@@ -39,7 +39,7 @@ class BlackflyLarvae(BaseModel):
 class Person(BaseModel):
 
     treated: bool  # 1: column used during treatment
-    age: int  # 2: current age
+    age: float  # 2: current age
     sex: Sex  # 3: sex
 
     blackfly: BlackflyLarvae
@@ -47,6 +47,8 @@ class Person(BaseModel):
     mf: MicroStageList  # microfilariae stages (21)
 
     worms: WormsStageList  # Worm stages (21)
+
+    mf_current_quantity: int
 
     @classmethod
     def generate_random(
