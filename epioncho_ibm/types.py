@@ -50,6 +50,8 @@ class Person(BaseModel):
 
     mf_current_quantity: int
 
+    exposure: float
+
     @classmethod
     def generate_random(
         cls, random_config: RandomConfig
