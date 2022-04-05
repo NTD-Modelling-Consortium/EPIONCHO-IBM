@@ -23,6 +23,23 @@ class State:
     def microfilariae_per_skin_snip(self: "State") -> float:
         raise NotImplementedError
 
+    def mf_prevalence_in_population(self: "State", min_age_skinsnip: int) -> float:
+        """
+        Returns a decimal representation of mf prevalence in skinsnip aged population.
+        """
+        # TODO: Handle exceptions
+
+        pop_over_min_age = 0
+        infected_over_min_age = 0
+
+        for person in self.people:
+            if person.age >= min_age_skinsnip:
+                pop_over_min_age += 1
+                if person.mf_current_quantity > 0:
+                    infected_over_min_age += 1
+
+        return pop_over_min_age / infected_over_min_age
+
 
 class Params(BaseModel):
     treatment_probability: float = 0.65  # The probability that a 'treatable' person is actually treated in an iteration
