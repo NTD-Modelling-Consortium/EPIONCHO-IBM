@@ -1,10 +1,12 @@
 from enum import Enum
+from random import random
 
 from pydantic import BaseModel, conlist
 
 
 class RandomConfig(BaseModel):
     gender_ratio: float = 0.5
+    noncompliant_percentage: float = 0.05
 
 
 worms_stages = 21
@@ -38,7 +40,7 @@ class BlackflyLarvae(BaseModel):
 
 class Person(BaseModel):
 
-    treated: bool  # 1: column used during treatment
+    compliant: bool  # 1: 'column used during treatment'
     age: float  # 2: current age
     sex: Sex  # 3: sex
 
@@ -54,9 +56,13 @@ class Person(BaseModel):
 
     new_worm_rate: float
 
+    treated: bool  # TODO: check if exists
+
     @classmethod
     def generate_random(
         cls, random_config: RandomConfig
     ) -> "Person":  # Other params here
-
+        Person.sex = random.random() < random_config.gender_ratio
+        Person.compliant = random.random() > random_config.noncompliant_percentage
+        # TODO: is this the right place for these?^^
         raise NotImplementedError

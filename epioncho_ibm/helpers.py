@@ -6,9 +6,9 @@ from .types import Person
 
 def is_treatable(person: Person, min_treatable_age: int) -> bool:
     """
-    Treatable people are above the min_treatable_age, and have not already been treated.
+    Treatable people are above the min_treatable_age, and are compliant.
     """
-    return person.age >= min_treatable_age and not person.treated
+    return person.age >= min_treatable_age and person.compliant
 
 
 def is_to_treat(
