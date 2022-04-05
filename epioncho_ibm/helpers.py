@@ -22,3 +22,19 @@ def is_to_treat(
     if is_treatable(person, min_treatable_age):
         return random() < to_treat_probability
     return False
+
+
+def get_L3_developing_in_human(
+    person: Person,
+    delta_hz: float,
+    delta_hinf: float,
+    c_h: float,
+    L3,
+    m: float,
+    beta: float,
+) -> float:
+    expo = person.exposure
+    out = (delta_hz + delta_hinf * c_h * m * beta * L3 * expo) / (
+        1 + c_h * m * beta * L3 * expo
+    )
+    return out
