@@ -47,7 +47,7 @@ class Params(BaseModel):
     # See line 476 R code
 
     # So-called Hard coded params
-    bite_rate_per_person_per_year = 1000  # Annual biting
+    bite_rate_per_person_per_year = 1000  # Annual biting rate ABR
     bite_rate_per_fly_on_human = bite_rate_per_person_per_year * (
         (1 / 104) / 0.63
     )  # calculated as the product of the proportion of blackfly bites taken on humans 'm = ABR * [...]'

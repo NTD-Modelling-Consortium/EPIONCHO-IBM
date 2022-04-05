@@ -1,4 +1,5 @@
 from random import random
+from typing import List
 
 from .types import Person
 
@@ -25,16 +26,49 @@ def is_to_treat(
 
 
 def get_L3_developing_in_human(
-    person: Person,
+    exposure: float,
     delta_hz: float,
     delta_hinf: float,
     c_h: float,
     L3,
-    m: float,
+    bite_rate_per_fly_on_human: float,
     beta: float,
 ) -> float:
-    expo = person.exposure
-    out = (delta_hz + delta_hinf * c_h * m * beta * L3 * expo) / (
-        1 + c_h * m * beta * L3 * expo
-    )
+    """
+    Returns the proportion of L3 larvae developing into works in a given person.
+    Return value is between 0 and 1.
+    """
+    # TODO: verify why L3 is initially set to 0.03 when it appears it should be an integer
+    out = (
+        delta_hz + delta_hinf * c_h * bite_rate_per_fly_on_human * beta * L3 * exposure
+    ) / (1 + c_h * bite_rate_per_fly_on_human * beta * L3 * exposure)
     return out
+
+
+def get_new_worm_infections(
+    people: List[Person],
+    delta_hz: float,
+    delta_hinf: float,
+    c_h: float,
+    L3,
+    bite_rate_per_fly_on_human: float,
+    beta: float,
+):
+    """
+    The rate of acquisition of new infections in each human line 222
+    """
+
+    for person in people:
+        person.new_worm_rate = get_L3_developing_in_human(
+            person.exposure,
+            delta_hz,
+            delta_hinf,
+            c_h,
+            L3,
+            bite_rate_per_fly_on_human,
+            beta,
+        )
+    # TODO: Question 4 in questions txt
+    # Calculate the value of new worms in the population
+    # Why is the vector dh, created using m, beta, dh, expos, and L3 then again multiplied by each of these in Wplus1.rate?
+    raise NotImplementedError

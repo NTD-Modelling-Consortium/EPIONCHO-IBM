@@ -52,6 +52,8 @@ class Person(BaseModel):
 
     exposure: float
 
+    new_worm_rate: float
+
     @classmethod
     def generate_random(
         cls, random_config: RandomConfig
