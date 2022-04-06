@@ -1,0 +1,33 @@
+Questions for EPIONCHO IBM client:
+
+1)
+treat.prob is defined as an integer (65), but is handled as a probability in the code (see function os.cov)
+This is further evidenced by the 'other' epioncho github repo, which uses 0.75 where 65 has been used
+It is also unclear how:
+`covrg <- covrg / (1 - nc.age)` in os.cov ought be calculated, as a value over 1 is mathematically possible. This would be inappropriate for a probability, which is what it appears to be used as.
+
+This has been implemented by our interpretation.
+
+2)
+The number of iterations in the main 'while' loop is in days. Coming to ~14,640 total iterations with the current values.
+This might be ok, but many yearly calculations - such as yearly exposure to blackflies (see use of s.a.exp with yearly variable m.exp = 1.08 - the male yearly exposure rate) - use variables which are explicity for yearly resolution. To apply these every day appears to be explicitly incorrect usage.
+
+3)
+What is the source / meaning of the value '0.03' assigned to int.L1/2/3 on line 492?
+
+4)
+Why is the vector dh, created using m, beta, dh, expos, and L3 then again multiplied by each of these in Wplus1.rate?
+delta.h Line 177
+Wplus1.rate Line: 230
+
+5)
+pnc = 0.05 is ambiguous. There is no mention of the value or of the symbol anywhere in the document.
+Appears to be used regarding individual compliance.
+L 824 ep.equi.sium
+
+pncomp appears to be unused in os.cov
+L 16 in os.cov
+
+6)
+What is 'm' in the delta.h functions? defined as `ABR * ((1/104) / 0.63)`
+We define it as annual transmission potential (ATP), but the R implementation does not align with the paper's definition of ATP
