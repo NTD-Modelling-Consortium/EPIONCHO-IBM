@@ -45,12 +45,21 @@ class Params(BaseModel):
     treatment_probability: float = 0.65  # The probability that a 'treatable' person is actually treated in an iteration
     treatment_start_iter: int  # The iteration upon which treatment commences (treat.start in R code)
     # See line 476 R code
+    human_population = 440
+    bite_rate_per_person_per_year = (
+        1000  # Annual biting rate 'ABR' in paper and in R code
+    )
+    human_blood_index = 0.63  # 'h' in paper, used in 'm' and 'beta' in R code
+    recip_gono_cycle = 1 / 104  # 'g' in paper, used in 'm' and 'beta' in R code
+    bite_rate_per_fly_on_human = (
+        human_blood_index / recip_gono_cycle
+    )  # defined in table D in paper, is 'beta' in R code
+
+    annual_transm_potential = (
+        bite_rate_per_person_per_year * human_population
+    ) / bite_rate_per_fly_on_human
 
     # So-called Hard coded params
-    bite_rate_per_person_per_year = 1000  # Annual biting rate ABR
-    bite_rate_per_fly_on_human = bite_rate_per_person_per_year * (
-        (1 / 104) / 0.63
-    )  # calculated as the product of the proportion of blackfly bites taken on humans 'm = ABR * [...]'
 
     # Params within blackfly vector...
     l1_l2_per_person_per_year = (
@@ -65,6 +74,8 @@ class Params(BaseModel):
     blackfly_mort_from_mf_per_person_per_year = (
         0.39  # Per capita microfilaria-induced mortality of blackfly vectors 'a.v'
     )
+
+    # Params within parasite
 
 
 def advance_state(state: State, params: Params, n_iters: int = 1) -> State:
