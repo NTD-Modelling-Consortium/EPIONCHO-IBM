@@ -60,6 +60,15 @@ class Params(BaseModel):
     ) / bite_rate_per_fly_on_human
 
     # So-called Hard coded params
+    # '.' have been replaced with '_'
+
+    delta_hz: float = 0.1864987  # Proportion of L3 larvae developing to the adult stage within the human host, per bite when 𝐴𝑇𝑃(𝑡) → 0
+    delta_hinf: float = 0.002772749  # Proportion of L3 larvae developing to the adult stage within the human host, per bite when 𝐴𝑇𝑃(𝑡) → ∞
+    c_h: float = 0.004900419  # Severity of transmission intensitydependent parasite establishment within humans
+
+    int_mf: int = 0  # TODO
+    sigma_L0: int = 52  # TODO
+    a_H: float = 0.8  # Time delay between L3 entering the host and establishing as adult worms in years
 
     # Params within blackfly vector...
     l1_l2_per_person_per_year = (
