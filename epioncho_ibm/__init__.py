@@ -1,6 +1,7 @@
 version = 1.0
 from typing import List
 
+import numpy as np
 from pydantic import BaseModel
 
 from .types import Person, RandomConfig
@@ -40,13 +41,34 @@ class State:
 
         return pop_over_min_age / infected_over_min_age
 
+    def dist_population_age(
+        self, num_iter: int = 1, DT: float = 1 / 366, mean_age: float = 50
+    ):
+        """
+        function that updates age of the population in state by DT
+        """
+        number_of_people = len(self.people)
+        for i in range(num_iter):
+            for person in self.people:
+                person.age += DT
+            death_vec = np.random.binomial(
+                1, ((1 / mean_age) * (1 / 366)), number_of_people
+            )
+            for i in range(number_of_people):
+                if death_vec[i] == 1:
+                    self.people[i].age = 0
+                if self.people[i].age >= 80:
+                    self.people[i].age = 0
+
 
 class Params(BaseModel):
     treatment_probability: float = 0.65  # The probability that a 'treatable' person is actually treated in an iteration
     treatment_start_iter: int  # The iteration upon which treatment commences (treat.start in R code)
     # See line 476 R code
     human_population: int = 440
-    bite_rate_per_person_per_year: int = (
+    max_age_person: int = 80
+    mean_age_of_human_population: int = 50
+    bite_rate_per_person_per_year: float = (
         1000  # Annual biting rate 'ABR' in paper and in R code
     )
     human_blood_index: float = 0.63  # 'h' in paper, used in 'm' and 'beta' in R code
