@@ -31,3 +31,17 @@ L 16 in os.cov
 6)
 What is 'm' in the delta.h functions? defined as `ABR * ((1/104) / 0.63)`
 We define it as annual transmission potential (ATP), but the R implementation does not align with the paper's definition of ATP
+
+7) Please clarify:
+int.mf = 0 - this value never changes, and appears to just set values of matrices to 0
+sigma.L0 = 52 - it is unclear where this value comes from, or what it means using the docs and the R file and context
+
+delta.hz, delta.hinf, c.h - where do these values come from? They dont appear to exist in the docs, and it is unclear how they are calculated or whether they are intended to be parameters.
+
+is the minimum treatable age alwasy the same as the minimum skinsnip age? are these related, are they both always 5, is it preferable to have these as two seperate variables in case they differ?
+
+calculation of int.L3 is taken by the mean across all rows, which appears to be inteded as the mean number of L3 larvae per blackfly. No number of blackflies exists, so this is an average per capita (of people). The meaning of this is uncertain. This also applies to int.L2 and int.L1
+
+delta.vo = 0.0166 - unclear what this is or where it comes from
+c.v = 0.0205 - as above
+
