@@ -45,17 +45,17 @@ class Params(BaseModel):
     treatment_probability: float = 0.65  # The probability that a 'treatable' person is actually treated in an iteration
     treatment_start_iter: int  # The iteration upon which treatment commences (treat.start in R code)
     # See line 476 R code
-    human_population = 440
-    bite_rate_per_person_per_year = (
+    human_population: int = 440
+    bite_rate_per_person_per_year: int = (
         1000  # Annual biting rate 'ABR' in paper and in R code
     )
-    human_blood_index = 0.63  # 'h' in paper, used in 'm' and 'beta' in R code
-    recip_gono_cycle = 1 / 104  # 'g' in paper, used in 'm' and 'beta' in R code
-    bite_rate_per_fly_on_human = (
+    human_blood_index: float = 0.63  # 'h' in paper, used in 'm' and 'beta' in R code
+    recip_gono_cycle: float = 1 / 104  # 'g' in paper, used in 'm' and 'beta' in R code
+    bite_rate_per_fly_on_human: float = (
         human_blood_index / recip_gono_cycle
     )  # defined in table D in paper, is 'beta' in R code
 
-    annual_transm_potential = (
+    annual_transm_potential: float = (
         bite_rate_per_person_per_year * human_population
     ) / bite_rate_per_fly_on_human
 
@@ -71,16 +71,16 @@ class Params(BaseModel):
     a_H: float = 0.8  # Time delay between L3 entering the host and establishing as adult worms in years
 
     # Params within blackfly vector...
-    l1_l2_per_person_per_year = (
+    l1_l2_per_person_per_year: float = (
         201.6189  # Per capita development rate of larvae from stage L1 to L2 'nuone'
     )
-    l2_l3_per_person_per_year = (
+    l2_l3_per_person_per_year: float = (
         207.7384  # Per capita development rate of larvae from stage L2 to L3 'nutwo'
     )
-    blackfly_mort_per_person_per_year = (
+    blackfly_mort_per_person_per_year: float = (
         26  # Per capita mortality rate of blackfly vectors 'mu.v'
     )
-    blackfly_mort_from_mf_per_person_per_year = (
+    blackfly_mort_from_mf_per_person_per_year: float = (
         0.39  # Per capita microfilaria-induced mortality of blackfly vectors 'a.v'
     )
 
