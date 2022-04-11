@@ -45,3 +45,5 @@ calculation of int.L3 is taken by the mean across all rows, which appears to be 
 delta.vo = 0.0166 - unclear what this is or where it comes from
 c.v = 0.0205 - as above
 
+8) Compliant percentage:
+Do you wish this to be calculated as a chance (5% chance any given person is non-compliant), or would you like to just randomly assign 5% of the total population as non-compliant?

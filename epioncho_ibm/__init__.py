@@ -9,7 +9,7 @@ from .types import Person, RandomConfig
 
 class State:
     current_iteration: int = 0
-    people: List[Person]
+    _people: List[Person]
 
     def __init__(self, people: List[Person]) -> None:
         self._people = people
@@ -33,7 +33,7 @@ class State:
         pop_over_min_age = 0
         infected_over_min_age = 0
 
-        for person in self.people:
+        for person in self._people:
             if person.age >= min_age_skinsnip:
                 pop_over_min_age += 1
                 if person.mf_current_quantity > 0:
@@ -47,23 +47,23 @@ class State:
         """
         function that updates age of the population in state by DT
         """
-        number_of_people = len(self.people)
+        number_of_people = len(self._people)
         for i in range(num_iter):
-            for person in self.people:
+            for person in self._people:
                 person.age += DT
             death_vec = np.random.binomial(
                 1, ((1 / mean_age) * (1 / 366)), number_of_people
             )
             for i in range(number_of_people):
                 if death_vec[i] == 1:
-                    self.people[i].age = 0
-                if self.people[i].age >= 80:
-                    self.people[i].age = 0
+                    self._people[i].age = 0
+                if self._people[i].age >= 80:
+                    self._people[i].age = 0
 
 
 class Params(BaseModel):
     # ep.equi.sim parameters (bottom of 'R' file)
-    timestep_count: int  # total number of timesteps of the simulation
+    timestep_count: int = 10  # total number of timesteps of the simulation
     bite_rate_per_person_per_year: float = (
         1000  # Annual biting rate 'ABR' in paper and in R code
     )
@@ -73,8 +73,10 @@ class Params(BaseModel):
     timestep_size: float = 1 / 366  # the timestep ('DT.in' and 'DT' in code)
     treatment_probability: float = 0.65  # The probability that a 'treatable' person is actually treated in an iteration
     # unclear what gv.trt / give.treat is, given that it is '1'. Might be flag to enable or disable treatment logic
-    treatment_start_iter: int  # The iteration upon which treatment commences (treat.start in R code)
-    treatment_stop_iter: int  # the iteration up which treatment stops (treat.stop)
+    treatment_start_iter: int = (
+        0  # The iteration upon which treatment commences (treat.start in R code)
+    )
+    treatment_stop_iter: int = 0  # the iteration up which treatment stops (treat.stop)
     # 'pnc' or percentage non compliant is in random config
     min_skinsnip_age: int = 5  # TODO: below
     min_treatable_age: int = 5  # TODO: check if skinsnip and treatable age differ or whether they are always the same value

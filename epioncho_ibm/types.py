@@ -1,5 +1,5 @@
 from enum import Enum
-from random import random
+from random import uniform
 
 from pydantic import BaseModel, conlist
 
@@ -41,28 +41,33 @@ class BlackflyLarvae(BaseModel):
 class Person(BaseModel):
 
     compliant: bool  # 1: 'column used during treatment'
-    age: float  # 2: current age
+    age: float = 0  # 2: current age
     sex: Sex  # 3: sex
 
-    blackfly: BlackflyLarvae
+    blackfly: BlackflyLarvae = BlackflyLarvae(L1=0, L2=0, L3=0)
 
-    mf: MicroStageList  # microfilariae stages (21)
+    mf: MicroStageList = []  # microfilariae stages (21)
 
-    worms: WormsStageList  # Worm stages (21)
+    worms: WormsStageList = []  # Worm stages (21)
 
-    mf_current_quantity: int
+    mf_current_quantity: int = 0
 
-    exposure: float
+    exposure: float = 0
 
-    new_worm_rate: float
+    new_worm_rate: float = 0
 
-    treated: bool  # TODO: check if exists
+    # treated: bool  # TODO: check if exists
 
     @classmethod
     def generate_random(
         cls, random_config: RandomConfig
     ) -> "Person":  # Other params here
-        Person.sex = random.random() < random_config.gender_ratio
-        Person.compliant = random.random() > random_config.noncompliant_percentage
+
+        if uniform(0, 1) < random_config.gender_ratio:
+            sex = Sex.male
+        else:
+            sex = Sex.female
+        compliant = uniform(0, 1) > random_config.noncompliant_percentage
         # TODO: is this the right place for these?^^
-        raise NotImplementedError
+
+        return Person(sex=sex, compliant=compliant)
