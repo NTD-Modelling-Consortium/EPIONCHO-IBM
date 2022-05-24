@@ -1,7 +1,10 @@
 from enum import Enum
 from random import uniform
+from typing import Type
 
 from pydantic import BaseModel, conlist
+
+from .params import Params
 
 
 class RandomConfig(BaseModel):
@@ -30,12 +33,9 @@ class Sex(Enum):
 
 
 class BlackflyLarvae(BaseModel):
-
-    L1: int  # 4: L1
-
-    L2: int  # 5: L2
-
-    L3: int  # 6: L3
+    L1: float  # 4: L1
+    L2: float  # 5: L2
+    L3: float  # 6: L3
 
 
 class Person(BaseModel):
@@ -44,7 +44,7 @@ class Person(BaseModel):
     age: float = 0  # 2: current age
     sex: Sex  # 3: sex
 
-    blackfly: BlackflyLarvae = BlackflyLarvae(L1=0, L2=0, L3=0)
+    blackfly: BlackflyLarvae
 
     mf: MicroStageList = []  # microfilariae stages (21)
 
@@ -60,7 +60,7 @@ class Person(BaseModel):
 
     @classmethod
     def generate_random(
-        cls, random_config: RandomConfig
+        cls, random_config: RandomConfig, params: Params
     ) -> "Person":  # Other params here
 
         if uniform(0, 1) < random_config.gender_ratio:
@@ -70,4 +70,4 @@ class Person(BaseModel):
         compliant = uniform(0, 1) > random_config.noncompliant_percentage
         # TODO: is this the right place for these?^^
 
-        return Person(sex=sex, compliant=compliant)
+        return Person(sex=sex, compliant=compliant, blackfly = BlackflyLarvae(L1 = params.initial_L1, L2 = params.initial_L2, L3 = params.initial_L3))

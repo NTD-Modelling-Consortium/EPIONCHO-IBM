@@ -2,7 +2,7 @@ from epioncho_ibm import Params, RandomConfig, State, advance_state
 
 random_config = RandomConfig()
 params = Params()
-initial_state = State.generate_random(n_people=100, random_config=random_config)
+initial_state = State.generate_random(random_config=random_config, params = params)
 
 initial_state.dist_population_age(num_iter=15000)
 compliantCount = 0
