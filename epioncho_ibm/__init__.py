@@ -103,7 +103,7 @@ class Params(BaseModel):
     blackfly_mort_per_person_per_year: float = (
         26  # Per capita mortality rate of blackfly vectors 'mu.v'
     )
-    int_mf: int = 0  # TODO: just 0, and doesn't change in program. What is the purpose?
+    initial_mf: int = 0  # TODO: "int_mf" just 0, and doesn't change in program. What is the purpose?
     sigma_L0: int = 52  # TODO: unclear where this comes from, and what it means
     a_H: float = 0.8  # Time delay between L3 entering the host and establishing as adult worms in years
     # g is 'recip_gono_cycle'
@@ -130,7 +130,7 @@ class Params(BaseModel):
     # aging in parasites
     worms_aging: float = 1  # 'time.each.comp.worms'
     microfil_aging: float = 0.125  # 'time.each.comp.mf'
-    microfil_move_rate: float = 8.13333  # 'mf.move.rate'
+    microfil_move_rate: float = 8.13333  # 'mf.move.rate' #for aging in parasites 
 
     l1_l2_per_person_per_year: float = (
         201.6189  # Per capita development rate of larvae from stage L1 to L2 'nuone'
@@ -138,8 +138,25 @@ class Params(BaseModel):
     l2_l3_per_person_per_year: float = (
         207.7384  # Per capita development rate of larvae from stage L2 to L3 'nutwo'
     )
-    # Params within parasite
+    initial_L3: float = 0.03 # "int.L3"
+    initial_L2: float = 0.03 # "int.L2"
+    initial_L1: float = 0.03 # "int.L1"
+    initial_worms: int = 1 # "int.worms" initial number of worms in each worm age compartment
 
+    skin_snip_weight: int = 2 # "ss.wt" the weight of the skin snip
+    skin_snip_number: int = 2 # "num.ss"
+
+    slope_kmf = 0.0478 # "slope.kmf"
+    initial_kmf = 0.313 # "int.kMf"
+    gamma_distribution = 0.3 #individual level exposure heterogeneity
+
+    mu_worms1: float = 1.089 #parameters controlling age-dependent mortality in adult worms 
+    mu_worms2: float = 6.00569 #parameters controlling age-dependent mortality in adult worms 
+    mu_microfillarie1: float = 1.089 #parameters controlling age-dependent mortality in mf
+    mu_microfillarie2: float = 1.428 #parameters controlling age-dependent mortality in mf
+    fecundity_worms_1 = 70
+    fecundity_worms_2 = 0.72 #parameters controlling age-dependent fecundity in adult worms 
+    l3_delay = 10 # (days?) delay in worms entering humans and joining the first adult worm age class 
 
 def advance_state(state: State, params: Params, n_iters: int = 1) -> State:
     def _next(state: State) -> State:
