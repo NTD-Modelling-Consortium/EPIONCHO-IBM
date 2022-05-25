@@ -141,18 +141,6 @@ derivmf.rest <- function(mf.in, mf.mort, mf.move, mf.comp.minus.one, k.in)
   return(out)
 }
 
-
-#proportion of L3 larvae (final life stage in the fly population) developing into adult worms in humans
-#expos is the total exposure for an individual
-#delta.hz, delta.hinf, c.h control the density dependent establishment of parasites
-
-delta.h <- function(delta.hz, delta.hinf, c.h, L3, m , beta, expos)
-  
-{
-  out <- (delta.hz + delta.hinf * c.h * m * beta *  L3 * expos) / (1 + c.h * m * beta * L3 * expos) 
-  return(out)
-}
-
 #proportion of mf per mg developing into infective larvae within the vector
 
 delta.v <- function(delta.vo, c.v, mf, expos)
@@ -197,15 +185,6 @@ calc.L3 <- function(nutwo, L2.in, a.H, g, mu.v, sigma.L0)
 #rate of acquisition of new infections in humans
 #depends on mean number of L3 larvae in the fly population 
 
-Wplus1.rate <- function(delta.hz, delta.hinf, c.h, L3, m , beta, expos, DT)
-  
-{
-  dh <- delta.h(delta.hz, delta.hinf, c.h, L3, m , beta, expos)
-  
-  out <- DT * m * beta * dh * expos * L3
-  
-  return(out)
-}
 
 
 
@@ -525,18 +504,7 @@ ep.equi.sim <- function(time.its,
 
     #increase age (for next time step)
     
-    all.mats.temp[,2] <- (all.mats.cur[,2]) + DT #increase age for all individuals
-    
-    death.vec <- rbinom(N, 1, (1/mean.age) * DT) #select individuals to die
-    
-    to.die <- which(death.vec == 1)
-    
-    at.ab.max <- which(all.mats.temp[,2] >= real.max.age)
-    
-    to.die <- c(to.die, at.ab.max)
-    
-    to.die <- unique(to.die) #may have repeated indivudals i.e selected by binom and >80 
-    
+
     ##################
     #delay calculations 
     ##################
@@ -546,14 +514,16 @@ ep.equi.sim <- function(time.its,
     new.worms.m <- c()
     new.worms.nf <- c()
     
-    new.worms.m <- rbinom(N, size = l.extras[,length(l.extras[1,])], prob = 0.5) #draw males and females from last column of delay matrix
+    new.worms.m <- rbinom(
+      N, 
+      size = l.extras[,length(l.extras[1,])], 
+      prob = 0.5
+    ) #draw males and females from last column of delay matrix
     new.worms.nf <- l.extras[,length(l.extras[1,])] - new.worms.m
     
     #move individuals along
     l.extras[,inds.l.mat] <- l.extras[,(inds.l.mat-1)]
     
-    #mean number of L3 in fly population
-    L3.in <- mean(all.mats.cur[, 6])
     
     #rate of infections in humans
     #delta.hz, delta.hinf, c.h are density dependence parameters, expos is the exposure of each person to bites

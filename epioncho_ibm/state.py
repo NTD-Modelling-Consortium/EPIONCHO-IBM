@@ -62,16 +62,15 @@ class State:
             np.random.uniform(low=0, high=1, size=n_people)
             > random_config.noncompliant_percentage
         )
-        ones_array = np.ones(n_people)
         return cls(
             people=People(
                 compliance=compliance_array,
                 ages=np.zeros(n_people),
                 sex_is_male=sex_array,
                 blackfly=BlackflyLarvae(
-                    L1=ones_array * params.initial_L1,
-                    L2=ones_array * params.initial_L2,
-                    L3=ones_array * params.initial_L3,
+                    L1=np.repeat(params.initial_L1, n_people),
+                    L2=np.repeat(params.initial_L2, n_people),
+                    L3=np.repeat(params.initial_L3, n_people),
                 ),
                 mf=np.zeros((n_people, params.microfil_age_stages)),
                 worms=np.zeros((n_people, params.worm_age_stages)),
@@ -253,6 +252,45 @@ def calculate_total_exposure(
     return total_exposure
 
 
+def delta_h(
+    params: Params, L3: float, total_exposure: NDArray[np.float_]
+) -> NDArray[np.float_]:
+    # proportion of L3 larvae (final life stage in the fly population) developing into adult worms in humans
+    # expos is the total exposure for an individual
+    # delta.hz, delta.hinf, c.h control the density dependent establishment of parasites
+    multiplier = (
+        params.c_h
+        * params.annual_transm_potential
+        * params.bite_rate_per_fly_on_human
+        * L3
+        * total_exposure
+    )
+    return (params.delta_hz + (params.delta_hinf * multiplier)) / (1 + multiplier)
+
+
+def w_plus_one_rate(
+    params: Params, L3: float, total_exposure: NDArray[np.float_]
+) -> NDArray[np.float_]:
+    """
+    params.delta_hz # delta.hz
+    params.delta_hinf # delta.hinf
+    params.c_h # c.h
+    params.annual_transm_potential # "m"
+    params.bite_rate_per_fly_on_human #"beta"
+    total_exposure # "expos"
+    params.delta_time #"DT"
+    """
+    dh = delta_h(params, L3, total_exposure)
+    return (
+        params.delta_time
+        * params.annual_transm_potential
+        * params.bite_rate_per_fly_on_human
+        * dh
+        * total_exposure
+        * L3
+    )
+
+
 def run_simulation(state: State, start_time: float = 0, end_time: float = 0):
 
     if end_time < start_time:
@@ -273,3 +311,22 @@ def run_simulation(state: State, start_time: float = 0, end_time: float = 0):
         total_exposure = calculate_total_exposure(
             state.params, state.people, individual_exposure
         )
+
+        # increase ages
+        state.people.ages += state.params.delta_time
+
+        people_to_die: NDArray[np.bool_] = np.logical_or(
+            np.random.binomial(
+                n=1,
+                p=(1 / state.params.mean_human_age) * state.params.delta_time,
+                size=state.params.human_population,
+            )
+            == 1,
+            state.people.ages >= state.params.max_human_age,
+        )
+
+        # Insert l.extras stuff here
+
+        L3_in = np.mean(state.people.blackfly.L3)
+        new_rate = w_plus_one_rate(state.params, L3_in, total_exposure)
+        new_worms = np.random.poisson(lam=new_rate, size=state.params.human_population)
