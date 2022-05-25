@@ -52,7 +52,7 @@ def ep_equilibrium_simulation(
     current_ages = generate_age_dist(
         params.human_population,
         params.mean_human_age,
-        params.max_age_person,
+        params.max_human_age,
         delta_time
     )
     individual_exposure = np.random.gamma( #individual level exposure to fly bites

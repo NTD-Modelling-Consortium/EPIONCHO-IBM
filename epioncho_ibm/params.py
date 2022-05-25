@@ -49,7 +49,7 @@ class Params(BaseModel):
     blackfly_mort_from_mf_per_person_per_year: float = (
         0.39  # Per capita microfilaria-induced mortality of blackfly vectors 'a.v'
     )
-    max_age_person: int = 80  # 'real.max.age' in R file
+    max_human_age: int = 80  # 'real.max.age' in R file
     # human population is defined earlier
     mean_human_age: int = 50  # years 'mean.age' in R file
 
@@ -93,6 +93,8 @@ class Params(BaseModel):
     mu_worms2: float = 6.00569 #parameters controlling age-dependent mortality in adult worms 
     mu_microfillarie1: float = 1.089 #parameters controlling age-dependent mortality in mf
     mu_microfillarie2: float = 1.428 #parameters controlling age-dependent mortality in mf
-    fecundity_worms_1 = 70
-    fecundity_worms_2 = 0.72 #parameters controlling age-dependent fecundity in adult worms 
-    l3_delay = 10 # (days?) delay in worms entering humans and joining the first adult worm age class 
+    fecundity_worms_1: float = 70
+    fecundity_worms_2: float = 0.72 #parameters controlling age-dependent fecundity in adult worms 
+    l3_delay: float = 10 # (days?) delay in worms entering humans and joining the first adult worm age class 
+
+    delta_time: float = 1
