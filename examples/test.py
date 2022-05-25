@@ -1,8 +1,12 @@
-from epioncho_ibm import Params, RandomConfig, State, advance_state
 import numpy as np
+
+from epioncho_ibm import Params, RandomConfig, State, advance_state
+
 random_config = RandomConfig()
 params = Params()
-initial_state = State.generate_random(random_config=random_config, params = params, n_people=100)
+initial_state = State.generate_random(
+    random_config=random_config, params=params, n_people=100
+)
 
 initial_state.dist_population_age(num_iter=15000)
 

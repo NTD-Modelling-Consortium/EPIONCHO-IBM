@@ -1,10 +1,8 @@
-from random import random
-from typing import List
-
 import numpy as np
 from numpy.typing import NDArray
 
 from epioncho_ibm.state import People
+
 """
 def is_treatable(person: People, min_treatable_age: int) -> bool:
     ""
@@ -26,6 +24,7 @@ def is_to_treat(
         return random() < to_treat_probability
     return False
 """
+
 
 def get_L3_developing_in_human(
     exposure: NDArray[np.float_],
@@ -59,7 +58,6 @@ def get_new_worm_infections(
     """
     The rate of acquisition of new infections in each human line 222
     """
-
 
     people.new_worm_rate = get_L3_developing_in_human(
         people.exposure,
