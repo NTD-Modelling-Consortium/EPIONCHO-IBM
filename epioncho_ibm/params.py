@@ -70,6 +70,9 @@ class Params(BaseModel):
     worms_aging: float = 1  # 'time.each.comp.worms'
     microfil_aging: float = 0.125  # 'time.each.comp.mf'
     microfil_move_rate: float = 8.13333  # 'mf.move.rate' #for aging in parasites 
+    
+    microfil_age_stages = 21
+    worm_age_stages = 21
 
     l1_l2_per_person_per_year: float = (
         201.6189  # Per capita development rate of larvae from stage L1 to L2 'nuone'

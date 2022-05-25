@@ -2,24 +2,70 @@ from typing import List, Optional
 
 import numpy as np
 
-from .types import Person, RandomConfig
 from .params import Params
 from numpy.typing import NDArray
+from dataclasses import dataclass
+from copy import copy
+from pydantic import BaseModel
+
+class RandomConfig(BaseModel):
+    gender_ratio: float = 0.5
+    noncompliant_percentage: float = 0.05
+
+@dataclass
+class BlackflyLarvae:
+    L1: NDArray[np.float_]  # 4: L1
+    L2: NDArray[np.float_]  # 5: L2
+    L3: NDArray[np.float_]  # 6: L3
+
+
+@dataclass
+class People:
+    compliance: NDArray[np.bool_] # 1: 'column used during treatment'
+    sex_is_male: NDArray[np.bool_] # 3: sex
+    blackfly: BlackflyLarvae 
+    ages: NDArray[np.float_] # 2: current age
+    mf: NDArray[np.float_] # 2D Array, (N, age stage): microfilariae stages 7-28 (21)
+    worms: NDArray[np.float_] # 2D Array, (N, age stage): microfilariae stages 29-50 (21)
+    mf_current_quantity: NDArray[np.int_]
+    exposure: NDArray[np.float_]
+    new_worm_rate: NDArray[np.float_]
+
+    def __len__(self):
+        return len(self.compliance)
 
 class State:
     current_iteration: int = 0
-    _people: List[Person]
+    _people: People
     _params: Params
 
-    def __init__(self, people: List[Person], params: Params) -> None:
+    def __init__(self, people: People, params: Params) -> None:
         self._people = people
         self._params = params
 
     @classmethod
-    def generate_random(cls, random_config: RandomConfig, params: Params) -> "State":
-        return cls(
-            [Person.generate_random(random_config, params) for _ in range(params.human_population)], 
-            params=params
+    def generate_random(cls, random_config: RandomConfig, n_people: int, params: Params) -> "State":
+        sex_array = np.random.uniform(low = 0, high = 1, size=n_people) < random_config.gender_ratio
+        zeros_array = np.zeros(n_people)
+        compliance_array = np.random.uniform(low = 0, high = 1, size=n_people) > random_config.noncompliant_percentage
+        ones_array = np.ones(n_people)
+        return cls( 
+            people =People(
+                compliance=compliance_array, 
+                ages = np.zeros(n_people),
+                sex_is_male = sex_array,
+                blackfly = BlackflyLarvae(
+                    L1 = ones_array * params.initial_L1, 
+                    L2 = ones_array * params.initial_L2, 
+                    L3 = ones_array * params.initial_L3
+                ),
+                mf = np.zeros((n_people, params.microfil_age_stages)),
+                worms = np.zeros((n_people, params.worm_age_stages)),
+                mf_current_quantity = np.zeros(n_people, dtype = int),
+                exposure = np.zeros(n_people),
+                new_worm_rate =  np.zeros(n_people)
+            ), 
+            params = params
         )
 
     def prevelence(self: "State") -> float:
@@ -32,17 +78,9 @@ class State:
         """
         Returns a decimal representation of mf prevalence in skinsnip aged population.
         """
-        # TODO: Handle exceptions
-
-        pop_over_min_age = 0
-        infected_over_min_age = 0
-
-        for person in self._people:
-            if person.age >= min_age_skinsnip:
-                pop_over_min_age += 1
-                if person.mf_current_quantity > 0:
-                    infected_over_min_age += 1
-
+        pop_over_min_age_array = self._people.ages >= min_age_skinsnip
+        pop_over_min_age = np.sum(pop_over_min_age_array)
+        infected_over_min_age = np.sum(np.logical_and(pop_over_min_age_array, self._people.mf_current_quantity > 0))
         return pop_over_min_age / infected_over_min_age
 
     def dist_population_age(
@@ -54,33 +92,26 @@ class State:
         """
         if params is None:
             params = self._params
-        delta_time = params.delta_time
-        mean_age = params.mean_human_age
-        max_age = params.max_human_age
-        number_of_people = len(self._people)
-        current_ages = np.zeros(number_of_people)
-        delta_time_vector = np.ones(number_of_people)*delta_time
+        
+        current_ages = self._people.ages
+        size_population = len(self._people)
+        delta_time_vector = np.ones(size_population)*params.delta_time
         for i in range(num_iter):
             current_ages += delta_time_vector
-            death_vector = np.random.binomial(
-                n = 1, 
-                p = (1/mean_age) * delta_time, 
-                size = number_of_people
-            )
-            np.place(current_ages, death_vector == 1 or current_ages >=max_age , 0)
-        for i, person in enumerate(self._people):
-            person.age = current_ages[i]
+            death_vector = np.random.binomial(n = 1, p = (1/params.mean_human_age) * params.delta_time, size = size_population)
+            np.place(current_ages, np.logical_or(death_vector == 1, current_ages >=params.max_human_age), 0)
+        return current_ages
 
 
-def calc_coverage(people: List[Person], percent_non_compliant: float, coverage: float, age_compliance: float =5):
+def calc_coverage(people: People, percent_non_compliant: float, coverage: float, age_compliance: float =5):
     
-    non_compliant_people = [person for person in people if person.age < age_compliance or not person.compliant]
-    non_compliant_percentage = len(non_compliant_people)/len(people)
+    non_compliant_people = np.logical_or(people.ages < age_compliance, np.logical_not(people.compliance))
+    non_compliant_percentage = np.sum(non_compliant_people)/len(non_compliant_people)
     compliant_percentage = 1 - non_compliant_percentage
     new_coverage = coverage/compliant_percentage # TODO: Is this correct?
 
 
-    ages = np.array([person.age for person in people])
+    #ages = np.array([person.age for person in people])
 
 
 

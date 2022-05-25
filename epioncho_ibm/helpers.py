@@ -1,39 +1,41 @@
 from random import random
 from typing import List
 
-from .types import Person
+import numpy as np
+from numpy.typing import NDArray
 
-
-def is_treatable(person: Person, min_treatable_age: int) -> bool:
-    """
+from epioncho_ibm.state import People
+"""
+def is_treatable(person: People, min_treatable_age: int) -> bool:
+    ""
     Treatable people are above the min_treatable_age, and are compliant.
-    """
-    return person.age >= min_treatable_age and person.compliant
+    ""
+    return person.ages >= min_treatable_age and person.compliance
 
 
 def is_to_treat(
     person: Person, to_treat_probability: float, min_treatable_age: int
 ) -> bool:
-    """
+    ""
     Returns whether a given person is to be treated in a given iteration.
-    """
+    ""
     # TODO: Check with client how covrg (to_treat_probability) should be calculated based on implementation currently in os.cov()
     # covrg <- covrg / (1 - nc.age)
 
     if is_treatable(person, min_treatable_age):
         return random() < to_treat_probability
     return False
-
+"""
 
 def get_L3_developing_in_human(
-    exposure: float,
+    exposure: NDArray[np.float_],
     delta_hz: float,
     delta_hinf: float,
     c_h: float,
     L3,
     bite_rate_per_fly_on_human: float,
     beta: float,
-) -> float:
+) -> NDArray[np.float_]:
     """
     Returns the proportion of L3 larvae developing into works in a given person.
     Return value is between 0 and 1.
@@ -46,7 +48,7 @@ def get_L3_developing_in_human(
 
 
 def get_new_worm_infections(
-    people: List[Person],
+    people: People,
     delta_hz: float,
     delta_hinf: float,
     c_h: float,
@@ -58,16 +60,16 @@ def get_new_worm_infections(
     The rate of acquisition of new infections in each human line 222
     """
 
-    for person in people:
-        person.new_worm_rate = get_L3_developing_in_human(
-            person.exposure,
-            delta_hz,
-            delta_hinf,
-            c_h,
-            L3,
-            bite_rate_per_fly_on_human,
-            beta,
-        )
+
+    people.new_worm_rate = get_L3_developing_in_human(
+        people.exposure,
+        delta_hz,
+        delta_hinf,
+        c_h,
+        L3,
+        bite_rate_per_fly_on_human,
+        beta,
+    )
     # TODO: Question 4 in questions txt
     # Calculate the value of new worms in the population
     # Why is the vector dh, created using m, beta, dh, expos, and L3 then again multiplied by each of these in Wplus1.rate?
