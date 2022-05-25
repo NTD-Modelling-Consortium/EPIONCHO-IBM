@@ -13,10 +13,15 @@ class Params(BaseModel):
     timestep_size: float = 1 / 366  # the timestep ('DT.in' and 'DT' in code)
     treatment_probability: float = 0.65  # The probability that a 'treatable' person is actually treated in an iteration
     # unclear what gv.trt / give.treat is, given that it is '1'. Might be flag to enable or disable treatment logic
-    treatment_start_iter: int = (
+    treatment_start_time: float = (
         0  # The iteration upon which treatment commences (treat.start in R code)
     )
-    treatment_stop_iter: int = 0  # the iteration up which treatment stops (treat.stop)
+    treatment_stop_time: float = (
+        0  # the iteration up which treatment stops (treat.stop)
+    )
+
+    treatment_interval: float = 1
+
     # 'pnc' or percentage non compliant is in random config
     min_skinsnip_age: int = 5  # TODO: below
     min_treatable_age: int = 5  # TODO: check if skinsnip and treatable age differ or whether they are always the same value
@@ -95,7 +100,7 @@ class Params(BaseModel):
 
     slope_kmf = 0.0478  # "slope.kmf"
     initial_kmf = 0.313  # "int.kMf"
-    gamma_distribution = 0.3  # individual level exposure heterogeneity
+    gamma_distribution = 0.3  # "gam.dis" individual level exposure heterogeneity
 
     mu_worms1: float = (
         1.089  # parameters controlling age-dependent mortality in adult worms
@@ -116,3 +121,9 @@ class Params(BaseModel):
     l3_delay: float = 10  # (days?) delay in worms entering humans and joining the first adult worm age class
 
     delta_time: float = 1
+
+    total_population_coverage: float = 0.65
+    male_exposure: float = 1.08
+    female_exposure: float = 0.9
+    male_exposure_exponent: float = 0.007
+    female_exposure_exponent: float = -0.023

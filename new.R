@@ -14,20 +14,6 @@
 #and the age of each individual 
 #covrg is the total coverage of the population
 
-#os.cov <- function(all.dt, pncomp, covrg, N)  
-# {                   
-#   pop.ages <- all.dt[,2] #age of each individual in population 
-#   iny <- which(pop.ages < 5 | all.dt[,1] == 1) 
-#   nc.age <- length(iny) / length(pop.ages)
-#   covrg <- covrg / (1 - nc.age) #probability a complying individual will be treated
-#   out.cov <- rep(covrg, length(pop.ages))
-#   out.cov[iny] <- 0 #non compliers get probability 0
-#   f.cov <- rep(0, N)
-#   r.nums <- runif(N, 0, 1)
-#   inds.c <- which(r.nums < out.cov)
-#   f.cov[inds.c] <- 1
-#   return(f.cov)
-# } : helpers.py, is_to_treat
 
 
 
@@ -536,31 +522,7 @@ ep.equi.sim <- function(time.its,
     
     all.mats.cur <- all.mats.temp 
 
-    #which individuals will be treated if treatment is given
-    if(i >= treat.start) {cov.in <- os.cov(all.dt = all.mats.cur, pncomp = pnc, covrg = treat.prob, N = N)}
-    
-    #sex and age dependent exposure, mean exposure must be 1, so ABR is meaningful
-    
-    mls <- which(all.mats.cur[,3] == 1)
-    fmls <- which(all.mats.cur[,3] == 0)
-    
-    s.a.exp <- rep(0, N)
-    
-    s.a.exp[mls] <- m.exp * exp(-age.exp.m * (all.mats.cur[mls, 2]))
-    
-    gam.m <- 1 / mean(s.a.exp[mls]) #normalize so mean = 1
-    s.a.exp[mls] <- s.a.exp[mls] * gam.m
-    
-    s.a.exp[fmls] <- f.exp * exp(-age.exp.f * (all.mats.cur[fmls, 2]))
-    
-    gam.f <- 1 / mean(s.a.exp[fmls]) #normalize so mean = 1
-    s.a.exp[fmls] <- s.a.exp[fmls] * gam.f
-    
-    ex.vec <- ex.vec * (1 / mean(ex.vec)) #normalize so mean = 1
-    
-    tot.ex.ai <- s.a.exp * ex.vec
-    tot.ex.ai <- tot.ex.ai * (1 / mean(tot.ex.ai)) #normalize so mean = 1
-    
+
     #increase age (for next time step)
     
     all.mats.temp[,2] <- (all.mats.cur[,2]) + DT #increase age for all individuals
