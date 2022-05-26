@@ -118,7 +118,9 @@ class Params(BaseModel):
     fecundity_worms_2: float = (
         0.72  # parameters controlling age-dependent fecundity in adult worms
     )
-    l3_delay: float = 10  # (days?) delay in worms entering humans and joining the first adult worm age class
+    l3_delay: float = (
+        10 * 28
+    )  # "l3.delay" (days?) delay in worms entering humans and joining the first adult worm age class
 
     delta_time: float = 1
 

@@ -501,39 +501,6 @@ ep.equi.sim <- function(time.its,
     
     all.mats.cur <- all.mats.temp 
 
-
-    #increase age (for next time step)
-    
-
-    ##################
-    #delay calculations 
-    ##################
-    
-    #there is a delay in new parasites entering humans (from fly bites) and entering the first adult worm age class
-    
-    new.worms.m <- c()
-    new.worms.nf <- c()
-    
-    new.worms.m <- rbinom(
-      N, 
-      size = l.extras[,length(l.extras[1,])], 
-      prob = 0.5
-    ) #draw males and females from last column of delay matrix
-    new.worms.nf <- l.extras[,length(l.extras[1,])] - new.worms.m
-    
-    #move individuals along
-    l.extras[,inds.l.mat] <- l.extras[,(inds.l.mat-1)]
-    
-    
-    #rate of infections in humans
-    #delta.hz, delta.hinf, c.h are density dependence parameters, expos is the exposure of each person to bites
-    nw.rate <- Wplus1.rate(delta.hz, delta.hinf, c.h, L3 = L3.in, m ,
-                           beta, expos = tot.ex.ai, DT)
-    
-    
-    new.worms <- rpois(N, nw.rate) #total new establishing L3 for each individual 
-    
-    l.extras[,1] <- new.worms
     
     
     for(k in 1 : num.comps.worm) #go through each adult worm compartment

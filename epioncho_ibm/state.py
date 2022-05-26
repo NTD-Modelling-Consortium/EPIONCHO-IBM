@@ -221,8 +221,10 @@ def initialise_simulation(params: Params):
     # indices_l_mat = np.arange(2, number_of_delay_cols)
 
     # SET initial values in state
+    number_of_delay_cols = round(params.l3_delay / params.delta_time)
+    l_extras = np.zeros((number_of_delay_cols, params.human_population))
 
-    return individual_exposure
+    return individual_exposure, l_extras
 
 
 def calculate_total_exposure(
@@ -296,7 +298,7 @@ def run_simulation(state: State, start_time: float = 0, end_time: float = 0):
     if end_time < start_time:
         raise ValueError("End time after start")
 
-    individual_exposure = initialise_simulation(state.params)
+    individual_exposure, l_extras = initialise_simulation(state.params)
 
     current_time = start_time
     while current_time < end_time:
@@ -325,8 +327,18 @@ def run_simulation(state: State, start_time: float = 0, end_time: float = 0):
             state.people.ages >= state.params.max_human_age,
         )
 
-        # Insert l.extras stuff here
+        # there is a delay in new parasites entering humans (from fly bites) and entering the first adult worm age class
 
         L3_in = np.mean(state.people.blackfly.L3)
         new_rate = w_plus_one_rate(state.params, L3_in, total_exposure)
         new_worms = np.random.poisson(lam=new_rate, size=state.params.human_population)
+
+        # Take males and females from final column of l_extras
+        final_column = l_extras[-1]
+        is_male = (
+            np.random.binomial(n=1, p=0.5, size=state.params.human_population) == 0
+        )  # TODO: Check this
+        last_males = np.extract(is_male, final_column)  # new.worms.m
+        last_females = np.extract(np.logical_not(is_male), final_column)  # new.worms.nf
+        # Move all columns in l_extras along one
+        l_extras = np.vstack((new_worms, l_extras[:-1]))
