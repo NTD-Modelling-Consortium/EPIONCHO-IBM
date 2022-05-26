@@ -419,11 +419,9 @@ ep.equi.sim <- function(time.its,
   
   #hard coded parms
 
-  lam.m = 32.4; phi = 19.6 #effects of ivermectin
-  cum.infer= 0.345 #permenent infertility in worms due to ivermectin 
+
   up = 0.0096; kap = 1.25 #effects of ivermectin
-  gam.dis = 0.3 #individual level exposure heterogeneity
-  E0 = 0; q = 0; m.exp = 1.08; f.exp = 0.9; age.exp.m = 0.007; age.exp.f = -0.023 #age-dependent exposure to fly bites
+  E0 = 0; q = 0;  #age-dependent exposure to fly bites
   
 
   
@@ -464,12 +462,7 @@ ep.equi.sim <- function(time.its,
   all.mats.temp <- matrix(, nrow=N, ncol=num.cols)
   
   all.mats.temp[,  (worms.start) : num.cols] <- int.worms
-  
-  all.mats.temp[, 4] <- int.L1
-  
-  all.mats.temp[, 5] <- int.L2
-  
-  all.mats.temp[, 6] <- int.L3
+
   
   all.mats.temp[, 7 : (7 + (num.mf.comps-1))] <- int.mf
   
@@ -510,13 +503,12 @@ ep.equi.sim <- function(time.its,
       if(k == 1) {from.last <- rep(0, N)} #create vector for worms coming from previous compartment (needs to be 0 when k ==1)
       
       
-      res <- change.worm.per.ind(delta.hz = delta.hz, delta.hinf = delta.hinf, c.h = c.h, L3 = L3.in, m = m , beta = beta, compartment = k, 
-                                 total.dat = all.mats.cur, num.comps = num.comps.worm,
-                                 w.f.l.c = from.last, lambda.zero = lambda.zero, omeg = omeg, expos = tot.ex.ai, 
-                                 ws = worms.start, DT = DT, mort.rates = mort.rates.worms, time.each.comp = time.each.comp.worms, new.worms.m = new.worms.m, 
-                                 new.worms.nf.fo = new.worms.nf, lam.m = lam.m, phi = phi, treat.stop = treat.stop, iteration = i, treat.int = treat.int, treat.prob = treat.prob, 
-                                 cum.infer = cum.infer, treat.vec = treat.vec.in, 
-                                 give.treat = give.treat, treat.start = treat.start, N = N, onchosim.cov = cov.in, times.of.treat = times.of.treat.in)
+      res <- change.worm.per.ind(
+                                 total.dat = all.mats.cur, 
+                                 num.comps = num.comps.worm,
+                                 time.each.comp = time.each.comp.worms, 
+                                 treat.vec = treat.vec.in, 
+                                )
       
       
       

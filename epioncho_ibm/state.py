@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, Tuple
 
 import numpy as np
 from numpy.typing import NDArray
@@ -180,7 +180,7 @@ def initialise_simulation(params: Params):
             ),
         )
     else:
-        pass
+        initial_treatment_times = None
 
     # Cols to zero is a mechanism for resetting certain attributes to zero
     # columns_to_zero = np.arange( start = 1, stop = )
@@ -224,7 +224,7 @@ def initialise_simulation(params: Params):
     number_of_delay_cols = round(params.l3_delay / params.delta_time)
     l_extras = np.zeros((number_of_delay_cols, params.human_population))
 
-    return individual_exposure, l_extras
+    return individual_exposure, l_extras, worm_mortality_rate, initial_treatment_times
 
 
 def calculate_total_exposure(
@@ -293,13 +293,77 @@ def w_plus_one_rate(
     )
 
 
+def get_last_males_and_females(
+    l_extras, params: Params
+) -> Tuple[NDArray[np.float_], NDArray[np.float_]]:
+    final_column = l_extras[-1]
+    is_male = (
+        np.random.binomial(n=1, p=0.5, size=params.human_population) == 0
+    )  # TODO: Check this
+    last_males = np.extract(is_male, final_column)  # new.worms.m
+    last_females = np.extract(np.logical_not(is_male), final_column)  # new.worms.nf
+    return last_males, last_females
+
+
+def change_in_worm_per_index(
+    params: Params,
+    state: State,
+    L3: float,
+    last_females: NDArray[np.float_],
+    last_males: NDArray[np.float_],
+    total_exposure: NDArray[np.float_],
+    worm_mortality_rate: NDArray[np.float_],
+    coverage_in: Optional[NDArray[np.bool_]],
+    last_change: NDArray[np.float_],
+    initial_treatment_times: Optional[NDArray[np.float_]],
+    current_time: float,
+    compartment: int,
+) -> NDArray[np.float_]:
+    """
+    params.delta_hz # delta.hz
+    params.delta_hinf # delta.hinf
+    params.c_h # c.h
+    params.annual_transm_potential # "m"
+    params.bite_rate_per_fly_on_human #"beta"
+    "compartment" Corresponds to worm column
+    params.worm_age_stages "num.comps"
+    params.omega "omeg"
+    params.lambda_zero "lambda.zero"
+    params.human_population "N"
+    params.lam_m "lam.m"
+    params.phi "phi"
+    last_males "new.worms.m"
+    last_females "new.worms.nf.fo"
+    total_exposure "tot.ex.ai"
+    params.delta_time "DT"
+    params.treatment_start_time "treat.start"
+    params.treatment_stop_time "treat.stop"
+    worm_mortality_rate "mort.rates.worms"
+    params.total_population_coverage "treat.prob"
+    params.treatment_interval "treat.int"
+    coverage_in "onchosim.cov"
+    last_change "w.f.l.c"
+    permanent_infertility "cum.infer"
+    worms.start/ws used to refer to start point in giant array for worms
+    initial_treatment_times "times.of.treat.in"
+    iteration/i now means current_time
+    if initial_treatment_times is None give.treat is false etc
+    """
+    return last_change
+
+
 def run_simulation(state: State, start_time: float = 0, end_time: float = 0):
 
     if end_time < start_time:
         raise ValueError("End time after start")
 
-    individual_exposure, l_extras = initialise_simulation(state.params)
-
+    (
+        individual_exposure,
+        l_extras,
+        worm_mortality_rate,
+        initial_treatment_times,
+    ) = initialise_simulation(state.params)
+    # TODO: Move l_extras to state  - potentially move constants to params
     current_time = start_time
     while current_time < end_time:
         current_time += state.params.delta_time
@@ -309,6 +373,8 @@ def run_simulation(state: State, start_time: float = 0, end_time: float = 0):
                 state.params.total_population_coverage,
                 state.params.min_skinsnip_age,
             )
+        else:
+            coverage_in = None
 
         total_exposure = calculate_total_exposure(
             state.params, state.people, individual_exposure
@@ -334,11 +400,25 @@ def run_simulation(state: State, start_time: float = 0, end_time: float = 0):
         new_worms = np.random.poisson(lam=new_rate, size=state.params.human_population)
 
         # Take males and females from final column of l_extras
-        final_column = l_extras[-1]
-        is_male = (
-            np.random.binomial(n=1, p=0.5, size=state.params.human_population) == 0
-        )  # TODO: Check this
-        last_males = np.extract(is_male, final_column)  # new.worms.m
-        last_females = np.extract(np.logical_not(is_male), final_column)  # new.worms.nf
+        last_males, last_females = get_last_males_and_females(l_extras, state.params)
         # Move all columns in l_extras along one
         l_extras = np.vstack((new_worms, l_extras[:-1]))
+
+        last_change = np.zeros(state.params.human_population)
+        for compartment in range(state.params.worm_age_stages):
+
+            result = change_in_worm_per_index(
+                state.params,
+                state,
+                L3_in,
+                last_females,
+                last_males,
+                total_exposure,
+                worm_mortality_rate,
+                coverage_in,
+                last_change,
+                initial_treatment_times,
+                current_time,
+                compartment,
+            )
+            last_change = result  # assign output to use at next iteration, indexes 2, 5, 6 (worms moving through compartments)

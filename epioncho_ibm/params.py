@@ -20,7 +20,7 @@ class Params(BaseModel):
         0  # the iteration up which treatment stops (treat.stop)
     )
 
-    treatment_interval: float = 1
+    treatment_interval: float = 1  # "treat.int/trt.int"
 
     # 'pnc' or percentage non compliant is in random config
     min_skinsnip_age: int = 5  # TODO: below
@@ -66,9 +66,7 @@ class Params(BaseModel):
         1 / 3
     )  # Per capita rate of reversion from fertile to non-fertile adult female worms (lambda.zero / 0.33 in 'R' code)
     # omega
-    omega: float = (
-        0.59  # Per capita rate of progression from non-fertile to fertile adult female
-    )
+    omega: float = 0.59  # "omeg" Per capita rate of progression from non-fertile to fertile adult female
     delta_v_o: float = 0.0166  # TODO: verify with client, used in calc.L1
     c_v: float = 0.0205  # TODO: verify with client, used in calc.L1
     # sex.rat = 0.5 is in random config
@@ -122,10 +120,19 @@ class Params(BaseModel):
         10 * 28
     )  # "l3.delay" (days?) delay in worms entering humans and joining the first adult worm age class
 
-    delta_time: float = 1
+    delta_time: float = 1  # DT
 
-    total_population_coverage: float = 0.65
-    male_exposure: float = 1.08
-    female_exposure: float = 0.9
-    male_exposure_exponent: float = 0.007
-    female_exposure_exponent: float = -0.023
+    total_population_coverage: float = 0.65  # "treat.prob"
+
+    # age-dependent exposure to fly bites
+    male_exposure: float = 1.08  # "m.exp"
+    female_exposure: float = 0.9  # "f.exp"
+    male_exposure_exponent: float = 0.007  # "age.exp.m"
+    female_exposure_exponent: float = -0.023  # "age.exp.f"
+
+    lam_m = 32.4  # "lam.m" effects of ivermectin
+    phi = 19.6  # effects of ivermectin
+
+    permanent_infertility = (
+        0.345  # "cum.infer" permenent infertility in worms due to ivermectin
+    )
