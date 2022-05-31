@@ -27,9 +27,7 @@ class People:
     blackfly: BlackflyLarvae
     ages: NDArray[np.float_]  # 2: current age
     mf: NDArray[np.float_]  # 2D Array, (N, age stage): microfilariae stages 7-28 (21)
-    worms: NDArray[
-        np.float_
-    ]  # 2D Array, (N, age stage): microfilariae stages 29-50 (21)
+    worms: NDArray[np.int_]  # 2D Array, (N, age stage): microfilariae stages 29-50 (21)
     mf_current_quantity: NDArray[np.int_]
     exposure: NDArray[np.float_]
     new_worm_rate: NDArray[np.float_]
@@ -72,8 +70,8 @@ class State:
                     L2=np.repeat(params.initial_L2, n_people),
                     L3=np.repeat(params.initial_L3, n_people),
                 ),
-                mf=np.zeros((n_people, params.microfil_age_stages)),
-                worms=np.zeros((n_people, params.worm_age_stages)),
+                mf=np.zeros((params.microfil_age_stages, n_people)),
+                worms=np.zeros((params.worm_age_stages, n_people), dtype=int),
                 mf_current_quantity=np.zeros(n_people, dtype=int),
                 exposure=np.zeros(n_people),
                 new_worm_rate=np.zeros(n_people),
@@ -160,7 +158,7 @@ def initialise_simulation(params: Params):
     worm_max_age = 20
     microfillarie_max_age = 2.5
     number_of_microfillariae_age_categories = 20
-
+    number_of_worm_age_categories = 20
     individual_exposure = (
         np.random.gamma(  # individual level exposure to fly bites "ex.vec"
             shape=params.gamma_distribution,
@@ -187,7 +185,7 @@ def initialise_simulation(params: Params):
 
     # age-dependent mortality and fecundity rates of parasite life stages
     worm_age_categories = np.arange(
-        start=0, stop=worm_max_age, step=worm_max_age
+        start=0, stop=worm_max_age, step=worm_max_age / number_of_worm_age_categories
     )  # age.cats
     worm_mortality_rate = weibull_mortality(
         params.delta_time, params.mu_worms1, params.mu_worms2, worm_age_categories
@@ -348,7 +346,39 @@ def change_in_worm_per_index(
     initial_treatment_times "times.of.treat.in"
     iteration/i now means current_time
     if initial_treatment_times is None give.treat is false etc
+    N is params.human_population
+    params.worms_aging "time.each.comp"
     """
+    lambda_zero_in = np.repeat(
+        params.lambda_zero * params.delta_time, params.human_population
+    )  # loss of fertility
+    omega = np.repeat(
+        params.omega * params.delta_time, params.human_population
+    )  # becoming fertile
+    # male worms
+    current_worms = state.people.worms[compartment]  # cur.Wm
+    compartment_mortality = np.repeat(
+        worm_mortality_rate[compartment], params.human_population
+    )
+    dead_male_worms = np.random.binomial(
+        n=current_worms,
+        p=compartment_mortality,  # TODO: Weibull mortality is greater than one - how can it be a prob?
+        size=params.human_population,
+    )
+    lost_male_worms = np.random.binomial(
+        n=current_worms - dead_male_worms,
+        p=np.repeat(params.delta_time / params.worms_aging, params.human_population),
+        size=params.human_population,
+    )
+    if compartment == 0:
+        # why are last males the only one not over all population?
+        total_male_worms = (
+            current_worms + last_males + lost_male_worms - dead_male_worms
+        )
+    else:
+        total_male_worms = (
+            current_worms + last_change[2] - lost_male_worms - dead_male_worms
+        )  # TODO: check
     return last_change
 
 
@@ -363,6 +393,7 @@ def run_simulation(state: State, start_time: float = 0, end_time: float = 0):
         worm_mortality_rate,
         initial_treatment_times,
     ) = initialise_simulation(state.params)
+    treatment_vector_in = np.repeat(None, state.params.human_population)  # type:ignore
     # TODO: Move l_extras to state  - potentially move constants to params
     current_time = start_time
     while current_time < end_time:
@@ -405,7 +436,7 @@ def run_simulation(state: State, start_time: float = 0, end_time: float = 0):
         l_extras = np.vstack((new_worms, l_extras[:-1]))
 
         last_change = np.zeros(state.params.human_population)
-        for compartment in range(state.params.worm_age_stages):
+        for compartment in range(state.params.worm_age_stages - 1):
 
             result = change_in_worm_per_index(
                 state.params,

@@ -242,32 +242,6 @@ change.worm.per.ind<- function(delta.hz, delta.hinf, c.h, L3, m , beta, compartm
                                 lam.m, phi, treat.stop, iteration, treat.int, treat.prob, cum.infer, treat.vec, give.treat, treat.start, N, onchosim.cov, times.of.treat)
   
 {
-  N <- length(treat.vec)
-  
-  lambda.zero.in <- rep(lambda.zero * DT, N) #loss of fertility
-  omeg <- rep(omeg * DT, N) #becoming fertile
-  
-  #male worms
-  
-  cl <- (ws-1) + compartment #calculate which column to use depending on sex, type (fertile or infertile) and compartment
-  
-  cur.Wm <- total.dat[, cl] #take current number of worms from matrix
-  
-  worm.dead.males <- rbinom(N, cur.Wm, rep(mort.rates[compartment], N))
-  worm.loss.males <- rbinom(N, (cur.Wm - worm.dead.males), rep((DT / time.each.comp), N))
-  
-  
-  if(compartment == 1)
-    
-  {
-    male.tot.worms <- cur.Wm + new.worms.m - worm.loss.males - worm.dead.males
-  }
-  
-  if(compartment > 1)
-    
-  {
-    male.tot.worms <- cur.Wm + w.f.l.c[[2]] - worm.loss.males - worm.dead.males
-  }
   
   #female worms
   
