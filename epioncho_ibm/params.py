@@ -101,7 +101,7 @@ class Params(BaseModel):
     gamma_distribution = 0.3  # "gam.dis" individual level exposure heterogeneity
 
     mu_worms1: float = (
-        1.089  # parameters controlling age-dependent mortality in adult worms
+        0.09953  # parameters controlling age-dependent mortality in adult worms
     )
     mu_worms2: float = (
         6.00569  # parameters controlling age-dependent mortality in adult worms
@@ -120,7 +120,7 @@ class Params(BaseModel):
         10 * 28
     )  # "l3.delay" (days?) delay in worms entering humans and joining the first adult worm age class
 
-    delta_time: float = 1  # DT
+    delta_time: float = 1 / 365  # DT
 
     total_population_coverage: float = 0.65  # "treat.prob"
 

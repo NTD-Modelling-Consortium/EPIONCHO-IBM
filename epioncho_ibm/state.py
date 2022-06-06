@@ -27,7 +27,11 @@ class People:
     blackfly: BlackflyLarvae
     ages: NDArray[np.float_]  # 2: current age
     mf: NDArray[np.float_]  # 2D Array, (N, age stage): microfilariae stages 7-28 (21)
-    worms: NDArray[np.int_]  # 2D Array, (N, age stage): microfilariae stages 29-50 (21)
+    male_worms: NDArray[
+        np.int_
+    ]  # 2D Array, (N, age stage): worm stages 29-92 (63) males(21), infertile females(21), fertile females(21)
+    infertile_female_worms: NDArray[np.int_]
+    fertile_female_worms: NDArray[np.int_]
     mf_current_quantity: NDArray[np.int_]
     exposure: NDArray[np.float_]
     new_worm_rate: NDArray[np.float_]
@@ -71,7 +75,13 @@ class State:
                     L3=np.repeat(params.initial_L3, n_people),
                 ),
                 mf=np.zeros((params.microfil_age_stages, n_people)),
-                worms=np.zeros((params.worm_age_stages, n_people), dtype=int),
+                male_worms=np.zeros((params.worm_age_stages, n_people), dtype=int),
+                infertile_female_worms=np.zeros(
+                    (params.worm_age_stages, n_people), dtype=int
+                ),
+                fertile_female_worms=np.zeros(
+                    (params.worm_age_stages, n_people), dtype=int
+                ),
                 mf_current_quantity=np.zeros(n_people, dtype=int),
                 exposure=np.zeros(n_people),
                 new_worm_rate=np.zeros(n_people),
@@ -190,6 +200,7 @@ def initialise_simulation(params: Params):
     worm_mortality_rate = weibull_mortality(
         params.delta_time, params.mu_worms1, params.mu_worms2, worm_age_categories
     )
+    print(worm_mortality_rate)
     fecundity_rates_worms = (
         1.158305
         * params.fecundity_worms_1
@@ -219,7 +230,7 @@ def initialise_simulation(params: Params):
     # indices_l_mat = np.arange(2, number_of_delay_cols)
 
     # SET initial values in state
-    number_of_delay_cols = round(params.l3_delay / params.delta_time)
+    number_of_delay_cols = round(params.l3_delay * 28 / (params.delta_time * 365))
     l_extras = np.zeros((number_of_delay_cols, params.human_population))
 
     return individual_exposure, l_extras, worm_mortality_rate, initial_treatment_times
@@ -292,14 +303,14 @@ def w_plus_one_rate(
 
 
 def get_last_males_and_females(
-    l_extras, params: Params
+    l_extras: NDArray[np.int_], params: Params
 ) -> Tuple[NDArray[np.float_], NDArray[np.float_]]:
-    final_column = l_extras[-1]
-    is_male = (
-        np.random.binomial(n=1, p=0.5, size=params.human_population) == 0
-    )  # TODO: Check this
-    last_males = np.extract(is_male, final_column)  # new.worms.m
-    last_females = np.extract(np.logical_not(is_male), final_column)  # new.worms.nf
+    final_column = np.array(l_extras[-1], dtype=int)
+    assert len(final_column) == params.human_population
+    last_males = np.random.binomial(
+        n=final_column, p=0.5, size=len(final_column)
+    )  # new.worms.m
+    last_females = final_column - last_males  # new.worms.nf
     return last_males, last_females
 
 
@@ -356,29 +367,32 @@ def change_in_worm_per_index(
         params.omega * params.delta_time, params.human_population
     )  # becoming fertile
     # male worms
-    current_worms = state.people.worms[compartment]  # cur.Wm
+    current_male_worms = state.people.male_worms[compartment]  # cur.Wm
     compartment_mortality = np.repeat(
         worm_mortality_rate[compartment], params.human_population
     )
     dead_male_worms = np.random.binomial(
-        n=current_worms,
-        p=compartment_mortality,  # TODO: Weibull mortality is greater than one - how can it be a prob?
+        n=current_male_worms,
+        p=compartment_mortality,
         size=params.human_population,
     )
     lost_male_worms = np.random.binomial(
-        n=current_worms - dead_male_worms,
+        n=current_male_worms - dead_male_worms,
         p=np.repeat(params.delta_time / params.worms_aging, params.human_population),
         size=params.human_population,
     )
     if compartment == 0:
         # why are last males the only one not over all population?
         total_male_worms = (
-            current_worms + last_males + lost_male_worms - dead_male_worms
+            current_male_worms + last_males + lost_male_worms - dead_male_worms
         )
     else:
         total_male_worms = (
-            current_worms + last_change[2] - lost_male_worms - dead_male_worms
+            current_male_worms + last_change - lost_male_worms - dead_male_worms
         )  # TODO: check
+
+    # female worms
+
     return last_change
 
 
@@ -397,6 +411,7 @@ def run_simulation(state: State, start_time: float = 0, end_time: float = 0):
     # TODO: Move l_extras to state  - potentially move constants to params
     current_time = start_time
     while current_time < end_time:
+        print(current_time)
         current_time += state.params.delta_time
         if current_time >= state.params.treatment_start_time:
             coverage_in = calc_coverage(
