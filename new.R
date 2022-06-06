@@ -242,71 +242,7 @@ change.worm.per.ind<- function(delta.hz, delta.hinf, c.h, L3, m , beta, compartm
                                 lam.m, phi, treat.stop, iteration, treat.int, treat.prob, cum.infer, treat.vec, give.treat, treat.start, N, onchosim.cov, times.of.treat)
   
 {
-  
-  #female worms
-  
-  clnf <- (ws - 1) + num.comps + compartment #column for infertile females, num.comps skips over males
-  
-  clf <- (ws - 1) + 2*num.comps + compartment #column for fertile females, 2*num.comps skips over males and infertile females
-  
-  cur.Wm.nf <- total.dat[, clnf] #take current worm number from matrix infertile females 
-  
-  cur.Wm.f <- total.dat[, clf] #take current worm number from matrix fertile females
-  
-  mort.fems <- rep(mort.rates[compartment], N)
-
-  ######### 
-  #treatment
-  #########
-  
-  #approach assumes individuals which are moved from fertile to non fertile class due to treatment re enter fertile class at standard rate 
-  
-  if(give.treat == 1 & iteration >= treat.start) 
-  {
     
-    if((sum(times.of.treat == iteration) == 1) & iteration <= treat.stop) #is it a treatment time
-      
-    {
-      #print('TREATMENT GIVEN') 
-      
-      inds.to.treat <- which(onchosim.cov == 1) #which individuals will received treatment
-      
-      treat.vec[inds.to.treat]  <-  (iteration-1) * DT #alter time since treatment 
-      #cum.infer is the proportion of female worms made permanently infertile, killed for simplicity 
-      if(iteration > treat.start) {mort.fems[inds.to.treat] <- mort.fems[inds.to.treat] + (cum.infer); print('cum.infer')} #alter mortality 
-    }
-    
-    
-    tao <- ((iteration-1)*DT) - treat.vec #vector of toas, some will be NA
-    
-    lam.m.temp <- rep(0, N); lam.m.temp[which(is.na(treat.vec) != TRUE)] <- lam.m #individuals which have been treated get additional infertility rate
-    
-    f.to.nf.rate <- DT * (lam.m.temp * exp(-phi * tao)) #account for time since treatment (fertility reduction decays with time since treatment)
-    
-    f.to.nf.rate[which(is.na(treat.vec) == TRUE)] <- 0 #these entries in f.to.nf.rate will be NA, lambda.zero.in cannot be NA
-    
-    lambda.zero.in <- lambda.zero.in + f.to.nf.rate #update 'standard' fertile to non fertile rate to account for treatment 
-    
-  }
-  ############################################################
-  
-  #.fi = 'from inside': worms moving from a fertile or infertile compartment
-  #.fo = 'from outside': completely new adult worms 
-  
-  
-  worm.dead.nf <- rbinom(N, cur.Wm.nf, mort.fems) #movement to next compartment
-  
-  worm.dead.f <- rbinom(N, cur.Wm.f, mort.fems)
-  
-  worm.loss.age.nf <- rbinom(N, (cur.Wm.nf - worm.dead.nf), rep((DT / time.each.comp), N))
-  
-  worm.loss.age.f <- rbinom(N, (cur.Wm.f - worm.dead.f), rep((DT / time.each.comp), N))
-  
-  
-  #calculate worms moving between fertile and non fertile, deaths and aging 
-  
-  #females from fertile to infertile
-  
   new.worms.nf.fi <- rep(0, N)
   
   trans.fc <- which((cur.Wm.f - worm.dead.f - worm.loss.age.f) > 0)

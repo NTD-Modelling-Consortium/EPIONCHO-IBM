@@ -1,3 +1,4 @@
+from copy import copy
 from dataclasses import dataclass
 from typing import Optional, Tuple
 
@@ -35,6 +36,7 @@ class People:
     mf_current_quantity: NDArray[np.int_]
     exposure: NDArray[np.float_]
     new_worm_rate: NDArray[np.float_]
+    time_of_last_treatment: NDArray[np.float_]  # treat.vec
 
     def __len__(self):
         return len(self.compliance)
@@ -64,6 +66,8 @@ class State:
             np.random.uniform(low=0, high=1, size=n_people)
             > random_config.noncompliant_percentage
         )
+        time_of_last_treatment = np.empty(n_people)
+        time_of_last_treatment[:] = np.nan
         return cls(
             people=People(
                 compliance=compliance_array,
@@ -85,6 +89,7 @@ class State:
                 mf_current_quantity=np.zeros(n_people, dtype=int),
                 exposure=np.zeros(n_people),
                 new_worm_rate=np.zeros(n_people),
+                time_of_last_treatment=time_of_last_treatment,
             ),
             params=params,
         )
@@ -200,7 +205,6 @@ def initialise_simulation(params: Params):
     worm_mortality_rate = weibull_mortality(
         params.delta_time, params.mu_worms1, params.mu_worms2, worm_age_categories
     )
-    print(worm_mortality_rate)
     fecundity_rates_worms = (
         1.158305
         * params.fecundity_worms_1
@@ -231,7 +235,7 @@ def initialise_simulation(params: Params):
 
     # SET initial values in state
     number_of_delay_cols = round(params.l3_delay * 28 / (params.delta_time * 365))
-    l_extras = np.zeros((number_of_delay_cols, params.human_population))
+    l_extras = np.zeros((number_of_delay_cols, params.human_population), dtype=int)
 
     return individual_exposure, l_extras, worm_mortality_rate, initial_treatment_times
 
@@ -304,7 +308,7 @@ def w_plus_one_rate(
 
 def get_last_males_and_females(
     l_extras: NDArray[np.int_], params: Params
-) -> Tuple[NDArray[np.float_], NDArray[np.float_]]:
+) -> Tuple[NDArray[np.int_], NDArray[np.int_]]:
     final_column = np.array(l_extras[-1], dtype=int)
     assert len(final_column) == params.human_population
     last_males = np.random.binomial(
@@ -318,8 +322,8 @@ def change_in_worm_per_index(
     params: Params,
     state: State,
     L3: float,
-    last_females: NDArray[np.float_],
-    last_males: NDArray[np.float_],
+    last_females: NDArray[np.int_],
+    last_males: NDArray[np.int_],
     total_exposure: NDArray[np.float_],
     worm_mortality_rate: NDArray[np.float_],
     coverage_in: Optional[NDArray[np.bool_]],
@@ -350,9 +354,9 @@ def change_in_worm_per_index(
     worm_mortality_rate "mort.rates.worms"
     params.total_population_coverage "treat.prob"
     params.treatment_interval "treat.int"
-    coverage_in "onchosim.cov"
+    coverage_in "onchosim.cov/inds.to.treat"
     last_change "w.f.l.c"
-    permanent_infertility "cum.infer"
+    params.permanent_infertility "cum.infer"
     worms.start/ws used to refer to start point in giant array for worms
     initial_treatment_times "times.of.treat.in"
     iteration/i now means current_time
@@ -362,7 +366,7 @@ def change_in_worm_per_index(
     """
     lambda_zero_in = np.repeat(
         params.lambda_zero * params.delta_time, params.human_population
-    )  # loss of fertility
+    )  # loss of fertility lambda.zero.in
     omega = np.repeat(
         params.omega * params.delta_time, params.human_population
     )  # becoming fertile
@@ -392,6 +396,82 @@ def change_in_worm_per_index(
         )  # TODO: check
 
     # female worms
+
+    current_female_worms_infertile = state.people.infertile_female_worms[
+        compartment
+    ]  # cur.Wm.nf
+    current_female_worms_fertile = state.people.fertile_female_worms[
+        compartment
+    ]  # cur.Wm.f
+
+    female_mortalities = copy(compartment_mortality)  # mort.fems
+    #########
+    # treatment
+    #########
+
+    # approach assumes individuals which are moved from fertile to non
+    # fertile class due to treatment re enter fertile class at standard rate
+
+    if (
+        initial_treatment_times is not None
+        and current_time > params.treatment_start_time
+    ):
+        during_treatment = np.any(
+            np.logical_and(
+                current_time < initial_treatment_times,
+                initial_treatment_times <= current_time + params.delta_time,
+            )
+        )
+        if during_treatment and current_time <= params.treatment_stop_time:
+            assert coverage_in is not None
+            np.place(
+                state.people.time_of_last_treatment, coverage_in, current_time
+            )  # treat.vec equivalent
+            # params.permanent_infertility is the proportion of female worms made permanently infertile, killed for simplicity
+            np.place(
+                female_mortalities,
+                coverage_in,
+                np.extract(coverage_in, female_mortalities)
+                + params.permanent_infertility,
+            )
+        time_since_treatment = current_time - state.people.time_of_last_treatment  # tao
+
+        # individuals which have been treated get additional infertility rate
+        lam_m_temp = np.where(
+            state.people.time_of_last_treatment == np.nan, 0, params.lam_m
+        )
+        fertile_to_non_fertile_rate = np.nan_to_num(
+            params.delta_time * lam_m_temp * np.exp(-params.phi * time_since_treatment)
+        )
+        lambda_zero_in += fertile_to_non_fertile_rate  # update 'standard' fertile to non fertile rate to account for treatment
+    ############################################################
+    # .fi = 'from inside': worms moving from a fertile or infertile compartment
+    # .fo = 'from outside': completely new adult worms
+    dead_infertile_worms = np.random.binomial(
+        n=current_female_worms_infertile,
+        p=female_mortalities,
+        size=params.human_population,
+    )  # movement to next compartment
+
+    dead_fertile_worms = np.random.binomial(
+        n=current_female_worms_fertile,
+        p=female_mortalities,
+        size=params.human_population,
+    )
+
+    lost_infertile_worms = np.random.binomial(
+        n=current_female_worms_infertile - dead_infertile_worms,
+        p=np.repeat((params.delta_time / params.worms_aging), params.human_population),
+        size=params.human_population,
+    )
+    lost_fertile_worms = np.random.binomial(
+        n=current_female_worms_fertile - dead_fertile_worms,
+        p=np.repeat((params.delta_time / params.worms_aging), params.human_population),
+        size=params.human_population,
+    )
+    # calculate worms moving between fertile and non fertile, deaths and aging
+
+    # females from fertile to infertile
 
     return last_change
 
