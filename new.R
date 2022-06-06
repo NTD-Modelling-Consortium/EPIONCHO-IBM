@@ -235,63 +235,6 @@ mf.per.skin.snip <- function(ss.wt, num.ss, slope.kmf, int.kMf, data, nfw.start,
 }
 
 
-#calculates the change in the number of adult worms in one adult worm age class for all people
-#if appropriate considers additional mortality and loss of fertility due to ivermectin treatment
-change.worm.per.ind<- function(delta.hz, delta.hinf, c.h, L3, m , beta, compartment, total.dat, num.comps,
-                               w.f.l.c, lambda.zero, omeg, expos, ws, DT, mort.rates, time.each.comp, new.worms.m, new.worms.nf.fo,
-                                lam.m, phi, treat.stop, iteration, treat.int, treat.prob, cum.infer, treat.vec, give.treat, treat.start, N, onchosim.cov, times.of.treat)
-  
-{
-    
-  new.worms.nf.fi <- rep(0, N)
-  
-  trans.fc <- which((cur.Wm.f - worm.dead.f - worm.loss.age.f) > 0)
-  
-  #individuals which still have fertile worms in an age compartment after death and aging
-  if(length(trans.fc) > 0) 
-  {
-    new.worms.nf.fi[trans.fc] <- rbinom(length(trans.fc), (cur.Wm.f[trans.fc] - worm.dead.f[trans.fc] - worm.loss.age.f[trans.fc]), lambda.zero.in[trans.fc])
-  }
-  
-  
-  #females worms from infertile to fertile, this happens independent of males, but production of mf depends on males
-  
-  #individuals which still have non fertile worms in an age compartment after death and aging
-  new.worms.f.fi <- rep(0, N)
-  
-  trans.fc <-  which((cur.Wm.nf - worm.dead.nf - worm.loss.age.nf) > 0)
-  if(length(trans.fc) > 0)
-  {
-    new.worms.f.fi[trans.fc] <- rbinom(length(trans.fc), (cur.Wm.nf[trans.fc] - worm.dead.nf[trans.fc] - worm.loss.age.nf[trans.fc]), omeg[trans.fc])#females moving from infertile to fertile
-  }
-  
-
-  
-  if(compartment == 1) #if it's the first adult worm age compartment 
-    
-  {
-    nf.out <- cur.Wm.nf + new.worms.nf.fo + new.worms.nf.fi - worm.loss.age.nf - new.worms.f.fi - worm.dead.nf#final number of infertile worms
-    
-    f.out <- cur.Wm.f + new.worms.f.fi - worm.loss.age.f - new.worms.nf.fi - worm.dead.f#final number of fertile worms
-  }       
-  
-  if(compartment > 1) 
-    
-  {
-    nf.out <- cur.Wm.nf + new.worms.nf.fi - worm.loss.age.nf - new.worms.f.fi + w.f.l.c[[5]] - worm.dead.nf#w.f.l.c = worms from previous compartment
-    
-    f.out <- cur.Wm.f + new.worms.f.fi - worm.loss.age.f - new.worms.nf.fi + w.f.l.c[[6]] - worm.dead.f
-  }   
-  
-  
-  list(male.tot.worms,
-       worm.loss.males,
-       nf.out,
-       f.out,
-       worm.loss.age.nf,
-       worm.loss.age.f, treat.vec)  
-}
-
 #mf prevalence in people based on a skin snip
 prevalence.for.age <- function(age, ss.in, main.dat)
   
