@@ -42,6 +42,21 @@ class People:
         return len(self.compliance)
 
 
+@dataclass
+class WormGroup:
+    male: NDArray[np.int_]
+    infertile: NDArray[np.int_]
+    fertile: NDArray[np.int_]
+
+    @classmethod
+    def from_population(cls, population: int):
+        return cls(
+            male=np.zeros(population, dtype=int),
+            infertile=np.zeros(population, dtype=int),
+            fertile=np.zeros(population, dtype=int),
+        )
+
+
 class State:
     current_iteration: int = 0
     people: People
@@ -373,28 +388,12 @@ def change_in_worm_per_index(
     total_exposure: NDArray[np.float_],
     worm_mortality_rate: NDArray[np.float_],
     coverage_in: Optional[NDArray[np.bool_]],
-    last_change: Tuple[
-        NDArray[np.float_],
-        NDArray[np.int_],
-        NDArray[np.int_],
-        NDArray[np.float_],
-        NDArray[np.int_],
-        NDArray[np.int_],
-        NDArray[np.float_],
-    ],
+    last_lost_worms: WormGroup,
     initial_treatment_times: Optional[NDArray[np.float_]],
     current_time: float,
     compartment: int,
-    time_of_last_treatment: NDArray[np.float_],
-) -> Tuple[
-    NDArray[np.float_],
-    NDArray[np.int_],
-    NDArray[np.int_],
-    NDArray[np.float_],
-    NDArray[np.int_],
-    NDArray[np.int_],
-    NDArray[np.float_],
-]:
+    time_of_last_treatment: Optional[NDArray[np.float_]],
+) -> Tuple[WormGroup, WormGroup, Optional[NDArray[np.float_]],]:
     """
     params.delta_hz # delta.hz
     params.delta_hinf # delta.hinf
@@ -451,7 +450,10 @@ def change_in_worm_per_index(
         )
     else:
         total_male_worms = (
-            current_male_worms + last_change[1] - lost_male_worms - dead_male_worms
+            current_male_worms
+            + last_lost_worms.male
+            - lost_male_worms
+            - dead_male_worms
         )  # TODO: check
 
     # female worms
@@ -475,6 +477,7 @@ def change_in_worm_per_index(
         initial_treatment_times is not None
         and current_time > params.treatment_start_time
     ):
+        assert time_of_last_treatment is not None
         during_treatment = np.any(
             np.logical_and(
                 current_time < initial_treatment_times,
@@ -558,7 +561,7 @@ def change_in_worm_per_index(
             + new_worms_infertile_from_inside
             - lost_infertile_worms
             - new_worms_fertile_from_inside
-            + last_change[4]
+            + last_lost_worms.infertile
             - dead_infertile_worms
         )
         fertile_out = (
@@ -567,15 +570,17 @@ def change_in_worm_per_index(
             - lost_fertile_worms
             - dead_fertile_worms
             - new_worms_infertile_from_inside
-            + last_change[5]
+            + last_lost_worms.fertile
         )
+    new_lost_worms = WormGroup(
+        male=lost_male_worms, infertile=lost_infertile_worms, fertile=lost_fertile_worms
+    )
+    new_total_worms = WormGroup(
+        male=total_male_worms, infertile=infertile_out, fertile=fertile_out
+    )
     return (
-        total_male_worms,
-        lost_male_worms,
-        infertile_out,
-        fertile_out,
-        lost_infertile_worms,
-        lost_fertile_worms,
+        new_total_worms,
+        new_lost_worms,
         time_of_last_treatment,
     )
 
@@ -635,29 +640,15 @@ def run_simulation(state: State, start_time: float = 0, end_time: float = 0):
         # Move all columns in l_extras along one
         l_extras = np.vstack((new_worms, l_extras[:-1]))
 
-        last_change: Tuple[
-            NDArray[np.float_],
-            NDArray[np.int_],
-            NDArray[np.int_],
-            NDArray[np.float_],
-            NDArray[np.int_],
-            NDArray[np.int_],
-            NDArray[np.float_],
-        ] = tuple(
-            [
-                np.zeros(state.params.human_population),
-                np.zeros(state.params.human_population, dtype=int),
-                np.zeros(state.params.human_population, dtype=int),
-                np.zeros(state.params.human_population),
-                np.zeros(state.params.human_population, dtype=int),
-                np.zeros(state.params.human_population, dtype=int),
-                np.zeros(state.params.human_population),
-            ]
-        )
-
+        last_lost_worms = WormGroup.from_population(state.params.human_population)
+        last_time_of_last_treatment = None
         for compartment in range(state.params.worm_age_stages - 1):
 
-            result = change_in_worm_per_index(
+            (
+                last_total_worms,
+                last_lost_worms,
+                last_time_of_last_treatment,
+            ) = change_in_worm_per_index(  # res
                 state.params,
                 state,
                 L3_in,
@@ -666,10 +657,20 @@ def run_simulation(state: State, start_time: float = 0, end_time: float = 0):
                 total_exposure,
                 worm_mortality_rate,
                 coverage_in,
-                last_change,
+                last_lost_worms,
                 initial_treatment_times,
                 current_time,
                 compartment,
                 time_of_last_treatment,
             )
-            last_change = result  # assign output to use at next iteration, indexes 2, 5, 6 (worms moving through compartments)
+            state.people.male_worms[compartment] = last_total_worms.male
+            state.people.infertile_female_worms[
+                compartment
+            ] = last_total_worms.infertile
+            state.people.fertile_female_worms[compartment] = last_total_worms.fertile
+        assert last_time_of_last_treatment is not None
+        if (
+            initial_treatment_times is None
+            and current_time >= state.params.treatment_start_time
+        ):
+            time_of_last_treatment = last_time_of_last_treatment

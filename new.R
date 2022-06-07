@@ -347,40 +347,7 @@ ep.equi.sim <- function(time.its,
     
     all.mats.cur <- all.mats.temp 
 
-    
-    
-    for(k in 1 : num.comps.worm) #go through each adult worm compartment
-      
-    {
-      
-      if(k == 1) {from.last <- rep(0, N)} #create vector for worms coming from previous compartment (needs to be 0 when k ==1)
-      
-      
-      res <- change.worm.per.ind(
-                                 total.dat = all.mats.cur, 
-                                 num.comps = num.comps.worm,
-                                 time.each.comp = time.each.comp.worms, 
-                                 treat.vec = treat.vec.in, 
-                                )
-      
-      
-      
-      from.last <- res #assign output to use at next iteration, indexes 2, 5, 6 (worms moving through compartments)
-      
-      #update male worms in matrix for compartment k
-      
-      all.mats.temp[, (6 + num.mf.comps + k)] <- res[[1]]
-      
-      #update females worms in matrix
-      
-      all.mats.temp[, (6 + num.mf.comps + num.comps.worm + k)] <- res[[3]] #infertile, num.comps.worm skips over males
-      all.mats.temp[, (6 + num.mf.comps + 2*num.comps.worm + k)] <- res[[4]] #fertile, num.comps.worm skips over males and infertile females
-      
-      
-    }
-    
-    if(give.treat == 1 & i >= treat.start) {treat.vec.in <- res[[7]]} #treated individuals
-    
+
     for(mf.c in 1 : num.mf.comps)   
       
     {
