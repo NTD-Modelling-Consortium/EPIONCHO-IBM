@@ -259,6 +259,8 @@ def initialise_simulation(params: Params):
         worm_mortality_rate,
         initial_treatment_times,
         time_of_last_treatment,
+        microfillarie_mortality_rate,
+        fecundity_rates_worms,
     )
 
 
@@ -585,6 +587,36 @@ def change_in_worm_per_index(
     )
 
 
+def change_in_microfil(
+    state: State,
+    params: Params,
+    microfillarie_mortality_rate: NDArray[np.float_],
+    fecundity_rates_worms: NDArray[np.float_],
+    time_of_last_treatment: NDArray[np.float_],
+    compartment: int,
+    current_time: float,
+):
+    """
+    microfillarie_mortality_rate # mu.rates.mf
+    fecundity_rates_worms # fec.rates
+    params.delta_time "DT"
+    worms.start/ws used to refer to start point in giant array for worms
+    if initial_treatment_times is None give.treat is false etc
+    params.treatment_start_time "treat.start"
+    time_of_last_treatment # "treat.vec"
+    "compartment" Corresponds to mf column mf.cpt
+    "current_time" corresponds to iteration
+    params.up up
+    params.kap kap
+    params.microfil_move_rate # mf.move.rate
+    params.worm_age_stages "num.comps"
+    params.microfil_age_stages "num.mf.comps"
+    params.microfil_aging "time.each.comp"
+    N is params.human_population
+    state is dat
+    """
+
+
 def run_simulation(state: State, start_time: float = 0, end_time: float = 0):
 
     if end_time < start_time:
@@ -596,6 +628,8 @@ def run_simulation(state: State, start_time: float = 0, end_time: float = 0):
         worm_mortality_rate,
         initial_treatment_times,
         time_of_last_treatment,
+        microfillarie_mortality_rate,
+        fecundity_rates_worms,
     ) = initialise_simulation(state.params)
     treatment_vector_in = np.repeat(None, state.params.human_population)  # type:ignore
     # TODO: Move l_extras to state  - potentially move constants to params
@@ -674,3 +708,14 @@ def run_simulation(state: State, start_time: float = 0, end_time: float = 0):
             and current_time >= state.params.treatment_start_time
         ):
             time_of_last_treatment = last_time_of_last_treatment
+
+        for compartment in range(state.params.microfil_age_stages - 1):
+            microfil_result = change_in_microfil(
+                state,
+                state.params,
+                microfillarie_mortality_rate,
+                fecundity_rates_worms,
+                time_of_last_treatment,
+                compartment,
+                current_time,
+            )

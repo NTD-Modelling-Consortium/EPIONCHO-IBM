@@ -33,14 +33,14 @@ change.micro <- function(dat, num.comps, mf.cpt, num.mf.comps, ws, DT, time.each
                          up, kap, iteration, treat.vec, give.treat, treat.start)
   
 {
-  N <- length(dat[,1])
+
   #indexes for fertile worms (to use in production of mf)
-  fert.worms.start <-  ws + num.comps*2 
-  fert.worms.end <-  (ws-1) + num.comps*3
+  #fert.worms.start <-  ws + num.comps*2 
+  #fert.worms.end <-  (ws-1) + num.comps*3
   
   #indexes to check if there are males (males start is just 'ws')
   #there must be >= 1 male worm for females to produce microfilariae 
-  mal.worms.end <- (ws-1) + num.comps
+  #mal.worms.end <- (ws-1) + num.comps
   mf.mu <- rep(mu.rates.mf[mf.cpt], N)
   fert.worms <- dat[, fert.worms.start:fert.worms.end] #number of fertile females worms
   
@@ -333,8 +333,7 @@ ep.equi.sim <- function(time.its,
   out.comp[s.comp] <- 1
   all.mats.temp[,1] <- out.comp
   
-  treat.vec.in <- rep(NA, N) #for time since treatment calculations 
-  
+
   prev <-  c()
   mean.mf.per.snip <- c()
   
@@ -352,9 +351,9 @@ ep.equi.sim <- function(time.its,
       
     {
       
-      res.mf <- change.micro(dat = all.mats.cur, num.comps =num.comps.worm, mf.cpt = mf.c, 
-                             num.mf.comps = num.mf.comps, ws=worms.start, DT=DT, time.each.comp = time.each.comp.mf, 
-                             mu.rates.mf = mort.rates.mf, fec.rates = fec.rates.worms, mf.move.rate = mf.move.rate, up = up, kap = kap, iteration = i, treat.vec = treat.vec.in, give.treat = give.treat, treat.start = treat.start)
+      res.mf <- change.micro(
+        dat = all.mats.cur, 
+      )
       
       all.mats.temp[, 6 + mf.c] <- res.mf
     }

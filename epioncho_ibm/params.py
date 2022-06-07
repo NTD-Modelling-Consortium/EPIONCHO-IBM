@@ -136,3 +136,6 @@ class Params(BaseModel):
     permanent_infertility = (
         0.345  # "cum.infer" permenent infertility in worms due to ivermectin
     )
+
+    up = 0.0096  # effects of ivermectin
+    kap = 1.25  # effects of ivermectin
