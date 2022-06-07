@@ -41,29 +41,23 @@ change.micro <- function(dat, num.comps, mf.cpt, num.mf.comps, ws, DT, time.each
   #indexes to check if there are males (males start is just 'ws')
   #there must be >= 1 male worm for females to produce microfilariae 
   #mal.worms.end <- (ws-1) + num.comps
-  mf.mu <- rep(mu.rates.mf[mf.cpt], N)
-  fert.worms <- dat[, fert.worms.start:fert.worms.end] #number of fertile females worms
-  
+
   #increases microfilarial mortality if treatment has started
-  if(give.treat == 1 & iteration >= treat.start)
-  {
-    tao <- ((iteration-1)*DT) - treat.vec #tao is zero if treatment has been given at this timestep
-    
-    mu.mf.prime <- ((tao + up) ^ (-kap)) #additional mortality due to ivermectin treatment
-    
-    mu.mf.prime[which(is.na(mu.mf.prime) == TRUE)] <- 0
-    
-    mf.mu <- mf.mu + mu.mf.prime
-    
-  }
+
   
   if(mf.cpt == 1) #if the first age class of microfilariae
   {
-    mp <- rep(0, N)
     
-    inds.fec <- which(rowSums(dat[, ws : mal.worms.end]) > 0); mp[inds.fec] <- 1     #need to check there is more than one male
-    
-    k1 <- derivmf.one(fert.worms = fert.worms, mf.in = dat[, 6 + mf.cpt], ep.in = fec.rates, mf.mort = mf.mu, mf.move = mf.move.rate, mp = mp, k.in = 0)  #fert worms and epin are vectors
+
+    k1 <- derivmf.one(
+      fert.worms = fert.worms, 
+      mf.in = dat[, 6 + mf.cpt], 
+      ep.in = fec.rates, 
+      mf.mort = mf.mu, 
+      mf.move = mf.move.rate, 
+      mp = mp,
+      k.in = 0
+    )  #fert worms and epin are vectors
     k2 <- derivmf.one(fert.worms = fert.worms, mf.in = dat[, 6 + mf.cpt], ep.in = fec.rates, mf.mort = mf.mu, mf.move = mf.move.rate, mp = mp, k.in = DT*k1/2) 
     k3 <- derivmf.one(fert.worms = fert.worms, mf.in = dat[, 6 + mf.cpt], ep.in = fec.rates, mf.mort = mf.mu, mf.move = mf.move.rate, mp = mp, k.in = DT*k2/2)  
     k4 <- derivmf.one(fert.worms = fert.worms, mf.in = dat[, 6 + mf.cpt], ep.in = fec.rates, mf.mort = mf.mu, mf.move = mf.move.rate, mp = mp, k.in = DT*k3) 

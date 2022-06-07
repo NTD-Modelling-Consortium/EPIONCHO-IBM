@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from typing import Optional, Tuple
 
 import numpy as np
+from numpy.lib.type_check import nan_to_num
 from numpy.typing import NDArray
 from pydantic import BaseModel
 
@@ -215,7 +216,9 @@ def initialise_simulation(params: Params):
 
     # age-dependent mortality and fecundity rates of parasite life stages
     worm_age_categories = np.arange(
-        start=0, stop=worm_max_age, step=worm_max_age / number_of_worm_age_categories
+        start=0,
+        stop=worm_max_age + 1,
+        step=worm_max_age / number_of_worm_age_categories,
     )  # age.cats
     worm_mortality_rate = weibull_mortality(
         params.delta_time, params.mu_worms1, params.mu_worms2, worm_age_categories
@@ -587,12 +590,46 @@ def change_in_worm_per_index(
     )
 
 
+def derive_microfil_one(
+    fertile_worms: NDArray[np.int_],
+    microfil: NDArray[np.int_],
+    fecundity_rates_worms: NDArray[np.float_],
+    mortality: NDArray[np.float_],
+    params: Params,
+    person_has_worms: NDArray[np.bool_],
+    k: float,
+):
+    """
+    #function called during RK4 for first age class of microfilariae
+
+    fertile_worms # fert.worms
+    microfil #mf.in
+    fecundity_rates_worms # ep.in
+    mortality # mf.mort
+    params.microfil_move_rate #mf.move
+    person_has_worms # mp (once turned to 0 or 1)
+    """
+    new_in = np.einsum(
+        "ij, i -> j", fertile_worms, fecundity_rates_worms
+    )  # TODO: Check?
+    mortality_temp = mortality * (microfil + k)
+    move_rate_temp = params.microfil_move_rate * (microfil + k)
+    mortality_temp[mortality_temp < 0] = 0
+    move_rate_temp[move_rate_temp < 0] = 0
+    if sum(mortality * (microfil + k) < 0) != 0:
+        print("MF NEGATIVE1")
+    if sum(params.microfil_move_rate * (microfil + k) < 0) != 0:
+        print("MF NEGATIVE2")
+    multiplier = np.where(person_has_worms, 0, 1)
+    return multiplier * new_in - mortality_temp - move_rate_temp
+
+
 def change_in_microfil(
     state: State,
     params: Params,
     microfillarie_mortality_rate: NDArray[np.float_],
     fecundity_rates_worms: NDArray[np.float_],
-    time_of_last_treatment: NDArray[np.float_],
+    time_of_last_treatment: Optional[NDArray[np.float_]],
     compartment: int,
     current_time: float,
 ):
@@ -615,6 +652,38 @@ def change_in_microfil(
     N is params.human_population
     state is dat
     """
+    compartment_mortality = np.repeat(  # mf.mu
+        microfillarie_mortality_rate[compartment], params.human_population
+    )
+    fertile_worms = state.people.fertile_female_worms  # fert.worms
+    microfil = state.people.mf[compartment]
+
+    # increases microfilarial mortality if treatment has started
+    if (
+        time_of_last_treatment is not None
+        and current_time >= params.treatment_start_time
+    ):
+        compartment_mortality_prime = (time_of_last_treatment + params.up) ** (
+            -params.kap
+        )  # additional mortality due to ivermectin treatment
+        compartment_mortality_prime = np.nan_to_num(compartment_mortality_prime)
+        compartment_mortality += compartment_mortality_prime
+
+    if compartment == 0:
+        # multiplier = np.zeros(params.human_population) #mp
+        person_has_worms = np.sum(state.people.male_worms, axis=0) > 0
+        k1 = derive_microfil_one(
+            fertile_worms,
+            microfil,
+            fecundity_rates_worms,
+            compartment_mortality,
+            params,
+            person_has_worms,
+            0.0,
+        )
+
+    else:
+        pass
 
 
 def run_simulation(state: State, start_time: float = 0, end_time: float = 0):
@@ -676,7 +745,7 @@ def run_simulation(state: State, start_time: float = 0, end_time: float = 0):
 
         last_lost_worms = WormGroup.from_population(state.params.human_population)
         last_time_of_last_treatment = None
-        for compartment in range(state.params.worm_age_stages - 1):
+        for compartment in range(state.params.worm_age_stages):
 
             (
                 last_total_worms,
@@ -702,9 +771,10 @@ def run_simulation(state: State, start_time: float = 0, end_time: float = 0):
                 compartment
             ] = last_total_worms.infertile
             state.people.fertile_female_worms[compartment] = last_total_worms.fertile
+
         assert last_time_of_last_treatment is not None
         if (
-            initial_treatment_times is None
+            initial_treatment_times is not None
             and current_time >= state.params.treatment_start_time
         ):
             time_of_last_treatment = last_time_of_last_treatment
