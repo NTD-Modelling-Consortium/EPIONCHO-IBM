@@ -10,7 +10,7 @@ class Params(BaseModel):
     treatment_intrvl_yrs: float = (
         1  # 'trt.int' treatment interval (years, 0.5 gives biannual)
     )
-    timestep_size: float = 1 / 366  # the timestep ('DT.in' and 'DT' in code)
+    # timestep_size: float = 1 / 366  # the timestep ('DT.in' and 'DT' in code)
     treatment_probability: float = 0.65  # The probability that a 'treatable' person is actually treated in an iteration
     # unclear what gv.trt / give.treat is, given that it is '1'. Might be flag to enable or disable treatment logic
     treatment_start_time: float = (
