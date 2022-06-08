@@ -105,25 +105,7 @@ ep.equi.sim <- function(time.its,
   E0 = 0; q = 0;  #age-dependent exposure to fly bites
   
 
-  
-  #columns to set to zero when an individual dies
-  cols.to.zero <- seq(from = 1, to = (6 + num.mf.comps + 3*num.comps.worm))  
-  cols.to.zero <- cols.to.zero[-c(1,5, 6)] #compliance, L2 and L3 do not become zero when an individual dies
-  
-  #columns, used to perform operations on different worm and mf compartments 
-  tot.worms <- num.comps.worm*3
-  num.cols <- 6 + num.mf.comps + tot.worms 
-  worms.start <- 7 + num.mf.comps
-  
-  
-  nfw.start <- 7 + num.mf.comps + num.comps.worm #start of infertile worms
-  fw.end <- num.cols #end of fertile worms 
-  mf.start <- 7
-  mf.end <- 6 + num.mf.comps
-  
-  #age-dependent mortality and fecundity rates of parasite life stages 
 
-  ################################################
   
   #matrix for first timestep, contains all parasite values, human age, sex and compliance
   all.mats.temp <- matrix(, nrow=N, ncol=num.cols)
@@ -158,29 +140,34 @@ ep.equi.sim <- function(time.its,
   {
     #new individual exposure for newborns, clear rows for new borns
     
-    if(length(to.die) > 0)
-    {
-      ex.vec[to.die] <- rgamma(length(to.die), gam.dis, gam.dis)
-      
-      l.extras[to.die, ] <- 0 #establishing adult worms 
-      
-      mf.delay[to.die, 1] <- 0 #individual dies so no contribution to L1s at this timestep
-
-      l1.delay[to.die] <- 0
-      
-      treat.vec.in[to.die] <- NA
-      
-      all.mats.temp[to.die, cols.to.zero] <- 0 #set age, sex and parasites to 0 (includes L1, but not L2 L3)
-      all.mats.temp[to.die, 3] <- rbinom(length(to.die), 1, 0.5) #draw sex
-    }
     
-    temp.mf <- mf.per.skin.snip(ss.wt = 2, num.ss = 2, slope.kmf = 0.0478, int.kMf = 0.313, data = all.mats.temp, nfw.start, fw.end, 
-                             mf.start, mf.end, pop.size = N)
+    temp.mf <- mf.per.skin.snip(
+      ss.wt = 2, 
+      num.ss = 2, 
+      slope.kmf = 0.0478, 
+      int.kMf = 0.313, 
+      data = all.mats.temp, 
+      nfw.start, 
+      fw.end, 
+      mf.start, 
+      mf.end, 
+      pop.size = N
+    )
     
-    prev <-  c(prev, prevalence.for.age(age = min.mont.age, ss.in = temp.mf, main.dat = all.mats.temp))
+    prev <-  c(
+      prev, 
+      prevalence.for.age(
+        age = min.mont.age, 
+        ss.in = temp.mf, 
+        main.dat = all.mats.temp
+      )
+    )
     
     
-    mean.mf.per.snip <- c(mean.mf.per.snip, mean(temp.mf[[2]][which(all.mats.temp[,2] >= min.mont.age)]))
+    mean.mf.per.snip <- c(
+      mean.mf.per.snip, 
+      mean(temp.mf[[2]][which(all.mats.temp[,2] >= min.mont.age)])
+    )
     
     
     i <- i + 1

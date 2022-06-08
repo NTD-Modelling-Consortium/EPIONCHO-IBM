@@ -825,7 +825,7 @@ def calc_l3(
     )
 
 
-def run_simulation(state: State, start_time: float = 0, end_time: float = 0):
+def run_simulation(state: State, start_time: float = 0, end_time: float = 0) -> State:
 
     if end_time < start_time:
         raise ValueError("End time after start")
@@ -839,7 +839,6 @@ def run_simulation(state: State, start_time: float = 0, end_time: float = 0):
         microfillarie_mortality_rate,
         fecundity_rates_worms,
     ) = initialise_simulation(state.params)
-    treatment_vector_in = np.repeat(None, state.params.human_population)  # type:ignore
 
     # matrix for exposure (to fly bites) for L1 delay
     number_of_exposure_columns = math.ceil(4 / (state.params.delta_time * 365))
@@ -893,14 +892,20 @@ def run_simulation(state: State, start_time: float = 0, end_time: float = 0):
 
         L3_in = np.mean(old_state.people.blackfly.L3)
         new_rate = w_plus_one_rate(state.params, L3_in, total_exposure)
-        """
-        if np.any(new_rate > 10 ** 10):
+
+        if np.any(new_rate > 10**10):
             st_dev = np.sqrt(new_rate)
-            new_worms: NDArray[np.int_] = np.round(np.random.normal(loc=new_rate, scale = st_dev, size=state.params.human_population))
+            new_worms: NDArray[np.int_] = np.round(
+                np.random.normal(
+                    loc=new_rate, scale=st_dev, size=state.params.human_population
+                )
+            )
         else:
-            new_worms = np.random.poisson(lam=new_rate, size=state.params.human_population)
-        """
-        new_worms = np.random.poisson(lam=new_rate, size=state.params.human_population)
+            new_worms = np.random.poisson(
+                lam=new_rate, size=state.params.human_population
+            )
+        # TODO: Check calculation change
+        # new_worms = np.random.poisson(lam=new_rate, size=state.params.human_population)
         # Take males and females from final column of l_extras
         last_males, last_females = get_last_males_and_females(l_extras, state.params)
         # Move all columns in l_extras along one
@@ -971,3 +976,32 @@ def run_simulation(state: State, start_time: float = 0, end_time: float = 0):
         exposure_delay = np.vstack((total_exposure, exposure_delay[:-1]))
         mf_delay = np.vstack((new_mf, mf_delay[:-1]))
         l1_delay = state.people.blackfly.L1
+
+        total_people_to_die: int = np.sum(people_to_die)
+        if total_people_to_die > 0:
+            np.place(
+                individual_exposure,
+                people_to_die,
+                np.random.gamma(
+                    shape=state.params.gamma_distribution,
+                    scale=state.params.gamma_distribution,
+                    size=total_people_to_die,
+                ),
+            )
+            l_extras[:, people_to_die] = 0
+            mf_delay[0, people_to_die] = 0
+            l1_delay[people_to_die] = 0
+            time_of_last_treatment[people_to_die] = np.nan
+
+            sex_array = (
+                np.random.uniform(low=0, high=1, size=total_people_to_die)
+                < 0.5  # TODO: Make adjustable
+            )
+            state.people.sex_is_male[people_to_die] = sex_array
+            state.people.ages[people_to_die] = 0
+            state.people.blackfly.L1[people_to_die] = 0
+            state.people.mf[:, people_to_die] = 0
+            state.people.male_worms[:, people_to_die] = 0
+            state.people.fertile_female_worms[:, people_to_die] = 0
+            state.people.infertile_female_worms[:, people_to_die] = 0
+    return state
