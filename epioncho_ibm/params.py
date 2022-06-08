@@ -48,11 +48,11 @@ class Params(BaseModel):
     blackfly_mort_per_person_per_year: float = (
         26  # Per capita mortality rate of blackfly vectors 'mu.v'
     )
-    initial_mf: int = (
-        0  # TODO: "int_mf" just 0, and doesn't change in program. What is the purpose?
+    initial_mf: int = 0  # "int.mf"
+    sigma_L0: int = (
+        52  # TODO: unclear where this comes from, and what it means #sigma.L0
     )
-    sigma_L0: int = 52  # TODO: unclear where this comes from, and what it means
-    a_H: float = 0.8  # Time delay between L3 entering the host and establishing as adult worms in years
+    a_H: float = 0.8  # Time delay between L3 entering the host and establishing as adult worms in years # a.H
     # g is 'recip_gono_cycle'
     blackfly_mort_from_mf_per_person_per_year: float = (
         0.39  # Per capita microfilaria-induced mortality of blackfly vectors 'a.v'
@@ -67,7 +67,7 @@ class Params(BaseModel):
     )  # Per capita rate of reversion from fertile to non-fertile adult female worms (lambda.zero / 0.33 in 'R' code)
     # omega
     omega: float = 0.59  # "omeg" Per capita rate of progression from non-fertile to fertile adult female
-    delta_v_o: float = 0.0166  # TODO: verify with client, used in calc.L1
+    delta_v0: float = 0.0166  # TODO: verify with client, used in calc.L1
     c_v: float = 0.0205  # TODO: verify with client, used in calc.L1
     # sex.rat = 0.5 is in random config
     # num.mf.comps and num.comps.worm are both in the Person object

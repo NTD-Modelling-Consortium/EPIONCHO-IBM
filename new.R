@@ -11,44 +11,6 @@
 
 #proportion of mf per mg developing into infective larvae within the vector
 
-delta.v <- function(delta.vo, c.v, mf, expos)
-  
-{
-  out <- delta.vo / (1 + c.v * mf *expos)
-  
-  return(out)
-}
-
-#L1, L2, L3 (parasite life stages) dynamics in the fly population
-#assumed to be at equilibrium
-#delay of 4 days for parasites moving from L1 to L2
-
-calc.L1 <- function(beta, mf, mf.delay.in, expos, delta.vo, c.v, nuone, mu.v, a.v, expos.delay)
-  
-{
-  delta.vv <- delta.v(delta.vo, c.v, mf, expos)#density dependent establishment
-  
-  out <- (delta.vv * beta * expos *  mf)  / ((mu.v + a.v * mf*expos) + (nuone * exp (-(4/366) * (mu.v + (a.v * mf.delay.in*expos.delay)))))
-  
-  return(out)
-}
-
-calc.L2 <- function(nuone, L1.in, mu.v, nutwo, mf, a.v, expos) 
-  
-{
-  out <- (L1.in * (nuone * exp (-(4/366) * (mu.v + (a.v * mf * expos))))) / (mu.v + nutwo)
-  
-  return(out)
-}
-
-calc.L3 <- function(nutwo, L2.in, a.H, g, mu.v, sigma.L0)
-  
-{
-  out <- (nutwo * L2.in) / ((a.H / g) + mu.v + sigma.L0) 
-
-  return(out)
-}
-
 
 #rate of acquisition of new infections in humans
 #depends on mean number of L3 larvae in the fly population 
@@ -140,8 +102,6 @@ ep.equi.sim <- function(time.its,
   
   #hard coded parms
 
-
-  up = 0.0096; kap = 1.25 #effects of ivermectin
   E0 = 0; q = 0;  #age-dependent exposure to fly bites
   
 
@@ -164,20 +124,6 @@ ep.equi.sim <- function(time.its,
   #age-dependent mortality and fecundity rates of parasite life stages 
 
   ################################################
-  #L1 delay in flies
-  l1.delay <- rep(int.L1, N)
-  
-  ###############################################
-  #matrix for tracking mf for L1 delay
-  num.mfd.cols <- 4 / dt.days
-  mf.delay <- matrix(int.mf, ncol= num.mfd.cols, nrow= N)
-  inds.mfd.mats <- seq(2,(length(mf.delay[1,])))
-  
-  ###############################################
-  #matrix for exposure (to fly bites) for L1 delay
-  num.exp.cols <- 4 / dt.days
-  exposure.delay <- matrix(ex.vec, ncol= num.exp.cols, nrow= N)
-  inds.exp.mats <- seq(2,(length(exposure.delay[1,])))  
   
   #matrix for first timestep, contains all parasite values, human age, sex and compliance
   all.mats.temp <- matrix(, nrow=N, ncol=num.cols)
@@ -210,47 +156,6 @@ ep.equi.sim <- function(time.its,
   while(i < time.its) #over time
     
   {
-    #stores mean L3 and adult worms from previous timesteps 
-    
-    all.mats.cur <- all.mats.temp 
-
-
-    for(mf.c in 1 : num.mf.comps)   
-      
-    {
-      
-      res.mf <- change.micro(
-        dat = all.mats.cur, 
-      )
-      
-      all.mats.temp[, 6 + mf.c] <- res.mf
-    }
-    
-    
-    #inputs for delay in L1  
-    exp.delay.temp <- exposure.delay[, length(exposure.delay[1,])]
-    mf.delay.temp <- mf.delay[, length(mf.delay[1,])]
-    l1.delay.temp <- l1.delay #L1 from previous timestep
-    
-    #move values along
-    exposure.delay[, inds.exp.mats] <- exposure.delay[, (inds.exp.mats -1)]
-    mf.delay[, inds.mfd.mats] <- mf.delay[, (inds.mfd.mats - 1)] 
-    
-    #update L1, L2 and L3
-    
-    #total number of mf in each person
-    mf.temp <- rowSums(all.mats.cur[, 7 : (6 + num.mf.comps)]) #sum mf over compartments, mf start in column 7
-    
-    all.mats.temp[, 4] <- calc.L1(beta, mf = mf.temp, mf.delay.in = mf.delay.temp, expos = tot.ex.ai, delta.vo, c.v, nuone, mu.v, a.v, expos.delay = exp.delay.temp)
-    all.mats.temp[, 5] <- calc.L2(nuone, L1.in = l1.delay.temp, mu.v, nutwo, mf = mf.delay.temp, a.v, expos = exp.delay.temp)
-    all.mats.temp[, 6] <- calc.L3(nutwo, L2.in = all.mats.cur[, 5], a.H, g, mu.v, sigma.L0)
-    
-    #new values for delay parts
-    l1.delay <- all.mats.temp[, 4]
-    mf.delay[, 1] <- rowSums(all.mats.cur[, 7 : (6 + num.mf.comps)])
-    exposure.delay[, 1] <- tot.ex.ai
-    
-    
     #new individual exposure for newborns, clear rows for new borns
     
     if(length(to.die) > 0)

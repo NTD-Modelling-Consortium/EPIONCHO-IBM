@@ -1,4 +1,5 @@
-from copy import copy
+import math
+from copy import copy, deepcopy
 from dataclasses import dataclass
 from typing import Callable, Optional, Tuple, Union
 
@@ -94,14 +95,17 @@ class State:
                     L2=np.repeat(params.initial_L2, n_people),
                     L3=np.repeat(params.initial_L3, n_people),
                 ),
-                mf=np.zeros((params.microfil_age_stages, n_people)),
-                male_worms=np.zeros((params.worm_age_stages, n_people), dtype=int),
-                infertile_female_worms=np.zeros(
+                mf=np.ones((params.microfil_age_stages, n_people)) * params.initial_mf,
+                male_worms=np.ones((params.worm_age_stages, n_people), dtype=int)
+                * params.initial_worms,
+                infertile_female_worms=np.ones(
                     (params.worm_age_stages, n_people), dtype=int
-                ),
-                fertile_female_worms=np.zeros(
+                )
+                * params.initial_worms,
+                fertile_female_worms=np.ones(
                     (params.worm_age_stages, n_people), dtype=int
-                ),
+                )
+                * params.initial_worms,
                 mf_current_quantity=np.zeros(n_people, dtype=int),
                 exposure=np.zeros(n_people),
                 new_worm_rate=np.zeros(n_people),
@@ -235,7 +239,7 @@ def initialise_simulation(params: Params):
 
     microfillarie_age_categories = np.arange(
         start=0,
-        stop=microfillarie_max_age,
+        stop=microfillarie_max_age + 1,
         step=microfillarie_max_age / number_of_microfillariae_age_categories,
     )  # age.cats.mf
 
@@ -252,7 +256,7 @@ def initialise_simulation(params: Params):
     # indices_l_mat = np.arange(2, number_of_delay_cols)
 
     # SET initial values in state
-    number_of_delay_cols = round(params.l3_delay * 28 / (params.delta_time * 365))
+    number_of_delay_cols = math.ceil(params.l3_delay * 28 / (params.delta_time * 365))
     l_extras = np.zeros((number_of_delay_cols, params.human_population), dtype=int)
     time_of_last_treatment = np.empty(params.human_population)
     time_of_last_treatment[:] = np.nan
@@ -725,6 +729,102 @@ def change_in_microfil(
     return output
 
 
+# L1, L2, L3 (parasite life stages) dynamics in the fly population
+# assumed to be at equilibrium
+# delay of 4 days for parasites moving from L1 to L2
+
+
+def calc_l1(
+    params: Params,
+    microfil: NDArray[np.float_],
+    last_microfil_delay: NDArray[np.float_],
+    total_exposure: NDArray[np.float_],
+    exposure_delay: NDArray[np.float_],
+) -> NDArray[np.float_]:
+    """
+    microfil # mf
+    last_microfil_delay # mf.delay.in
+    total_exposure # expos
+    params.delta_v0 #delta.vo
+    params.bite_rate_per_fly_on_human # beta
+    params.c_v #c.v
+    params.l1_l2_per_person_per_year # nuone
+    params.blackfly_mort_per_person_per_year # mu.v
+    params.blackfly_mort_from_mf_per_person_per_year # a.v
+    exposure_delay # expos.delay
+    """
+    # proportion of mf per mg developing into infective larvae within the vector
+    delta_vv = params.delta_v0 / (1 + params.c_v * microfil * total_exposure)
+    return (
+        (delta_vv * params.bite_rate_per_fly_on_human * microfil * total_exposure)
+        / params.blackfly_mort_per_person_per_year
+        + params.blackfly_mort_from_mf_per_person_per_year * microfil * total_exposure
+        + params.l1_l2_per_person_per_year
+        * np.exp(
+            -(4 / 365)
+            * (
+                params.blackfly_mort_per_person_per_year
+                + params.blackfly_mort_from_mf_per_person_per_year
+                * last_microfil_delay
+                * exposure_delay
+            )
+        )
+    )
+
+
+def calc_l2(
+    params: Params,
+    l1_delay: NDArray[np.float_],
+    microfil: NDArray[np.float_],
+    total_exposure: NDArray[np.float_],
+) -> NDArray[np.float_]:
+    """
+    params.l1_l2_per_person_per_year # nuone
+    params.blackfly_mort_per_person_per_year # mu.v
+    params.l2_l3_per_person_per_year # nutwo
+    params.blackfly_mort_from_mf_per_person_per_year # a.v
+    l1_delay # L1.in
+    microfil # mf
+    total_exposure # expos
+    """
+    return (
+        l1_delay
+        * (
+            params.l1_l2_per_person_per_year
+            * np.exp(
+                -(4 / 366)
+                * (
+                    params.blackfly_mort_per_person_per_year
+                    + (
+                        params.blackfly_mort_from_mf_per_person_per_year
+                        * microfil
+                        * total_exposure
+                    )
+                )
+            )
+        )
+    ) / (params.blackfly_mort_per_person_per_year + params.l2_l3_per_person_per_year)
+
+
+def calc_l3(
+    params: Params,
+    l2: NDArray[np.float_],
+) -> NDArray[np.float_]:
+    """
+    params.l2_l3_per_person_per_year # nutwo
+    l2 # L2.in
+    params.a_H # a.H
+    params.recip_gono_cycle # g
+    params.blackfly_mort_per_person_per_year # mu.v
+    params.sigma_L0 # sigma.L0
+    """
+    return (params.l2_l3_per_person_per_year * l2) / (
+        (params.a_H / params.recip_gono_cycle)
+        + params.blackfly_mort_per_person_per_year
+        + params.sigma_L0
+    )
+
+
 def run_simulation(state: State, start_time: float = 0, end_time: float = 0):
 
     if end_time < start_time:
@@ -740,6 +840,24 @@ def run_simulation(state: State, start_time: float = 0, end_time: float = 0):
         fecundity_rates_worms,
     ) = initialise_simulation(state.params)
     treatment_vector_in = np.repeat(None, state.params.human_population)  # type:ignore
+
+    # matrix for exposure (to fly bites) for L1 delay
+    number_of_exposure_columns = math.ceil(4 / (state.params.delta_time * 365))
+    exposure_delay = np.tile(
+        individual_exposure, (number_of_exposure_columns, 1)
+    )  # exposure.delay
+
+    # matrix for tracking mf for L1 delay
+    number_of_mf_columns = math.ceil(4 / (state.params.delta_time * 365))
+    mf_delay = (
+        np.ones((number_of_mf_columns, state.params.human_population))
+        * state.params.initial_mf
+    )  # mf.delay
+    # L1 delay in flies
+    l1_delay = np.repeat(state.params.initial_L1, state.params.human_population)
+
+    # inds.exp.mats is a sequence from 2 to number_of_exposure_columns
+
     # TODO: Move l_extras to state  - potentially move constants to params
     current_time = start_time
     while current_time < end_time:
@@ -757,7 +875,7 @@ def run_simulation(state: State, start_time: float = 0, end_time: float = 0):
         total_exposure = calculate_total_exposure(
             state.params, state.people, individual_exposure
         )
-
+        old_state = deepcopy(state)  # all.mats.cur
         # increase ages
         state.people.ages += state.params.delta_time
 
@@ -773,10 +891,16 @@ def run_simulation(state: State, start_time: float = 0, end_time: float = 0):
 
         # there is a delay in new parasites entering humans (from fly bites) and entering the first adult worm age class
 
-        L3_in = np.mean(state.people.blackfly.L3)
+        L3_in = np.mean(old_state.people.blackfly.L3)
         new_rate = w_plus_one_rate(state.params, L3_in, total_exposure)
+        """
+        if np.any(new_rate > 10 ** 10):
+            st_dev = np.sqrt(new_rate)
+            new_worms: NDArray[np.int_] = np.round(np.random.normal(loc=new_rate, scale = st_dev, size=state.params.human_population))
+        else:
+            new_worms = np.random.poisson(lam=new_rate, size=state.params.human_population)
+        """
         new_worms = np.random.poisson(lam=new_rate, size=state.params.human_population)
-
         # Take males and females from final column of l_extras
         last_males, last_females = get_last_males_and_females(l_extras, state.params)
         # Move all columns in l_extras along one
@@ -792,7 +916,7 @@ def run_simulation(state: State, start_time: float = 0, end_time: float = 0):
                 last_time_of_last_treatment,
             ) = change_in_worm_per_index(  # res
                 state.params,
-                state,
+                old_state,
                 L3_in,
                 last_females,
                 last_males,
@@ -818,9 +942,9 @@ def run_simulation(state: State, start_time: float = 0, end_time: float = 0):
         ):
             time_of_last_treatment = last_time_of_last_treatment
 
-        for compartment in range(state.params.microfil_age_stages - 1):
-            microfil_result = change_in_microfil(
-                state,
+        for compartment in range(state.params.microfil_age_stages):
+            state.people.mf[compartment] = change_in_microfil(
+                old_state,
                 state.params,
                 microfillarie_mortality_rate,
                 fecundity_rates_worms,
@@ -828,3 +952,22 @@ def run_simulation(state: State, start_time: float = 0, end_time: float = 0):
                 compartment,
                 current_time,
             )
+        # inputs for delay in L1
+        last_exposure_delay = exposure_delay[-1]  # exp.delay.temp
+        last_mf_delay = mf_delay[-1]  # mf.delay.temp
+        last_l1_delay = l1_delay  # l1.delay.temp
+        new_mf = np.sum(
+            old_state.people.mf, axis=0
+        )  # TODO: Should this be old state? mf.temp
+
+        state.people.blackfly.L1 = calc_l1(
+            state.params, new_mf, last_mf_delay, total_exposure, last_exposure_delay
+        )
+        state.people.blackfly.L2 = calc_l2(
+            state.params, last_l1_delay, last_mf_delay, last_exposure_delay
+        )
+        state.people.blackfly.L3 = calc_l3(state.params, old_state.people.blackfly.L3)
+
+        exposure_delay = np.vstack((total_exposure, exposure_delay[:-1]))
+        mf_delay = np.vstack((new_mf, mf_delay[:-1]))
+        l1_delay = state.people.blackfly.L1
