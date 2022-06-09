@@ -42,9 +42,12 @@ class Params(BaseModel):
     bite_rate_per_fly_on_human: float = (
         human_blood_index / recip_gono_cycle
     )  # defined in table D in paper, is 'beta' in R code
+    # annual_transm_potential: float = (
+    #    bite_rate_per_person_per_year * human_population
+    # ) / bite_rate_per_fly_on_human  # ATP in doc, possible this is 'm' - implemented based on doc calculation
     annual_transm_potential: float = (
-        bite_rate_per_person_per_year * human_population
-    ) / bite_rate_per_fly_on_human  # ATP in doc, possible this is 'm' - implemented based on doc calculation
+        bite_rate_per_person_per_year / bite_rate_per_fly_on_human
+    )
     blackfly_mort_per_person_per_year: float = (
         26  # Per capita mortality rate of blackfly vectors 'mu.v'
     )
@@ -116,9 +119,7 @@ class Params(BaseModel):
     fecundity_worms_2: float = (
         0.72  # parameters controlling age-dependent fecundity in adult worms
     )
-    l3_delay: float = (
-        10 * 28
-    )  # "l3.delay" (days?) delay in worms entering humans and joining the first adult worm age class
+    l3_delay: float = 10  # "l3.delay" (months?) delay in worms entering humans and joining the first adult worm age class
 
     delta_time: float = 1 / 365  # DT
 
