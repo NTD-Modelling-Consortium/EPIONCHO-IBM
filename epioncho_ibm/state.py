@@ -497,15 +497,15 @@ def change_in_worm_per_index(
     )
     if compartment == 0:
         total_male_worms = (
-            current_male_worms + last_males + lost_male_worms - dead_male_worms
+            current_male_worms + last_males - lost_male_worms - dead_male_worms
         )
     else:
         total_male_worms = (
             current_male_worms
-            + last_lost_worms.male
+            # + last_lost_worms.male
             - lost_male_worms
             - dead_male_worms
-        )  # TODO: check
+        )  # TODO: check - altered calculation to avoid worm amounts exploding
 
     # female worms
 
@@ -934,7 +934,6 @@ def run_simulation(state: State, start_time: float = 0, end_time: float = 0) -> 
 
         L3_in = np.mean(old_state.people.blackfly.L3)
         new_rate = w_plus_one_rate(state.params, L3_in, total_exposure)
-
         if np.any(new_rate > 10**10):
             st_dev = np.sqrt(new_rate)
             new_worms: NDArray[np.int_] = np.round(
