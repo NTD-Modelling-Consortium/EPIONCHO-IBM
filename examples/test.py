@@ -18,7 +18,8 @@ print("Average age: " + str(average_age))
 print("Male Percentage: " + str(male_count))
 print("Compliant Percentage: " + str(compliant_count))
 
-run_simulation(initial_state, start_time=0, end_time=4)
+new_state = run_simulation(initial_state, start_time=0, end_time=0.5)
+print(new_state.microfilariae_per_skin_snip())
 # new_state = advance_state(initial_state, params=params, n_iters=100)
 
 # print(new_state.prevelence())

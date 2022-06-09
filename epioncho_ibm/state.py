@@ -11,6 +11,19 @@ from pydantic import BaseModel
 from .params import Params
 
 
+def negative_binomial_alt_interface(
+    n: NDArray[np.float_], mu: NDArray[np.float_]
+) -> NDArray[np.int_]:
+    non_zero_n = n[n > 0]
+    rel_prob = non_zero_n / (non_zero_n + mu[n > 0])
+    temp_output = np.random.negative_binomial(
+        n=non_zero_n, p=rel_prob, size=len(non_zero_n)
+    )
+    output = np.zeros(len(n), dtype=int)
+    output[n > 0] = temp_output
+    return output
+
+
 class RandomConfig(BaseModel):
     gender_ratio: float = 0.5
     noncompliant_percentage: float = 0.05
@@ -35,9 +48,9 @@ class People:
     ]  # 2D Array, (N, age stage): worm stages 29-92 (63) males(21), infertile females(21), fertile females(21)
     infertile_female_worms: NDArray[np.int_]
     fertile_female_worms: NDArray[np.int_]
-    mf_current_quantity: NDArray[np.int_]
-    exposure: NDArray[np.float_]
-    new_worm_rate: NDArray[np.float_]
+    # mf_current_quantity: NDArray[np.int_]
+    # exposure: NDArray[np.float_]
+    # new_worm_rate: NDArray[np.float_]
     # time_of_last_treatment: NDArray[np.float_]  # treat.vec
 
     def __len__(self):
@@ -106,9 +119,9 @@ class State:
                     (params.worm_age_stages, n_people), dtype=int
                 )
                 * params.initial_worms,
-                mf_current_quantity=np.zeros(n_people, dtype=int),
-                exposure=np.zeros(n_people),
-                new_worm_rate=np.zeros(n_people),
+                # mf_current_quantity=np.zeros(n_people, dtype=int),
+                # exposure=np.zeros(n_people),
+                # new_worm_rate=np.zeros(n_people),
                 # time_of_last_treatment=time_of_last_treatment,
             ),
             params=params,
@@ -117,19 +130,51 @@ class State:
     def prevelence(self: "State") -> float:
         raise NotImplementedError
 
-    def microfilariae_per_skin_snip(self: "State") -> float:
-        raise NotImplementedError
+    def microfilariae_per_skin_snip(self: "State") -> Tuple[float, NDArray[np.float_]]:
+        """
+        #people are tested for the presence of mf using a skin snip, we assume mf are overdispersed in the skin
+        #function calculates number of mf in skin snip for all people
 
-    def mf_prevalence_in_population(self: "State", min_age_skinsnip: int) -> float:
+        params.skin_snip_weight # ss.wt
+        params.skin_snip_number # num.ss
+        params.slope_kmf # slope.kmf
+        params.initial_kmf # int.kMf
+        params.human_population # pop.size
+        Determined by new structure
+        nfw.start,
+        fw.end,
+        mf.start,
+        mf.end,
         """
-        Returns a decimal representation of mf prevalence in skinsnip aged population.
-        """
-        pop_over_min_age_array = self.people.ages >= min_age_skinsnip
-        pop_over_min_age = np.sum(pop_over_min_age_array)
-        infected_over_min_age = np.sum(
-            np.logical_and(pop_over_min_age_array, self.people.mf_current_quantity > 0)
+        # rowSums(da... sums up adult worms for all individuals giving a vector of kmfs
+        # TODO: Note that the worms used here were only female, not total - is this correct?
+        kmf = self.params.slope_kmf * np.sum(
+            self.people.fertile_female_worms + self.people.infertile_female_worms,
+            axis=0,
         )
-        return pop_over_min_age / infected_over_min_age
+        mu = self.params.skin_snip_weight * np.sum(self.people.mf, axis=0)
+        if self.params.skin_snip_number > 1:
+            total_skin_snip_mf = np.zeros(
+                (self.params.human_population, self.params.skin_snip_number)
+            )
+            for i in range(self.params.skin_snip_number):
+                total_skin_snip_mf[:, i] = negative_binomial_alt_interface(n=kmf, mu=mu)
+            mfobs = np.sum(total_skin_snip_mf, axis=1)
+        else:
+            mfobs = negative_binomial_alt_interface(n=kmf, mu=mu)
+        mfobs = mfobs / (self.params.skin_snip_number * self.params.skin_snip_weight)
+        return np.mean(mfobs), mfobs
+
+    # def mf_prevalence_in_population(self: "State", min_age_skinsnip: int) -> float:
+    #    """
+    #    Returns a decimal representation of mf prevalence in skinsnip aged population.
+    #    """
+    #    pop_over_min_age_array = self.people.ages >= min_age_skinsnip
+    #    pop_over_min_age = np.sum(pop_over_min_age_array)
+    #    infected_over_min_age = np.sum(
+    #        np.logical_and(pop_over_min_age_array, self.people.mf_current_quantity > 0)
+    #    )
+    #    return pop_over_min_age / infected_over_min_age
 
     def dist_population_age(
         self,
@@ -625,7 +670,7 @@ def construct_derive_microfil_one(
             print("MF NEGATIVE1")
         if sum(params.microfil_move_rate * (microfil + k) < 0) != 0:
             print("MF NEGATIVE2")
-        multiplier = np.where(person_has_worms, 0, 1)
+        multiplier = np.where(person_has_worms, 1, 0)
         return multiplier * new_in - mortality_temp - move_rate_temp
 
     return derive_microfil_one
@@ -708,7 +753,7 @@ def change_in_microfil(
 
     if compartment == 0:
         person_has_worms = np.sum(state.people.male_worms, axis=0) > 0
-        derive_microfil_one = construct_derive_microfil_one(
+        derive_microfil = construct_derive_microfil_one(
             fertile_worms,
             microfil,
             fecundity_rates_worms,
@@ -717,15 +762,14 @@ def change_in_microfil(
             person_has_worms,
         )
     else:
-        derive_microfil_one = construct_derive_microfil_rest(
+        derive_microfil = construct_derive_microfil_rest(
             microfil, compartment_mortality, params, state.people.mf[compartment - 1]
         )
-    k1 = derive_microfil_one(0.0)
-    k2 = derive_microfil_one(params.delta_time * k1 / 2)
-    k3 = derive_microfil_one(params.delta_time * k2 / 2)
-    k4 = derive_microfil_one(params.delta_time * k3)
+    k1 = derive_microfil(0.0)
+    k2 = derive_microfil(params.delta_time * k1 / 2)
+    k3 = derive_microfil(params.delta_time * k2 / 2)
+    k4 = derive_microfil(params.delta_time * k3)
     output = microfil + (params.delta_time / 6) * (k1 + 2 * k2 + 2 * k3 + k4)
-
     return output
 
 
@@ -914,7 +958,6 @@ def run_simulation(state: State, start_time: float = 0, end_time: float = 0) -> 
         last_lost_worms = WormGroup.from_population(state.params.human_population)
         last_time_of_last_treatment = None
         for compartment in range(state.params.worm_age_stages):
-
             (
                 last_total_worms,
                 last_lost_worms,

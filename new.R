@@ -9,62 +9,6 @@
 #all functions are called in ep.equi.sim which gives the final output
 
 
-#proportion of mf per mg developing into infective larvae within the vector
-
-
-#rate of acquisition of new infections in humans
-#depends on mean number of L3 larvae in the fly population 
-
-
-
-
-#people are tested for the presence of mf using a skin snip, we assume mf are overdispersed in the skin
-#function calculates number of mf in skin snip for all people
-#ss.wt is the weight of the skin snip
-mf.per.skin.snip <- function(ss.wt, num.ss, slope.kmf, int.kMf, data, nfw.start, fw.end,  ###check vectorization 
-                             mf.start, mf.end, pop.size)
-  
-{
-  
-  all.mfobs <- c()
-  
-  kmf <- slope.kmf * (rowSums(data[,nfw.start:fw.end])) + int.kMf #rowSums(da... sums up adult worms for all individuals giving a vector of kmfs
-  
-  mfobs <- rnbinom(pop.size, size = kmf, mu = ss.wt * (rowSums(data[,mf.start:mf.end])))
-  
-  nans <- which(mfobs == 'NaN'); mfobs[nans] <- 0
-  
-  if(num.ss > 1)
-    
-  {
-    
-    tot.ss.mf <- matrix(, nrow = length(data[,1]), ncol = num.ss)
-    tot.ss.mf[,1] <- mfobs
-    
-    for(j in 2 : (num.ss)) #could be vectorized
-      
-    {
-      
-      temp <- rnbinom(pop.size, size = kmf, mu = ss.wt * (rowSums(data[,mf.start:mf.end])))
-      
-      nans <- which(temp == 'NaN'); temp[nans] <- 0
-      
-      tot.ss.mf[,j] <- temp
-      
-    }
-    
-    mfobs <- rowSums(tot.ss.mf)  
-    
-  } 
-  
-  mfobs <- mfobs / (ss.wt * num.ss) 
-  # mfobs <- mfobs / (num.ss) 
-  
-  list(mean(mfobs), mfobs)
-  
-}
-
-
 #mf prevalence in people based on a skin snip
 prevalence.for.age <- function(age, ss.in, main.dat)
   
