@@ -14,10 +14,10 @@ class Params(BaseModel):
     treatment_probability: float = 0.65  # The probability that a 'treatable' person is actually treated in an iteration
     # unclear what gv.trt / give.treat is, given that it is '1'. Might be flag to enable or disable treatment logic
     treatment_start_time: float = (
-        0  # The iteration upon which treatment commences (treat.start in R code)
+        100  # The iteration upon which treatment commences (treat.start in R code)
     )
     treatment_stop_time: float = (
-        2  # the iteration up which treatment stops (treat.stop)
+        120  # the iteration up which treatment stops (treat.stop)
     )
 
     treatment_interval: float = 1  # "treat.int/trt.int"

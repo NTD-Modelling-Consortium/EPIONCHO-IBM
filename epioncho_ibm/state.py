@@ -901,7 +901,8 @@ def run_simulation(state: State, start_time: float = 0, end_time: float = 0) -> 
     # TODO: Move l_extras to state  - potentially move constants to params
     current_time = start_time
     while current_time < end_time:
-        print(current_time)
+        if state.params.delta_time > current_time % 0.2:
+            print(current_time)
         current_time += state.params.delta_time
         if current_time >= state.params.treatment_start_time:
             coverage_in = calc_coverage(
@@ -974,6 +975,29 @@ def run_simulation(state: State, start_time: float = 0, end_time: float = 0) -> 
                 compartment,
                 time_of_last_treatment,
             )
+
+            if np.any(
+                np.logical_or(
+                    np.logical_or(
+                        last_total_worms.male < 0, last_total_worms.fertile < 0
+                    ),
+                    last_total_worms.infertile < 0,
+                )
+            ):
+                candidate_people_male_worms = last_total_worms.male[
+                    last_total_worms.male < 0
+                ]
+                candidate_people_fertile_worms = last_total_worms.fertile[
+                    last_total_worms.fertile < 0
+                ]
+                candidate_people_infertile_worms = last_total_worms.infertile[
+                    last_total_worms.infertile < 0
+                ]
+
+                raise RuntimeError(
+                    f"Worms became negative: \nMales: {candidate_people_male_worms} \nFertile Females: {candidate_people_fertile_worms} \nInfertile Females: {candidate_people_infertile_worms}"
+                )
+
             state.people.male_worms[compartment] = last_total_worms.male
             state.people.infertile_female_worms[
                 compartment
@@ -1011,7 +1035,7 @@ def run_simulation(state: State, start_time: float = 0, end_time: float = 0) -> 
         state.people.blackfly.L2 = calc_l2(
             state.params, last_l1_delay, last_mf_delay, last_exposure_delay
         )
-        state.people.blackfly.L3 = calc_l3(state.params, old_state.people.blackfly.L3)
+        state.people.blackfly.L3 = calc_l3(state.params, old_state.people.blackfly.L2)
 
         exposure_delay = np.vstack((total_exposure, exposure_delay[:-1]))
         mf_delay = np.vstack((new_mf, mf_delay[:-1]))
