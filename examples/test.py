@@ -20,6 +20,7 @@ print("Compliant Percentage: " + str(compliant_count))
 
 new_state = run_simulation(initial_state, start_time=0, end_time=0.5)
 print(new_state.microfilariae_per_skin_snip())
+print(new_state.mf_prevalence_in_population())
 # new_state = advance_state(initial_state, params=params, n_iters=100)
 
 # print(new_state.prevelence())

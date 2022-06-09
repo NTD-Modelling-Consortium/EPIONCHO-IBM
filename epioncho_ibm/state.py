@@ -4,7 +4,6 @@ from dataclasses import dataclass
 from typing import Callable, Optional, Tuple, Union
 
 import numpy as np
-from numpy.lib.type_check import nan_to_num
 from numpy.typing import NDArray
 from pydantic import BaseModel
 
@@ -165,16 +164,15 @@ class State:
         mfobs = mfobs / (self.params.skin_snip_number * self.params.skin_snip_weight)
         return np.mean(mfobs), mfobs
 
-    # def mf_prevalence_in_population(self: "State", min_age_skinsnip: int) -> float:
-    #    """
-    #    Returns a decimal representation of mf prevalence in skinsnip aged population.
-    #    """
-    #    pop_over_min_age_array = self.people.ages >= min_age_skinsnip
-    #    pop_over_min_age = np.sum(pop_over_min_age_array)
-    #    infected_over_min_age = np.sum(
-    #        np.logical_and(pop_over_min_age_array, self.people.mf_current_quantity > 0)
-    #    )
-    #    return pop_over_min_age / infected_over_min_age
+    def mf_prevalence_in_population(self: "State") -> float:
+        """
+        Returns a decimal representation of mf prevalence in skinsnip aged population.
+        """
+        pop_over_min_age_array = self.people.ages >= self.params.min_skinsnip_age
+        _, mf_skin_snip = self.microfilariae_per_skin_snip()
+        infected_over_min_age = np.sum(mf_skin_snip[pop_over_min_age_array] > 0)
+        total_over_min_age = np.sum(pop_over_min_age_array)
+        return infected_over_min_age / total_over_min_age
 
     def dist_population_age(
         self,
@@ -498,7 +496,6 @@ def change_in_worm_per_index(
         mortalities=compartment_mortality,
     )
     if compartment == 0:
-        # why are last males the only one not over all population?
         total_male_worms = (
             current_male_worms + last_males + lost_male_worms - dead_male_worms
         )
