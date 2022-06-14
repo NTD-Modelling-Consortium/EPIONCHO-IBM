@@ -9,16 +9,6 @@
 #all functions are called in ep.equi.sim which gives the final output
 
 
-#mf prevalence in people based on a skin snip
-prevalence.for.age <- function(age, ss.in, main.dat)
-  
-{
-  inds <- which(main.dat[,2] >= age)
-  
-  out <- length(which(ss.in[[2]][inds] > 0)) / length(inds) 
-  
-  return(out)
-}
 
 
 #ep.equi.sim will run one repeat of the model, typically the mean of 500 repeats is required

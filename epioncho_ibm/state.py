@@ -126,9 +126,6 @@ class State:
             params=params,
         )
 
-    def prevelence(self: "State") -> float:
-        raise NotImplementedError
-
     def microfilariae_per_skin_snip(self: "State") -> Tuple[float, NDArray[np.float_]]:
         """
         #people are tested for the presence of mf using a skin snip, we assume mf are overdispersed in the skin

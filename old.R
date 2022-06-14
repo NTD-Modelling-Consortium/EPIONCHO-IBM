@@ -27,12 +27,12 @@ os.cov <- function(all.dt, pncomp, covrg, N)
   inds.c <- which(r.nums < out.cov)
   f.cov[inds.c] <- 1
   return(f.cov)
-} : helpers.py, is_to_treat
+}# : helpers.py, is_to_treat
 
 
 
 #function to rotate matrix, used in mf function 
-#rotate <- function(x) t(apply(x, 2, rev))
+rotate <- function(x) t(apply(x, 2, rev))
 
 #function calculates change in the number of microfilariae (mf) (offspring of adult worms) in each human using RK4 method
 #this is called in ep.equi.sim for each mf age class
@@ -106,7 +106,6 @@ change.micro <- function(dat, num.comps, mf.cpt, num.mf.comps, ws, DT, time.each
 #ep.in is fecundity of female worms
 derivmf.one <- function(fert.worms, mf.in, ep.in, mf.mort, mf.move, mp, k.in)  #fert worms and epin are vectors
 {
-  
   new.in <- (rotate(fert.worms)*ep.in) #need to rotate matrix to each column is multiplied by respective fecundity rate, not each row
   new.in <- rotate(rotate(rotate(new.in)))
   new.in <- rowSums(new.in)
@@ -785,11 +784,11 @@ ep.equi.sim <- function(time.its,
     
     mean.mf.per.snip <- c(mean.mf.per.snip, mean(temp.mf[[2]][which(all.mats.temp[,2] >= min.mont.age)]))
     
-    
+    print(mean(mean.mf.per.snip))
     i <- i + 1
     
   }
-  
+
   return(list(all.mats.temp, prev, mean.mf.per.snip)) #[[2]] is mf prevalence, [[3]] is intensity
   
   
@@ -819,5 +818,5 @@ output <-  ep.equi.sim(time.its = timesteps,
               treat.stop = treat.stp,
               pnc = 0.05, min.mont.age = 5)
   
-
+#print(output[[2]])
 
