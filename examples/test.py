@@ -21,7 +21,7 @@ print("Compliant Percentage: " + str(compliant_count))
 new_state = run_simulation(initial_state, start_time=0, end_time=10)
 for i in range(12):
     new_state = run_simulation(
-        new_state, start_time=(i + 1) * 10, end_time=(i + 2) * 10
+        new_state, start_time=(i + 1) * 10, end_time=(i + 2) * 10, verbose=True
     )
     print("run", str(i))
     print(new_state.microfilariae_per_skin_snip())

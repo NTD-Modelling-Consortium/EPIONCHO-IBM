@@ -1,5 +1,6 @@
 import json
 import math
+import time
 from pathlib import Path
 from typing import Any, Dict, List, Tuple, Union
 
@@ -24,7 +25,7 @@ class NTDSettings(BaseModel):
     benchmark_iters: int = 1
 
 
-def get_test_pairs(settings: NTDSettings) -> List[Tuple[float, int]]:
+def get_test_pairs(settings: NTDSettings) -> Tuple[List[Tuple[float, int]], float]:
     def get_exponentially_spaced_steps(
         start: Union[int, float], end: Union[int, float], n_steps: int
     ) -> NDArray[np.float_]:
@@ -47,7 +48,8 @@ def get_test_pairs(settings: NTDSettings) -> List[Tuple[float, int]]:
     coords = valid_tests.nonzero()
     years_for_test = year_spaces[coords[0]]
     pops_for_test = pop_spaces[coords[1]]
-    return list(zip(years_for_test, pops_for_test))
+    total_pop_years = np.sum(pop_years[valid_tests])
+    return list(zip(years_for_test, pops_for_test)), total_pop_years
 
 
 def run_stochastic_test(end_time: float, params: Params) -> PeopleStats:
@@ -81,10 +83,15 @@ def compute_mean_and_st_dev_of_pydantic(
 settings_path = Path("ntd_settings.json")
 settings_model = NTDSettings.parse_file(settings_path)
 
-test_pairs = get_test_pairs(settings_model)
-
+test_pairs, total_pop_years = get_test_pairs(settings_model)
+est_base_time = 0.46
+est_test_time = est_base_time * total_pop_years
+est_benchmark_time = est_test_time * settings_model.benchmark_iters
 print(f"Benchmark will run {len(test_pairs)} tests")
+print(f"Estimated benchmark calc time: {est_benchmark_time}")
+print(f"Estimated test time (no reruns): {est_test_time}")
 
+start = time.time()
 tests: List[OutputData] = []
 for end_year, population in test_pairs:
     params = Params(human_population=population)
@@ -96,6 +103,8 @@ for end_year, population in test_pairs:
     people = compute_mean_and_st_dev_of_pydantic(list_of_stats)
     test_output = OutputData(end_year=end_year, params=params, people=people)
     tests.append(test_output)
+end = time.time()
+print(f"Benchmark calculated in: {end-start}")
 test_data = TestData(tests=tests)
 benchmark_file_path = Path("benchmark.json")
 benchmark_file = open(benchmark_file_path, "w+")

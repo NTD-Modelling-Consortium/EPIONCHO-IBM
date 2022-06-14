@@ -1,10 +1,10 @@
 {
     "min_year": 0.003906,
     "max_year": 128,
-    "year_steps": 8,
+    "year_steps": 16,
     "min_pop": 5,
     "max_pop": 640,
-    "pop_steps": 8,
+    "pop_steps": 16,
     "max_pop_years": 1,
     "benchmark_iters": 100
 }

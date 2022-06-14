@@ -901,7 +901,9 @@ def calc_l3(
     )
 
 
-def run_simulation(state: State, start_time: float = 0, end_time: float = 0) -> State:
+def run_simulation(
+    state: State, start_time: float = 0, end_time: float = 0, verbose: bool = False
+) -> State:
 
     if end_time < start_time:
         raise ValueError("End time after start")
@@ -936,7 +938,7 @@ def run_simulation(state: State, start_time: float = 0, end_time: float = 0) -> 
     # TODO: Move l_extras to state  - potentially move constants to params
     current_time = start_time
     while current_time < end_time:
-        if state.params.delta_time > current_time % 0.2:
+        if state.params.delta_time > current_time % 0.2 and verbose:
             print(current_time)
         current_time += state.params.delta_time
         if current_time >= state.params.treatment_start_time:

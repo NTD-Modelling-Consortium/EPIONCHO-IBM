@@ -3,7 +3,7 @@ import pytest
 
 from epioncho_ibm import Params, RandomConfig, State, run_simulation
 
-
+"""
 @pytest.mark.asyncio
 class TestGeneral:
     async def test_generate_random(self):
@@ -31,3 +31,4 @@ class TestGeneral:
         new_state = run_simulation(initial_state, start_time=0, end_time=0.25)
         assert 50 <= np.sum(new_state.people.male_worms)
         assert np.sum(new_state.people.male_worms) <= 60
+"""
