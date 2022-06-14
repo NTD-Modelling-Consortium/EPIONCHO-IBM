@@ -1,10 +1,37 @@
+import json
 import math
 from pathlib import Path
-from typing import List, Tuple, Union
+from typing import Any, Dict, List, Tuple, Union
 
 import numpy as np
 from numpy.typing import NDArray
 from pydantic import BaseModel
+
+from epioncho_ibm import Params, RandomConfig, State, run_simulation
+from epioncho_ibm.state import NumericArrayStat, PeopleStats
+
+Flat = Union[float, int]
+InnerDictType = Union[
+    Flat,
+    Dict[str, "InnerDictType"],
+]
+DictType = Dict[str, InnerDictType]
+FlatDict = Dict[str, Flat]
+
+
+def flatten_dict(input_dict: DictType, prefix: str = "") -> FlatDict:
+    if prefix == "":
+        effective_prefix = ""
+    else:
+        effective_prefix = prefix + "_"
+    output_dict = {}
+    for k, v in input_dict.items():
+        if isinstance(v, dict):
+            new_dict = flatten_dict(v, prefix=effective_prefix + k)
+        else:
+            new_dict = {effective_prefix + k: v}
+        output_dict.update(new_dict)
+    return output_dict
 
 
 class NTDSettings(BaseModel):
@@ -15,6 +42,17 @@ class NTDSettings(BaseModel):
     max_pop: int
     pop_steps: int
     max_pop_years: float
+    benchmark_iters: int = 1
+
+
+class OutputData(BaseModel):
+    end_year: float
+    params: Params
+    people: Dict[str, NumericArrayStat]
+
+
+class TestData(BaseModel):
+    tests: List[OutputData]
 
 
 def get_test_pairs(settings: NTDSettings) -> List[Tuple[float, int]]:
@@ -43,8 +81,53 @@ def get_test_pairs(settings: NTDSettings) -> List[Tuple[float, int]]:
     return list(zip(years_for_test, pops_for_test))
 
 
+def run_stochastic_test(end_time: float, params: Params) -> PeopleStats:
+    random_config = RandomConfig()
+    initial_state = State.generate_random(random_config=random_config, params=params)
+    initial_state.dist_population_age(num_iter=15000)
+    new_state = run_simulation(initial_state, start_time=0, end_time=end_time)
+    stats = new_state.people.to_stats()
+    return stats
+
+
+def compute_mean_and_st_dev_of_pydantic(
+    input_stats: List[PeopleStats],
+) -> Dict[str, NumericArrayStat]:
+    flat_dicts: List[FlatDict] = [
+        flatten_dict(input_stat.dict()) for input_stat in input_stats
+    ]
+    dict_of_arrays: Dict[str, List[Any]] = {}
+    for flat_dict in flat_dicts:
+        for k, v in flat_dict.items():
+            if k in dict_of_arrays:
+                dict_of_arrays[k].append(v)
+            else:
+                dict_of_arrays[k] = [v]
+    final_dict_of_arrays: Dict[str, NDArray[np.float_]] = {
+        k: np.array(v) for k, v in dict_of_arrays.items()
+    }
+    return {k: NumericArrayStat.from_array(v) for k, v in final_dict_of_arrays.items()}
+
+
 settings_path = Path("ntd_settings.json")
 settings_model = NTDSettings.parse_file(settings_path)
 
 test_pairs = get_test_pairs(settings_model)
-print(test_pairs)
+
+print(f"Benchmark will run {len(test_pairs)} tests")
+
+tests: List[OutputData] = []
+for end_year, population in test_pairs:
+    params = Params(human_population=population)
+
+    list_of_stats: List[PeopleStats] = []
+    for i in range(settings_model.benchmark_iters):
+        stats = run_stochastic_test(end_year, params)
+        list_of_stats.append(stats)
+    people = compute_mean_and_st_dev_of_pydantic(list_of_stats)
+    test_output = OutputData(end_year=end_year, params=params, people=people)
+    tests.append(test_output)
+test_data = TestData(tests=tests)
+benchmark_file_path = Path("benchmark.json")
+benchmark_file = open(benchmark_file_path, "w+")
+json.dump(test_data.dict(), benchmark_file, indent=2)

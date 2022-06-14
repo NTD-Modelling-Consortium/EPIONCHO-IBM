@@ -35,6 +35,28 @@ class BlackflyLarvae:
     L3: NDArray[np.float_]  # 6: L3
 
 
+class NumericArrayStat(BaseModel):
+    mean: float
+    st_dev: float
+
+    @classmethod
+    def from_array(cls, array: Union[NDArray[np.float_], NDArray[np.int_]]):
+        return cls(mean=np.mean(array), st_dev=np.std(array))
+
+
+class PeopleStats(BaseModel):
+    total_compliant: int
+    total_male: int
+    L1: NumericArrayStat
+    L2: NumericArrayStat
+    L3: NumericArrayStat
+    ages: NumericArrayStat
+    mf: NumericArrayStat
+    male_worms: NumericArrayStat
+    infertile_female_worms: NumericArrayStat
+    fertile_female_worms: NumericArrayStat
+
+
 @dataclass
 class People:
     compliance: NDArray[np.bool_]  # 1: 'column used during treatment'
@@ -54,6 +76,22 @@ class People:
 
     def __len__(self):
         return len(self.compliance)
+
+    def to_stats(self) -> PeopleStats:
+        return PeopleStats(
+            total_compliant=np.sum(self.compliance),
+            total_male=np.sum(self.sex_is_male),
+            L1=NumericArrayStat.from_array(self.blackfly.L1),
+            L2=NumericArrayStat.from_array(self.blackfly.L2),
+            L3=NumericArrayStat.from_array(self.blackfly.L3),
+            ages=NumericArrayStat.from_array(self.ages),
+            mf=NumericArrayStat.from_array(self.mf),
+            male_worms=NumericArrayStat.from_array(self.male_worms),
+            infertile_female_worms=NumericArrayStat.from_array(
+                self.infertile_female_worms
+            ),
+            fertile_female_worms=NumericArrayStat.from_array(self.fertile_female_worms),
+        )
 
 
 @dataclass
