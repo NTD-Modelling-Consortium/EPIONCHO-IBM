@@ -9,29 +9,8 @@ from pydantic import BaseModel
 
 from epioncho_ibm import Params, RandomConfig, State, run_simulation
 from epioncho_ibm.state import NumericArrayStat, PeopleStats
-
-Flat = Union[float, int]
-InnerDictType = Union[
-    Flat,
-    Dict[str, "InnerDictType"],
-]
-DictType = Dict[str, InnerDictType]
-FlatDict = Dict[str, Flat]
-
-
-def flatten_dict(input_dict: DictType, prefix: str = "") -> FlatDict:
-    if prefix == "":
-        effective_prefix = ""
-    else:
-        effective_prefix = prefix + "_"
-    output_dict = {}
-    for k, v in input_dict.items():
-        if isinstance(v, dict):
-            new_dict = flatten_dict(v, prefix=effective_prefix + k)
-        else:
-            new_dict = {effective_prefix + k: v}
-        output_dict.update(new_dict)
-    return output_dict
+from tests.benchmark_data_types import OutputData, TestData
+from tests.utils import FlatDict, flatten_dict
 
 
 class NTDSettings(BaseModel):
@@ -43,16 +22,6 @@ class NTDSettings(BaseModel):
     pop_steps: int
     max_pop_years: float
     benchmark_iters: int = 1
-
-
-class OutputData(BaseModel):
-    end_year: float
-    params: Params
-    people: Dict[str, NumericArrayStat]
-
-
-class TestData(BaseModel):
-    tests: List[OutputData]
 
 
 def get_test_pairs(settings: NTDSettings) -> List[Tuple[float, int]]:

@@ -5,6 +5,6 @@
     "min_pop": 5,
     "max_pop": 640,
     "pop_steps": 8,
-    "max_pop_years": 5,
-    "benchmark_iters": 3
+    "max_pop_years": 1,
+    "benchmark_iters": 100
 }
