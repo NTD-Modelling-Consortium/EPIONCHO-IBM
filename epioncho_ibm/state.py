@@ -9,6 +9,8 @@ from pydantic import BaseModel
 
 from .params import Params
 
+np.seterr(all="ignore")
+
 
 def negative_binomial_alt_interface(
     n: NDArray[np.float_], mu: NDArray[np.float_]
@@ -37,16 +39,16 @@ class BlackflyLarvae:
 
 class NumericArrayStat(BaseModel):
     mean: float
-    st_dev: float
+    # st_dev: float
 
     @classmethod
     def from_array(cls, array: Union[NDArray[np.float_], NDArray[np.int_]]):
-        return cls(mean=np.mean(array), st_dev=np.std(array))
+        return cls(mean=np.mean(array))  # , st_dev=np.std(array))
 
 
 class PeopleStats(BaseModel):
-    total_compliant: int
-    total_male: int
+    percent_compliant: float
+    percent_male: float
     L1: NumericArrayStat
     L2: NumericArrayStat
     L3: NumericArrayStat
@@ -79,8 +81,8 @@ class People:
 
     def to_stats(self) -> PeopleStats:
         return PeopleStats(
-            total_compliant=np.sum(self.compliance),
-            total_male=np.sum(self.sex_is_male),
+            percent_compliant=np.sum(self.compliance) / len(self.compliance),
+            percent_male=np.sum(self.sex_is_male) / len(self.compliance),
             L1=NumericArrayStat.from_array(self.blackfly.L1),
             L2=NumericArrayStat.from_array(self.blackfly.L2),
             L3=NumericArrayStat.from_array(self.blackfly.L3),
