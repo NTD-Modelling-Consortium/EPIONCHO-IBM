@@ -11,9 +11,9 @@ from pydantic import BaseModel
 
 from epioncho_ibm import Params, RandomConfig, State, run_simulation
 from epioncho_ibm.state import NumericArrayStat, PeopleStats
-from tests.benchmark_data_types import OutputData, TestData
-from tests.pytest_config import PytestConfig
-from tests.utils import FlatDict, flatten_dict
+from tests.definitions.benchmark_data_types import OutputData, TestData
+from tests.definitions.pytest_config import PytestConfig
+from tests.definitions.utils import FlatDict, flatten_dict
 
 
 class NTDSettings(BaseModel):

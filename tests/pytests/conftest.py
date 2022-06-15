@@ -3,8 +3,8 @@ from pathlib import Path
 
 import pytest
 
-from tests.benchmark_data_types import OutputData, TestData
-from tests.pytest_config import PytestConfig
+from tests.definitions.benchmark_data_types import OutputData, TestData
+from tests.definitions.pytest_config import PytestConfig
 
 pytest_config = PytestConfig.parse_file("pytest_config.json")
 benchmark_file_path = (

@@ -1,8 +1,8 @@
 import pytest
 
 from epioncho_ibm import RandomConfig, State, run_simulation
-from tests.conftest import pytest_config
-from tests.utils import flatten_dict
+from tests.definitions.utils import flatten_dict
+from tests.pytests.conftest import pytest_config
 
 
 @pytest.mark.flaky(reruns=pytest_config.re_runs)
