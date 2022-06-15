@@ -386,7 +386,7 @@ python-versions = ">=3.6"
 name = "scipy"
 version = "1.8.1"
 description = "SciPy: Scientific Library for Python"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.8,<3.11"
 
@@ -446,7 +446,7 @@ testing = ["coverage (>=4)", "coverage-enable-subprocess (>=1)", "flaky (>=3)", 
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.9, <3.11"
-content-hash = "290d8ea1be5f82aec53c56fa5bb62b089d82fb1bfc0ed9784490dd4f1f01a8e9"
+content-hash = "343b728a50c36de83ffca23a468e110058c28b31e40e42d1bdb49c0ea82d2054"
 
 [metadata.files]
 atomicwrites = [
