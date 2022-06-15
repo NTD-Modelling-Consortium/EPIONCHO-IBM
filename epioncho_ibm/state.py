@@ -46,7 +46,7 @@ class NumericArrayStat(BaseModel):
         return cls(mean=np.mean(array))  # , st_dev=np.std(array))
 
 
-class PeopleStats(BaseModel):
+class StateStats(BaseModel):
     percent_compliant: float
     percent_male: float
     L1: NumericArrayStat
@@ -57,6 +57,8 @@ class PeopleStats(BaseModel):
     male_worms: NumericArrayStat
     infertile_female_worms: NumericArrayStat
     fertile_female_worms: NumericArrayStat
+    mf_per_skin_snip: float
+    population_prevalence: float
 
 
 @dataclass
@@ -78,22 +80,6 @@ class People:
 
     def __len__(self):
         return len(self.compliance)
-
-    def to_stats(self) -> PeopleStats:
-        return PeopleStats(
-            percent_compliant=np.sum(self.compliance) / len(self.compliance),
-            percent_male=np.sum(self.sex_is_male) / len(self.compliance),
-            L1=NumericArrayStat.from_array(self.blackfly.L1),
-            L2=NumericArrayStat.from_array(self.blackfly.L2),
-            L3=NumericArrayStat.from_array(self.blackfly.L3),
-            ages=NumericArrayStat.from_array(self.ages),
-            mf=NumericArrayStat.from_array(self.mf),
-            male_worms=NumericArrayStat.from_array(self.male_worms),
-            infertile_female_worms=NumericArrayStat.from_array(
-                self.infertile_female_worms
-            ),
-            fertile_female_worms=NumericArrayStat.from_array(self.fertile_female_worms),
-        )
 
 
 @dataclass
@@ -239,6 +225,27 @@ class State:
                 0,
             )
         return current_ages
+
+    def to_stats(self) -> StateStats:
+        return StateStats(
+            percent_compliant=np.sum(self.people.compliance)
+            / len(self.people.compliance),
+            percent_male=np.sum(self.people.sex_is_male) / len(self.people.compliance),
+            L1=NumericArrayStat.from_array(self.people.blackfly.L1),
+            L2=NumericArrayStat.from_array(self.people.blackfly.L2),
+            L3=NumericArrayStat.from_array(self.people.blackfly.L3),
+            ages=NumericArrayStat.from_array(self.people.ages),
+            mf=NumericArrayStat.from_array(self.people.mf),
+            male_worms=NumericArrayStat.from_array(self.people.male_worms),
+            infertile_female_worms=NumericArrayStat.from_array(
+                self.people.infertile_female_worms
+            ),
+            fertile_female_worms=NumericArrayStat.from_array(
+                self.people.fertile_female_worms
+            ),
+            mf_per_skin_snip=self.microfilariae_per_skin_snip()[0],
+            population_prevalence=self.mf_prevalence_in_population(),
+        )
 
 
 def calc_coverage(

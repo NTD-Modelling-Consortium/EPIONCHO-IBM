@@ -8,7 +8,7 @@ from tests.pytests.conftest import pytest_config
 @pytest.mark.flaky(reruns=pytest_config.re_runs)
 @pytest.mark.asyncio
 class TestGeneral:
-    async def test_run_simulation_short(self, benchmark_data):
+    async def test_benchmark(self, benchmark_data):
         acceptable_st_devs = (
             pytest_config.acceptable_st_devs
         )  # TODO: Figure out where to put this?
@@ -22,7 +22,7 @@ class TestGeneral:
         initial_state.dist_population_age(num_iter=15000)
         new_state = run_simulation(initial_state, start_time=0, end_time=end_time)
 
-        people_stats = new_state.people.to_stats()
+        people_stats = new_state.to_stats()
         people_stats_dict = flatten_dict(people_stats.dict())
         for k, v in people_stats_dict.items():
             if k not in benchmark_data.people:

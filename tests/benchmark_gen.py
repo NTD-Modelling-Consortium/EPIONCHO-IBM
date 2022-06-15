@@ -2,14 +2,16 @@ import json
 import math
 import os
 import time
+from multiprocessing import cpu_count
 from pathlib import Path
 from typing import Any, Dict, List, Tuple, Union
 
 import numpy as np
+from joblib import Parallel, delayed
 from numpy.typing import NDArray
 
 from epioncho_ibm import Params, RandomConfig, State, run_simulation
-from epioncho_ibm.state import PeopleStats
+from epioncho_ibm.state import StateStats
 from tests.definitions.benchmark_data_types import (
     BenchmarkArray,
     NTDSettings,
@@ -47,17 +49,17 @@ def get_test_pairs(settings: NTDSettings) -> Tuple[List[Tuple[float, int]], floa
     return list(zip(years_for_test, pops_for_test)), total_pop_years
 
 
-def run_stochastic_test(end_time: float, params: Params) -> PeopleStats:
+def run_stochastic_test(end_time: float, params: Params) -> StateStats:
     random_config = RandomConfig()
     initial_state = State.generate_random(random_config=random_config, params=params)
     initial_state.dist_population_age(num_iter=15000)
     new_state = run_simulation(initial_state, start_time=0, end_time=end_time)
-    stats = new_state.people.to_stats()
+    stats = new_state.to_stats()
     return stats
 
 
 def compute_mean_and_st_dev_of_pydantic(
-    input_stats: List[PeopleStats],
+    input_stats: List[StateStats],
 ) -> Dict[str, BenchmarkArray]:
     flat_dicts: List[FlatDict] = [
         flatten_dict(input_stat.dict()) for input_stat in input_stats
@@ -175,10 +177,11 @@ tests: List[OutputData] = []
 for end_year, population in test_pairs:
     params = Params(human_population=population)
 
-    list_of_stats: List[PeopleStats] = []
-    for i in range(settings_model.benchmark_iters):
-        stats = run_stochastic_test(end_year, params)
-        list_of_stats.append(stats)
+    list_of_stats: List[StateStats] = Parallel(n_jobs=cpu_count())(
+        delayed(run_stochastic_test)(end_year, params)
+        for i in range(settings_model.benchmark_iters)
+    )
+
     people = compute_mean_and_st_dev_of_pydantic(list_of_stats)
     test_output = OutputData(end_year=end_year, params=params, people=people)
     tests.append(test_output)
