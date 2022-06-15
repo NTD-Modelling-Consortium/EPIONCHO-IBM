@@ -1,13 +1,17 @@
 import pytest
 
 from epioncho_ibm import RandomConfig, State, run_simulation
+from tests.conftest import pytest_config
 from tests.utils import flatten_dict
 
 
+@pytest.mark.flaky(reruns=pytest_config.re_runs)
 @pytest.mark.asyncio
 class TestGeneral:
     async def test_run_simulation_short(self, benchmark_data):
-        acceptable_st_devs = 3  # TODO: Figure out where to put this?
+        acceptable_st_devs = (
+            pytest_config.acceptable_st_devs
+        )  # TODO: Figure out where to put this?
 
         random_config = RandomConfig()
         params = benchmark_data.params

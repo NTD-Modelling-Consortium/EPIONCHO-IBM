@@ -1,5 +1,6 @@
 import json
 import math
+import os
 import time
 from pathlib import Path
 from typing import Any, Dict, List, Tuple, Union
@@ -11,6 +12,7 @@ from pydantic import BaseModel
 from epioncho_ibm import Params, RandomConfig, State, run_simulation
 from epioncho_ibm.state import NumericArrayStat, PeopleStats
 from tests.benchmark_data_types import OutputData, TestData
+from tests.pytest_config import PytestConfig
 from tests.utils import FlatDict, flatten_dict
 
 
@@ -80,7 +82,8 @@ def compute_mean_and_st_dev_of_pydantic(
     return {k: NumericArrayStat.from_array(v) for k, v in final_dict_of_arrays.items()}
 
 
-settings_path = Path("ntd_settings.json")
+pytest_config = PytestConfig.parse_file("pytest_config.json")
+settings_path = Path(str(Path(pytest_config.benchmark_path)) + os.sep + "settings.json")
 settings_model = NTDSettings.parse_file(settings_path)
 
 test_pairs, total_pop_years = get_test_pairs(settings_model)
