@@ -17,7 +17,7 @@ class Params(BaseModel):
         100  # The iteration upon which treatment commences (treat.start in R code)
     )
     treatment_stop_time: float = (
-        120  # the iteration upon which treatment stops (treat.stop)
+        130  # the iteration upon which treatment stops (treat.stop)
     )
 
     # treatment_interval: float = 1  # "treat.int/trt.int"

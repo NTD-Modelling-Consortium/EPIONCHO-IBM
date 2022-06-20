@@ -555,7 +555,7 @@ def change_in_worm_per_index(
             + last_lost_worms.male
             - lost_male_worms
             - dead_male_worms
-        )  # TODO: check - altered calculation to avoid worm amounts exploding
+        )
 
     # female worms
 
@@ -841,17 +841,20 @@ def calc_l1(
     # proportion of mf per mg developing into infective larvae within the vector
     delta_vv = params.delta_v0 / (1 + params.c_v * microfil * total_exposure)
     return (
-        (delta_vv * params.bite_rate_per_fly_on_human * microfil * total_exposure)
-        / params.blackfly_mort_per_person_per_year
-        + params.blackfly_mort_from_mf_per_person_per_year * microfil * total_exposure
+        delta_vv * params.bite_rate_per_fly_on_human * microfil * total_exposure
+    ) / (
+        params.blackfly_mort_per_person_per_year
+        + (params.blackfly_mort_from_mf_per_person_per_year * microfil * total_exposure)
         + params.l1_l2_per_person_per_year
         * np.exp(
             -(4 / 365)
             * (
                 params.blackfly_mort_per_person_per_year
-                + params.blackfly_mort_from_mf_per_person_per_year
-                * last_microfil_delay
-                * exposure_delay
+                + (
+                    params.blackfly_mort_from_mf_per_person_per_year
+                    * last_microfil_delay
+                    * exposure_delay
+                )
             )
         )
     )
