@@ -292,12 +292,18 @@ def initialise_simulation(params: Params):
         individual_exposure
     )  # normalise
     if give_treatment:
-        initial_treatment_times = np.arange(  # "times.of.treat.in"
+        treatment_number = (
+            params.treatment_stop_time - params.treatment_start_time
+        ) / params.treatment_interval_yrs
+        if round(treatment_number) != treatment_number:
+            raise ValueError(
+                f"Treatment times could not be found for start: {params.treatment_start_time}, stop: {params.treatment_stop_time}, interval: {params.treatment_interval_yrs}"
+            )
+        treatment_number_int: int = math.ceil(treatment_number)
+        initial_treatment_times = np.linspace(  # "times.of.treat.in"
             start=params.treatment_start_time,
-            stop=(
-                params.treatment_stop_time
-                - params.treatment_interval / params.delta_time
-            ),
+            stop=params.treatment_stop_time,
+            num=treatment_number_int + 1,
         )
     else:
         initial_treatment_times = None
@@ -464,7 +470,7 @@ def calc_new_worms_from_inside(
         delta_fertile_female_worms > 0, delta_fertile_female_worms, 0
     )
 
-    if sum(true_delta_fertile_female_worms) > 0:
+    if np.sum(true_delta_fertile_female_worms) > 0:
         new_worms = np.random.binomial(
             n=true_delta_fertile_female_worms,
             p=prob,
@@ -546,7 +552,7 @@ def change_in_worm_per_index(
     else:
         total_male_worms = (
             current_male_worms
-            # + last_lost_worms.male
+            + last_lost_worms.male
             - lost_male_worms
             - dead_male_worms
         )  # TODO: check - altered calculation to avoid worm amounts exploding
@@ -581,16 +587,13 @@ def change_in_worm_per_index(
         )
         if during_treatment and current_time <= params.treatment_stop_time:
             assert coverage_in is not None
-            np.place(
-                time_of_last_treatment, coverage_in, current_time
-            )  # treat.vec equivalent
+            # TODO: This only needs to be calculated at compartment 0 - all others repeat calc
+            time_of_last_treatment[coverage_in] = current_time  # treat.vec
             # params.permanent_infertility is the proportion of female worms made permanently infertile, killed for simplicity
-            np.place(
-                female_mortalities,
-                coverage_in,
-                np.extract(coverage_in, female_mortalities)
-                + params.permanent_infertility,
+            female_mortalities[coverage_in] = (
+                female_mortalities[coverage_in] + params.permanent_infertility
             )
+
         time_since_treatment = current_time - time_of_last_treatment  # tao
 
         # individuals which have been treated get additional infertility rate
@@ -704,15 +707,12 @@ def construct_derive_microfil_one(
 
     def derive_microfil_one(k: Union[float, NDArray[np.float_]]) -> NDArray[np.float_]:
         mortality_temp = mortality * (microfil + k)
+        assert np.sum(mortality_temp < 0) == 0
         move_rate_temp = params.microfil_move_rate * (microfil + k)
+        assert np.sum(move_rate_temp < 0) == 0
         mortality_temp[mortality_temp < 0] = 0
         move_rate_temp[move_rate_temp < 0] = 0
-        if sum(mortality * (microfil + k) < 0) != 0:
-            print("MF NEGATIVE1")
-        if sum(params.microfil_move_rate * (microfil + k) < 0) != 0:
-            print("MF NEGATIVE2")
-        multiplier = np.where(person_has_worms, 1, 0)
-        return multiplier * new_in - mortality_temp - move_rate_temp
+        return person_has_worms * new_in - mortality_temp - move_rate_temp
 
     return derive_microfil_one
 
@@ -735,13 +735,11 @@ def construct_derive_microfil_rest(
 
     def derive_microfil_rest(k: Union[float, NDArray[np.float_]]) -> NDArray[np.float_]:
         mortality_temp = mortality * (microfil + k)
+        assert np.sum(mortality_temp < 0) == 0
         move_rate_temp = params.microfil_move_rate * (microfil + k)
+        assert np.sum(move_rate_temp < 0) == 0
         mortality_temp[mortality_temp < 0] = 0
         move_rate_temp[move_rate_temp < 0] = 0
-        if sum(mortality * (microfil + k) < 0) != 0:
-            print("MF NEGATIVE3")
-        if sum(params.microfil_move_rate * (microfil + k) < 0) != 0:
-            print("MF NEGATIVE4")
         return movement_last - mortality_temp - move_rate_temp
 
     return derive_microfil_rest
@@ -786,8 +784,10 @@ def change_in_microfil(
         time_of_last_treatment is not None
         and current_time >= params.treatment_start_time
     ):
-        compartment_mortality_prime = (time_of_last_treatment + params.up) ** (
-            -params.kap
+        compartment_mortality_prime = (
+            time_of_last_treatment + params.u_ivermectin
+        ) ** (
+            -params.shape_parameter_ivermectin
         )  # additional mortality due to ivermectin treatment
         compartment_mortality_prime = np.nan_to_num(compartment_mortality_prime)
         compartment_mortality += compartment_mortality_prime
@@ -978,7 +978,7 @@ def run_simulation(
 
         # there is a delay in new parasites entering humans (from fly bites) and entering the first adult worm age class
 
-        L3_in = np.mean(old_state.people.blackfly.L3)
+        L3_in = np.mean(state.people.blackfly.L3)
         new_rate = w_plus_one_rate(state.params, L3_in, total_exposure)
         if np.any(new_rate > 10**10):
             st_dev = np.sqrt(new_rate)
@@ -1007,7 +1007,7 @@ def run_simulation(
                 last_time_of_last_treatment,
             ) = change_in_worm_per_index(  # res
                 state.params,
-                old_state,
+                state,
                 L3_in,
                 last_females,
                 last_males,
@@ -1066,6 +1066,7 @@ def run_simulation(
                 compartment,
                 current_time,
             )
+
         # inputs for delay in L1
         last_exposure_delay = exposure_delay[-1]  # exp.delay.temp
         last_mf_delay = mf_delay[-1]  # mf.delay.temp

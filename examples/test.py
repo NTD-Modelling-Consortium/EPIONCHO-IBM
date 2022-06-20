@@ -3,7 +3,7 @@ import numpy as np
 from epioncho_ibm import Params, RandomConfig, State, run_simulation
 
 random_config = RandomConfig()
-params = Params(human_population=5)
+params = Params(human_population=440)
 initial_state = State.generate_random(random_config=random_config, params=params)
 
 initial_state.dist_population_age(num_iter=15000)
@@ -18,7 +18,7 @@ print("Average age: " + str(average_age))
 print("Male Percentage: " + str(male_count))
 print("Compliant Percentage: " + str(compliant_count))
 
-new_state = run_simulation(initial_state, start_time=0, end_time=10)
+new_state = run_simulation(initial_state, start_time=0, end_time=10, verbose=True)
 for i in range(12):
     new_state = run_simulation(
         new_state, start_time=(i + 1) * 10, end_time=(i + 2) * 10, verbose=True

@@ -7,7 +7,7 @@ class Params(BaseModel):
     bite_rate_per_person_per_year: float = (
         1000  # Annual biting rate 'ABR' in paper and in R code
     )
-    treatment_intrvl_yrs: float = (
+    treatment_interval_yrs: float = (
         1  # 'trt.int' treatment interval (years, 0.5 gives biannual)
     )
     # timestep_size: float = 1 / 366  # the timestep ('DT.in' and 'DT' in code)
@@ -17,10 +17,10 @@ class Params(BaseModel):
         100  # The iteration upon which treatment commences (treat.start in R code)
     )
     treatment_stop_time: float = (
-        120  # the iteration up which treatment stops (treat.stop)
+        120  # the iteration upon which treatment stops (treat.stop)
     )
 
-    treatment_interval: float = 1  # "treat.int/trt.int"
+    # treatment_interval: float = 1  # "treat.int/trt.int"
 
     # 'pnc' or percentage non compliant is in random config
     min_skinsnip_age: int = 5  # TODO: below
@@ -138,5 +138,5 @@ class Params(BaseModel):
         0.345  # "cum.infer" permenent infertility in worms due to ivermectin
     )
 
-    up = 0.0096  # effects of ivermectin
-    kap = 1.25  # effects of ivermectin
+    u_ivermectin = 0.0096  # effects of ivermectin
+    shape_parameter_ivermectin = 1.25  # effects of ivermectin

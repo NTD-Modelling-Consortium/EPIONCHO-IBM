@@ -191,7 +191,7 @@ class AutoBenchmarker(Generic[FuncReturn]):
         for items in test_pairs:
             list_of_stats: List[FuncReturn] = Parallel(n_jobs=cpu_count())(
                 delayed(self.func)(*items)
-                for i in range(settings_model.benchmark_iters)
+                for _ in range(settings_model.benchmark_iters)
             )
             data = self._compute_mean_and_st_dev_of_pydantic(list_of_stats)
             values = {header: items[i] for i, header in enumerate(headers)}
