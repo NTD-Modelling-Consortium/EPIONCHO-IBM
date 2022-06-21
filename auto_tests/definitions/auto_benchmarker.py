@@ -24,7 +24,7 @@ from numpy.typing import NDArray
 from pydantic import BaseModel, create_model
 from pydantic.generics import GenericModel
 
-from tests.definitions.utils import FlatDict, flatten_dict
+from auto_tests.definitions.utils import FlatDict, flatten_dict
 
 # From here on we will only use benchmarker_test_func and StateStats
 
@@ -58,6 +58,10 @@ class BaseTestDimension(GenericModel, Generic[DataT]):
     minimum: DataT
     maximum: DataT
     steps: int
+
+
+class BaseTestModel(BaseModel):
+    pass
 
 
 def get_test_pairs(
@@ -150,6 +154,7 @@ class AutoBenchmarker(Generic[FuncReturn]):
         self.pytest_config = PytestConfig.parse_file("pytest_config.json")
         self._settings_model = None
         self._output_data = None
+        self._test_model = None
         self.est_base_time = est_base_time
 
     def _generate_settings_model(self) -> Type[BaseSettingsModel]:
@@ -234,6 +239,20 @@ class AutoBenchmarker(Generic[FuncReturn]):
             self._output_data = self._generate_output_model()
         return self._output_data
 
+    def _generate_test_model(self) -> Type[BaseTestModel]:
+        OutputModel = self.output_model
+        return create_model(
+            "TestData",
+            __base__=BaseTestModel,
+            tests=(List[OutputModel], ...),  # type:ignore
+        )
+
+    @property
+    def test_model(self) -> Type[BaseTestModel]:
+        if self._test_model is None:
+            self._test_model = self._generate_test_model()
+        return self._test_model
+
     def _compute_mean_and_st_dev_of_pydantic(
         self,
         input_stats: List[FuncReturn],
@@ -258,9 +277,7 @@ class AutoBenchmarker(Generic[FuncReturn]):
     def generate_benchmark(self, verbose: bool = False):
         SettingsModel = self.settings_model
         OutputModel = self.output_model
-        TestData = create_model(
-            "TestData", tests=(List[OutputModel], ...)  # type:ignore
-        )
+        TestModel = self.test_model
 
         settings_folder = Path(self.pytest_config.benchmark_path)
         settings_path = Path(str(settings_folder) + os.sep + "settings.json")
@@ -298,25 +315,38 @@ class AutoBenchmarker(Generic[FuncReturn]):
         end = time.time()
         if verbose:
             print(f"Benchmark calculated in: {end-start}")
-        test_data = TestData(tests=tests)
+        test_data = TestModel.parse_obj({"tests": tests})
         benchmark_file_path = Path(str(settings_folder) + os.sep + "benchmark.json")
         benchmark_file = open(benchmark_file_path, "w+")
         json.dump(test_data.dict(), benchmark_file, indent=2)
 
-
-from epioncho_ibm import Params, RandomConfig, State, run_simulation
-from epioncho_ibm.state import StateStats
-
-
-def benchmarker_test_func(end_time: float, population: int) -> StateStats:
-    params = Params(human_population=population)
-    random_config = RandomConfig()
-    initial_state = State.generate_random(random_config=random_config, params=params)
-    initial_state.dist_population_age(num_iter=15000)
-    new_state = run_simulation(initial_state, start_time=0, end_time=end_time)
-    stats = new_state.to_stats()
-    return stats
-
-
-benchmarker = AutoBenchmarker[StateStats](benchmarker_test_func)
-mod = benchmarker.generate_benchmark(verbose=True)
+    def test_benchmark_data(
+        self, benchmark_data: BaseOutputData, acceptable_st_devs: float
+    ) -> None:
+        func_args = {
+            dimension: getattr(benchmark_data, dimension)
+            for dimension in self.parameters.keys()
+        }
+        func_return = self.func(**func_args)
+        func_return_dict = flatten_dict(func_return.dict())
+        for k, v in func_return_dict.items():
+            if k not in benchmark_data.data:
+                raise RuntimeError(f"Key {k} not present in benchmark")
+            else:
+                benchmark_item = benchmark_data.data[k]
+            benchmark_item_mean = benchmark_item.mean
+            benchmark_item_st_dev = benchmark_item.st_dev
+            benchmark_lower_bound = (
+                benchmark_item_mean - acceptable_st_devs * benchmark_item_st_dev
+            )
+            benchmark_upper_bound = (
+                benchmark_item_mean + acceptable_st_devs * benchmark_item_st_dev
+            )
+            if v < benchmark_lower_bound:
+                raise ValueError(
+                    f"For key: {k} lower bound: {benchmark_lower_bound} surpassed by value {v}"
+                )
+            if v > benchmark_upper_bound:
+                raise ValueError(
+                    f"For key: {k} upper bound: {benchmark_upper_bound} surpassed by value {v}"
+                )

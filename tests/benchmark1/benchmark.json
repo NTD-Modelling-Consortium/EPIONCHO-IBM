@@ -4,12 +4,11 @@
       "end_year": 0.003906000000000002,
       "params": {
         "timestep_count": 10,
-        "bite_rate_per_person_per_year": 1000,
-        "treatment_intrvl_yrs": 1,
+        "bite_rate_per_person_per_year": 4500,
+        "treatment_interval_yrs": 1,
         "treatment_probability": 0.65,
         "treatment_start_time": 100,
-        "treatment_stop_time": 120,
-        "treatment_interval": 1,
+        "treatment_stop_time": 130,
         "min_skinsnip_age": 5,
         "min_treatable_age": 5,
         "human_population": 5,
@@ -19,7 +18,7 @@
         "human_blood_index": 0.63,
         "recip_gono_cycle": 0.009615384615384616,
         "bite_rate_per_fly_on_human": 65.52,
-        "annual_transm_potential": 15.262515262515263,
+        "annual_transm_potential": 68.68131868131869,
         "blackfly_mort_per_person_per_year": 26,
         "initial_mf": 0,
         "sigma_L0": 52,
@@ -63,24 +62,24 @@
         "lam_m": 32.4,
         "phi": 19.6,
         "permanent_infertility": 0.345,
-        "up": 0.0096,
-        "kap": 1.25
+        "u_ivermectin": 0.0096,
+        "shape_parameter_ivermectin": 1.25
       },
       "people": {
         "percent_compliant": {
-          "mean": 0.9496,
-          "st_dev": 0.09889307356938604
+          "mean": 0.9464000000000001,
+          "st_dev": 0.10279610887577408
         },
         "percent_male": {
-          "mean": 0.5004,
-          "st_dev": 0.2250329753613901
+          "mean": 0.524,
+          "st_dev": 0.23795797948377356
         },
         "L1_mean": {
-          "mean": 151.6487985325779,
-          "st_dev": 1.3513237719132373e-06
+          "mean": 0.00025643328739148927,
+          "st_dev": 2.1663107300243567e-07
         },
         "L2_mean": {
-          "mean": 98.4423905952376,
+          "mean": 0.0,
           "st_dev": 0.0
         },
         "L3_mean": {
@@ -88,32 +87,32 @@
           "st_dev": 3.469446951953614e-18
         },
         "ages_mean": {
-          "mean": 28.16857753424658,
-          "st_dev": 6.249438469683118
+          "mean": 28.038702465753385,
+          "st_dev": 6.726620492369746
         },
         "mf_mean": {
-          "mean": 0.0039946191955979714,
-          "st_dev": 1.3765701793855706e-05
+          "mean": 0.003993426377774863,
+          "st_dev": 1.3555418777924764e-05
         },
         "male_worms_mean": {
-          "mean": 0.9758666666666668,
-          "st_dev": 0.014793649431160103
+          "mean": 0.9808952380952382,
+          "st_dev": 0.01284113288917887
         },
         "infertile_female_worms_mean": {
-          "mean": 0.9784952380952382,
-          "st_dev": 0.01408569818731171
+          "mean": 0.9809523809523809,
+          "st_dev": 0.014266653951294488
         },
         "fertile_female_worms_mean": {
-          "mean": 0.9845904761904762,
-          "st_dev": 0.014228698922103634
+          "mean": 0.9838857142857144,
+          "st_dev": 0.01452228251145128
         },
         "mf_per_skin_snip": {
-          "mean": 0.0801,
-          "st_dev": 0.06564289755944659
+          "mean": 0.08430000000000001,
+          "st_dev": 0.06571537110904876
         },
         "population_prevalence": {
-          "mean": 0.27370000000000005,
-          "st_dev": 0.21021940654680024
+          "mean": 0.2651,
+          "st_dev": 0.20960091973928824
         }
       }
     },
@@ -121,12 +120,11 @@
       "end_year": 0.003906000000000002,
       "params": {
         "timestep_count": 10,
-        "bite_rate_per_person_per_year": 1000,
-        "treatment_intrvl_yrs": 1,
+        "bite_rate_per_person_per_year": 4500,
+        "treatment_interval_yrs": 1,
         "treatment_probability": 0.65,
         "treatment_start_time": 100,
-        "treatment_stop_time": 120,
-        "treatment_interval": 1,
+        "treatment_stop_time": 130,
         "min_skinsnip_age": 5,
         "min_treatable_age": 5,
         "human_population": 7,
@@ -136,7 +134,7 @@
         "human_blood_index": 0.63,
         "recip_gono_cycle": 0.009615384615384616,
         "bite_rate_per_fly_on_human": 65.52,
-        "annual_transm_potential": 15.262515262515263,
+        "annual_transm_potential": 68.68131868131869,
         "blackfly_mort_per_person_per_year": 26,
         "initial_mf": 0,
         "sigma_L0": 52,
@@ -180,57 +178,57 @@
         "lam_m": 32.4,
         "phi": 19.6,
         "permanent_infertility": 0.345,
-        "up": 0.0096,
-        "kap": 1.25
+        "u_ivermectin": 0.0096,
+        "shape_parameter_ivermectin": 1.25
       },
       "people": {
         "percent_compliant": {
-          "mean": 0.9528571428571428,
-          "st_dev": 0.07942394642238652
+          "mean": 0.9474285714285714,
+          "st_dev": 0.08578282973620666
         },
         "percent_male": {
-          "mean": 0.4991428571428571,
-          "st_dev": 0.18637048903641765
+          "mean": 0.4885714285714285,
+          "st_dev": 0.19997959079539562
         },
         "L1_mean": {
-          "mean": 151.64879804843324,
-          "st_dev": 1.6523360605008628e-06
+          "mean": 0.00025633184395186753,
+          "st_dev": 2.866341600450712e-07
         },
         "L2_mean": {
-          "mean": 98.41426419792467,
-          "st_dev": 0.6282961233976012
+          "mean": 0.0,
+          "st_dev": 0.0
         },
         "L3_mean": {
           "mean": 0.025099674614652397,
           "st_dev": 3.469446951953614e-18
         },
         "ages_mean": {
-          "mean": 27.4470379647749,
-          "st_dev": 5.708321001315356
+          "mean": 27.67368140900185,
+          "st_dev": 5.494211215827565
         },
         "mf_mean": {
-          "mean": 0.003993466359599549,
-          "st_dev": 2.6679009156782473e-05
+          "mean": 0.003993753130572166,
+          "st_dev": 1.1335993769451928e-05
         },
         "male_worms_mean": {
-          "mean": 0.9748707482993196,
-          "st_dev": 0.013801921435414779
+          "mean": 0.9814829931972788,
+          "st_dev": 0.01078336654437126
         },
         "infertile_female_worms_mean": {
-          "mean": 0.9785986394557822,
-          "st_dev": 0.01394920145399471
+          "mean": 0.9805442176870747,
+          "st_dev": 0.011799142745999367
         },
         "fertile_female_worms_mean": {
-          "mean": 0.9841224489795917,
-          "st_dev": 0.01269476705037289
+          "mean": 0.9823945578231291,
+          "st_dev": 0.012436624477549209
         },
         "mf_per_skin_snip": {
-          "mean": 0.08228571428571428,
-          "st_dev": 0.05573699171015564
+          "mean": 0.08942857142857141,
+          "st_dev": 0.06216731866667631
         },
         "population_prevalence": {
-          "mean": 0.2747047619047619,
-          "st_dev": 0.19149706521613993
+          "mean": 0.2776190476190476,
+          "st_dev": 0.18025322324384635
         }
       }
     },
@@ -238,12 +236,11 @@
       "end_year": 0.003906000000000002,
       "params": {
         "timestep_count": 10,
-        "bite_rate_per_person_per_year": 1000,
-        "treatment_intrvl_yrs": 1,
+        "bite_rate_per_person_per_year": 4500,
+        "treatment_interval_yrs": 1,
         "treatment_probability": 0.65,
         "treatment_start_time": 100,
-        "treatment_stop_time": 120,
-        "treatment_interval": 1,
+        "treatment_stop_time": 130,
         "min_skinsnip_age": 5,
         "min_treatable_age": 5,
         "human_population": 10,
@@ -253,7 +250,7 @@
         "human_blood_index": 0.63,
         "recip_gono_cycle": 0.009615384615384616,
         "bite_rate_per_fly_on_human": 65.52,
-        "annual_transm_potential": 15.262515262515263,
+        "annual_transm_potential": 68.68131868131869,
         "blackfly_mort_per_person_per_year": 26,
         "initial_mf": 0,
         "sigma_L0": 52,
@@ -297,57 +294,57 @@
         "lam_m": 32.4,
         "phi": 19.6,
         "permanent_infertility": 0.345,
-        "up": 0.0096,
-        "kap": 1.25
+        "u_ivermectin": 0.0096,
+        "shape_parameter_ivermectin": 1.25
       },
       "people": {
         "percent_compliant": {
-          "mean": 0.9498000000000002,
-          "st_dev": 0.06648277972527922
+          "mean": 0.952,
+          "st_dev": 0.06705221845696083
         },
         "percent_male": {
-          "mean": 0.506,
-          "st_dev": 0.15324490203592417
+          "mean": 0.49460000000000004,
+          "st_dev": 0.15579101386151897
         },
         "L1_mean": {
-          "mean": 151.64879734099839,
-          "st_dev": 4.89181085092636e-06
+          "mean": 0.000256274888469154,
+          "st_dev": 3.166662234777698e-07
         },
         "L2_mean": {
-          "mean": 98.42270211711855,
-          "st_dev": 0.43980728637832067
+          "mean": 0.0,
+          "st_dev": 0.0
         },
         "L3_mean": {
           "mean": 0.025099674614652394,
           "st_dev": 3.469446951953614e-18
         },
         "ages_mean": {
-          "mean": 27.902569315068497,
-          "st_dev": 4.56244858762732
+          "mean": 28.116862465753474,
+          "st_dev": 4.615616847125681
         },
         "mf_mean": {
-          "mean": 0.003992664085480894,
-          "st_dev": 2.052374021203801e-05
+          "mean": 0.003993138084392166,
+          "st_dev": 9.61626844321523e-06
         },
         "male_worms_mean": {
-          "mean": 0.9760952380952381,
-          "st_dev": 0.010929167947201687
+          "mean": 0.9810095238095238,
+          "st_dev": 0.009049944563290963
         },
         "infertile_female_worms_mean": {
-          "mean": 0.9788380952380953,
-          "st_dev": 0.011573352769662986
+          "mean": 0.9805333333333334,
+          "st_dev": 0.010562690511370786
         },
         "fertile_female_worms_mean": {
-          "mean": 0.9827428571428573,
-          "st_dev": 0.011518125319875363
+          "mean": 0.9826666666666667,
+          "st_dev": 0.010919619738713223
         },
         "mf_per_skin_snip": {
-          "mean": 0.08265,
-          "st_dev": 0.04566429130075272
+          "mean": 0.08525,
+          "st_dev": 0.04726190326256445
         },
         "population_prevalence": {
-          "mean": 0.27864365079365083,
-          "st_dev": 0.14100241144081174
+          "mean": 0.26842857142857146,
+          "st_dev": 0.15106553517717847
         }
       }
     },
@@ -355,12 +352,11 @@
       "end_year": 0.003906000000000002,
       "params": {
         "timestep_count": 10,
-        "bite_rate_per_person_per_year": 1000,
-        "treatment_intrvl_yrs": 1,
+        "bite_rate_per_person_per_year": 4500,
+        "treatment_interval_yrs": 1,
         "treatment_probability": 0.65,
         "treatment_start_time": 100,
-        "treatment_stop_time": 120,
-        "treatment_interval": 1,
+        "treatment_stop_time": 130,
         "min_skinsnip_age": 5,
         "min_treatable_age": 5,
         "human_population": 13,
@@ -370,7 +366,7 @@
         "human_blood_index": 0.63,
         "recip_gono_cycle": 0.009615384615384616,
         "bite_rate_per_fly_on_human": 65.52,
-        "annual_transm_potential": 15.262515262515263,
+        "annual_transm_potential": 68.68131868131869,
         "blackfly_mort_per_person_per_year": 26,
         "initial_mf": 0,
         "sigma_L0": 52,
@@ -414,24 +410,24 @@
         "lam_m": 32.4,
         "phi": 19.6,
         "permanent_infertility": 0.345,
-        "up": 0.0096,
-        "kap": 1.25
+        "u_ivermectin": 0.0096,
+        "shape_parameter_ivermectin": 1.25
       },
       "people": {
         "percent_compliant": {
-          "mean": 0.9507692307692309,
-          "st_dev": 0.06354423516327194
+          "mean": 0.9493846153846155,
+          "st_dev": 0.06139579616701984
         },
         "percent_male": {
-          "mean": 0.4963076923076923,
-          "st_dev": 0.13296117687585735
+          "mean": 0.5001538461538462,
+          "st_dev": 0.14591064786287294
         },
         "L1_mean": {
-          "mean": 151.6254690903311,
-          "st_dev": 0.5211105268075658
+          "mean": 0.0002561488472039237,
+          "st_dev": 1.3012595336857043e-06
         },
         "L2_mean": {
-          "mean": 98.4423905952376,
+          "mean": 0.0,
           "st_dev": 0.0
         },
         "L3_mean": {
@@ -439,32 +435,32 @@
           "st_dev": 3.469446951953614e-18
         },
         "ages_mean": {
-          "mean": 27.96197428872491,
-          "st_dev": 3.910394420469988
+          "mean": 27.928163540568967,
+          "st_dev": 4.138408379967565
         },
         "mf_mean": {
-          "mean": 0.003992711709951843,
-          "st_dev": 1.6679852883760016e-05
+          "mean": 0.003992094195645755,
+          "st_dev": 2.1703560470688156e-05
         },
         "male_worms_mean": {
-          "mean": 0.9761684981684983,
-          "st_dev": 0.010014121441178565
+          "mean": 0.9813772893772893,
+          "st_dev": 0.009399687079327814
         },
         "infertile_female_worms_mean": {
-          "mean": 0.9803736263736265,
-          "st_dev": 0.010104736702160515
+          "mean": 0.9796043956043957,
+          "st_dev": 0.010490126236625137
         },
         "fertile_female_worms_mean": {
-          "mean": 0.9817802197802198,
-          "st_dev": 0.009994916122407079
+          "mean": 0.9827838827838828,
+          "st_dev": 0.010569527090825509
         },
         "mf_per_skin_snip": {
-          "mean": 0.08388461538461539,
-          "st_dev": 0.03978007217202898
+          "mean": 0.08161538461538462,
+          "st_dev": 0.04262322893646626
         },
         "population_prevalence": {
-          "mean": 0.2739698135198135,
-          "st_dev": 0.1303794921989403
+          "mean": 0.2693102952602952,
+          "st_dev": 0.12768985895264648
         }
       }
     },
@@ -472,12 +468,11 @@
       "end_year": 0.003906000000000002,
       "params": {
         "timestep_count": 10,
-        "bite_rate_per_person_per_year": 1000,
-        "treatment_intrvl_yrs": 1,
+        "bite_rate_per_person_per_year": 4500,
+        "treatment_interval_yrs": 1,
         "treatment_probability": 0.65,
         "treatment_start_time": 100,
-        "treatment_stop_time": 120,
-        "treatment_interval": 1,
+        "treatment_stop_time": 130,
         "min_skinsnip_age": 5,
         "min_treatable_age": 5,
         "human_population": 18,
@@ -487,7 +482,7 @@
         "human_blood_index": 0.63,
         "recip_gono_cycle": 0.009615384615384616,
         "bite_rate_per_fly_on_human": 65.52,
-        "annual_transm_potential": 15.262515262515263,
+        "annual_transm_potential": 68.68131868131869,
         "blackfly_mort_per_person_per_year": 26,
         "initial_mf": 0,
         "sigma_L0": 52,
@@ -531,24 +526,24 @@
         "lam_m": 32.4,
         "phi": 19.6,
         "permanent_infertility": 0.345,
-        "up": 0.0096,
-        "kap": 1.25
+        "u_ivermectin": 0.0096,
+        "shape_parameter_ivermectin": 1.25
       },
       "people": {
         "percent_compliant": {
-          "mean": 0.9471111111111112,
-          "st_dev": 0.0548200197729008
+          "mean": 0.9517777777777778,
+          "st_dev": 0.04813099409520433
         },
         "percent_male": {
-          "mean": 0.49655555555555553,
-          "st_dev": 0.1172492859753457
+          "mean": 0.5001111111111111,
+          "st_dev": 0.11544326809367512
         },
         "L1_mean": {
-          "mean": 151.64879673155482,
-          "st_dev": 2.295039259897066e-06
+          "mean": 0.00025611075912758397,
+          "st_dev": 1.0474251117826926e-06
         },
         "L2_mean": {
-          "mean": 98.4423905952376,
+          "mean": 0.0,
           "st_dev": 0.0
         },
         "L3_mean": {
@@ -556,32 +551,32 @@
           "st_dev": 6.938893903907228e-18
         },
         "ages_mean": {
-          "mean": 27.809908980213063,
-          "st_dev": 3.47678026790501
+          "mean": 28.047063318112574,
+          "st_dev": 3.258638988457257
         },
         "mf_mean": {
-          "mean": 0.003993413173208854,
-          "st_dev": 7.127792151090319e-06
+          "mean": 0.0039916172789749805,
+          "st_dev": 1.8411678087361875e-05
         },
         "male_worms_mean": {
-          "mean": 0.9757883597883598,
-          "st_dev": 0.00785714107565939
+          "mean": 0.9805185185185186,
+          "st_dev": 0.008217045349221155
         },
         "infertile_female_worms_mean": {
-          "mean": 0.9797089947089946,
-          "st_dev": 0.00753903273910171
+          "mean": 0.9797830687830688,
+          "st_dev": 0.00890628651433237
         },
         "fertile_female_worms_mean": {
-          "mean": 0.9827354497354497,
-          "st_dev": 0.007542849051949649
+          "mean": 0.9814973544973545,
+          "st_dev": 0.008434949443004627
         },
         "mf_per_skin_snip": {
-          "mean": 0.08522222222222223,
-          "st_dev": 0.03572848571319564
+          "mean": 0.07966666666666668,
+          "st_dev": 0.03370826180004313
         },
         "population_prevalence": {
-          "mean": 0.2746851233733587,
-          "st_dev": 0.11588478682665854
+          "mean": 0.2740446257990376,
+          "st_dev": 0.11217044141067889
         }
       }
     },
@@ -589,12 +584,11 @@
       "end_year": 0.003906000000000002,
       "params": {
         "timestep_count": 10,
-        "bite_rate_per_person_per_year": 1000,
-        "treatment_intrvl_yrs": 1,
+        "bite_rate_per_person_per_year": 4500,
+        "treatment_interval_yrs": 1,
         "treatment_probability": 0.65,
         "treatment_start_time": 100,
-        "treatment_stop_time": 120,
-        "treatment_interval": 1,
+        "treatment_stop_time": 130,
         "min_skinsnip_age": 5,
         "min_treatable_age": 5,
         "human_population": 25,
@@ -604,7 +598,7 @@
         "human_blood_index": 0.63,
         "recip_gono_cycle": 0.009615384615384616,
         "bite_rate_per_fly_on_human": 65.52,
-        "annual_transm_potential": 15.262515262515263,
+        "annual_transm_potential": 68.68131868131869,
         "blackfly_mort_per_person_per_year": 26,
         "initial_mf": 0,
         "sigma_L0": 52,
@@ -648,57 +642,57 @@
         "lam_m": 32.4,
         "phi": 19.6,
         "permanent_infertility": 0.345,
-        "up": 0.0096,
-        "kap": 1.25
+        "u_ivermectin": 0.0096,
+        "shape_parameter_ivermectin": 1.25
       },
       "people": {
         "percent_compliant": {
-          "mean": 0.9504000000000001,
-          "st_dev": 0.04356879617340832
+          "mean": 0.94832,
+          "st_dev": 0.04386772845726115
         },
         "percent_male": {
-          "mean": 0.5048800000000001,
-          "st_dev": 0.10521685036152718
+          "mean": 0.50216,
+          "st_dev": 0.10315878246664217
         },
         "L1_mean": {
-          "mean": 151.64879657079254,
-          "st_dev": 1.928733800071804e-06
+          "mean": 0.0002561337151309056,
+          "st_dev": 3.182342143094372e-07
         },
         "L2_mean": {
-          "mean": 98.43451520398997,
-          "st_dev": 0.17592291455132822
+          "mean": 0.0,
+          "st_dev": 0.0
         },
         "L3_mean": {
           "mean": 0.025099674614652394,
           "st_dev": 6.938893903907228e-18
         },
         "ages_mean": {
-          "mean": 28.124971835616417,
-          "st_dev": 2.8633265154130982
+          "mean": 27.960020602739686,
+          "st_dev": 2.8421762737650083
         },
         "mf_mean": {
-          "mean": 0.003992653488205312,
-          "st_dev": 9.555003006539097e-06
+          "mean": 0.003992783513521662,
+          "st_dev": 9.519309382772358e-06
         },
         "male_worms_mean": {
-          "mean": 0.9764266666666668,
-          "st_dev": 0.0064981766847906864
+          "mean": 0.9813523809523811,
+          "st_dev": 0.006140870849039286
         },
         "infertile_female_worms_mean": {
-          "mean": 0.980144761904762,
-          "st_dev": 0.006893086746731044
+          "mean": 0.9797561904761906,
+          "st_dev": 0.006419249961485155
         },
         "fertile_female_worms_mean": {
-          "mean": 0.982384761904762,
-          "st_dev": 0.006885258761195311
+          "mean": 0.9824038095238096,
+          "st_dev": 0.00712018140358479
         },
         "mf_per_skin_snip": {
-          "mean": 0.08416000000000001,
-          "st_dev": 0.0296562708377166
+          "mean": 0.08314000000000002,
+          "st_dev": 0.03029092933536375
         },
         "population_prevalence": {
-          "mean": 0.2707181587697835,
-          "st_dev": 0.0898445050122398
+          "mean": 0.2762709813128497,
+          "st_dev": 0.08935490063065717
         }
       }
     },
@@ -706,12 +700,11 @@
       "end_year": 0.003906000000000002,
       "params": {
         "timestep_count": 10,
-        "bite_rate_per_person_per_year": 1000,
-        "treatment_intrvl_yrs": 1,
+        "bite_rate_per_person_per_year": 4500,
+        "treatment_interval_yrs": 1,
         "treatment_probability": 0.65,
         "treatment_start_time": 100,
-        "treatment_stop_time": 120,
-        "treatment_interval": 1,
+        "treatment_stop_time": 130,
         "min_skinsnip_age": 5,
         "min_treatable_age": 5,
         "human_population": 35,
@@ -721,7 +714,7 @@
         "human_blood_index": 0.63,
         "recip_gono_cycle": 0.009615384615384616,
         "bite_rate_per_fly_on_human": 65.52,
-        "annual_transm_potential": 15.262515262515263,
+        "annual_transm_potential": 68.68131868131869,
         "blackfly_mort_per_person_per_year": 26,
         "initial_mf": 0,
         "sigma_L0": 52,
@@ -765,24 +758,24 @@
         "lam_m": 32.4,
         "phi": 19.6,
         "permanent_infertility": 0.345,
-        "up": 0.0096,
-        "kap": 1.25
+        "u_ivermectin": 0.0096,
+        "shape_parameter_ivermectin": 1.25
       },
       "people": {
         "percent_compliant": {
-          "mean": 0.9520571428571429,
-          "st_dev": 0.03639147691200146
+          "mean": 0.9489142857142857,
+          "st_dev": 0.03945605667275008
         },
         "percent_male": {
-          "mean": 0.4982857142857143,
-          "st_dev": 0.08614368632626276
+          "mean": 0.49725714285714284,
+          "st_dev": 0.08784394325932174
         },
         "L1_mean": {
-          "mean": 151.64013127586585,
-          "st_dev": 0.19356051474679836
+          "mean": 0.0002560501934062691,
+          "st_dev": 6.763358017108894e-07
         },
         "L2_mean": {
-          "mean": 98.4423905952376,
+          "mean": 0.0,
           "st_dev": 0.0
         },
         "L3_mean": {
@@ -790,32 +783,32 @@
           "st_dev": 3.469446951953614e-18
         },
         "ages_mean": {
-          "mean": 27.77662653620346,
-          "st_dev": 2.4099980870550515
+          "mean": 28.049091819960807,
+          "st_dev": 2.5544701295353605
         },
         "mf_mean": {
-          "mean": 0.003993702813747003,
-          "st_dev": 7.5564097795578154e-06
+          "mean": 0.00399281215846661,
+          "st_dev": 1.0076327333312385e-05
         },
         "male_worms_mean": {
-          "mean": 0.9762639455782313,
-          "st_dev": 0.0054386185646119346
+          "mean": 0.9811183673469388,
+          "st_dev": 0.00496237236865573
         },
         "infertile_female_worms_mean": {
-          "mean": 0.9795156462585034,
-          "st_dev": 0.0054978216461172335
+          "mean": 0.9793632653061225,
+          "st_dev": 0.0057401062249202
         },
         "fertile_female_worms_mean": {
-          "mean": 0.9828489795918367,
-          "st_dev": 0.005900867708645366
+          "mean": 0.9824108843537415,
+          "st_dev": 0.005661370809351187
         },
         "mf_per_skin_snip": {
-          "mean": 0.08267142857142858,
-          "st_dev": 0.026342063049698397
+          "mean": 0.08438571428571427,
+          "st_dev": 0.02547848632289843
         },
         "population_prevalence": {
-          "mean": 0.2826298513853918,
-          "st_dev": 0.07767427455642494
+          "mean": 0.2731068534947378,
+          "st_dev": 0.0776016953463932
         }
       }
     },
@@ -823,12 +816,11 @@
       "end_year": 0.003906000000000002,
       "params": {
         "timestep_count": 10,
-        "bite_rate_per_person_per_year": 1000,
-        "treatment_intrvl_yrs": 1,
+        "bite_rate_per_person_per_year": 4500,
+        "treatment_interval_yrs": 1,
         "treatment_probability": 0.65,
         "treatment_start_time": 100,
-        "treatment_stop_time": 120,
-        "treatment_interval": 1,
+        "treatment_stop_time": 130,
         "min_skinsnip_age": 5,
         "min_treatable_age": 5,
         "human_population": 48,
@@ -838,7 +830,7 @@
         "human_blood_index": 0.63,
         "recip_gono_cycle": 0.009615384615384616,
         "bite_rate_per_fly_on_human": 65.52,
-        "annual_transm_potential": 15.262515262515263,
+        "annual_transm_potential": 68.68131868131869,
         "blackfly_mort_per_person_per_year": 26,
         "initial_mf": 0,
         "sigma_L0": 52,
@@ -882,24 +874,24 @@
         "lam_m": 32.4,
         "phi": 19.6,
         "permanent_infertility": 0.345,
-        "up": 0.0096,
-        "kap": 1.25
+        "u_ivermectin": 0.0096,
+        "shape_parameter_ivermectin": 1.25
       },
       "people": {
         "percent_compliant": {
-          "mean": 0.948625,
-          "st_dev": 0.031656001493485485
+          "mean": 0.9501666666666666,
+          "st_dev": 0.030889138688038692
         },
         "percent_male": {
-          "mean": 0.49929166666666663,
-          "st_dev": 0.07344701179535262
+          "mean": 0.5071666666666667,
+          "st_dev": 0.06958977016136143
         },
         "L1_mean": {
-          "mean": 151.6487961464841,
-          "st_dev": 2.3427531757848166e-06
+          "mean": 0.0002559308785688563,
+          "st_dev": 2.391858487040992e-06
         },
         "L2_mean": {
-          "mean": 98.4423905952376,
+          "mean": 0.0,
           "st_dev": 0.0
         },
         "L3_mean": {
@@ -907,32 +899,32 @@
           "st_dev": 3.469446951953614e-18
         },
         "ages_mean": {
-          "mean": 28.19961381278537,
-          "st_dev": 2.1083039351592325
+          "mean": 28.062757077625566,
+          "st_dev": 2.182194637237975
         },
         "mf_mean": {
-          "mean": 0.003993722146980864,
-          "st_dev": 4.2345743600652785e-06
+          "mean": 0.003993268994400073,
+          "st_dev": 6.683977500281109e-06
         },
         "male_worms_mean": {
-          "mean": 0.9761230158730159,
-          "st_dev": 0.004367713851459792
+          "mean": 0.9816329365079365,
+          "st_dev": 0.0044252931165400435
         },
         "infertile_female_worms_mean": {
-          "mean": 0.9795575396825397,
-          "st_dev": 0.00482379220592117
+          "mean": 0.9798095238095239,
+          "st_dev": 0.005289484569819763
         },
         "fertile_female_worms_mean": {
-          "mean": 0.9826765873015872,
-          "st_dev": 0.004864607990707001
+          "mean": 0.9825297619047619,
+          "st_dev": 0.005018105839048473
         },
         "mf_per_skin_snip": {
-          "mean": 0.08341666666666665,
-          "st_dev": 0.022505632011170496
+          "mean": 0.08403125,
+          "st_dev": 0.022348571740810792
         },
         "population_prevalence": {
-          "mean": 0.27611820875197063,
-          "st_dev": 0.06951550005522743
+          "mean": 0.2740310770258757,
+          "st_dev": 0.06834047591572655
         }
       }
     },
@@ -940,12 +932,11 @@
       "end_year": 0.003906000000000002,
       "params": {
         "timestep_count": 10,
-        "bite_rate_per_person_per_year": 1000,
-        "treatment_intrvl_yrs": 1,
+        "bite_rate_per_person_per_year": 4500,
+        "treatment_interval_yrs": 1,
         "treatment_probability": 0.65,
         "treatment_start_time": 100,
-        "treatment_stop_time": 120,
-        "treatment_interval": 1,
+        "treatment_stop_time": 130,
         "min_skinsnip_age": 5,
         "min_treatable_age": 5,
         "human_population": 66,
@@ -955,7 +946,7 @@
         "human_blood_index": 0.63,
         "recip_gono_cycle": 0.009615384615384616,
         "bite_rate_per_fly_on_human": 65.52,
-        "annual_transm_potential": 15.262515262515263,
+        "annual_transm_potential": 68.68131868131869,
         "blackfly_mort_per_person_per_year": 26,
         "initial_mf": 0,
         "sigma_L0": 52,
@@ -999,57 +990,57 @@
         "lam_m": 32.4,
         "phi": 19.6,
         "permanent_infertility": 0.345,
-        "up": 0.0096,
-        "kap": 1.25
+        "u_ivermectin": 0.0096,
+        "shape_parameter_ivermectin": 1.25
       },
       "people": {
         "percent_compliant": {
-          "mean": 0.9486060606060606,
-          "st_dev": 0.026943875960793656
+          "mean": 0.9492424242424242,
+          "st_dev": 0.026047829849203886
         },
         "percent_male": {
-          "mean": 0.5043030303030303,
-          "st_dev": 0.060612393608511846
+          "mean": 0.4999393939393939,
+          "st_dev": 0.060537810055212526
         },
         "L1_mean": {
-          "mean": 151.63960493500454,
-          "st_dev": 0.14503297037513188
+          "mean": 0.0002560355412052016,
+          "st_dev": 2.690705305918465e-07
         },
         "L2_mean": {
-          "mean": 98.43642438974697,
-          "st_dev": 0.09414513466516064
+          "mean": 0.0,
+          "st_dev": 0.0
         },
         "L3_mean": {
           "mean": 0.025099674614652397,
           "st_dev": 3.469446951953614e-18
         },
         "ages_mean": {
-          "mean": 27.981624989622237,
-          "st_dev": 1.7190995383646201
+          "mean": 27.848030801162256,
+          "st_dev": 1.7948402975376763
         },
         "mf_mean": {
-          "mean": 0.003992781185000341,
-          "st_dev": 6.498064454930369e-06
+          "mean": 0.003992909657387681,
+          "st_dev": 6.3839642095168666e-06
         },
         "male_worms_mean": {
-          "mean": 0.9762395382395384,
-          "st_dev": 0.004370613881329291
+          "mean": 0.9809004329004328,
+          "st_dev": 0.0038388460050070446
         },
         "infertile_female_worms_mean": {
-          "mean": 0.9797777777777779,
-          "st_dev": 0.0042783968314704735
+          "mean": 0.9797258297258298,
+          "st_dev": 0.004323589687324281
         },
         "fertile_female_worms_mean": {
-          "mean": 0.9823896103896105,
-          "st_dev": 0.004380973293966856
+          "mean": 0.9824588744588745,
+          "st_dev": 0.004078276430184282
         },
         "mf_per_skin_snip": {
-          "mean": 0.08444696969696969,
-          "st_dev": 0.01864296969637863
+          "mean": 0.08406818181818182,
+          "st_dev": 0.018762952367436737
         },
         "population_prevalence": {
-          "mean": 0.2711681905587915,
-          "st_dev": 0.0591605856595084
+          "mean": 0.2751003288561638,
+          "st_dev": 0.05723199655126031
         }
       }
     },
@@ -1057,12 +1048,11 @@
       "end_year": 0.003906000000000002,
       "params": {
         "timestep_count": 10,
-        "bite_rate_per_person_per_year": 1000,
-        "treatment_intrvl_yrs": 1,
+        "bite_rate_per_person_per_year": 4500,
+        "treatment_interval_yrs": 1,
         "treatment_probability": 0.65,
         "treatment_start_time": 100,
-        "treatment_stop_time": 120,
-        "treatment_interval": 1,
+        "treatment_stop_time": 130,
         "min_skinsnip_age": 5,
         "min_treatable_age": 5,
         "human_population": 92,
@@ -1072,7 +1062,7 @@
         "human_blood_index": 0.63,
         "recip_gono_cycle": 0.009615384615384616,
         "bite_rate_per_fly_on_human": 65.52,
-        "annual_transm_potential": 15.262515262515263,
+        "annual_transm_potential": 68.68131868131869,
         "blackfly_mort_per_person_per_year": 26,
         "initial_mf": 0,
         "sigma_L0": 52,
@@ -1116,57 +1106,57 @@
         "lam_m": 32.4,
         "phi": 19.6,
         "permanent_infertility": 0.345,
-        "up": 0.0096,
-        "kap": 1.25
+        "u_ivermectin": 0.0096,
+        "shape_parameter_ivermectin": 1.25
       },
       "people": {
         "percent_compliant": {
-          "mean": 0.948695652173913,
-          "st_dev": 0.022731688864643145
+          "mean": 0.9490217391304349,
+          "st_dev": 0.02262828373855916
         },
         "percent_male": {
-          "mean": 0.5057826086956523,
-          "st_dev": 0.04934947325349052
+          "mean": 0.5008913043478261,
+          "st_dev": 0.0513421885135515
         },
         "L1_mean": {
-          "mean": 151.63890520800496,
-          "st_dev": 0.12730361290429187
+          "mean": 0.00025602443323025363,
+          "st_dev": 2.315993871734786e-07
         },
         "L2_mean": {
-          "mean": 98.4423905952376,
-          "st_dev": 2.842170943040401e-14
+          "mean": 0.0,
+          "st_dev": 0.0
         },
         "L3_mean": {
           "mean": 0.025099674614652404,
           "st_dev": 0.0
         },
         "ages_mean": {
-          "mean": 28.040791125670026,
-          "st_dev": 1.513687385812745
+          "mean": 27.987739785586637,
+          "st_dev": 1.547114810843028
         },
         "mf_mean": {
-          "mean": 0.003992869731167432,
-          "st_dev": 4.716525830841252e-06
+          "mean": 0.003992944317289955,
+          "st_dev": 4.2187505532144466e-06
         },
         "male_worms_mean": {
-          "mean": 0.9760113871635612,
-          "st_dev": 0.003584916320228423
+          "mean": 0.9812049689440994,
+          "st_dev": 0.00316923466615998
         },
         "infertile_female_worms_mean": {
-          "mean": 0.9798809523809524,
-          "st_dev": 0.003427935467518263
+          "mean": 0.9797991718426501,
+          "st_dev": 0.003236178497906568
         },
         "fertile_female_worms_mean": {
-          "mean": 0.9822898550724638,
-          "st_dev": 0.003602623685466062
+          "mean": 0.9826221532091097,
+          "st_dev": 0.003594999929516708
         },
         "mf_per_skin_snip": {
-          "mean": 0.08292391304347825,
-          "st_dev": 0.015139002290744535
+          "mean": 0.08327717391304348,
+          "st_dev": 0.015717867686267897
         },
         "population_prevalence": {
-          "mean": 0.27479491069917694,
-          "st_dev": 0.04868363798960153
+          "mean": 0.2770136861296018,
+          "st_dev": 0.05145611029757199
         }
       }
     },
@@ -1174,12 +1164,11 @@
       "end_year": 0.003906000000000002,
       "params": {
         "timestep_count": 10,
-        "bite_rate_per_person_per_year": 1000,
-        "treatment_intrvl_yrs": 1,
+        "bite_rate_per_person_per_year": 4500,
+        "treatment_interval_yrs": 1,
         "treatment_probability": 0.65,
         "treatment_start_time": 100,
-        "treatment_stop_time": 120,
-        "treatment_interval": 1,
+        "treatment_stop_time": 130,
         "min_skinsnip_age": 5,
         "min_treatable_age": 5,
         "human_population": 127,
@@ -1189,7 +1178,7 @@
         "human_blood_index": 0.63,
         "recip_gono_cycle": 0.009615384615384616,
         "bite_rate_per_fly_on_human": 65.52,
-        "annual_transm_potential": 15.262515262515263,
+        "annual_transm_potential": 68.68131868131869,
         "blackfly_mort_per_person_per_year": 26,
         "initial_mf": 0,
         "sigma_L0": 52,
@@ -1233,57 +1222,57 @@
         "lam_m": 32.4,
         "phi": 19.6,
         "permanent_infertility": 0.345,
-        "up": 0.0096,
-        "kap": 1.25
+        "u_ivermectin": 0.0096,
+        "shape_parameter_ivermectin": 1.25
       },
       "people": {
         "percent_compliant": {
-          "mean": 0.94948031496063,
-          "st_dev": 0.019793314819671386
+          "mean": 0.95,
+          "st_dev": 0.020483794550123717
         },
         "percent_male": {
-          "mean": 0.5001417322834646,
-          "st_dev": 0.044889953689170634
+          "mean": 0.4984724409448819,
+          "st_dev": 0.04293495376520754
         },
         "L1_mean": {
-          "mean": 151.646407705816,
-          "st_dev": 0.05334550813799788
+          "mean": 0.00025599006259736554,
+          "st_dev": 3.665248384666541e-07
         },
         "L2_mean": {
-          "mean": 98.43929004750231,
-          "st_dev": 0.0489258180149646
+          "mean": 0.0,
+          "st_dev": 0.0
         },
         "L3_mean": {
           "mean": 0.025099674614652404,
           "st_dev": 3.469446951953614e-18
         },
         "ages_mean": {
-          "mean": 28.0560381404379,
-          "st_dev": 1.284633726399056
+          "mean": 28.067858828605313,
+          "st_dev": 1.346062244095249
         },
         "mf_mean": {
-          "mean": 0.003993376812391852,
-          "st_dev": 3.552882898963986e-06
+          "mean": 0.003992780484059542,
+          "st_dev": 5.147682056523002e-06
         },
         "male_worms_mean": {
-          "mean": 0.9759295088113986,
-          "st_dev": 0.0028619901074553073
+          "mean": 0.9809096362954631,
+          "st_dev": 0.002762430236777399
         },
         "infertile_female_worms_mean": {
-          "mean": 0.9795095613048369,
-          "st_dev": 0.002871173969163629
+          "mean": 0.9797810273715786,
+          "st_dev": 0.0031119353404745523
         },
         "fertile_female_worms_mean": {
-          "mean": 0.9826929133858269,
-          "st_dev": 0.003042463047847343
+          "mean": 0.9825001874765654,
+          "st_dev": 0.0030250240766567676
         },
         "mf_per_skin_snip": {
-          "mean": 0.08363385826771653,
-          "st_dev": 0.014200242737143178
+          "mean": 0.0836496062992126,
+          "st_dev": 0.014484492745728453
         },
         "population_prevalence": {
-          "mean": 0.27374658084863973,
-          "st_dev": 0.04105806846984603
+          "mean": 0.272141880298368,
+          "st_dev": 0.041005737079688694
         }
       }
     },
@@ -1291,12 +1280,11 @@
       "end_year": 0.003906000000000002,
       "params": {
         "timestep_count": 10,
-        "bite_rate_per_person_per_year": 1000,
-        "treatment_intrvl_yrs": 1,
+        "bite_rate_per_person_per_year": 4500,
+        "treatment_interval_yrs": 1,
         "treatment_probability": 0.65,
         "treatment_start_time": 100,
-        "treatment_stop_time": 120,
-        "treatment_interval": 1,
+        "treatment_stop_time": 130,
         "min_skinsnip_age": 5,
         "min_treatable_age": 5,
         "human_population": 175,
@@ -1306,7 +1294,7 @@
         "human_blood_index": 0.63,
         "recip_gono_cycle": 0.009615384615384616,
         "bite_rate_per_fly_on_human": 65.52,
-        "annual_transm_potential": 15.262515262515263,
+        "annual_transm_potential": 68.68131868131869,
         "blackfly_mort_per_person_per_year": 26,
         "initial_mf": 0,
         "sigma_L0": 52,
@@ -1350,57 +1338,57 @@
         "lam_m": 32.4,
         "phi": 19.6,
         "permanent_infertility": 0.345,
-        "up": 0.0096,
-        "kap": 1.25
+        "u_ivermectin": 0.0096,
+        "shape_parameter_ivermectin": 1.25
       },
       "people": {
         "percent_compliant": {
-          "mean": 0.95056,
-          "st_dev": 0.017004101305993495
+          "mean": 0.9515428571428572,
+          "st_dev": 0.015956676038701847
         },
         "percent_male": {
-          "mean": 0.5009942857142857,
-          "st_dev": 0.03580433174112556
+          "mean": 0.5003314285714285,
+          "st_dev": 0.0359639892454797
         },
         "L1_mean": {
-          "mean": 151.64186253072745,
-          "st_dev": 0.07720564838437671
+          "mean": 0.0002559907964700434,
+          "st_dev": 2.4607952389619755e-07
         },
         "L2_mean": {
-          "mean": 98.4378903716675,
-          "st_dev": 0.05011236883638573
+          "mean": 0.0,
+          "st_dev": 0.0
         },
         "L3_mean": {
           "mean": 0.0250996746146524,
           "st_dev": 0.0
         },
         "ages_mean": {
-          "mean": 27.99343740117414,
-          "st_dev": 1.1246844829965665
+          "mean": 28.014863436399203,
+          "st_dev": 1.117073285795455
         },
         "mf_mean": {
-          "mean": 0.003993064825534148,
-          "st_dev": 3.55984069009227e-06
+          "mean": 0.003993301172268667,
+          "st_dev": 3.2692456389607612e-06
         },
         "male_worms_mean": {
-          "mean": 0.9758949659863945,
-          "st_dev": 0.0026596966246936007
+          "mean": 0.9813382312925168,
+          "st_dev": 0.002290362555747827
         },
         "infertile_female_worms_mean": {
-          "mean": 0.9797697959183673,
-          "st_dev": 0.002443262927176616
+          "mean": 0.9796914285714285,
+          "st_dev": 0.002459057781329896
         },
         "fertile_female_worms_mean": {
-          "mean": 0.9825039455782312,
-          "st_dev": 0.0024193092456640934
+          "mean": 0.9825844897959184,
+          "st_dev": 0.0024494934608267054
         },
         "mf_per_skin_snip": {
-          "mean": 0.08343428571428572,
-          "st_dev": 0.01110807612064487
+          "mean": 0.08442857142857144,
+          "st_dev": 0.010992947646522458
         },
         "population_prevalence": {
-          "mean": 0.27522368427869603,
-          "st_dev": 0.03413631470273446
+          "mean": 0.27447858603535347,
+          "st_dev": 0.03602198244128976
         }
       }
     },
@@ -1408,12 +1396,11 @@
       "end_year": 0.003906000000000002,
       "params": {
         "timestep_count": 10,
-        "bite_rate_per_person_per_year": 1000,
-        "treatment_intrvl_yrs": 1,
+        "bite_rate_per_person_per_year": 4500,
+        "treatment_interval_yrs": 1,
         "treatment_probability": 0.65,
         "treatment_start_time": 100,
-        "treatment_stop_time": 120,
-        "treatment_interval": 1,
+        "treatment_stop_time": 130,
         "min_skinsnip_age": 5,
         "min_treatable_age": 5,
         "human_population": 243,
@@ -1423,7 +1410,7 @@
         "human_blood_index": 0.63,
         "recip_gono_cycle": 0.009615384615384616,
         "bite_rate_per_fly_on_human": 65.52,
-        "annual_transm_potential": 15.262515262515263,
+        "annual_transm_potential": 68.68131868131869,
         "blackfly_mort_per_person_per_year": 26,
         "initial_mf": 0,
         "sigma_L0": 52,
@@ -1467,57 +1454,57 @@
         "lam_m": 32.4,
         "phi": 19.6,
         "permanent_infertility": 0.345,
-        "up": 0.0096,
-        "kap": 1.25
+        "u_ivermectin": 0.0096,
+        "shape_parameter_ivermectin": 1.25
       },
       "people": {
         "percent_compliant": {
-          "mean": 0.9497366255144033,
-          "st_dev": 0.014023326794644892
+          "mean": 0.9496625514403293,
+          "st_dev": 0.01382506352901854
         },
         "percent_male": {
-          "mean": 0.49969547325102875,
-          "st_dev": 0.0329023924214047
+          "mean": 0.5000987654320987,
+          "st_dev": 0.032834612917616544
         },
         "L1_mean": {
-          "mean": 151.64255496427285,
-          "st_dev": 0.062094794336681455
+          "mean": 0.0002559750391322955,
+          "st_dev": 1.7621962732593939e-07
         },
         "L2_mean": {
-          "mean": 98.4383394680526,
-          "st_dev": 0.04030820655185287
+          "mean": 0.0,
+          "st_dev": 0.0
         },
         "L3_mean": {
           "mean": 0.025099674614652397,
           "st_dev": 0.0
         },
         "ages_mean": {
-          "mean": 28.027978848864073,
-          "st_dev": 0.9716933822636724
+          "mean": 27.956614420204037,
+          "st_dev": 0.9637053289633537
         },
         "mf_mean": {
-          "mean": 0.003993072668791887,
-          "st_dev": 3.1827785835555073e-06
+          "mean": 0.003993033842923526,
+          "st_dev": 3.1908523843475557e-06
         },
         "male_worms_mean": {
-          "mean": 0.9760458553791888,
-          "st_dev": 0.0022084044350765024
+          "mean": 0.9811632373113855,
+          "st_dev": 0.001988235527696156
         },
         "infertile_female_worms_mean": {
-          "mean": 0.9796833235351753,
-          "st_dev": 0.0022376472198592907
+          "mean": 0.9797523025671173,
+          "st_dev": 0.002326760494856225
         },
         "fertile_female_worms_mean": {
-          "mean": 0.982466784244562,
-          "st_dev": 0.0022358118256859223
+          "mean": 0.9825287086027826,
+          "st_dev": 0.0020292140192454235
         },
         "mf_per_skin_snip": {
-          "mean": 0.08382716049382717,
-          "st_dev": 0.009324280162313325
+          "mean": 0.0841604938271605,
+          "st_dev": 0.00983108451272822
         },
         "population_prevalence": {
-          "mean": 0.2768915891037192,
-          "st_dev": 0.0291936900662672
+          "mean": 0.27432931520882986,
+          "st_dev": 0.02839398486105428
         }
       }
     },
@@ -1525,12 +1512,11 @@
       "end_year": 0.00781203333233776,
       "params": {
         "timestep_count": 10,
-        "bite_rate_per_person_per_year": 1000,
-        "treatment_intrvl_yrs": 1,
+        "bite_rate_per_person_per_year": 4500,
+        "treatment_interval_yrs": 1,
         "treatment_probability": 0.65,
         "treatment_start_time": 100,
-        "treatment_stop_time": 120,
-        "treatment_interval": 1,
+        "treatment_stop_time": 130,
         "min_skinsnip_age": 5,
         "min_treatable_age": 5,
         "human_population": 5,
@@ -1540,7 +1526,7 @@
         "human_blood_index": 0.63,
         "recip_gono_cycle": 0.009615384615384616,
         "bite_rate_per_fly_on_human": 65.52,
-        "annual_transm_potential": 15.262515262515263,
+        "annual_transm_potential": 68.68131868131869,
         "blackfly_mort_per_person_per_year": 26,
         "initial_mf": 0,
         "sigma_L0": 52,
@@ -1584,57 +1570,57 @@
         "lam_m": 32.4,
         "phi": 19.6,
         "permanent_infertility": 0.345,
-        "up": 0.0096,
-        "kap": 1.25
+        "u_ivermectin": 0.0096,
+        "shape_parameter_ivermectin": 1.25
       },
       "people": {
         "percent_compliant": {
-          "mean": 0.9532,
-          "st_dev": 0.09364699674842752
+          "mean": 0.9464000000000001,
+          "st_dev": 0.1051048999809238
         },
         "percent_male": {
-          "mean": 0.4744,
-          "st_dev": 0.22712252200079147
+          "mean": 0.5172,
+          "st_dev": 0.22222547108736207
         },
         "L1_mean": {
-          "mean": 151.66686681148047,
-          "st_dev": 0.00021705876738008575
+          "mean": 0.0005109576466041564,
+          "st_dev": 2.9695070688786903e-06
         },
         "L2_mean": {
-          "mean": 98.45415866861048,
-          "st_dev": 9.386078650595169e-07
+          "mean": 0.0001662865513374699,
+          "st_dev": 4.266256822087938e-06
         },
         "L3_mean": {
-          "mean": 126.86268433269053,
-          "st_dev": 1.4210854715202004e-14
+          "mean": 0.0,
+          "st_dev": 0.0
         },
         "ages_mean": {
-          "mean": 28.23524931506851,
-          "st_dev": 6.39551526723667
+          "mean": 27.721594520547935,
+          "st_dev": 6.739161700172267
         },
         "mf_mean": {
-          "mean": 0.005983600787546406,
-          "st_dev": 3.0136632985487523e-05
+          "mean": 0.0059797342541685556,
+          "st_dev": 6.0671556131919896e-05
         },
         "male_worms_mean": {
-          "mean": 0.9652761904761905,
-          "st_dev": 0.01723963160740924
+          "mean": 0.972247619047619,
+          "st_dev": 0.017391331538971155
         },
         "infertile_female_worms_mean": {
-          "mean": 0.9700380952380954,
-          "st_dev": 0.01772729680899474
+          "mean": 0.9679047619047619,
+          "st_dev": 0.02012455545909782
         },
         "fertile_female_worms_mean": {
-          "mean": 0.9748380952380952,
-          "st_dev": 0.018773832321754436
+          "mean": 0.9726666666666668,
+          "st_dev": 0.019474036439272042
         },
         "mf_per_skin_snip": {
-          "mean": 0.12960000000000002,
-          "st_dev": 0.08290862440060141
+          "mean": 0.12569999999999998,
+          "st_dev": 0.08458433661145542
         },
         "population_prevalence": {
-          "mean": 0.3704333333333334,
-          "st_dev": 0.23271282015966946
+          "mean": 0.3823666666666667,
+          "st_dev": 0.2271897371508376
         }
       }
     },
@@ -1642,12 +1628,11 @@
       "end_year": 0.00781203333233776,
       "params": {
         "timestep_count": 10,
-        "bite_rate_per_person_per_year": 1000,
-        "treatment_intrvl_yrs": 1,
+        "bite_rate_per_person_per_year": 4500,
+        "treatment_interval_yrs": 1,
         "treatment_probability": 0.65,
         "treatment_start_time": 100,
-        "treatment_stop_time": 120,
-        "treatment_interval": 1,
+        "treatment_stop_time": 130,
         "min_skinsnip_age": 5,
         "min_treatable_age": 5,
         "human_population": 7,
@@ -1657,7 +1642,7 @@
         "human_blood_index": 0.63,
         "recip_gono_cycle": 0.009615384615384616,
         "bite_rate_per_fly_on_human": 65.52,
-        "annual_transm_potential": 15.262515262515263,
+        "annual_transm_potential": 68.68131868131869,
         "blackfly_mort_per_person_per_year": 26,
         "initial_mf": 0,
         "sigma_L0": 52,
@@ -1701,57 +1686,57 @@
         "lam_m": 32.4,
         "phi": 19.6,
         "permanent_infertility": 0.345,
-        "up": 0.0096,
-        "kap": 1.25
+        "u_ivermectin": 0.0096,
+        "shape_parameter_ivermectin": 1.25
       },
       "people": {
         "percent_compliant": {
-          "mean": 0.9534285714285714,
-          "st_dev": 0.0837542566691633
+          "mean": 0.9491428571428571,
+          "st_dev": 0.08774545746716722
         },
         "percent_male": {
-          "mean": 0.5054285714285713,
-          "st_dev": 0.1851946576564502
+          "mean": 0.5005714285714286,
+          "st_dev": 0.17945404732699904
         },
         "L1_mean": {
-          "mean": 151.6668669596991,
-          "st_dev": 0.00016357720759964948
+          "mean": 0.0005106267332151287,
+          "st_dev": 2.603183971172806e-06
         },
         "L2_mean": {
-          "mean": 98.45415834097521,
-          "st_dev": 1.1245787645018063e-06
+          "mean": 0.00016642127764890429,
+          "st_dev": 1.725666038966883e-07
         },
         "L3_mean": {
-          "mean": 126.86268433269053,
-          "st_dev": 2.842170943040401e-14
+          "mean": 0.0,
+          "st_dev": 0.0
         },
         "ages_mean": {
-          "mean": 28.16472093933462,
-          "st_dev": 5.402404586800789
+          "mean": 27.935789432485276,
+          "st_dev": 5.470347379946294
         },
         "mf_mean": {
-          "mean": 0.005982436922533424,
-          "st_dev": 2.29282253309847e-05
+          "mean": 0.005979767666285309,
+          "st_dev": 4.450424126664074e-05
         },
         "male_worms_mean": {
-          "mean": 0.9638095238095239,
-          "st_dev": 0.014076209149798697
+          "mean": 0.9716734693877549,
+          "st_dev": 0.01457292115554049
         },
         "infertile_female_worms_mean": {
-          "mean": 0.9703945578231292,
-          "st_dev": 0.01543497689441818
+          "mean": 0.9691428571428571,
+          "st_dev": 0.01611068200577185
         },
         "fertile_female_worms_mean": {
-          "mean": 0.9745034013605441,
-          "st_dev": 0.014679534445854906
+          "mean": 0.9747619047619047,
+          "st_dev": 0.016715740608202415
         },
         "mf_per_skin_snip": {
-          "mean": 0.12764285714285714,
-          "st_dev": 0.06966138947561604
+          "mean": 0.12321428571428572,
+          "st_dev": 0.06921111595277576
         },
         "population_prevalence": {
-          "mean": 0.36926190476190474,
-          "st_dev": 0.19717238535475817
+          "mean": 0.3679428571428571,
+          "st_dev": 0.19158647692514616
         }
       }
     },
@@ -1759,12 +1744,11 @@
       "end_year": 0.00781203333233776,
       "params": {
         "timestep_count": 10,
-        "bite_rate_per_person_per_year": 1000,
-        "treatment_intrvl_yrs": 1,
+        "bite_rate_per_person_per_year": 4500,
+        "treatment_interval_yrs": 1,
         "treatment_probability": 0.65,
         "treatment_start_time": 100,
-        "treatment_stop_time": 120,
-        "treatment_interval": 1,
+        "treatment_stop_time": 130,
         "min_skinsnip_age": 5,
         "min_treatable_age": 5,
         "human_population": 10,
@@ -1774,7 +1758,7 @@
         "human_blood_index": 0.63,
         "recip_gono_cycle": 0.009615384615384616,
         "bite_rate_per_fly_on_human": 65.52,
-        "annual_transm_potential": 15.262515262515263,
+        "annual_transm_potential": 68.68131868131869,
         "blackfly_mort_per_person_per_year": 26,
         "initial_mf": 0,
         "sigma_L0": 52,
@@ -1818,57 +1802,57 @@
         "lam_m": 32.4,
         "phi": 19.6,
         "permanent_infertility": 0.345,
-        "up": 0.0096,
-        "kap": 1.25
+        "u_ivermectin": 0.0096,
+        "shape_parameter_ivermectin": 1.25
       },
       "people": {
         "percent_compliant": {
-          "mean": 0.951,
-          "st_dev": 0.0658710862214978
+          "mean": 0.9464000000000001,
+          "st_dev": 0.07132348841721077
         },
         "percent_male": {
-          "mean": 0.5068,
-          "st_dev": 0.15502825548912041
+          "mean": 0.5074,
+          "st_dev": 0.16126140269760772
         },
         "L1_mean": {
-          "mean": 151.66686092158213,
-          "st_dev": 0.00014252288799898168
+          "mean": 0.0005101896590042625,
+          "st_dev": 2.612570453753548e-06
         },
         "L2_mean": {
-          "mean": 98.45415820801418,
-          "st_dev": 1.1396147491319553e-06
+          "mean": 0.00016636185995246727,
+          "st_dev": 2.024427461037861e-07
         },
         "L3_mean": {
-          "mean": 126.86268433269053,
-          "st_dev": 1.4210854715202004e-14
+          "mean": 0.0,
+          "st_dev": 0.0
         },
         "ages_mean": {
-          "mean": 28.407218630137002,
-          "st_dev": 4.671186158404914
+          "mean": 28.066378630136903,
+          "st_dev": 4.486275803507754
         },
         "mf_mean": {
-          "mean": 0.005983383339045255,
-          "st_dev": 2.074547581177051e-05
+          "mean": 0.0059817480002832156,
+          "st_dev": 3.3617609071222047e-05
         },
         "male_worms_mean": {
-          "mean": 0.9644761904761906,
-          "st_dev": 0.012359321764041921
+          "mean": 0.9722952380952381,
+          "st_dev": 0.011610531617649751
         },
         "infertile_female_worms_mean": {
-          "mean": 0.9698571428571429,
-          "st_dev": 0.012810408891355454
+          "mean": 0.9709047619047619,
+          "st_dev": 0.012969439047481938
         },
         "fertile_female_worms_mean": {
-          "mean": 0.9752000000000001,
-          "st_dev": 0.012322882131882996
+          "mean": 0.9750285714285715,
+          "st_dev": 0.01383779044661555
         },
         "mf_per_skin_snip": {
-          "mean": 0.12735,
-          "st_dev": 0.058891659001933376
+          "mean": 0.12429999999999998,
+          "st_dev": 0.05685076956383264
         },
         "population_prevalence": {
-          "mean": 0.3815015873015873,
-          "st_dev": 0.15928391726353236
+          "mean": 0.38198174603174606,
+          "st_dev": 0.16032063349641354
         }
       }
     },
@@ -1876,12 +1860,11 @@
       "end_year": 0.00781203333233776,
       "params": {
         "timestep_count": 10,
-        "bite_rate_per_person_per_year": 1000,
-        "treatment_intrvl_yrs": 1,
+        "bite_rate_per_person_per_year": 4500,
+        "treatment_interval_yrs": 1,
         "treatment_probability": 0.65,
         "treatment_start_time": 100,
-        "treatment_stop_time": 120,
-        "treatment_interval": 1,
+        "treatment_stop_time": 130,
         "min_skinsnip_age": 5,
         "min_treatable_age": 5,
         "human_population": 13,
@@ -1891,7 +1874,7 @@
         "human_blood_index": 0.63,
         "recip_gono_cycle": 0.009615384615384616,
         "bite_rate_per_fly_on_human": 65.52,
-        "annual_transm_potential": 15.262515262515263,
+        "annual_transm_potential": 68.68131868131869,
         "blackfly_mort_per_person_per_year": 26,
         "initial_mf": 0,
         "sigma_L0": 52,
@@ -1935,57 +1918,57 @@
         "lam_m": 32.4,
         "phi": 19.6,
         "permanent_infertility": 0.345,
-        "up": 0.0096,
-        "kap": 1.25
+        "u_ivermectin": 0.0096,
+        "shape_parameter_ivermectin": 1.25
       },
       "people": {
         "percent_compliant": {
-          "mean": 0.947846153846154,
-          "st_dev": 0.057271077616550446
+          "mean": 0.9475384615384617,
+          "st_dev": 0.06100130952130133
         },
         "percent_male": {
-          "mean": 0.49184615384615393,
-          "st_dev": 0.14272835953441282
+          "mean": 0.49553846153846154,
+          "st_dev": 0.13347064921241458
         },
         "L1_mean": {
-          "mean": 151.66686129759432,
-          "st_dev": 0.00013595216930378134
+          "mean": 0.0005094682529284616,
+          "st_dev": 6.907809956175975e-06
         },
         "L2_mean": {
-          "mean": 98.45415796341315,
-          "st_dev": 1.2125475435192835e-06
+          "mean": 0.00016617276629560032,
+          "st_dev": 3.670934525932213e-06
         },
         "L3_mean": {
-          "mean": 126.86268433269055,
-          "st_dev": 1.4210854715202004e-14
+          "mean": 0.0,
+          "st_dev": 0.0
         },
         "ages_mean": {
-          "mean": 27.93445268703896,
-          "st_dev": 3.914008506390461
+          "mean": 27.8944408851423,
+          "st_dev": 4.124307477387901
         },
         "mf_mean": {
-          "mean": 0.005981686963621156,
-          "st_dev": 1.7838245848375838e-05
+          "mean": 0.0059796192334516645,
+          "st_dev": 3.929783090356736e-05
         },
         "male_worms_mean": {
-          "mean": 0.9642490842490843,
-          "st_dev": 0.011068333976417205
+          "mean": 0.9719267399267398,
+          "st_dev": 0.0108656716858048
         },
         "infertile_female_worms_mean": {
-          "mean": 0.9702930402930403,
-          "st_dev": 0.010299425756484466
+          "mean": 0.9696483516483516,
+          "st_dev": 0.011912482140276034
         },
         "fertile_female_worms_mean": {
-          "mean": 0.9736996336996337,
-          "st_dev": 0.010326552409185875
+          "mean": 0.9737582417582419,
+          "st_dev": 0.012076309227678765
         },
         "mf_per_skin_snip": {
-          "mean": 0.12711538461538463,
-          "st_dev": 0.05193696395489508
+          "mean": 0.1245,
+          "st_dev": 0.05146278887753028
         },
         "population_prevalence": {
-          "mean": 0.36881946386946385,
-          "st_dev": 0.13393280781878603
+          "mean": 0.3870691364191364,
+          "st_dev": 0.14651785916408455
         }
       }
     },
@@ -1993,12 +1976,11 @@
       "end_year": 0.00781203333233776,
       "params": {
         "timestep_count": 10,
-        "bite_rate_per_person_per_year": 1000,
-        "treatment_intrvl_yrs": 1,
+        "bite_rate_per_person_per_year": 4500,
+        "treatment_interval_yrs": 1,
         "treatment_probability": 0.65,
         "treatment_start_time": 100,
-        "treatment_stop_time": 120,
-        "treatment_interval": 1,
+        "treatment_stop_time": 130,
         "min_skinsnip_age": 5,
         "min_treatable_age": 5,
         "human_population": 18,
@@ -2008,7 +1990,7 @@
         "human_blood_index": 0.63,
         "recip_gono_cycle": 0.009615384615384616,
         "bite_rate_per_fly_on_human": 65.52,
-        "annual_transm_potential": 15.262515262515263,
+        "annual_transm_potential": 68.68131868131869,
         "blackfly_mort_per_person_per_year": 26,
         "initial_mf": 0,
         "sigma_L0": 52,
@@ -2052,57 +2034,57 @@
         "lam_m": 32.4,
         "phi": 19.6,
         "permanent_infertility": 0.345,
-        "up": 0.0096,
-        "kap": 1.25
+        "u_ivermectin": 0.0096,
+        "shape_parameter_ivermectin": 1.25
       },
       "people": {
         "percent_compliant": {
-          "mean": 0.952,
-          "st_dev": 0.049861041473179483
+          "mean": 0.9503333333333334,
+          "st_dev": 0.05026976608972883
         },
         "percent_male": {
-          "mean": 0.5002222222222222,
-          "st_dev": 0.11706260855195247
+          "mean": 0.49744444444444447,
+          "st_dev": 0.11805894112792523
         },
         "L1_mean": {
-          "mean": 151.66686738223797,
-          "st_dev": 0.00011389724650404298
+          "mean": 0.0005098228048398248,
+          "st_dev": 2.094319946485729e-06
         },
         "L2_mean": {
-          "mean": 98.45415752347847,
-          "st_dev": 1.4757082681747565e-06
+          "mean": 0.00016631023762736396,
+          "st_dev": 2.0619261650617626e-07
         },
         "L3_mean": {
-          "mean": 126.86268433269053,
-          "st_dev": 2.842170943040401e-14
+          "mean": 0.0,
+          "st_dev": 0.0
         },
         "ages_mean": {
-          "mean": 28.045424961948207,
-          "st_dev": 3.283169409059235
+          "mean": 27.770878538812738,
+          "st_dev": 3.498797310526822
         },
         "mf_mean": {
-          "mean": 0.0059834587190033105,
-          "st_dev": 1.4691686570525302e-05
+          "mean": 0.005982480879172799,
+          "st_dev": 1.5543422620621147e-05
         },
         "male_worms_mean": {
-          "mean": 0.9644074074074075,
-          "st_dev": 0.008708440196558533
+          "mean": 0.9721269841269841,
+          "st_dev": 0.00837614099506818
         },
         "infertile_female_worms_mean": {
-          "mean": 0.9704973544973545,
-          "st_dev": 0.009355095865360962
+          "mean": 0.970179894179894,
+          "st_dev": 0.008956507735842436
         },
         "fertile_female_worms_mean": {
-          "mean": 0.9746084656084656,
-          "st_dev": 0.008780676349114353
+          "mean": 0.9743280423280424,
+          "st_dev": 0.008627902013217803
         },
         "mf_per_skin_snip": {
-          "mean": 0.13091666666666668,
-          "st_dev": 0.044808672482340176
+          "mean": 0.126,
+          "st_dev": 0.0432272919049077
         },
         "population_prevalence": {
-          "mean": 0.37076978021978024,
-          "st_dev": 0.11952988289926406
+          "mean": 0.3799838037779214,
+          "st_dev": 0.12057961563202119
         }
       }
     },
@@ -2110,12 +2092,11 @@
       "end_year": 0.00781203333233776,
       "params": {
         "timestep_count": 10,
-        "bite_rate_per_person_per_year": 1000,
-        "treatment_intrvl_yrs": 1,
+        "bite_rate_per_person_per_year": 4500,
+        "treatment_interval_yrs": 1,
         "treatment_probability": 0.65,
         "treatment_start_time": 100,
-        "treatment_stop_time": 120,
-        "treatment_interval": 1,
+        "treatment_stop_time": 130,
         "min_skinsnip_age": 5,
         "min_treatable_age": 5,
         "human_population": 25,
@@ -2125,7 +2106,7 @@
         "human_blood_index": 0.63,
         "recip_gono_cycle": 0.009615384615384616,
         "bite_rate_per_fly_on_human": 65.52,
-        "annual_transm_potential": 15.262515262515263,
+        "annual_transm_potential": 68.68131868131869,
         "blackfly_mort_per_person_per_year": 26,
         "initial_mf": 0,
         "sigma_L0": 52,
@@ -2169,57 +2150,57 @@
         "lam_m": 32.4,
         "phi": 19.6,
         "permanent_infertility": 0.345,
-        "up": 0.0096,
-        "kap": 1.25
+        "u_ivermectin": 0.0096,
+        "shape_parameter_ivermectin": 1.25
       },
       "people": {
         "percent_compliant": {
-          "mean": 0.9545600000000001,
-          "st_dev": 0.040978120991573046
+          "mean": 0.94632,
+          "st_dev": 0.04534377134734162
         },
         "percent_male": {
-          "mean": 0.4988000000000001,
-          "st_dev": 0.1003760927711375
+          "mean": 0.49928000000000006,
+          "st_dev": 0.09890339529055614
         },
         "L1_mean": {
-          "mean": 151.65472701488375,
-          "st_dev": 0.2709771669704348
+          "mean": 0.0005097565569538686,
+          "st_dev": 1.9719069775491373e-06
         },
         "L2_mean": {
-          "mean": 98.44628166853026,
-          "st_dev": 0.17593128525937837
+          "mean": 0.00016628227810598674,
+          "st_dev": 2.283589071057136e-07
         },
         "L3_mean": {
-          "mean": 126.86268433269053,
-          "st_dev": 1.4210854715202004e-14
+          "mean": 0.0,
+          "st_dev": 0.0
         },
         "ages_mean": {
-          "mean": 27.879998684931486,
-          "st_dev": 2.883877724400797
+          "mean": 28.133580931506813,
+          "st_dev": 2.705978028928871
         },
         "mf_mean": {
-          "mean": 0.005981261919855759,
-          "st_dev": 1.9553973097744955e-05
+          "mean": 0.005979120898813243,
+          "st_dev": 2.9966575304699246e-05
         },
         "male_worms_mean": {
-          "mean": 0.9642628571428572,
-          "st_dev": 0.008693178914366613
+          "mean": 0.9723466666666667,
+          "st_dev": 0.007839125315638577
         },
         "infertile_female_worms_mean": {
-          "mean": 0.970632380952381,
-          "st_dev": 0.008181008037950261
+          "mean": 0.9690971428571429,
+          "st_dev": 0.008823350590691639
         },
         "fertile_female_worms_mean": {
-          "mean": 0.9741409523809526,
-          "st_dev": 0.008728762162465467
+          "mean": 0.9736914285714285,
+          "st_dev": 0.008652873587149685
         },
         "mf_per_skin_snip": {
-          "mean": 0.12674000000000002,
-          "st_dev": 0.036703847209795325
+          "mean": 0.12606,
+          "st_dev": 0.03565215841993301
         },
         "population_prevalence": {
-          "mean": 0.3751170660997219,
-          "st_dev": 0.10150782904278226
+          "mean": 0.37433435135929416,
+          "st_dev": 0.09968218752047076
         }
       }
     },
@@ -2227,12 +2208,11 @@
       "end_year": 0.00781203333233776,
       "params": {
         "timestep_count": 10,
-        "bite_rate_per_person_per_year": 1000,
-        "treatment_intrvl_yrs": 1,
+        "bite_rate_per_person_per_year": 4500,
+        "treatment_interval_yrs": 1,
         "treatment_probability": 0.65,
         "treatment_start_time": 100,
-        "treatment_stop_time": 120,
-        "treatment_interval": 1,
+        "treatment_stop_time": 130,
         "min_skinsnip_age": 5,
         "min_treatable_age": 5,
         "human_population": 35,
@@ -2242,7 +2222,7 @@
         "human_blood_index": 0.63,
         "recip_gono_cycle": 0.009615384615384616,
         "bite_rate_per_fly_on_human": 65.52,
-        "annual_transm_potential": 15.262515262515263,
+        "annual_transm_potential": 68.68131868131869,
         "blackfly_mort_per_person_per_year": 26,
         "initial_mf": 0,
         "sigma_L0": 52,
@@ -2286,57 +2266,57 @@
         "lam_m": 32.4,
         "phi": 19.6,
         "permanent_infertility": 0.345,
-        "up": 0.0096,
-        "kap": 1.25
+        "u_ivermectin": 0.0096,
+        "shape_parameter_ivermectin": 1.25
       },
       "people": {
         "percent_compliant": {
-          "mean": 0.947657142857143,
-          "st_dev": 0.03618293655798523
+          "mean": 0.9522857142857144,
+          "st_dev": 0.03556081310335056
         },
         "percent_male": {
-          "mean": 0.4969714285714286,
-          "st_dev": 0.08546040496233638
+          "mean": 0.5008571428571428,
+          "st_dev": 0.08801252230014006
         },
         "L1_mean": {
-          "mean": 151.64951653115332,
-          "st_dev": 0.2737559794614146
+          "mean": 0.0005095982622267803,
+          "st_dev": 1.7270665958140698e-06
         },
         "L2_mean": {
-          "mean": 98.44853125563851,
-          "st_dev": 0.12567531585425057
+          "mean": 0.00016619562908309142,
+          "st_dev": 9.878176716034745e-07
         },
         "L3_mean": {
-          "mean": 126.84818574019536,
-          "st_dev": 0.22878393060018418
+          "mean": 0.0,
+          "st_dev": 0.0
         },
         "ages_mean": {
-          "mean": 27.968656125244586,
-          "st_dev": 2.5888222579327747
+          "mean": 28.16827350293543,
+          "st_dev": 2.5012915155415705
         },
         "mf_mean": {
-          "mean": 0.005980574934678529,
-          "st_dev": 2.1185567703787217e-05
+          "mean": 0.005981060273420233,
+          "st_dev": 2.0549688248035995e-05
         },
         "male_worms_mean": {
-          "mean": 0.964829931972789,
-          "st_dev": 0.006930433828086833
+          "mean": 0.9721931972789115,
+          "st_dev": 0.006640536880868601
         },
         "infertile_female_worms_mean": {
-          "mean": 0.9697251700680272,
-          "st_dev": 0.00685699384353799
+          "mean": 0.9698857142857144,
+          "st_dev": 0.007106684435976023
         },
         "fertile_female_worms_mean": {
-          "mean": 0.9740544217687075,
-          "st_dev": 0.007333964356377739
+          "mean": 0.9743156462585034,
+          "st_dev": 0.007050601632949624
         },
         "mf_per_skin_snip": {
-          "mean": 0.12758571428571427,
-          "st_dev": 0.03294007855956334
+          "mean": 0.12432857142857143,
+          "st_dev": 0.030895779382845632
         },
         "population_prevalence": {
-          "mean": 0.3702831668194348,
-          "st_dev": 0.0799934418293253
+          "mean": 0.36792348698243893,
+          "st_dev": 0.08516324220748951
         }
       }
     },
@@ -2344,12 +2324,11 @@
       "end_year": 0.00781203333233776,
       "params": {
         "timestep_count": 10,
-        "bite_rate_per_person_per_year": 1000,
-        "treatment_intrvl_yrs": 1,
+        "bite_rate_per_person_per_year": 4500,
+        "treatment_interval_yrs": 1,
         "treatment_probability": 0.65,
         "treatment_start_time": 100,
-        "treatment_stop_time": 120,
-        "treatment_interval": 1,
+        "treatment_stop_time": 130,
         "min_skinsnip_age": 5,
         "min_treatable_age": 5,
         "human_population": 48,
@@ -2359,7 +2338,7 @@
         "human_blood_index": 0.63,
         "recip_gono_cycle": 0.009615384615384616,
         "bite_rate_per_fly_on_human": 65.52,
-        "annual_transm_potential": 15.262515262515263,
+        "annual_transm_potential": 68.68131868131869,
         "blackfly_mort_per_person_per_year": 26,
         "initial_mf": 0,
         "sigma_L0": 52,
@@ -2403,57 +2382,57 @@
         "lam_m": 32.4,
         "phi": 19.6,
         "permanent_infertility": 0.345,
-        "up": 0.0096,
-        "kap": 1.25
+        "u_ivermectin": 0.0096,
+        "shape_parameter_ivermectin": 1.25
       },
       "people": {
         "percent_compliant": {
-          "mean": 0.9489166666666667,
-          "st_dev": 0.03262060953855195
+          "mean": 0.948875,
+          "st_dev": 0.03267503613021891
         },
         "percent_male": {
-          "mean": 0.49595833333333333,
-          "st_dev": 0.06932325397488685
+          "mean": 0.4977500000000001,
+          "st_dev": 0.070993495398444
         },
         "L1_mean": {
-          "mean": 151.66686028126324,
-          "st_dev": 8.163923928787538e-05
+          "mean": 0.0005093763332284671,
+          "st_dev": 1.6667314112180995e-06
         },
         "L2_mean": {
-          "mean": 98.45415718489733,
-          "st_dev": 1.2875838463025132e-06
+          "mean": 0.00016623142837004685,
+          "st_dev": 2.0157925464624345e-07
         },
         "L3_mean": {
-          "mean": 126.86268433269053,
-          "st_dev": 2.842170943040401e-14
+          "mean": 0.0,
+          "st_dev": 0.0
         },
         "ages_mean": {
-          "mean": 28.099859589041117,
-          "st_dev": 2.2452097748647826
+          "mean": 28.19192785388128,
+          "st_dev": 2.142013349873023
         },
         "mf_mean": {
-          "mean": 0.005982199356241372,
-          "st_dev": 9.207318573997464e-06
+          "mean": 0.005981804683789331,
+          "st_dev": 1.1040524602511057e-05
         },
         "male_worms_mean": {
-          "mean": 0.9644305555555556,
-          "st_dev": 0.005552071966204477
+          "mean": 0.9720079365079364,
+          "st_dev": 0.004924607971039946
         },
         "infertile_female_worms_mean": {
-          "mean": 0.9700634920634921,
-          "st_dev": 0.005675524400747634
+          "mean": 0.9698333333333333,
+          "st_dev": 0.005448726276829139
         },
         "fertile_female_worms_mean": {
-          "mean": 0.9746349206349205,
-          "st_dev": 0.005460259781902813
+          "mean": 0.9741388888888889,
+          "st_dev": 0.005790743182110467
         },
         "mf_per_skin_snip": {
-          "mean": 0.12613541666666667,
-          "st_dev": 0.024757107828274963
+          "mean": 0.12516666666666665,
+          "st_dev": 0.02666085548660766
         },
         "population_prevalence": {
-          "mean": 0.3816773382821207,
-          "st_dev": 0.07325111264698182
+          "mean": 0.3756177603376617,
+          "st_dev": 0.06967372909206897
         }
       }
     },
@@ -2461,12 +2440,11 @@
       "end_year": 0.00781203333233776,
       "params": {
         "timestep_count": 10,
-        "bite_rate_per_person_per_year": 1000,
-        "treatment_intrvl_yrs": 1,
+        "bite_rate_per_person_per_year": 4500,
+        "treatment_interval_yrs": 1,
         "treatment_probability": 0.65,
         "treatment_start_time": 100,
-        "treatment_stop_time": 120,
-        "treatment_interval": 1,
+        "treatment_stop_time": 130,
         "min_skinsnip_age": 5,
         "min_treatable_age": 5,
         "human_population": 66,
@@ -2476,7 +2454,7 @@
         "human_blood_index": 0.63,
         "recip_gono_cycle": 0.009615384615384616,
         "bite_rate_per_fly_on_human": 65.52,
-        "annual_transm_potential": 15.262515262515263,
+        "annual_transm_potential": 68.68131868131869,
         "blackfly_mort_per_person_per_year": 26,
         "initial_mf": 0,
         "sigma_L0": 52,
@@ -2520,57 +2498,57 @@
         "lam_m": 32.4,
         "phi": 19.6,
         "permanent_infertility": 0.345,
-        "up": 0.0096,
-        "kap": 1.25
+        "u_ivermectin": 0.0096,
+        "shape_parameter_ivermectin": 1.25
       },
       "people": {
         "percent_compliant": {
-          "mean": 0.9496060606060607,
-          "st_dev": 0.02800254153492251
+          "mean": 0.9512424242424242,
+          "st_dev": 0.026910370567443616
         },
         "percent_male": {
-          "mean": 0.5011515151515151,
-          "st_dev": 0.060054734752619875
+          "mean": 0.5021515151515151,
+          "st_dev": 0.058841423600327104
         },
         "L1_mean": {
-          "mean": 151.64847461656248,
-          "st_dev": 0.20471730926817974
+          "mean": 0.0005093741221243042,
+          "st_dev": 1.4368703916964932e-06
         },
         "L2_mean": {
-          "mean": 98.45415711425142,
-          "st_dev": 1.0580776756960753e-06
+          "mean": 0.00016622054518164177,
+          "st_dev": 1.7049381190096747e-07
         },
         "L3_mean": {
-          "mean": 126.86268433269053,
-          "st_dev": 2.842170943040401e-14
+          "mean": 0.0,
+          "st_dev": 0.0
         },
         "ages_mean": {
-          "mean": 28.12106484018264,
-          "st_dev": 1.7123309257221135
+          "mean": 27.94743503528433,
+          "st_dev": 1.713630319353042
         },
         "mf_mean": {
-          "mean": 0.0059815907655034585,
-          "st_dev": 1.1679206390649269e-05
+          "mean": 0.005981785563122637,
+          "st_dev": 1.4435042917285738e-05
         },
         "male_worms_mean": {
-          "mean": 0.9645238095238096,
-          "st_dev": 0.005036111214348025
+          "mean": 0.971878787878788,
+          "st_dev": 0.004540952900397653
         },
         "infertile_female_worms_mean": {
-          "mean": 0.969958152958153,
-          "st_dev": 0.00487165044937991
+          "mean": 0.9697417027417028,
+          "st_dev": 0.005285511402829876
         },
         "fertile_female_worms_mean": {
-          "mean": 0.9738975468975468,
-          "st_dev": 0.0052013304776587135
+          "mean": 0.9742395382395382,
+          "st_dev": 0.0052244018199814465
         },
         "mf_per_skin_snip": {
-          "mean": 0.12487121212121212,
-          "st_dev": 0.022809461239550737
+          "mean": 0.12525757575757576,
+          "st_dev": 0.023583424592684255
         },
         "population_prevalence": {
-          "mean": 0.37400137929296196,
-          "st_dev": 0.06363682402539139
+          "mean": 0.37883901333804154,
+          "st_dev": 0.0622842171207765
         }
       }
     },
@@ -2578,12 +2556,11 @@
       "end_year": 0.00781203333233776,
       "params": {
         "timestep_count": 10,
-        "bite_rate_per_person_per_year": 1000,
-        "treatment_intrvl_yrs": 1,
+        "bite_rate_per_person_per_year": 4500,
+        "treatment_interval_yrs": 1,
         "treatment_probability": 0.65,
         "treatment_start_time": 100,
-        "treatment_stop_time": 120,
-        "treatment_interval": 1,
+        "treatment_stop_time": 130,
         "min_skinsnip_age": 5,
         "min_treatable_age": 5,
         "human_population": 92,
@@ -2593,7 +2570,7 @@
         "human_blood_index": 0.63,
         "recip_gono_cycle": 0.009615384615384616,
         "bite_rate_per_fly_on_human": 65.52,
-        "annual_transm_potential": 15.262515262515263,
+        "annual_transm_potential": 68.68131868131869,
         "blackfly_mort_per_person_per_year": 26,
         "initial_mf": 0,
         "sigma_L0": 52,
@@ -2637,57 +2614,57 @@
         "lam_m": 32.4,
         "phi": 19.6,
         "permanent_infertility": 0.345,
-        "up": 0.0096,
-        "kap": 1.25
+        "u_ivermectin": 0.0096,
+        "shape_parameter_ivermectin": 1.25
       },
       "people": {
         "percent_compliant": {
-          "mean": 0.949804347826087,
-          "st_dev": 0.023484489914423146
+          "mean": 0.950304347826087,
+          "st_dev": 0.021925332992752927
         },
         "percent_male": {
-          "mean": 0.498,
-          "st_dev": 0.050813495669507026
+          "mean": 0.5017173913043478,
+          "st_dev": 0.05089584512550801
         },
         "L1_mean": {
-          "mean": 151.66685607207944,
-          "st_dev": 6.004374448944546e-05
+          "mean": 0.0005091859368048614,
+          "st_dev": 2.7511983272097575e-06
         },
         "L2_mean": {
-          "mean": 98.44131401924925,
-          "st_dev": 0.1165352004756933
+          "mean": 0.00016619856055627335,
+          "st_dev": 2.8927695478048334e-07
         },
         "L3_mean": {
-          "mean": 126.86268433269059,
-          "st_dev": 4.263256414560601e-14
+          "mean": 0.0,
+          "st_dev": 0.0
         },
         "ages_mean": {
-          "mean": 28.006274210839766,
-          "st_dev": 1.5077710935500939
+          "mean": 28.035905241215,
+          "st_dev": 1.5429367746361213
         },
         "mf_mean": {
-          "mean": 0.005981476804170823,
-          "st_dev": 9.598694886197654e-06
+          "mean": 0.005981412732216226,
+          "st_dev": 1.2730992027623405e-05
         },
         "male_worms_mean": {
-          "mean": 0.9644886128364389,
-          "st_dev": 0.00406274595480942
+          "mean": 0.9720165631469979,
+          "st_dev": 0.0039508693520773274
         },
         "infertile_female_worms_mean": {
-          "mean": 0.9704006211180125,
-          "st_dev": 0.004259032550214239
+          "mean": 0.9702360248447205,
+          "st_dev": 0.004291573394637585
         },
         "fertile_female_worms_mean": {
-          "mean": 0.9740807453416148,
-          "st_dev": 0.004346908608708059
+          "mean": 0.9742028985507246,
+          "st_dev": 0.004639552454470466
         },
         "mf_per_skin_snip": {
-          "mean": 0.12541304347826088,
-          "st_dev": 0.019136473849169867
+          "mean": 0.125375,
+          "st_dev": 0.01891486982061502
         },
         "population_prevalence": {
-          "mean": 0.3764382398218253,
-          "st_dev": 0.054746280702719266
+          "mean": 0.3708335108376268,
+          "st_dev": 0.05236689188357412
         }
       }
     },
@@ -2695,12 +2672,11 @@
       "end_year": 0.00781203333233776,
       "params": {
         "timestep_count": 10,
-        "bite_rate_per_person_per_year": 1000,
-        "treatment_intrvl_yrs": 1,
+        "bite_rate_per_person_per_year": 4500,
+        "treatment_interval_yrs": 1,
         "treatment_probability": 0.65,
         "treatment_start_time": 100,
-        "treatment_stop_time": 120,
-        "treatment_interval": 1,
+        "treatment_stop_time": 130,
         "min_skinsnip_age": 5,
         "min_treatable_age": 5,
         "human_population": 127,
@@ -2710,7 +2686,7 @@
         "human_blood_index": 0.63,
         "recip_gono_cycle": 0.009615384615384616,
         "bite_rate_per_fly_on_human": 65.52,
-        "annual_transm_potential": 15.262515262515263,
+        "annual_transm_potential": 68.68131868131869,
         "blackfly_mort_per_person_per_year": 26,
         "initial_mf": 0,
         "sigma_L0": 52,
@@ -2754,57 +2730,57 @@
         "lam_m": 32.4,
         "phi": 19.6,
         "permanent_infertility": 0.345,
-        "up": 0.0096,
-        "kap": 1.25
+        "u_ivermectin": 0.0096,
+        "shape_parameter_ivermectin": 1.25
       },
       "people": {
         "percent_compliant": {
-          "mean": 0.9502519685039371,
-          "st_dev": 0.019448780643272646
+          "mean": 0.9499055118110237,
+          "st_dev": 0.019432962390743574
         },
         "percent_male": {
-          "mean": 0.5005826771653543,
-          "st_dev": 0.04306771642026537
+          "mean": 0.49782677165354333,
+          "st_dev": 0.04596822069815872
         },
         "L1_mean": {
-          "mean": 151.65730739295515,
-          "st_dev": 0.10636142561539501
+          "mean": 0.000509193490542573,
+          "st_dev": 1.2842070001963288e-06
         },
         "L2_mean": {
-          "mean": 98.44640458428897,
-          "st_dev": 0.07713656580812851
+          "mean": 0.00016619931143060462,
+          "st_dev": 1.5050516574627115e-07
         },
         "L3_mean": {
-          "mean": 126.8586886575935,
-          "st_dev": 0.06305068953548468
+          "mean": 0.0,
+          "st_dev": 0.0
         },
         "ages_mean": {
-          "mean": 28.12071215618594,
-          "st_dev": 1.272036739846698
+          "mean": 27.987909222306094,
+          "st_dev": 1.2456567740776239
         },
         "mf_mean": {
-          "mean": 0.005981416124185392,
-          "st_dev": 8.977284286132238e-06
+          "mean": 0.005982054572131219,
+          "st_dev": 9.262045590883488e-06
         },
         "male_worms_mean": {
-          "mean": 0.9642699662542181,
-          "st_dev": 0.0036511798453562295
+          "mean": 0.9721507311586053,
+          "st_dev": 0.003279391699230678
         },
         "infertile_female_worms_mean": {
-          "mean": 0.9702189726284214,
-          "st_dev": 0.0036619030017980263
+          "mean": 0.9699167604049495,
+          "st_dev": 0.003490694353970568
         },
         "fertile_female_worms_mean": {
-          "mean": 0.9737787776527933,
-          "st_dev": 0.0036601912915309814
+          "mean": 0.9742099737532809,
+          "st_dev": 0.0036206278110620773
         },
         "mf_per_skin_snip": {
-          "mean": 0.12581496062992126,
-          "st_dev": 0.017122431978412227
+          "mean": 0.12620866141732284,
+          "st_dev": 0.016604304920889757
         },
         "population_prevalence": {
-          "mean": 0.3752621343204436,
-          "st_dev": 0.0448082371475868
+          "mean": 0.37284463388392075,
+          "st_dev": 0.04392397627317428
         }
       }
     },
@@ -2812,12 +2788,11 @@
       "end_year": 0.015624133329635477,
       "params": {
         "timestep_count": 10,
-        "bite_rate_per_person_per_year": 1000,
-        "treatment_intrvl_yrs": 1,
+        "bite_rate_per_person_per_year": 4500,
+        "treatment_interval_yrs": 1,
         "treatment_probability": 0.65,
         "treatment_start_time": 100,
-        "treatment_stop_time": 120,
-        "treatment_interval": 1,
+        "treatment_stop_time": 130,
         "min_skinsnip_age": 5,
         "min_treatable_age": 5,
         "human_population": 5,
@@ -2827,7 +2802,7 @@
         "human_blood_index": 0.63,
         "recip_gono_cycle": 0.009615384615384616,
         "bite_rate_per_fly_on_human": 65.52,
-        "annual_transm_potential": 15.262515262515263,
+        "annual_transm_potential": 68.68131868131869,
         "blackfly_mort_per_person_per_year": 26,
         "initial_mf": 0,
         "sigma_L0": 52,
@@ -2871,57 +2846,57 @@
         "lam_m": 32.4,
         "phi": 19.6,
         "permanent_infertility": 0.345,
-        "up": 0.0096,
-        "kap": 1.25
+        "u_ivermectin": 0.0096,
+        "shape_parameter_ivermectin": 1.25
       },
       "people": {
         "percent_compliant": {
-          "mean": 0.9516,
-          "st_dev": 0.09786439597729094
+          "mean": 0.9508000000000001,
+          "st_dev": 0.09909268388735869
         },
         "percent_male": {
-          "mean": 0.5096,
-          "st_dev": 0.22447235910017962
+          "mean": 0.5072,
+          "st_dev": 0.21134843268877107
         },
         "L1_mean": {
-          "mean": 151.6935359539826,
-          "st_dev": 0.0011075093107723577
+          "mean": 0.001263065676366415,
+          "st_dev": 1.6598946011474586e-05
         },
         "L2_mean": {
-          "mean": 98.47160703490968,
-          "st_dev": 0.0004938986000279658
+          "mean": 0.0006579635660609411,
+          "st_dev": 7.389501667422067e-06
         },
         "L3_mean": {
-          "mean": 126.85726740741944,
-          "st_dev": 1.1343551334970436
+          "mean": 0.0006386688802207101,
+          "st_dev": 5.6651734749937235e-06
         },
         "ages_mean": {
-          "mean": 28.146006575342476,
-          "st_dev": 6.435263236587469
+          "mean": 27.704220273972595,
+          "st_dev": 6.591175829061133
         },
         "mf_mean": {
-          "mean": 0.011916493199946001,
-          "st_dev": 0.00014071221545294325
+          "mean": 0.011907369604452121,
+          "st_dev": 0.00014519491578180945
         },
         "male_worms_mean": {
-          "mean": 0.9321142857142859,
-          "st_dev": 0.024943684416906996
+          "mean": 0.946361904761905,
+          "st_dev": 0.0229612233510712
         },
         "infertile_female_worms_mean": {
-          "mean": 0.9407238095238096,
-          "st_dev": 0.025157686824293007
+          "mean": 0.9436761904761906,
+          "st_dev": 0.02454595209341726
         },
         "fertile_female_worms_mean": {
-          "mean": 0.9510666666666667,
-          "st_dev": 0.026059335747325496
+          "mean": 0.9491809523809525,
+          "st_dev": 0.025289442824375286
         },
         "mf_per_skin_snip": {
-          "mean": 0.24810000000000001,
-          "st_dev": 0.13390814015585462
+          "mean": 0.2444,
+          "st_dev": 0.12218281384875698
         },
         "population_prevalence": {
-          "mean": 0.6047,
-          "st_dev": 0.23423544422937645
+          "mean": 0.5957333333333333,
+          "st_dev": 0.22656521258912535
         }
       }
     },
@@ -2929,12 +2904,11 @@
       "end_year": 0.015624133329635477,
       "params": {
         "timestep_count": 10,
-        "bite_rate_per_person_per_year": 1000,
-        "treatment_intrvl_yrs": 1,
+        "bite_rate_per_person_per_year": 4500,
+        "treatment_interval_yrs": 1,
         "treatment_probability": 0.65,
         "treatment_start_time": 100,
-        "treatment_stop_time": 120,
-        "treatment_interval": 1,
+        "treatment_stop_time": 130,
         "min_skinsnip_age": 5,
         "min_treatable_age": 5,
         "human_population": 7,
@@ -2944,7 +2918,7 @@
         "human_blood_index": 0.63,
         "recip_gono_cycle": 0.009615384615384616,
         "bite_rate_per_fly_on_human": 65.52,
-        "annual_transm_potential": 15.262515262515263,
+        "annual_transm_potential": 68.68131868131869,
         "blackfly_mort_per_person_per_year": 26,
         "initial_mf": 0,
         "sigma_L0": 52,
@@ -2988,57 +2962,57 @@
         "lam_m": 32.4,
         "phi": 19.6,
         "permanent_infertility": 0.345,
-        "up": 0.0096,
-        "kap": 1.25
+        "u_ivermectin": 0.0096,
+        "shape_parameter_ivermectin": 1.25
       },
       "people": {
         "percent_compliant": {
-          "mean": 0.9502857142857142,
-          "st_dev": 0.08016513568623108
+          "mean": 0.9522857142857142,
+          "st_dev": 0.08061548947229152
         },
         "percent_male": {
-          "mean": 0.5082857142857142,
-          "st_dev": 0.18728108308537905
+          "mean": 0.51,
+          "st_dev": 0.18166463832107374
         },
         "L1_mean": {
-          "mean": 151.69352849920082,
-          "st_dev": 0.0009336077350143243
+          "mean": 0.0012622110482919118,
+          "st_dev": 1.4362692737228531e-05
         },
         "L2_mean": {
-          "mean": 98.47159913924645,
-          "st_dev": 0.00041192832261021663
+          "mean": 0.0006574054640108624,
+          "st_dev": 7.139889733391878e-06
         },
         "L3_mean": {
-          "mean": 126.90802823292904,
-          "st_dev": 0.00032999106903561443
+          "mean": 0.0006385038257198461,
+          "st_dev": 4.652514089530587e-06
         },
         "ages_mean": {
-          "mean": 28.091486497064626,
-          "st_dev": 5.301348313760112
+          "mean": 27.805035616438243,
+          "st_dev": 5.299156478749515
         },
         "mf_mean": {
-          "mean": 0.011913272978242179,
-          "st_dev": 0.00013128372058699784
+          "mean": 0.011908534275215689,
+          "st_dev": 0.00017312436955863178
         },
         "male_worms_mean": {
-          "mean": 0.9330612244897959,
-          "st_dev": 0.02072140556570984
+          "mean": 0.9457278911564625,
+          "st_dev": 0.02197343778659619
         },
         "infertile_female_worms_mean": {
-          "mean": 0.9429387755102041,
-          "st_dev": 0.021748987666755152
+          "mean": 0.9409387755102041,
+          "st_dev": 0.023190072094547022
         },
         "fertile_female_worms_mean": {
-          "mean": 0.9499047619047619,
-          "st_dev": 0.021967106107814945
+          "mean": 0.9502312925170068,
+          "st_dev": 0.02281919428349075
         },
         "mf_per_skin_snip": {
-          "mean": 0.24785714285714283,
-          "st_dev": 0.10507771662256582
+          "mean": 0.24807142857142858,
+          "st_dev": 0.09932863923073029
         },
         "population_prevalence": {
-          "mean": 0.6010619047619048,
-          "st_dev": 0.20565523684046874
+          "mean": 0.5950142857142857,
+          "st_dev": 0.19317036827406608
         }
       }
     },
@@ -3046,12 +3020,11 @@
       "end_year": 0.015624133329635477,
       "params": {
         "timestep_count": 10,
-        "bite_rate_per_person_per_year": 1000,
-        "treatment_intrvl_yrs": 1,
+        "bite_rate_per_person_per_year": 4500,
+        "treatment_interval_yrs": 1,
         "treatment_probability": 0.65,
         "treatment_start_time": 100,
-        "treatment_stop_time": 120,
-        "treatment_interval": 1,
+        "treatment_stop_time": 130,
         "min_skinsnip_age": 5,
         "min_treatable_age": 5,
         "human_population": 10,
@@ -3061,7 +3034,7 @@
         "human_blood_index": 0.63,
         "recip_gono_cycle": 0.009615384615384616,
         "bite_rate_per_fly_on_human": 65.52,
-        "annual_transm_potential": 15.262515262515263,
+        "annual_transm_potential": 68.68131868131869,
         "blackfly_mort_per_person_per_year": 26,
         "initial_mf": 0,
         "sigma_L0": 52,
@@ -3105,57 +3078,57 @@
         "lam_m": 32.4,
         "phi": 19.6,
         "permanent_infertility": 0.345,
-        "up": 0.0096,
-        "kap": 1.25
+        "u_ivermectin": 0.0096,
+        "shape_parameter_ivermectin": 1.25
       },
       "people": {
         "percent_compliant": {
-          "mean": 0.95,
-          "st_dev": 0.06737952211169206
+          "mean": 0.9496000000000001,
+          "st_dev": 0.07056798140800116
         },
         "percent_male": {
-          "mean": 0.502,
-          "st_dev": 0.1596120296218302
+          "mean": 0.5012,
+          "st_dev": 0.1546562640179828
         },
         "L1_mean": {
-          "mean": 151.69360315242844,
-          "st_dev": 0.000879359357770414
+          "mean": 0.0012601283143881812,
+          "st_dev": 1.3277586693210429e-05
         },
         "L2_mean": {
-          "mean": 98.45192969086449,
-          "st_dev": 0.4399301607357881
+          "mean": 0.0006566351113244502,
+          "st_dev": 5.916200283244944e-06
         },
         "L3_mean": {
-          "mean": 126.90804884888064,
-          "st_dev": 0.00030958520059699553
+          "mean": 0.0006378314672626255,
+          "st_dev": 4.485050660819092e-06
         },
         "ages_mean": {
-          "mean": 27.939390136986255,
-          "st_dev": 4.477996978894533
+          "mean": 27.94503123287663,
+          "st_dev": 4.637670932138467
         },
         "mf_mean": {
-          "mean": 0.011918315653586625,
-          "st_dev": 0.00011295957668791715
+          "mean": 0.011913693702137768,
+          "st_dev": 0.00010268453068152903
         },
         "male_worms_mean": {
-          "mean": 0.9312857142857145,
-          "st_dev": 0.017623615881387503
+          "mean": 0.9473428571428572,
+          "st_dev": 0.01565691982230207
         },
         "infertile_female_worms_mean": {
-          "mean": 0.9412476190476191,
-          "st_dev": 0.019144844720317772
+          "mean": 0.9433238095238096,
+          "st_dev": 0.017638596619429445
         },
         "fertile_female_worms_mean": {
-          "mean": 0.9511714285714286,
-          "st_dev": 0.01851241172173691
+          "mean": 0.9497428571428572,
+          "st_dev": 0.017360447134695388
         },
         "mf_per_skin_snip": {
-          "mean": 0.24645,
-          "st_dev": 0.08866311239743392
+          "mean": 0.24810000000000001,
+          "st_dev": 0.08581311088639078
         },
         "population_prevalence": {
-          "mean": 0.592136507936508,
-          "st_dev": 0.16621939329386054
+          "mean": 0.5827619047619048,
+          "st_dev": 0.16063239849955496
         }
       }
     },
@@ -3163,12 +3136,11 @@
       "end_year": 0.015624133329635477,
       "params": {
         "timestep_count": 10,
-        "bite_rate_per_person_per_year": 1000,
-        "treatment_intrvl_yrs": 1,
+        "bite_rate_per_person_per_year": 4500,
+        "treatment_interval_yrs": 1,
         "treatment_probability": 0.65,
         "treatment_start_time": 100,
-        "treatment_stop_time": 120,
-        "treatment_interval": 1,
+        "treatment_stop_time": 130,
         "min_skinsnip_age": 5,
         "min_treatable_age": 5,
         "human_population": 13,
@@ -3178,7 +3150,7 @@
         "human_blood_index": 0.63,
         "recip_gono_cycle": 0.009615384615384616,
         "bite_rate_per_fly_on_human": 65.52,
-        "annual_transm_potential": 15.262515262515263,
+        "annual_transm_potential": 68.68131868131869,
         "blackfly_mort_per_person_per_year": 26,
         "initial_mf": 0,
         "sigma_L0": 52,
@@ -3222,57 +3194,57 @@
         "lam_m": 32.4,
         "phi": 19.6,
         "permanent_infertility": 0.345,
-        "up": 0.0096,
-        "kap": 1.25
+        "u_ivermectin": 0.0096,
+        "shape_parameter_ivermectin": 1.25
       },
       "people": {
         "percent_compliant": {
-          "mean": 0.9512307692307693,
-          "st_dev": 0.05978482125147657
+          "mean": 0.953846153846154,
+          "st_dev": 0.05735800579171461
         },
         "percent_male": {
-          "mean": 0.49215384615384616,
-          "st_dev": 0.14216408554531243
+          "mean": 0.507846153846154,
+          "st_dev": 0.13690570330571747
         },
         "L1_mean": {
-          "mean": 151.64687522819307,
-          "st_dev": 0.7361717296698077
+          "mean": 0.0012592325766625544,
+          "st_dev": 1.3484394410951032e-05
         },
         "L2_mean": {
-          "mean": 98.47159928828748,
-          "st_dev": 0.00033468467306072664
+          "mean": 0.0006561621325238456,
+          "st_dev": 6.162252309904944e-06
         },
         "L3_mean": {
-          "mean": 126.90803795423092,
-          "st_dev": 0.00026221833490209563
+          "mean": 0.0006374431155680737,
+          "st_dev": 4.748092466061522e-06
         },
         "ages_mean": {
-          "mean": 27.8356611169651,
-          "st_dev": 3.9647642546215467
+          "mean": 28.063451211801883,
+          "st_dev": 4.038569989014314
         },
         "mf_mean": {
-          "mean": 0.011917232848404034,
-          "st_dev": 8.319582765772422e-05
+          "mean": 0.011914367969396041,
+          "st_dev": 0.0001003465967814214
         },
         "male_worms_mean": {
-          "mean": 0.9322783882783883,
-          "st_dev": 0.014802277117209384
+          "mean": 0.9457728937728939,
+          "st_dev": 0.014412690137526798
         },
         "infertile_female_worms_mean": {
-          "mean": 0.9426227106227106,
-          "st_dev": 0.014966902080867227
+          "mean": 0.9430915750915752,
+          "st_dev": 0.015565267629804713
         },
         "fertile_female_worms_mean": {
-          "mean": 0.9500732600732601,
-          "st_dev": 0.015281838805289794
+          "mean": 0.9505128205128206,
+          "st_dev": 0.0159674611100348
         },
         "mf_per_skin_snip": {
-          "mean": 0.24915384615384617,
-          "st_dev": 0.07750277719780616
+          "mean": 0.2543461538461539,
+          "st_dev": 0.07748574024185613
         },
         "population_prevalence": {
-          "mean": 0.5822498057498058,
-          "st_dev": 0.1450418398776985
+          "mean": 0.5810320512820513,
+          "st_dev": 0.14535613796963576
         }
       }
     },
@@ -3280,12 +3252,11 @@
       "end_year": 0.015624133329635477,
       "params": {
         "timestep_count": 10,
-        "bite_rate_per_person_per_year": 1000,
-        "treatment_intrvl_yrs": 1,
+        "bite_rate_per_person_per_year": 4500,
+        "treatment_interval_yrs": 1,
         "treatment_probability": 0.65,
         "treatment_start_time": 100,
-        "treatment_stop_time": 120,
-        "treatment_interval": 1,
+        "treatment_stop_time": 130,
         "min_skinsnip_age": 5,
         "min_treatable_age": 5,
         "human_population": 18,
@@ -3295,7 +3266,7 @@
         "human_blood_index": 0.63,
         "recip_gono_cycle": 0.009615384615384616,
         "bite_rate_per_fly_on_human": 65.52,
-        "annual_transm_potential": 15.262515262515263,
+        "annual_transm_potential": 68.68131868131869,
         "blackfly_mort_per_person_per_year": 26,
         "initial_mf": 0,
         "sigma_L0": 52,
@@ -3339,57 +3310,57 @@
         "lam_m": 32.4,
         "phi": 19.6,
         "permanent_infertility": 0.345,
-        "up": 0.0096,
-        "kap": 1.25
+        "u_ivermectin": 0.0096,
+        "shape_parameter_ivermectin": 1.25
       },
       "people": {
         "percent_compliant": {
-          "mean": 0.9547777777777778,
-          "st_dev": 0.049671886377470074
+          "mean": 0.9501111111111111,
+          "st_dev": 0.04892662684893386
         },
         "percent_male": {
-          "mean": 0.4945555555555556,
-          "st_dev": 0.11993305745958843
+          "mean": 0.49844444444444447,
+          "st_dev": 0.1127547321828651
         },
         "L1_mean": {
-          "mean": 151.67663595762963,
-          "st_dev": 0.3765280201968955
+          "mean": 0.0012581230979336947,
+          "st_dev": 1.155428542770136e-05
         },
         "L2_mean": {
-          "mean": 98.46064005538094,
-          "st_dev": 0.24437754659720712
+          "mean": 0.0006551999188327722,
+          "st_dev": 1.2202626273780422e-05
         },
         "L3_mean": {
-          "mean": 126.90802318417391,
-          "st_dev": 0.0002265799692994656
+          "mean": 0.0006370150593814209,
+          "st_dev": 3.694689466081835e-06
         },
         "ages_mean": {
-          "mean": 27.98141582952808,
-          "st_dev": 3.3336199425321325
+          "mean": 28.00253546423136,
+          "st_dev": 3.402794303445801
         },
         "mf_mean": {
-          "mean": 0.011917115245043164,
-          "st_dev": 6.555776357865e-05
+          "mean": 0.011921120391486429,
+          "st_dev": 7.212791108873959e-05
         },
         "male_worms_mean": {
-          "mean": 0.9321746031746032,
-          "st_dev": 0.013264223134142224
+          "mean": 0.9476243386243386,
+          "st_dev": 0.010991162838199571
         },
         "infertile_female_worms_mean": {
-          "mean": 0.9434920634920636,
-          "st_dev": 0.01212390885963702
+          "mean": 0.9433650793650793,
+          "st_dev": 0.013013489694473298
         },
         "fertile_female_worms_mean": {
-          "mean": 0.9511693121693121,
-          "st_dev": 0.013070024361074533
+          "mean": 0.9510423280423281,
+          "st_dev": 0.01351589450506317
         },
         "mf_per_skin_snip": {
-          "mean": 0.24941666666666665,
-          "st_dev": 0.06575803828252051
+          "mean": 0.25027777777777777,
+          "st_dev": 0.0654454112360206
         },
         "population_prevalence": {
-          "mean": 0.5948652499461323,
-          "st_dev": 0.11955529815674329
+          "mean": 0.5939021439344968,
+          "st_dev": 0.12317622267968387
         }
       }
     },
@@ -3397,12 +3368,11 @@
       "end_year": 0.015624133329635477,
       "params": {
         "timestep_count": 10,
-        "bite_rate_per_person_per_year": 1000,
-        "treatment_intrvl_yrs": 1,
+        "bite_rate_per_person_per_year": 4500,
+        "treatment_interval_yrs": 1,
         "treatment_probability": 0.65,
         "treatment_start_time": 100,
-        "treatment_stop_time": 120,
-        "treatment_interval": 1,
+        "treatment_stop_time": 130,
         "min_skinsnip_age": 5,
         "min_treatable_age": 5,
         "human_population": 25,
@@ -3412,7 +3382,7 @@
         "human_blood_index": 0.63,
         "recip_gono_cycle": 0.009615384615384616,
         "bite_rate_per_fly_on_human": 65.52,
-        "annual_transm_potential": 15.262515262515263,
+        "annual_transm_potential": 68.68131868131869,
         "blackfly_mort_per_person_per_year": 26,
         "initial_mf": 0,
         "sigma_L0": 52,
@@ -3456,57 +3426,57 @@
         "lam_m": 32.4,
         "phi": 19.6,
         "permanent_infertility": 0.345,
-        "up": 0.0096,
-        "kap": 1.25
+        "u_ivermectin": 0.0096,
+        "shape_parameter_ivermectin": 1.25
       },
       "people": {
         "percent_compliant": {
-          "mean": 0.9494400000000001,
-          "st_dev": 0.044150723663378376
+          "mean": 0.9526400000000002,
+          "st_dev": 0.044002618103926486
         },
         "percent_male": {
-          "mean": 0.49800000000000005,
-          "st_dev": 0.09830157679305047
+          "mean": 0.49304000000000003,
+          "st_dev": 0.09421442776984851
         },
         "L1_mean": {
-          "mean": 151.68135759492668,
-          "st_dev": 0.27110857202201566
+          "mean": 0.0012567856354815175,
+          "st_dev": 1.0690616807739559e-05
         },
         "L2_mean": {
-          "mean": 98.46369988515981,
-          "st_dev": 0.17594751620239674
+          "mean": 0.0006550475735698142,
+          "st_dev": 4.86003250406748e-06
         },
         "L3_mean": {
-          "mean": 126.89787043108663,
-          "st_dev": 0.22671106623250817
+          "mean": 0.0006366861639532622,
+          "st_dev": 3.599144635530563e-06
         },
         "ages_mean": {
-          "mean": 27.97804909589039,
-          "st_dev": 2.965713574637467
+          "mean": 27.91881578082191,
+          "st_dev": 2.9629283473246026
         },
         "mf_mean": {
-          "mean": 0.011916229443727125,
-          "st_dev": 6.415204835672431e-05
+          "mean": 0.011913086434420262,
+          "st_dev": 6.996458319524512e-05
         },
         "male_worms_mean": {
-          "mean": 0.9319161904761905,
-          "st_dev": 0.011030933869841497
+          "mean": 0.9468419047619048,
+          "st_dev": 0.010318033175793728
         },
         "infertile_female_worms_mean": {
-          "mean": 0.9423695238095238,
-          "st_dev": 0.010812349368486627
+          "mean": 0.9435466666666666,
+          "st_dev": 0.010456250460664432
         },
         "fertile_female_worms_mean": {
-          "mean": 0.9506019047619048,
-          "st_dev": 0.010901770269609328
+          "mean": 0.9500571428571427,
+          "st_dev": 0.011617423774115855
         },
         "mf_per_skin_snip": {
-          "mean": 0.24833999999999998,
-          "st_dev": 0.05578749322204754
+          "mean": 0.24775999999999998,
+          "st_dev": 0.0582458788241709
         },
         "population_prevalence": {
-          "mean": 0.577575295930868,
-          "st_dev": 0.10578428154833916
+          "mean": 0.5878329777283634,
+          "st_dev": 0.10415839817534642
         }
       }
     },
@@ -3514,12 +3484,11 @@
       "end_year": 0.015624133329635477,
       "params": {
         "timestep_count": 10,
-        "bite_rate_per_person_per_year": 1000,
-        "treatment_intrvl_yrs": 1,
+        "bite_rate_per_person_per_year": 4500,
+        "treatment_interval_yrs": 1,
         "treatment_probability": 0.65,
         "treatment_start_time": 100,
-        "treatment_stop_time": 120,
-        "treatment_interval": 1,
+        "treatment_stop_time": 130,
         "min_skinsnip_age": 5,
         "min_treatable_age": 5,
         "human_population": 35,
@@ -3529,7 +3498,7 @@
         "human_blood_index": 0.63,
         "recip_gono_cycle": 0.009615384615384616,
         "bite_rate_per_fly_on_human": 65.52,
-        "annual_transm_potential": 15.262515262515263,
+        "annual_transm_potential": 68.68131868131869,
         "blackfly_mort_per_person_per_year": 26,
         "initial_mf": 0,
         "sigma_L0": 52,
@@ -3573,57 +3542,57 @@
         "lam_m": 32.4,
         "phi": 19.6,
         "permanent_infertility": 0.345,
-        "up": 0.0096,
-        "kap": 1.25
+        "u_ivermectin": 0.0096,
+        "shape_parameter_ivermectin": 1.25
       },
       "people": {
         "percent_compliant": {
-          "mean": 0.9495428571428572,
-          "st_dev": 0.03680332726750646
+          "mean": 0.9499428571428573,
+          "st_dev": 0.037585233748353465
         },
         "percent_male": {
-          "mean": 0.5012,
-          "st_dev": 0.08660600912365451
+          "mean": 0.498,
+          "st_dev": 0.08797541400520803
         },
         "L1_mean": {
-          "mean": 151.66746697642157,
-          "st_dev": 0.33489184185871734
+          "mean": 0.001255703867770102,
+          "st_dev": 1.0175454383536753e-05
         },
         "L2_mean": {
-          "mean": 98.47157396314786,
-          "st_dev": 0.00026020458926720013
+          "mean": 0.000654512251894807,
+          "st_dev": 4.617283544206307e-06
         },
         "L3_mean": {
-          "mean": 126.90076660695273,
-          "st_dev": 0.16194418369036698
+          "mean": 0.0006362174708659691,
+          "st_dev": 3.400747345632583e-06
         },
         "ages_mean": {
-          "mean": 27.913276712328734,
-          "st_dev": 2.368733180342129
+          "mean": 27.946987397260244,
+          "st_dev": 2.397663471264805
         },
         "mf_mean": {
-          "mean": 0.011912589449151866,
-          "st_dev": 5.452484122837589e-05
+          "mean": 0.011920099940362642,
+          "st_dev": 4.679824556723027e-05
         },
         "male_worms_mean": {
-          "mean": 0.9314884353741497,
-          "st_dev": 0.00902044551146063
+          "mean": 0.9471074829931972,
+          "st_dev": 0.008364926811115813
         },
         "infertile_female_worms_mean": {
-          "mean": 0.9431918367346939,
-          "st_dev": 0.009985086199488595
+          "mean": 0.9429306122448979,
+          "st_dev": 0.009498809169076106
         },
         "fertile_female_worms_mean": {
-          "mean": 0.9499020408163266,
-          "st_dev": 0.009174378364839227
+          "mean": 0.9509197278911565,
+          "st_dev": 0.009229718181967597
         },
         "mf_per_skin_snip": {
-          "mean": 0.24778571428571428,
-          "st_dev": 0.046093239576904095
+          "mean": 0.24914285714285714,
+          "st_dev": 0.046097500928322946
         },
         "population_prevalence": {
-          "mean": 0.587863190070754,
-          "st_dev": 0.08885861002283099
+          "mean": 0.5923094751605156,
+          "st_dev": 0.08384423464917204
         }
       }
     },
@@ -3631,12 +3600,11 @@
       "end_year": 0.015624133329635477,
       "params": {
         "timestep_count": 10,
-        "bite_rate_per_person_per_year": 1000,
-        "treatment_intrvl_yrs": 1,
+        "bite_rate_per_person_per_year": 4500,
+        "treatment_interval_yrs": 1,
         "treatment_probability": 0.65,
         "treatment_start_time": 100,
-        "treatment_stop_time": 120,
-        "treatment_interval": 1,
+        "treatment_stop_time": 130,
         "min_skinsnip_age": 5,
         "min_treatable_age": 5,
         "human_population": 48,
@@ -3646,7 +3614,7 @@
         "human_blood_index": 0.63,
         "recip_gono_cycle": 0.009615384615384616,
         "bite_rate_per_fly_on_human": 65.52,
-        "annual_transm_potential": 15.262515262515263,
+        "annual_transm_potential": 68.68131868131869,
         "blackfly_mort_per_person_per_year": 26,
         "initial_mf": 0,
         "sigma_L0": 52,
@@ -3690,57 +3658,57 @@
         "lam_m": 32.4,
         "phi": 19.6,
         "permanent_infertility": 0.345,
-        "up": 0.0096,
-        "kap": 1.25
+        "u_ivermectin": 0.0096,
+        "shape_parameter_ivermectin": 1.25
       },
       "people": {
         "percent_compliant": {
-          "mean": 0.95025,
-          "st_dev": 0.03244557408611808
+          "mean": 0.9484583333333333,
+          "st_dev": 0.03157692877015678
         },
         "percent_male": {
-          "mean": 0.5000833333333333,
-          "st_dev": 0.07488412344712626
+          "mean": 0.5013333333333334,
+          "st_dev": 0.07344423432479609
         },
         "L1_mean": {
-          "mean": 151.68718005512318,
-          "st_dev": 0.14109638546516057
+          "mean": 0.0012554637585951414,
+          "st_dev": 8.430907611395188e-06
         },
         "L2_mean": {
-          "mean": 98.46747505511838,
-          "st_dev": 0.09168853180309
+          "mean": 0.0006544598546768754,
+          "st_dev": 3.8469301517238195e-06
         },
         "L3_mean": {
-          "mean": 126.89216344524736,
-          "st_dev": 0.20410855544365952
+          "mean": 0.0006361636656670995,
+          "st_dev": 2.9174657839620567e-06
         },
         "ages_mean": {
-          "mean": 27.903962214611862,
-          "st_dev": 2.049042283528226
+          "mean": 28.004770547945203,
+          "st_dev": 2.004872234843852
         },
         "mf_mean": {
-          "mean": 0.011913376243630276,
-          "st_dev": 4.780639797257044e-05
+          "mean": 0.01192176615587244,
+          "st_dev": 3.9024858632080764e-05
         },
         "male_worms_mean": {
-          "mean": 0.931797619047619,
-          "st_dev": 0.00801158045523968
+          "mean": 0.946579365079365,
+          "st_dev": 0.00682586515558263
         },
         "infertile_female_worms_mean": {
-          "mean": 0.9431805555555556,
-          "st_dev": 0.008149360732069458
+          "mean": 0.9423769841269841,
+          "st_dev": 0.0077638044628886155
         },
         "fertile_female_worms_mean": {
-          "mean": 0.9502321428571429,
-          "st_dev": 0.007949545590836077
+          "mean": 0.9512757936507936,
+          "st_dev": 0.007574390403932312
         },
         "mf_per_skin_snip": {
-          "mean": 0.25063541666666667,
-          "st_dev": 0.04032579318939885
+          "mean": 0.24941666666666668,
+          "st_dev": 0.04232919107030828
         },
         "population_prevalence": {
-          "mean": 0.5907967582384941,
-          "st_dev": 0.07271920022009537
+          "mean": 0.5919095817366979,
+          "st_dev": 0.0723373843866445
         }
       }
     },
@@ -3748,12 +3716,11 @@
       "end_year": 0.03124839998975975,
       "params": {
         "timestep_count": 10,
-        "bite_rate_per_person_per_year": 1000,
-        "treatment_intrvl_yrs": 1,
+        "bite_rate_per_person_per_year": 4500,
+        "treatment_interval_yrs": 1,
         "treatment_probability": 0.65,
         "treatment_start_time": 100,
-        "treatment_stop_time": 120,
-        "treatment_interval": 1,
+        "treatment_stop_time": 130,
         "min_skinsnip_age": 5,
         "min_treatable_age": 5,
         "human_population": 5,
@@ -3763,7 +3730,7 @@
         "human_blood_index": 0.63,
         "recip_gono_cycle": 0.009615384615384616,
         "bite_rate_per_fly_on_human": 65.52,
-        "annual_transm_potential": 15.262515262515263,
+        "annual_transm_potential": 68.68131868131869,
         "blackfly_mort_per_person_per_year": 26,
         "initial_mf": 0,
         "sigma_L0": 52,
@@ -3807,57 +3774,57 @@
         "lam_m": 32.4,
         "phi": 19.6,
         "permanent_infertility": 0.345,
-        "up": 0.0096,
-        "kap": 1.25
+        "u_ivermectin": 0.0096,
+        "shape_parameter_ivermectin": 1.25
       },
       "people": {
         "percent_compliant": {
-          "mean": 0.9508000000000001,
-          "st_dev": 0.0932703597076799
+          "mean": 0.9488,
+          "st_dev": 0.09175271113160632
         },
         "percent_male": {
-          "mean": 0.5064,
-          "st_dev": 0.2249423037136412
+          "mean": 0.482,
+          "st_dev": 0.22144073699299324
         },
         "L1_mean": {
-          "mean": 151.6384757720821,
-          "st_dev": 0.0014315686802965368
+          "mean": 0.0027300750696059996,
+          "st_dev": 5.551931048664797e-05
         },
         "L2_mean": {
-          "mean": 98.33108604814974,
-          "st_dev": 0.0015104577275556785
+          "mean": 0.0016110346148088533,
+          "st_dev": 3.146411234985096e-05
         },
         "L3_mean": {
-          "mean": 126.74916220303741,
-          "st_dev": 0.0013820339651521216
+          "mean": 0.0018750895430077797,
+          "st_dev": 3.381152397199771e-05
         },
         "ages_mean": {
-          "mean": 27.50216219178084,
-          "st_dev": 6.440125652803816
+          "mean": 28.029043287671218,
+          "st_dev": 6.384074622883519
         },
         "mf_mean": {
-          "mean": 0.023655204860668567,
-          "st_dev": 0.00041721663930882646
+          "mean": 0.023654900459673053,
+          "st_dev": 0.0005015954722211255
         },
         "male_worms_mean": {
-          "mean": 0.8748571428571429,
-          "st_dev": 0.03355355822921422
+          "mean": 0.8990285714285716,
+          "st_dev": 0.030218547862540236
         },
         "infertile_female_worms_mean": {
-          "mean": 0.8929333333333336,
-          "st_dev": 0.030230311709139656
+          "mean": 0.8952761904761906,
+          "st_dev": 0.0342962735062752
         },
         "fertile_female_worms_mean": {
-          "mean": 0.9102095238095239,
-          "st_dev": 0.031748467208166556
+          "mean": 0.9088952380952382,
+          "st_dev": 0.033555239595454985
         },
         "mf_per_skin_snip": {
-          "mean": 0.504,
-          "st_dev": 0.1924421991144354
+          "mean": 0.5034000000000001,
+          "st_dev": 0.1975055442259786
         },
         "population_prevalence": {
-          "mean": 0.7980999999999999,
-          "st_dev": 0.1944943615292399
+          "mean": 0.8015,
+          "st_dev": 0.1872178618021736
         }
       }
     },
@@ -3865,12 +3832,11 @@
       "end_year": 0.03124839998975975,
       "params": {
         "timestep_count": 10,
-        "bite_rate_per_person_per_year": 1000,
-        "treatment_intrvl_yrs": 1,
+        "bite_rate_per_person_per_year": 4500,
+        "treatment_interval_yrs": 1,
         "treatment_probability": 0.65,
         "treatment_start_time": 100,
-        "treatment_stop_time": 120,
-        "treatment_interval": 1,
+        "treatment_stop_time": 130,
         "min_skinsnip_age": 5,
         "min_treatable_age": 5,
         "human_population": 7,
@@ -3880,7 +3846,7 @@
         "human_blood_index": 0.63,
         "recip_gono_cycle": 0.009615384615384616,
         "bite_rate_per_fly_on_human": 65.52,
-        "annual_transm_potential": 15.262515262515263,
+        "annual_transm_potential": 68.68131868131869,
         "blackfly_mort_per_person_per_year": 26,
         "initial_mf": 0,
         "sigma_L0": 52,
@@ -3924,57 +3890,57 @@
         "lam_m": 32.4,
         "phi": 19.6,
         "permanent_infertility": 0.345,
-        "up": 0.0096,
-        "kap": 1.25
+        "u_ivermectin": 0.0096,
+        "shape_parameter_ivermectin": 1.25
       },
       "people": {
         "percent_compliant": {
-          "mean": 0.952,
-          "st_dev": 0.08170429509355487
+          "mean": 0.9477142857142857,
+          "st_dev": 0.08853040524622728
         },
         "percent_male": {
-          "mean": 0.49742857142857144,
-          "st_dev": 0.17875282215554367
+          "mean": 0.5145714285714285,
+          "st_dev": 0.19014473542058236
         },
         "L1_mean": {
-          "mean": 151.59512379025307,
-          "st_dev": 0.9680402928844728
+          "mean": 0.002719291565067577,
+          "st_dev": 4.9908684514016674e-05
         },
         "L2_mean": {
-          "mean": 98.33112567898675,
-          "st_dev": 0.0012788278316849706
+          "mean": 0.001604664247781951,
+          "st_dev": 2.85438161673144e-05
         },
         "L3_mean": {
-          "mean": 126.7492131257158,
-          "st_dev": 0.0012475785191950854
+          "mean": 0.0018682424291100533,
+          "st_dev": 3.089016217923313e-05
         },
         "ages_mean": {
-          "mean": 27.950334246575338,
-          "st_dev": 5.371285979230536
+          "mean": 28.236068101761237,
+          "st_dev": 5.256590049806276
         },
         "mf_mean": {
-          "mean": 0.023662987485603026,
-          "st_dev": 0.0002914244198183283
+          "mean": 0.023650804732443426,
+          "st_dev": 0.00033031249005445126
         },
         "male_worms_mean": {
-          "mean": 0.873591836734694,
-          "st_dev": 0.024666103831694222
+          "mean": 0.903251700680272,
+          "st_dev": 0.023660090832255263
         },
         "infertile_female_worms_mean": {
-          "mean": 0.8961496598639457,
-          "st_dev": 0.02560503372117777
+          "mean": 0.8935238095238095,
+          "st_dev": 0.02574530756619554
         },
         "fertile_female_worms_mean": {
-          "mean": 0.9075782312925171,
-          "st_dev": 0.02609497917912597
+          "mean": 0.9092244897959183,
+          "st_dev": 0.02801999775089079
         },
         "mf_per_skin_snip": {
-          "mean": 0.5010714285714285,
-          "st_dev": 0.16883869551154682
+          "mean": 0.5025,
+          "st_dev": 0.17040280909345001
         },
         "population_prevalence": {
-          "mean": 0.7993238095238095,
-          "st_dev": 0.15973815280113096
+          "mean": 0.7971142857142857,
+          "st_dev": 0.15445799933991994
         }
       }
     },
@@ -3982,12 +3948,11 @@
       "end_year": 0.03124839998975975,
       "params": {
         "timestep_count": 10,
-        "bite_rate_per_person_per_year": 1000,
-        "treatment_intrvl_yrs": 1,
+        "bite_rate_per_person_per_year": 4500,
+        "treatment_interval_yrs": 1,
         "treatment_probability": 0.65,
         "treatment_start_time": 100,
-        "treatment_stop_time": 120,
-        "treatment_interval": 1,
+        "treatment_stop_time": 130,
         "min_skinsnip_age": 5,
         "min_treatable_age": 5,
         "human_population": 10,
@@ -3997,7 +3962,7 @@
         "human_blood_index": 0.63,
         "recip_gono_cycle": 0.009615384615384616,
         "bite_rate_per_fly_on_human": 65.52,
-        "annual_transm_potential": 15.262515262515263,
+        "annual_transm_potential": 68.68131868131869,
         "blackfly_mort_per_person_per_year": 26,
         "initial_mf": 0,
         "sigma_L0": 52,
@@ -4041,57 +4006,57 @@
         "lam_m": 32.4,
         "phi": 19.6,
         "permanent_infertility": 0.345,
-        "up": 0.0096,
-        "kap": 1.25
+        "u_ivermectin": 0.0096,
+        "shape_parameter_ivermectin": 1.25
       },
       "people": {
         "percent_compliant": {
-          "mean": 0.954,
-          "st_dev": 0.06514598989960932
+          "mean": 0.9476000000000001,
+          "st_dev": 0.07024414566353553
         },
         "percent_male": {
-          "mean": 0.47959999999999997,
-          "st_dev": 0.15054514273134154
+          "mean": 0.5005999999999999,
+          "st_dev": 0.16340024479785825
         },
         "L1_mean": {
-          "mean": 151.638510572749,
-          "st_dev": 0.0011870124007095722
+          "mean": 0.002712892585374296,
+          "st_dev": 5.0783011674001526e-05
         },
         "L2_mean": {
-          "mean": 98.33116711736625,
-          "st_dev": 0.001165550152949629
+          "mean": 0.0016003801613320382,
+          "st_dev": 2.950579975204768e-05
         },
         "L3_mean": {
-          "mean": 126.72395332036199,
-          "st_dev": 0.565828990019182
+          "mean": 0.0018639245791153211,
+          "st_dev": 3.195510881973109e-05
         },
         "ages_mean": {
-          "mean": 27.858992876712247,
-          "st_dev": 4.667410843504795
+          "mean": 28.00489095890411,
+          "st_dev": 4.596828145724457
         },
         "mf_mean": {
-          "mean": 0.023647203777097517,
-          "st_dev": 0.00029815228486264203
+          "mean": 0.023668294150604008,
+          "st_dev": 0.0002542449389585917
         },
         "male_worms_mean": {
-          "mean": 0.8743904761904764,
-          "st_dev": 0.022926044957972274
+          "mean": 0.9023238095238099,
+          "st_dev": 0.017101707225381794
         },
         "infertile_female_worms_mean": {
-          "mean": 0.8944857142857144,
-          "st_dev": 0.02317097840754274
+          "mean": 0.8952476190476193,
+          "st_dev": 0.021660122507259242
         },
         "fertile_female_worms_mean": {
-          "mean": 0.9080285714285716,
-          "st_dev": 0.02219037604718871
+          "mean": 0.9114476190476193,
+          "st_dev": 0.021653205656270477
         },
         "mf_per_skin_snip": {
-          "mean": 0.50275,
-          "st_dev": 0.1372358826983672
+          "mean": 0.5033,
+          "st_dev": 0.13266163725810112
         },
         "population_prevalence": {
-          "mean": 0.7922984126984127,
-          "st_dev": 0.13974678217852354
+          "mean": 0.7921603174603175,
+          "st_dev": 0.13396270609328076
         }
       }
     },
@@ -4099,12 +4064,11 @@
       "end_year": 0.03124839998975975,
       "params": {
         "timestep_count": 10,
-        "bite_rate_per_person_per_year": 1000,
-        "treatment_intrvl_yrs": 1,
+        "bite_rate_per_person_per_year": 4500,
+        "treatment_interval_yrs": 1,
         "treatment_probability": 0.65,
         "treatment_start_time": 100,
-        "treatment_stop_time": 120,
-        "treatment_interval": 1,
+        "treatment_stop_time": 130,
         "min_skinsnip_age": 5,
         "min_treatable_age": 5,
         "human_population": 13,
@@ -4114,7 +4078,7 @@
         "human_blood_index": 0.63,
         "recip_gono_cycle": 0.009615384615384616,
         "bite_rate_per_fly_on_human": 65.52,
-        "annual_transm_potential": 15.262515262515263,
+        "annual_transm_potential": 68.68131868131869,
         "blackfly_mort_per_person_per_year": 26,
         "initial_mf": 0,
         "sigma_L0": 52,
@@ -4158,57 +4122,57 @@
         "lam_m": 32.4,
         "phi": 19.6,
         "permanent_infertility": 0.345,
-        "up": 0.0096,
-        "kap": 1.25
+        "u_ivermectin": 0.0096,
+        "shape_parameter_ivermectin": 1.25
       },
       "people": {
         "percent_compliant": {
-          "mean": 0.9529230769230769,
-          "st_dev": 0.0592585349506469
+          "mean": 0.9503076923076924,
+          "st_dev": 0.06001400231090058
         },
         "percent_male": {
-          "mean": 0.5018461538461538,
-          "st_dev": 0.13772075340034906
+          "mean": 0.5,
+          "st_dev": 0.13978004699692134
         },
         "L1_mean": {
-          "mean": 151.61509524062913,
-          "st_dev": 0.5210763037995155
+          "mean": 0.002702507679526325,
+          "st_dev": 4.7778603383503774e-05
         },
         "L2_mean": {
-          "mean": 98.33118605336038,
-          "st_dev": 0.001009778184005035
+          "mean": 0.001594011013355427,
+          "st_dev": 2.8215517719886174e-05
         },
         "L3_mean": {
-          "mean": 126.74929584822164,
-          "st_dev": 0.001355258255913115
+          "mean": 0.0018570301169682567,
+          "st_dev": 3.0047102818232165e-05
         },
         "ages_mean": {
-          "mean": 28.10018377239202,
-          "st_dev": 3.980668088372768
+          "mean": 28.067416649104327,
+          "st_dev": 3.96579176202514
         },
         "mf_mean": {
-          "mean": 0.02366480587064177,
-          "st_dev": 0.00021549993691605222
+          "mean": 0.02365161804861004,
+          "st_dev": 0.00024596411708052766
         },
         "male_worms_mean": {
-          "mean": 0.8734505494505496,
-          "st_dev": 0.018641664442371628
+          "mean": 0.9022271062271064,
+          "st_dev": 0.016730400219680554
         },
         "infertile_female_worms_mean": {
-          "mean": 0.894849816849817,
-          "st_dev": 0.018319253722728294
+          "mean": 0.8939560439560441,
+          "st_dev": 0.018618547129133033
         },
         "fertile_female_worms_mean": {
-          "mean": 0.9090256410256412,
-          "st_dev": 0.018659437016078684
+          "mean": 0.9078901098901101,
+          "st_dev": 0.01891070971261317
         },
         "mf_per_skin_snip": {
-          "mean": 0.4987692307692308,
-          "st_dev": 0.11739263003186706
+          "mean": 0.49269230769230765,
+          "st_dev": 0.11906874847711017
         },
         "population_prevalence": {
-          "mean": 0.8068358197358197,
-          "st_dev": 0.11170654149090516
+          "mean": 0.799891724941725,
+          "st_dev": 0.11367048795393
         }
       }
     },
@@ -4216,12 +4180,11 @@
       "end_year": 0.03124839998975975,
       "params": {
         "timestep_count": 10,
-        "bite_rate_per_person_per_year": 1000,
-        "treatment_intrvl_yrs": 1,
+        "bite_rate_per_person_per_year": 4500,
+        "treatment_interval_yrs": 1,
         "treatment_probability": 0.65,
         "treatment_start_time": 100,
-        "treatment_stop_time": 120,
-        "treatment_interval": 1,
+        "treatment_stop_time": 130,
         "min_skinsnip_age": 5,
         "min_treatable_age": 5,
         "human_population": 18,
@@ -4231,7 +4194,7 @@
         "human_blood_index": 0.63,
         "recip_gono_cycle": 0.009615384615384616,
         "bite_rate_per_fly_on_human": 65.52,
-        "annual_transm_potential": 15.262515262515263,
+        "annual_transm_potential": 68.68131868131869,
         "blackfly_mort_per_person_per_year": 26,
         "initial_mf": 0,
         "sigma_L0": 52,
@@ -4275,57 +4238,57 @@
         "lam_m": 32.4,
         "phi": 19.6,
         "permanent_infertility": 0.345,
-        "up": 0.0096,
-        "kap": 1.25
+        "u_ivermectin": 0.0096,
+        "shape_parameter_ivermectin": 1.25
       },
       "people": {
         "percent_compliant": {
-          "mean": 0.9514444444444445,
-          "st_dev": 0.052296755322715306
+          "mean": 0.9482222222222223,
+          "st_dev": 0.05280338560039686
         },
         "percent_male": {
-          "mean": 0.4912222222222222,
-          "st_dev": 0.12625953087114838
+          "mean": 0.5086666666666667,
+          "st_dev": 0.11868185504132207
         },
         "L1_mean": {
-          "mean": 151.63843439204382,
-          "st_dev": 0.0010014431184942145
+          "mean": 0.002702781219672476,
+          "st_dev": 4.414892700941274e-05
         },
         "L2_mean": {
-          "mean": 98.33120617160333,
-          "st_dev": 0.0008271781194977816
+          "mean": 0.0015942320705595852,
+          "st_dev": 2.6167057630685223e-05
         },
         "L3_mean": {
-          "mean": 126.73521529358473,
-          "st_dev": 0.3144619349270149
+          "mean": 0.0018574575730125856,
+          "st_dev": 2.8336552571590075e-05
         },
         "ages_mean": {
-          "mean": 28.229044748858435,
-          "st_dev": 3.4436750766000013
+          "mean": 28.147025570776286,
+          "st_dev": 3.3838071821504307
         },
         "mf_mean": {
-          "mean": 0.0236647394162928,
-          "st_dev": 0.0002163795380694702
+          "mean": 0.023678833100918575,
+          "st_dev": 0.00017982991052759516
         },
         "male_worms_mean": {
-          "mean": 0.8741269841269841,
-          "st_dev": 0.015910801586402273
+          "mean": 0.9026190476190477,
+          "st_dev": 0.013691824435823018
         },
         "infertile_female_worms_mean": {
-          "mean": 0.8946613756613756,
-          "st_dev": 0.016720094928678132
+          "mean": 0.8942592592592591,
+          "st_dev": 0.01618414217145687
         },
         "fertile_female_worms_mean": {
-          "mean": 0.9099947089947089,
-          "st_dev": 0.016396465146944594
+          "mean": 0.9110899470899472,
+          "st_dev": 0.015360859099459659
         },
         "mf_per_skin_snip": {
-          "mean": 0.49525,
-          "st_dev": 0.10069304213582932
+          "mean": 0.4972500000000001,
+          "st_dev": 0.11067866888842484
         },
         "population_prevalence": {
-          "mean": 0.7999713854772679,
-          "st_dev": 0.09700627117104292
+          "mean": 0.7981246785893845,
+          "st_dev": 0.09451159865936652
         }
       }
     },
@@ -4333,12 +4296,11 @@
       "end_year": 0.03124839998975975,
       "params": {
         "timestep_count": 10,
-        "bite_rate_per_person_per_year": 1000,
-        "treatment_intrvl_yrs": 1,
+        "bite_rate_per_person_per_year": 4500,
+        "treatment_interval_yrs": 1,
         "treatment_probability": 0.65,
         "treatment_start_time": 100,
-        "treatment_stop_time": 120,
-        "treatment_interval": 1,
+        "treatment_stop_time": 130,
         "min_skinsnip_age": 5,
         "min_treatable_age": 5,
         "human_population": 25,
@@ -4348,7 +4310,7 @@
         "human_blood_index": 0.63,
         "recip_gono_cycle": 0.009615384615384616,
         "bite_rate_per_fly_on_human": 65.52,
-        "annual_transm_potential": 15.262515262515263,
+        "annual_transm_potential": 68.68131868131869,
         "blackfly_mort_per_person_per_year": 26,
         "initial_mf": 0,
         "sigma_L0": 52,
@@ -4392,57 +4354,57 @@
         "lam_m": 32.4,
         "phi": 19.6,
         "permanent_infertility": 0.345,
-        "up": 0.0096,
-        "kap": 1.25
+        "u_ivermectin": 0.0096,
+        "shape_parameter_ivermectin": 1.25
       },
       "people": {
         "percent_compliant": {
-          "mean": 0.95184,
-          "st_dev": 0.044441134098940356
+          "mean": 0.95048,
+          "st_dev": 0.04258367762417895
         },
         "percent_male": {
-          "mean": 0.5072800000000001,
-          "st_dev": 0.09918770891597406
+          "mean": 0.49856000000000006,
+          "st_dev": 0.09330126687242785
         },
         "L1_mean": {
-          "mean": 151.62633296509992,
-          "st_dev": 0.27104515252020567
+          "mean": 0.002692844357834664,
+          "st_dev": 4.4525529312409385e-05
         },
         "L2_mean": {
-          "mean": 98.33119492937314,
-          "st_dev": 0.0008068825770638786
+          "mean": 0.001587835939666315,
+          "st_dev": 2.6842327963973546e-05
         },
         "L3_mean": {
-          "mean": 126.7290700539588,
-          "st_dev": 0.32015014823083815
+          "mean": 0.0018506626302441215,
+          "st_dev": 2.8744182830338957e-05
         },
         "ages_mean": {
-          "mean": 28.128183671232904,
-          "st_dev": 2.7940768856201164
+          "mean": 28.013822246575337,
+          "st_dev": 2.857887282310496
         },
         "mf_mean": {
-          "mean": 0.023663652526650515,
-          "st_dev": 0.000202392550630909
+          "mean": 0.023665419251113356,
+          "st_dev": 0.00019114889905827795
         },
         "male_worms_mean": {
-          "mean": 0.874247619047619,
-          "st_dev": 0.013952377701933631
+          "mean": 0.9021142857142856,
+          "st_dev": 0.012647662076805746
         },
         "infertile_female_worms_mean": {
-          "mean": 0.8947047619047619,
-          "st_dev": 0.014330798700115078
+          "mean": 0.8941980952380952,
+          "st_dev": 0.014984059133556363
         },
         "fertile_female_worms_mean": {
-          "mean": 0.9093980952380952,
-          "st_dev": 0.01556665358562576
+          "mean": 0.9108114285714286,
+          "st_dev": 0.013511332138065617
         },
         "mf_per_skin_snip": {
-          "mean": 0.49336,
-          "st_dev": 0.09078276488409019
+          "mean": 0.49476,
+          "st_dev": 0.08820284802658018
         },
         "population_prevalence": {
-          "mean": 0.7973923473975957,
-          "st_dev": 0.08903273087843891
+          "mean": 0.7906369015792989,
+          "st_dev": 0.08519511456274195
         }
       }
     },
@@ -4450,12 +4412,11 @@
       "end_year": 0.062497066641634916,
       "params": {
         "timestep_count": 10,
-        "bite_rate_per_person_per_year": 1000,
-        "treatment_intrvl_yrs": 1,
+        "bite_rate_per_person_per_year": 4500,
+        "treatment_interval_yrs": 1,
         "treatment_probability": 0.65,
         "treatment_start_time": 100,
-        "treatment_stop_time": 120,
-        "treatment_interval": 1,
+        "treatment_stop_time": 130,
         "min_skinsnip_age": 5,
         "min_treatable_age": 5,
         "human_population": 5,
@@ -4465,7 +4426,7 @@
         "human_blood_index": 0.63,
         "recip_gono_cycle": 0.009615384615384616,
         "bite_rate_per_fly_on_human": 65.52,
-        "annual_transm_potential": 15.262515262515263,
+        "annual_transm_potential": 68.68131868131869,
         "blackfly_mort_per_person_per_year": 26,
         "initial_mf": 0,
         "sigma_L0": 52,
@@ -4509,57 +4470,57 @@
         "lam_m": 32.4,
         "phi": 19.6,
         "permanent_infertility": 0.345,
-        "up": 0.0096,
-        "kap": 1.25
+        "u_ivermectin": 0.0096,
+        "shape_parameter_ivermectin": 1.25
       },
       "people": {
         "percent_compliant": {
-          "mean": 0.9444,
-          "st_dev": 0.10367564805681224
+          "mean": 0.9456,
+          "st_dev": 0.09919999999999998
         },
         "percent_male": {
-          "mean": 0.49,
-          "st_dev": 0.23456342425877058
+          "mean": 0.514,
+          "st_dev": 0.2357201730866495
         },
         "L1_mean": {
-          "mean": 151.54023083624227,
-          "st_dev": 0.0021731019523795474
+          "mean": 0.005291021483406517,
+          "st_dev": 0.00015543206964431584
         },
         "L2_mean": {
-          "mean": 98.07985278666395,
-          "st_dev": 0.008677957891869887
+          "mean": 0.0032616799950177843,
+          "st_dev": 9.758790333372247e-05
         },
         "L3_mean": {
-          "mean": 126.42455626795237,
-          "st_dev": 0.010088594103959644
+          "mean": 0.004016135631340734,
+          "st_dev": 0.00011691668809538192
         },
         "ages_mean": {
-          "mean": 27.67506520547941,
-          "st_dev": 6.611561808862434
+          "mean": 28.347418082191755,
+          "st_dev": 6.573075587885408
         },
         "mf_mean": {
-          "mean": 0.0448848820319002,
-          "st_dev": 0.0009410007630534665
+          "mean": 0.04484951357741727,
+          "st_dev": 0.0011034724665158397
         },
         "male_worms_mean": {
-          "mean": 0.790704761904762,
-          "st_dev": 0.03654391822429108
+          "mean": 0.8361333333333334,
+          "st_dev": 0.031158382616179477
         },
         "infertile_female_worms_mean": {
-          "mean": 0.8237523809523811,
-          "st_dev": 0.03699600272579559
+          "mean": 0.8241714285714287,
+          "st_dev": 0.04011836907720659
         },
         "fertile_female_worms_mean": {
-          "mean": 0.8536,
-          "st_dev": 0.036302603243673494
+          "mean": 0.8544952380952383,
+          "st_dev": 0.03776609716714312
         },
         "mf_per_skin_snip": {
-          "mean": 0.9478,
-          "st_dev": 0.30598228706903935
+          "mean": 0.9439,
+          "st_dev": 0.32054296123920734
         },
         "population_prevalence": {
-          "mean": 0.9170666666666666,
-          "st_dev": 0.13326188085453725
+          "mean": 0.9113333333333332,
+          "st_dev": 0.12878233143132986
         }
       }
     },
@@ -4567,12 +4528,11 @@
       "end_year": 0.062497066641634916,
       "params": {
         "timestep_count": 10,
-        "bite_rate_per_person_per_year": 1000,
-        "treatment_intrvl_yrs": 1,
+        "bite_rate_per_person_per_year": 4500,
+        "treatment_interval_yrs": 1,
         "treatment_probability": 0.65,
         "treatment_start_time": 100,
-        "treatment_stop_time": 120,
-        "treatment_interval": 1,
+        "treatment_stop_time": 130,
         "min_skinsnip_age": 5,
         "min_treatable_age": 5,
         "human_population": 7,
@@ -4582,7 +4542,7 @@
         "human_blood_index": 0.63,
         "recip_gono_cycle": 0.009615384615384616,
         "bite_rate_per_fly_on_human": 65.52,
-        "annual_transm_potential": 15.262515262515263,
+        "annual_transm_potential": 68.68131868131869,
         "blackfly_mort_per_person_per_year": 26,
         "initial_mf": 0,
         "sigma_L0": 52,
@@ -4626,57 +4586,57 @@
         "lam_m": 32.4,
         "phi": 19.6,
         "permanent_infertility": 0.345,
-        "up": 0.0096,
-        "kap": 1.25
+        "u_ivermectin": 0.0096,
+        "shape_parameter_ivermectin": 1.25
       },
       "people": {
         "percent_compliant": {
-          "mean": 0.9571428571428571,
-          "st_dev": 0.08403109239915854
+          "mean": 0.948,
+          "st_dev": 0.08323853110924347
         },
         "percent_male": {
-          "mean": 0.5062857142857142,
-          "st_dev": 0.19123999240189682
+          "mean": 0.4942857142857142,
+          "st_dev": 0.18737717065222392
         },
         "L1_mean": {
-          "mean": 151.5402862811628,
-          "st_dev": 0.002044489468298797
+          "mean": 0.0052454922385401824,
+          "st_dev": 0.00015772260402247522
         },
         "L2_mean": {
-          "mean": 98.05254923074777,
-          "st_dev": 0.6265652777627779
+          "mean": 0.0032303950431546956,
+          "st_dev": 0.00010166292006869521
         },
         "L3_mean": {
-          "mean": 126.4253155924652,
-          "st_dev": 0.008529677578772744
+          "mean": 0.0039791783298669435,
+          "st_dev": 0.00012155786829824109
         },
         "ages_mean": {
-          "mean": 28.3281401174169,
-          "st_dev": 5.485854581668133
+          "mean": 28.450251272015667,
+          "st_dev": 5.4362802208846555
         },
         "mf_mean": {
-          "mean": 0.04474267326691993,
-          "st_dev": 0.0009290540709775429
+          "mean": 0.04486932183537797,
+          "st_dev": 0.0007060681117637083
         },
         "male_worms_mean": {
-          "mean": 0.7897414965986396,
-          "st_dev": 0.030697942028377723
+          "mean": 0.8377142857142857,
+          "st_dev": 0.024669844567175067
         },
         "infertile_female_worms_mean": {
-          "mean": 0.8232925170068026,
-          "st_dev": 0.03332876825605299
+          "mean": 0.8253061224489795,
+          "st_dev": 0.03026836329346801
         },
         "fertile_female_worms_mean": {
-          "mean": 0.8494421768707483,
-          "st_dev": 0.03051274532678895
+          "mean": 0.8529795918367347,
+          "st_dev": 0.03023459878930437
         },
         "mf_per_skin_snip": {
-          "mean": 0.9781428571428571,
-          "st_dev": 0.2624391474655582
+          "mean": 0.9276428571428572,
+          "st_dev": 0.2596930193241903
         },
         "population_prevalence": {
-          "mean": 0.9161476190476191,
-          "st_dev": 0.10473761828878513
+          "mean": 0.9260428571428572,
+          "st_dev": 0.1020503564950705
         }
       }
     },
@@ -4684,12 +4644,11 @@
       "end_year": 0.062497066641634916,
       "params": {
         "timestep_count": 10,
-        "bite_rate_per_person_per_year": 1000,
-        "treatment_intrvl_yrs": 1,
+        "bite_rate_per_person_per_year": 4500,
+        "treatment_interval_yrs": 1,
         "treatment_probability": 0.65,
         "treatment_start_time": 100,
-        "treatment_stop_time": 120,
-        "treatment_interval": 1,
+        "treatment_stop_time": 130,
         "min_skinsnip_age": 5,
         "min_treatable_age": 5,
         "human_population": 10,
@@ -4699,7 +4658,7 @@
         "human_blood_index": 0.63,
         "recip_gono_cycle": 0.009615384615384616,
         "bite_rate_per_fly_on_human": 65.52,
-        "annual_transm_potential": 15.262515262515263,
+        "annual_transm_potential": 68.68131868131869,
         "blackfly_mort_per_person_per_year": 26,
         "initial_mf": 0,
         "sigma_L0": 52,
@@ -4743,57 +4702,57 @@
         "lam_m": 32.4,
         "phi": 19.6,
         "permanent_infertility": 0.345,
-        "up": 0.0096,
-        "kap": 1.25
+        "u_ivermectin": 0.0096,
+        "shape_parameter_ivermectin": 1.25
       },
       "people": {
         "percent_compliant": {
-          "mean": 0.948,
-          "st_dev": 0.07249827584156743
+          "mean": 0.952,
+          "st_dev": 0.06705221845696083
         },
         "percent_male": {
-          "mean": 0.4971999999999999,
-          "st_dev": 0.17027084307067958
+          "mean": 0.49760000000000004,
+          "st_dev": 0.15809566723980767
         },
         "L1_mean": {
-          "mean": 151.54035440092093,
-          "st_dev": 0.0024293920297763856
+          "mean": 0.00522304807120062,
+          "st_dev": 0.00014995425636246042
         },
         "L2_mean": {
-          "mean": 98.08030093189153,
-          "st_dev": 0.007621492983212474
+          "mean": 0.0032140545796654515,
+          "st_dev": 9.879693193519555e-05
         },
         "L3_mean": {
-          "mean": 126.42534901758196,
-          "st_dev": 0.012304263445032883
+          "mean": 0.003959992123256108,
+          "st_dev": 0.00011772460822306595
         },
         "ages_mean": {
-          "mean": 28.098482739726023,
-          "st_dev": 4.629061964044329
+          "mean": 28.215735890410972,
+          "st_dev": 4.39138719296618
         },
         "mf_mean": {
-          "mean": 0.04489665041473142,
-          "st_dev": 0.0006826680928519803
+          "mean": 0.04482548164278883,
+          "st_dev": 0.0007403954096309462
         },
         "male_worms_mean": {
-          "mean": 0.7891333333333335,
-          "st_dev": 0.02483801307319159
+          "mean": 0.8392952380952381,
+          "st_dev": 0.02227253171362071
         },
         "infertile_female_worms_mean": {
-          "mean": 0.8249619047619049,
-          "st_dev": 0.025254907248613182
+          "mean": 0.8257333333333333,
+          "st_dev": 0.025956873355171595
         },
         "fertile_female_worms_mean": {
-          "mean": 0.8537904761904763,
-          "st_dev": 0.026656623959290665
+          "mean": 0.8517619047619048,
+          "st_dev": 0.026470837074401347
         },
         "mf_per_skin_snip": {
-          "mean": 0.9610500000000001,
-          "st_dev": 0.2311312343669717
+          "mean": 0.9481999999999999,
+          "st_dev": 0.2256972751275478
         },
         "population_prevalence": {
-          "mean": 0.9202531746031746,
-          "st_dev": 0.08965916305460533
+          "mean": 0.9178880952380952,
+          "st_dev": 0.09279906601598505
         }
       }
     },
@@ -4801,12 +4760,11 @@
       "end_year": 0.062497066641634916,
       "params": {
         "timestep_count": 10,
-        "bite_rate_per_person_per_year": 1000,
-        "treatment_intrvl_yrs": 1,
+        "bite_rate_per_person_per_year": 4500,
+        "treatment_interval_yrs": 1,
         "treatment_probability": 0.65,
         "treatment_start_time": 100,
-        "treatment_stop_time": 120,
-        "treatment_interval": 1,
+        "treatment_stop_time": 130,
         "min_skinsnip_age": 5,
         "min_treatable_age": 5,
         "human_population": 13,
@@ -4816,7 +4774,7 @@
         "human_blood_index": 0.63,
         "recip_gono_cycle": 0.009615384615384616,
         "bite_rate_per_fly_on_human": 65.52,
-        "annual_transm_potential": 15.262515262515263,
+        "annual_transm_potential": 68.68131868131869,
         "blackfly_mort_per_person_per_year": 26,
         "initial_mf": 0,
         "sigma_L0": 52,
@@ -4860,57 +4818,57 @@
         "lam_m": 32.4,
         "phi": 19.6,
         "permanent_infertility": 0.345,
-        "up": 0.0096,
-        "kap": 1.25
+        "u_ivermectin": 0.0096,
+        "shape_parameter_ivermectin": 1.25
       },
       "people": {
         "percent_compliant": {
-          "mean": 0.948923076923077,
-          "st_dev": 0.05833508591337386
+          "mean": 0.9501538461538463,
+          "st_dev": 0.06325004385245339
         },
         "percent_male": {
-          "mean": 0.5041538461538462,
-          "st_dev": 0.13706742607177252
+          "mean": 0.5000000000000001,
+          "st_dev": 0.13841879682185318
         },
         "L1_mean": {
-          "mean": 151.5404684613102,
-          "st_dev": 0.0016642011559197727
+          "mean": 0.005196114107788846,
+          "st_dev": 0.00015111538496601982
         },
         "L2_mean": {
-          "mean": 98.08120632165135,
-          "st_dev": 0.0060639055948824355
+          "mean": 0.0031952560203387216,
+          "st_dev": 9.990910186890855e-05
         },
         "L3_mean": {
-          "mean": 126.40664455153002,
-          "st_dev": 0.43426942002625296
+          "mean": 0.00393738537177225,
+          "st_dev": 0.00011913207900360087
         },
         "ages_mean": {
-          "mean": 27.67613698630143,
-          "st_dev": 4.255001287499061
+          "mean": 28.279944783983154,
+          "st_dev": 4.065145626376835
         },
         "mf_mean": {
-          "mean": 0.04480913417575884,
-          "st_dev": 0.000715815576665155
+          "mean": 0.044799736239820816,
+          "st_dev": 0.0006796310016769105
         },
         "male_worms_mean": {
-          "mean": 0.787978021978022,
-          "st_dev": 0.02247427412302194
+          "mean": 0.8386373626373627,
+          "st_dev": 0.019330561244367595
         },
         "infertile_female_worms_mean": {
-          "mean": 0.8237582417582419,
-          "st_dev": 0.02360094721777366
+          "mean": 0.8240659340659342,
+          "st_dev": 0.024070449674204585
         },
         "fertile_female_worms_mean": {
-          "mean": 0.8503956043956046,
-          "st_dev": 0.023375886580429082
+          "mean": 0.851897435897436,
+          "st_dev": 0.02337368808376177
         },
         "mf_per_skin_snip": {
-          "mean": 0.961076923076923,
-          "st_dev": 0.19455173784426819
+          "mean": 0.9292692307692308,
+          "st_dev": 0.1979053738084151
         },
         "population_prevalence": {
-          "mean": 0.9181783882783882,
-          "st_dev": 0.07671675160913569
+          "mean": 0.9168313908313908,
+          "st_dev": 0.08097853940969962
         }
       }
     },
@@ -4918,12 +4876,11 @@
       "end_year": 0.12499466660977625,
       "params": {
         "timestep_count": 10,
-        "bite_rate_per_person_per_year": 1000,
-        "treatment_intrvl_yrs": 1,
+        "bite_rate_per_person_per_year": 4500,
+        "treatment_interval_yrs": 1,
         "treatment_probability": 0.65,
         "treatment_start_time": 100,
-        "treatment_stop_time": 120,
-        "treatment_interval": 1,
+        "treatment_stop_time": 130,
         "min_skinsnip_age": 5,
         "min_treatable_age": 5,
         "human_population": 5,
@@ -4933,7 +4890,7 @@
         "human_blood_index": 0.63,
         "recip_gono_cycle": 0.009615384615384616,
         "bite_rate_per_fly_on_human": 65.52,
-        "annual_transm_potential": 15.262515262515263,
+        "annual_transm_potential": 68.68131868131869,
         "blackfly_mort_per_person_per_year": 26,
         "initial_mf": 0,
         "sigma_L0": 52,
@@ -4977,57 +4934,57 @@
         "lam_m": 32.4,
         "phi": 19.6,
         "permanent_infertility": 0.345,
-        "up": 0.0096,
-        "kap": 1.25
+        "u_ivermectin": 0.0096,
+        "shape_parameter_ivermectin": 1.25
       },
       "people": {
         "percent_compliant": {
-          "mean": 0.948,
-          "st_dev": 0.10438390680559911
+          "mean": 0.9492,
+          "st_dev": 0.09746466026206627
         },
         "percent_male": {
-          "mean": 0.494,
-          "st_dev": 0.23057319878945168
+          "mean": 0.4976,
+          "st_dev": 0.220350266621123
         },
         "L1_mean": {
-          "mean": 151.34374600880537,
-          "st_dev": 0.010496455778267338
+          "mean": 0.010180755693415002,
+          "st_dev": 0.0004572651062903572
         },
         "L2_mean": {
-          "mean": 97.53990785818759,
-          "st_dev": 0.850687455196416
+          "mean": 0.006363523084795499,
+          "st_dev": 0.0003063960944603124
         },
         "L3_mean": {
-          "mean": 125.77608509687501,
-          "st_dev": 0.041272962027779234
+          "mean": 0.008036873145700618,
+          "st_dev": 0.0003814773250618382
         },
         "ages_mean": {
-          "mean": 28.19549041095902,
-          "st_dev": 6.502171591045464
+          "mean": 28.51912438356166,
+          "st_dev": 6.036360047773775
         },
         "mf_mean": {
-          "mean": 0.08776323503321151,
-          "st_dev": 0.0028535110328102515
+          "mean": 0.08786900457907353,
+          "st_dev": 0.002636354472084702
         },
         "male_worms_mean": {
-          "mean": 0.6663619047619047,
-          "st_dev": 0.039271109550806864
+          "mean": 0.7508952380952381,
+          "st_dev": 0.03248116705341616
         },
         "infertile_female_worms_mean": {
-          "mean": 0.7288761904761905,
-          "st_dev": 0.040906924938651994
+          "mean": 0.729352380952381,
+          "st_dev": 0.039780891959323446
         },
         "fertile_female_worms_mean": {
-          "mean": 0.7725142857142857,
-          "st_dev": 0.04191450536076012
+          "mean": 0.7742285714285714,
+          "st_dev": 0.043275800635400395
         },
         "mf_per_skin_snip": {
-          "mean": 1.8453,
-          "st_dev": 0.5701604247928823
+          "mean": 1.8568000000000002,
+          "st_dev": 0.5834070277259265
         },
         "population_prevalence": {
-          "mean": 0.9749000000000001,
-          "st_dev": 0.07695230124347592
+          "mean": 0.9673333333333334,
+          "st_dev": 0.08957058048761819
         }
       }
     },
@@ -5035,12 +4992,11 @@
       "end_year": 0.12499466660977625,
       "params": {
         "timestep_count": 10,
-        "bite_rate_per_person_per_year": 1000,
-        "treatment_intrvl_yrs": 1,
+        "bite_rate_per_person_per_year": 4500,
+        "treatment_interval_yrs": 1,
         "treatment_probability": 0.65,
         "treatment_start_time": 100,
-        "treatment_stop_time": 120,
-        "treatment_interval": 1,
+        "treatment_stop_time": 130,
         "min_skinsnip_age": 5,
         "min_treatable_age": 5,
         "human_population": 7,
@@ -5050,7 +5006,7 @@
         "human_blood_index": 0.63,
         "recip_gono_cycle": 0.009615384615384616,
         "bite_rate_per_fly_on_human": 65.52,
-        "annual_transm_potential": 15.262515262515263,
+        "annual_transm_potential": 68.68131868131869,
         "blackfly_mort_per_person_per_year": 26,
         "initial_mf": 0,
         "sigma_L0": 52,
@@ -5094,57 +5050,57 @@
         "lam_m": 32.4,
         "phi": 19.6,
         "permanent_infertility": 0.345,
-        "up": 0.0096,
-        "kap": 1.25
+        "u_ivermectin": 0.0096,
+        "shape_parameter_ivermectin": 1.25
       },
       "people": {
         "percent_compliant": {
-          "mean": 0.9545714285714285,
-          "st_dev": 0.08092273967135795
+          "mean": 0.9431428571428571,
+          "st_dev": 0.08985203255965912
         },
         "percent_male": {
-          "mean": 0.5002857142857142,
-          "st_dev": 0.18962885339740979
+          "mean": 0.4862857142857142,
+          "st_dev": 0.18410201253763678
         },
         "L1_mean": {
-          "mean": 151.34417854042312,
-          "st_dev": 0.009019648364592845
+          "mean": 0.010034466031345729,
+          "st_dev": 0.0004445760420098313
         },
         "L2_mean": {
-          "mean": 97.57826656695089,
-          "st_dev": 0.028798588243121433
+          "mean": 0.006254184114784304,
+          "st_dev": 0.000305992815336627
         },
         "L3_mean": {
-          "mean": 125.77653987213219,
-          "st_dev": 0.03575485341549549
+          "mean": 0.007901682924704674,
+          "st_dev": 0.00038102674042644647
         },
         "ages_mean": {
-          "mean": 28.365372994129224,
-          "st_dev": 5.441665766054573
+          "mean": 28.014715459882556,
+          "st_dev": 5.530725829727863
         },
         "mf_mean": {
-          "mean": 0.08769625532561284,
-          "st_dev": 0.0024583099568627714
+          "mean": 0.08771292327930752,
+          "st_dev": 0.002536422259911705
         },
         "male_worms_mean": {
-          "mean": 0.6645034013605441,
-          "st_dev": 0.03398153317845725
+          "mean": 0.7487210884353742,
+          "st_dev": 0.028495327871266865
         },
         "infertile_female_worms_mean": {
-          "mean": 0.7281360544217687,
-          "st_dev": 0.03477960862864476
+          "mean": 0.7280680272108844,
+          "st_dev": 0.036416691089167404
         },
         "fertile_female_worms_mean": {
-          "mean": 0.7699455782312925,
-          "st_dev": 0.037093782835783386
+          "mean": 0.7724625850340137,
+          "st_dev": 0.03418142003605803
         },
         "mf_per_skin_snip": {
-          "mean": 1.8685,
-          "st_dev": 0.4956042436526654
+          "mean": 1.8377857142857141,
+          "st_dev": 0.4649888028057169
         },
         "population_prevalence": {
-          "mean": 0.9768095238095239,
-          "st_dev": 0.05868419265117465
+          "mean": 0.9804666666666667,
+          "st_dev": 0.05506285750525476
         }
       }
     }
