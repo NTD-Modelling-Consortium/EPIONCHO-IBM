@@ -370,15 +370,24 @@ def calculate_total_exposure(
     male_exposure_assumed = params.male_exposure * np.exp(
         -params.male_exposure_exponent * people.ages
     )
-    mean_male_exposure: float = np.mean(
-        np.extract(people.sex_is_male, male_exposure_assumed)
-    )
+    male_exposure_assumed_of_males = male_exposure_assumed[people.sex_is_male]
+    if len(male_exposure_assumed_of_males) == 0:
+        # TODO: Is this correct?
+        mean_male_exposure = np.nan
+    else:
+        mean_male_exposure: float = np.mean(male_exposure_assumed_of_males)
     female_exposure_assumed = params.female_exposure * np.exp(
         -params.female_exposure_exponent * people.ages
     )
-    mean_female_exposure: float = np.mean(
-        np.extract(np.logical_not(people.sex_is_male), female_exposure_assumed)
-    )
+    female_exposure_assumed_of_females = female_exposure_assumed[
+        np.logical_not(people.sex_is_male)
+    ]
+    if len(female_exposure_assumed_of_females) == 0:
+        # TODO: Is this correct?
+        mean_female_exposure = np.nan
+
+    else:
+        mean_female_exposure: float = np.mean(female_exposure_assumed_of_females)
 
     sex_age_exposure = np.where(
         people.sex_is_male,

@@ -5,7 +5,18 @@ import time
 from inspect import signature
 from multiprocessing import cpu_count
 from pathlib import Path
-from typing import Any, Callable, Dict, Generic, List, Tuple, Type, TypeVar, Union
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Generic,
+    List,
+    Optional,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+)
 
 import numpy as np
 from joblib import Parallel, delayed
@@ -51,7 +62,7 @@ class BaseTestDimension(GenericModel, Generic[DataT]):
 
 def get_test_pairs(
     settings: BaseSettingsModel, parameters: Dict[str, type]
-) -> List[Tuple]:
+) -> Tuple[List[Tuple], float]:
     def get_exponentially_spaced_steps(
         start: Union[int, float], end: Union[int, float], n_steps: int
     ) -> NDArray[np.float_]:
@@ -89,7 +100,8 @@ def get_test_pairs(
     for i, spaces in enumerate(arrays):
         item_for_test = spaces[coords[i]]
         items_for_test.append(item_for_test)
-    return list(zip(*tuple(items_for_test)))
+    total_product = np.sum(combined_array[valid_tests])
+    return list(zip(*tuple(items_for_test))), total_product
 
 
 def snake_to_camel_case(string: str) -> str:
@@ -117,8 +129,12 @@ class AutoBenchmarker(Generic[FuncReturn]):
     func_name: str
     camel_name: str
     pytest_config: PytestConfig
+    _settings_model: Optional[Type[BaseSettingsModel]]
+    _output_data: Optional[Type[BaseOutputData]]
 
-    def __init__(self, func: Callable[..., FuncReturn]) -> None:
+    def __init__(
+        self, func: Callable[..., FuncReturn], est_base_time: float = 0.46
+    ) -> None:
         sig = signature(func)
         return_type: FuncReturn = sig.return_annotation
         if not issubclass(
@@ -132,6 +148,9 @@ class AutoBenchmarker(Generic[FuncReturn]):
         self.func_name = func.__name__
         self.camel_name = snake_to_camel_case(self.func_name)
         self.pytest_config = PytestConfig.parse_file("pytest_config.json")
+        self._settings_model = None
+        self._output_data = None
+        self.est_base_time = est_base_time
 
     def _generate_settings_model(self) -> Type[BaseSettingsModel]:
         attributes: Dict[str, Tuple[type, ellipsis]] = {
@@ -142,6 +161,65 @@ class AutoBenchmarker(Generic[FuncReturn]):
             self.camel_name + "Settings", **attributes, __base__=BaseSettingsModel
         )
 
+    @property
+    def settings_model(self) -> Type[BaseSettingsModel]:
+        if self._settings_model is None:
+            self._settings_model = self._generate_settings_model()
+        return self._settings_model
+
+    def _generate_settings_file(self, settings_path: Path) -> None:
+        model = self.settings_model
+        attr_dict = {}
+        for k, t in self.parameters.items():
+            print(f"Attributes for {k}: \n")
+            while True:
+                constraints = input(
+                    f"Enter (minimum: {str(t.__name__)}, maximum: {str(t.__name__)}, steps: int): "
+                )
+                items = constraints.split(",")
+                if len(items) == 3:
+                    try:
+                        minimum = t(items[0])
+                        maximum = t(items[1])
+                        steps = int(items[2])
+                        if maximum < minimum:
+                            print("max less than min")
+                            continue
+                        break
+                    except ValueError:
+                        print("invalid type")
+                        continue
+                else:
+                    print("incorrect number of args")
+                    continue
+            attr_dict[k] = BaseTestDimension[t](  # type:ignore
+                minimum=minimum, maximum=maximum, steps=steps
+            )
+        while True:
+            try:
+                max_product_string = input("max_product: float: ")
+                max_product = float(max_product_string)
+                break
+            except ValueError:
+                print("invalid type")
+                continue
+        attr_dict["max_product"] = max_product
+
+        while True:
+            try:
+                benchmark_iters_string = input("benchmark_iters: int: ")
+                benchmark_iters = int(benchmark_iters_string)
+                break
+            except ValueError:
+                print("invalid type")
+                continue
+        attr_dict["benchmark_iters"] = benchmark_iters
+
+        settings = model.parse_obj(attr_dict)
+
+        settings_file = open(settings_path, "w+")
+        json.dump(settings.dict(), settings_file, indent=2)
+
     def _generate_output_model(self) -> Type[BaseOutputData]:
         attributes: Dict[str, Tuple[type, ellipsis]] = {
             k: (t, ...) for k, t in self.parameters.items()
@@ -149,6 +227,12 @@ class AutoBenchmarker(Generic[FuncReturn]):
         return create_model(
             self.camel_name + "Settings", **attributes, __base__=BaseOutputData
         )
+
+    @property
+    def output_model(self) -> Type[BaseOutputData]:
+        if self._output_data is None:
+            self._output_data = self._generate_output_model()
+        return self._output_data
 
     def _compute_mean_and_st_dev_of_pydantic(
         self,
@@ -171,9 +255,9 @@ class AutoBenchmarker(Generic[FuncReturn]):
             k: BenchmarkArray.from_array(v) for k, v in final_dict_of_arrays.items()
         }
 
-    def generate_benchmark(self):
-        SettingsModel = self._generate_settings_model()
-        OutputModel = self._generate_output_model()
+    def generate_benchmark(self, verbose: bool = False):
+        SettingsModel = self.settings_model
+        OutputModel = self.output_model
         TestData = create_model(
             "TestData", tests=(List[OutputModel], ...)  # type:ignore
         )
@@ -181,10 +265,23 @@ class AutoBenchmarker(Generic[FuncReturn]):
         settings_folder = Path(self.pytest_config.benchmark_path)
         settings_path = Path(str(settings_folder) + os.sep + "settings.json")
         if not settings_path.exists():
-            raise RuntimeError("Settings file not found")
-        else:
-            settings_model = SettingsModel.parse_file(settings_path)
-        test_pairs = get_test_pairs(settings=settings_model, parameters=self.parameters)
+            if not settings_folder.exists():
+                settings_folder.mkdir(parents=True)
+            self._generate_settings_file(settings_path)
+        settings_model = SettingsModel.parse_file(settings_path)
+        test_pairs, total_product = get_test_pairs(
+            settings=settings_model, parameters=self.parameters
+        )
+        if verbose:
+            est_test_time = self.est_base_time * total_product
+            est_benchmark_time = est_test_time * settings_model.benchmark_iters
+            print(f"Benchmark will run {len(test_pairs)} tests")
+            print(f"Estimated benchmark calc time (one core): {est_benchmark_time}")
+            print(
+                f"Estimated benchmark calc time (multiple cores): {est_benchmark_time/cpu_count()}"
+            )
+            print(f"Estimated test time (no reruns): {est_test_time}")
+
         start = time.time()
         tests: List[BaseOutputData] = []
         headers = [k for k in self.parameters.keys()]
@@ -199,7 +296,8 @@ class AutoBenchmarker(Generic[FuncReturn]):
             test_output = OutputModel(data=data, **values)
             tests.append(test_output)
         end = time.time()
-        print(f"Benchmark calculated in: {end-start}")
+        if verbose:
+            print(f"Benchmark calculated in: {end-start}")
         test_data = TestData(tests=tests)
         benchmark_file_path = Path(str(settings_folder) + os.sep + "benchmark.json")
         benchmark_file = open(benchmark_file_path, "w+")
@@ -221,4 +319,4 @@ def benchmarker_test_func(end_time: float, population: int) -> StateStats:
 
 
 benchmarker = AutoBenchmarker[StateStats](benchmarker_test_func)
-mod = benchmarker.generate_benchmark()
+mod = benchmarker.generate_benchmark(verbose=True)
