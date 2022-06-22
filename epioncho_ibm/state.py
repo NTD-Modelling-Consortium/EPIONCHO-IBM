@@ -73,10 +73,11 @@ class People:
     ]  # 2D Array, (N, age stage): worm stages 29-92 (63) males(21), infertile females(21), fertile females(21)
     infertile_female_worms: NDArray[np.int_]
     fertile_female_worms: NDArray[np.int_]
+    worm_delay: NDArray[np.int_]
     # mf_current_quantity: NDArray[np.int_]
     # exposure: NDArray[np.float_]
     # new_worm_rate: NDArray[np.float_]
-    # time_of_last_treatment: NDArray[np.float_]  # treat.vec
+    time_of_last_treatment: NDArray[np.float_]  # treat.vec
 
     def __len__(self):
         return len(self.compliance)
@@ -97,10 +98,81 @@ class WormGroup:
         )
 
 
+class DerivedParams:
+    worm_mortality_rate: NDArray[np.float_]
+    fecundity_rates_worms: NDArray[np.float_]
+    microfillarie_mortality_rate: NDArray[np.float_]
+    initial_treatment_times: Optional[NDArray[np.float_]]
+    individual_exposure: NDArray[np.float_]
+
+    def __init__(self, params: Params) -> None:
+
+        worm_age_categories = np.arange(
+            start=0,
+            stop=params.max_worm_age,
+            step=params.max_worm_age / params.worm_age_stages,
+        )  # age.cats
+        self.worm_mortality_rate = weibull_mortality(
+            params.delta_time, params.mu_worms1, params.mu_worms2, worm_age_categories
+        )
+        self.fecundity_rates_worms = (
+            1.158305
+            * params.fecundity_worms_1
+            / (
+                params.fecundity_worms_1
+                + (params.fecundity_worms_2 ** (-worm_age_categories))
+                - 1
+            )
+        )
+
+        # TODO revisit +1 and -1
+        microfillarie_age_categories = np.arange(
+            start=0,
+            stop=params.max_microfil_age + 1,
+            step=params.max_microfil_age / (params.microfil_age_stages - 1),
+        )  # age.cats.mf
+
+        self.microfillarie_mortality_rate = weibull_mortality(
+            params.delta_time,
+            params.mu_microfillarie1,
+            params.mu_microfillarie2,
+            microfillarie_age_categories,
+        )
+
+        if params.give_treatment:
+            treatment_number = (
+                params.treatment_stop_time - params.treatment_start_time
+            ) / params.treatment_interval_yrs
+            if round(treatment_number) != treatment_number:
+                raise ValueError(
+                    f"Treatment times could not be found for start: {params.treatment_start_time}, stop: {params.treatment_stop_time}, interval: {params.treatment_interval_yrs}"
+                )
+            treatment_number_int: int = math.ceil(treatment_number)
+            self.initial_treatment_times = np.linspace(  # "times.of.treat.in"
+                start=params.treatment_start_time,
+                stop=params.treatment_stop_time,
+                num=treatment_number_int + 1,
+            )
+        else:
+            self.initial_treatment_times = None
+
+        individual_exposure = (
+            np.random.gamma(  # individual level exposure to fly bites "ex.vec"
+                shape=params.gamma_distribution,
+                scale=params.gamma_distribution,
+                size=params.human_population,
+            )
+        )
+        self.individual_exposure = individual_exposure / np.mean(
+            individual_exposure
+        )  # normalise
+
+
 class State:
     current_iteration: int = 0
     people: People
-    params: Params
+    _params: Params
+    _derived_params: Optional[DerivedParams]
 
     def __init__(self, people: People, params: Params) -> None:
         if len(people) != params.human_population:
@@ -109,6 +181,22 @@ class State:
             )
         self.people = people
         self.params = params
+        self._derived_params = None
+
+    @property
+    def params(self):
+        return self._params
+
+    @params.setter
+    def params(self, value):
+        self._derived_params = None
+        self._params = value
+
+    @property
+    def derived_params(self) -> DerivedParams:
+        if self._derived_params is None:
+            self._derived_params = DerivedParams(self.params)
+        return self._derived_params
 
     @classmethod
     def generate_random(cls, random_config: RandomConfig, params: Params) -> "State":
@@ -123,6 +211,10 @@ class State:
         )
         time_of_last_treatment = np.empty(n_people)
         time_of_last_treatment[:] = np.nan
+        number_of_worm_delay_cols = math.ceil(
+            params.l3_delay * 28 / (params.delta_time * 365)
+        )
+
         return cls(
             people=People(
                 compliance=compliance_array,
@@ -144,10 +236,13 @@ class State:
                     (params.worm_age_stages, n_people), dtype=int
                 )
                 * params.initial_worms,
+                worm_delay=np.zeros(
+                    (number_of_worm_delay_cols, params.human_population), dtype=int
+                ),
                 # mf_current_quantity=np.zeros(n_people, dtype=int),
                 # exposure=np.zeros(n_people),
                 # new_worm_rate=np.zeros(n_people),
-                # time_of_last_treatment=time_of_last_treatment,
+                time_of_last_treatment=time_of_last_treatment,
             ),
             params=params,
         )
@@ -212,18 +307,16 @@ class State:
         current_ages = self.people.ages
         size_population = len(self.people)
         delta_time_vector = np.ones(size_population) * params.delta_time
-        for i in range(num_iter):
+        for _ in range(num_iter):
             current_ages += delta_time_vector
             death_vector = np.random.binomial(
                 n=1,
                 p=(1 / params.mean_human_age) * params.delta_time,
                 size=size_population,
             )
-            np.place(
-                current_ages,
-                np.logical_or(death_vector == 1, current_ages >= params.max_human_age),
-                0,
-            )
+            current_ages[
+                np.logical_or(death_vector == 1, current_ages >= params.max_human_age)
+            ] = 0
         return current_ages
 
     def to_stats(self) -> StateStats:
@@ -262,106 +355,15 @@ def calc_coverage(
     compliant_percentage = 1 - non_compliant_percentage
     coverage = measured_coverage / compliant_percentage  # TODO: Is this correct?
     out_coverage = np.repeat(coverage, len(people))
-    np.place(arr=out_coverage, mask=non_compliant_people, vals=0)
+    out_coverage[non_compliant_people] = 0
     rand_nums = np.random.uniform(low=0, high=1, size=len(people))
-    final_coverage = rand_nums < out_coverage
-    return final_coverage
+    return rand_nums < out_coverage
 
 
 def weibull_mortality(
     delta_time: float, mu1: float, mu2: float, age_categories: np.ndarray
-) -> np.ndarray:
+) -> NDArray[np.float_]:
     return delta_time * (mu1**mu2) * mu2 * (age_categories ** (mu2 - 1))
-
-
-def initialise_simulation(params: Params):
-    give_treatment = True
-
-    worm_max_age = 20
-    microfillarie_max_age = 2.5
-    number_of_microfillariae_age_categories = 20
-    number_of_worm_age_categories = 20
-    individual_exposure = (
-        np.random.gamma(  # individual level exposure to fly bites "ex.vec"
-            shape=params.gamma_distribution,
-            scale=params.gamma_distribution,
-            size=params.human_population,
-        )
-    )
-    individual_exposure = individual_exposure / np.mean(
-        individual_exposure
-    )  # normalise
-    if give_treatment:
-        treatment_number = (
-            params.treatment_stop_time - params.treatment_start_time
-        ) / params.treatment_interval_yrs
-        if round(treatment_number) != treatment_number:
-            raise ValueError(
-                f"Treatment times could not be found for start: {params.treatment_start_time}, stop: {params.treatment_stop_time}, interval: {params.treatment_interval_yrs}"
-            )
-        treatment_number_int: int = math.ceil(treatment_number)
-        initial_treatment_times = np.linspace(  # "times.of.treat.in"
-            start=params.treatment_start_time,
-            stop=params.treatment_stop_time,
-            num=treatment_number_int + 1,
-        )
-    else:
-        initial_treatment_times = None
-
-    # Cols to zero is a mechanism for resetting certain attributes to zero
-    # columns_to_zero = np.arange( start = 1, stop = )
-
-    # age-dependent mortality and fecundity rates of parasite life stages
-    worm_age_categories = np.arange(
-        start=0,
-        stop=worm_max_age + 1,
-        step=worm_max_age / number_of_worm_age_categories,
-    )  # age.cats
-    worm_mortality_rate = weibull_mortality(
-        params.delta_time, params.mu_worms1, params.mu_worms2, worm_age_categories
-    )
-    fecundity_rates_worms = (
-        1.158305
-        * params.fecundity_worms_1
-        / (
-            params.fecundity_worms_1
-            + (params.fecundity_worms_2 ** (-worm_age_categories))
-            - 1
-        )
-    )
-
-    microfillarie_age_categories = np.arange(
-        start=0,
-        stop=microfillarie_max_age + 1,
-        step=microfillarie_max_age / number_of_microfillariae_age_categories,
-    )  # age.cats.mf
-
-    microfillarie_mortality_rate = weibull_mortality(
-        params.delta_time,
-        params.mu_microfillarie1,
-        params.mu_microfillarie2,
-        microfillarie_age_categories,
-    )
-    # matrix for delay in L3 establishment in humans
-    # RE-EVALUATE THIS SECTION
-    # number_of_delay_cols = int(params.l3_delay * (28 / (delta_time*365)))
-    # l_extras = np.zeros((number_of_delay_cols, params.human_population))
-    # indices_l_mat = np.arange(2, number_of_delay_cols)
-
-    # SET initial values in state
-    number_of_delay_cols = math.ceil(params.l3_delay * 28 / (params.delta_time * 365))
-    l_extras = np.zeros((number_of_delay_cols, params.human_population), dtype=int)
-    time_of_last_treatment = np.empty(params.human_population)
-    time_of_last_treatment[:] = np.nan
-    return (
-        individual_exposure,
-        l_extras,
-        worm_mortality_rate,
-        initial_treatment_times,
-        time_of_last_treatment,
-        microfillarie_mortality_rate,
-        fecundity_rates_worms,
-    )
 
 
 def calculate_total_exposure(
@@ -373,7 +375,7 @@ def calculate_total_exposure(
     male_exposure_assumed_of_males = male_exposure_assumed[people.sex_is_male]
     if len(male_exposure_assumed_of_males) == 0:
         # TODO: Is this correct?
-        mean_male_exposure = np.nan
+        mean_male_exposure = 0
     else:
         mean_male_exposure: float = np.mean(male_exposure_assumed_of_males)
     female_exposure_assumed = params.female_exposure * np.exp(
@@ -384,8 +386,7 @@ def calculate_total_exposure(
     ]
     if len(female_exposure_assumed_of_females) == 0:
         # TODO: Is this correct?
-        mean_female_exposure = np.nan
-
+        mean_female_exposure = 0
     else:
         mean_female_exposure: float = np.mean(female_exposure_assumed_of_females)
 
@@ -440,9 +441,9 @@ def w_plus_one_rate(
 
 
 def get_last_males_and_females(
-    l_extras: NDArray[np.int_], params: Params
+    worm_delay: NDArray[np.int_], params: Params
 ) -> Tuple[NDArray[np.int_], NDArray[np.int_]]:
-    final_column = np.array(l_extras[-1], dtype=int)
+    final_column = np.array(worm_delay[-1], dtype=int)
     assert len(final_column) == params.human_population
     last_males = np.random.binomial(
         n=final_column, p=0.5, size=len(final_column)
@@ -929,20 +930,11 @@ def run_simulation(
     if end_time < start_time:
         raise ValueError("End time after start")
 
-    (
-        individual_exposure,
-        l_extras,
-        worm_mortality_rate,
-        initial_treatment_times,
-        time_of_last_treatment,
-        microfillarie_mortality_rate,
-        fecundity_rates_worms,
-    ) = initialise_simulation(state.params)
-
     # matrix for exposure (to fly bites) for L1 delay
     number_of_exposure_columns = math.ceil(4 / (state.params.delta_time * 365))
+
     exposure_delay = np.tile(
-        individual_exposure, (number_of_exposure_columns, 1)
+        state.derived_params.individual_exposure, (number_of_exposure_columns, 1)
     )  # exposure.delay
 
     # matrix for tracking mf for L1 delay
@@ -954,9 +946,7 @@ def run_simulation(
     # L1 delay in flies
     l1_delay = np.repeat(state.params.initial_L1, state.params.human_population)
 
-    # inds.exp.mats is a sequence from 2 to number_of_exposure_columns
-
-    # TODO: Move l_extras to state  - potentially move constants to params
+    # TODO: Move worm_delay to state  - potentially move constants to params
     current_time = start_time
     while current_time < end_time:
         if state.params.delta_time > current_time % 0.2 and verbose:
@@ -972,7 +962,7 @@ def run_simulation(
             coverage_in = None
 
         total_exposure = calculate_total_exposure(
-            state.params, state.people, individual_exposure
+            state.params, state.people, state.derived_params.individual_exposure
         )
         old_state = deepcopy(state)  # all.mats.cur
         # increase ages
@@ -1005,10 +995,12 @@ def run_simulation(
             )
         # TODO: Check calculation change
         # new_worms = np.random.poisson(lam=new_rate, size=state.params.human_population)
-        # Take males and females from final column of l_extras
-        last_males, last_females = get_last_males_and_females(l_extras, state.params)
-        # Move all columns in l_extras along one
-        l_extras = np.vstack((new_worms, l_extras[:-1]))
+        # Take males and females from final column of worm_delay
+        last_males, last_females = get_last_males_and_females(
+            state.people.worm_delay, state.params
+        )
+        # Move all columns in worm_delay along one
+        state.people.worm_delay = np.vstack((new_worms, state.people.worm_delay[:-1]))
 
         last_lost_worms = WormGroup.from_population(state.params.human_population)
         last_time_of_last_treatment = None
@@ -1024,13 +1016,13 @@ def run_simulation(
                 last_females,
                 last_males,
                 total_exposure,
-                worm_mortality_rate,
+                state.derived_params.worm_mortality_rate,
                 coverage_in,
                 last_lost_worms,
-                initial_treatment_times,
+                state.derived_params.initial_treatment_times,
                 current_time,
                 compartment,
-                time_of_last_treatment,
+                state.people.time_of_last_treatment,
             )
 
             if np.any(
@@ -1063,18 +1055,18 @@ def run_simulation(
 
         assert last_time_of_last_treatment is not None
         if (
-            initial_treatment_times is not None
+            state.derived_params.initial_treatment_times is not None
             and current_time >= state.params.treatment_start_time
         ):
-            time_of_last_treatment = last_time_of_last_treatment
+            state.people.time_of_last_treatment = last_time_of_last_treatment
 
         for compartment in range(state.params.microfil_age_stages):
             state.people.mf[compartment] = change_in_microfil(
                 old_state,
                 state.params,
-                microfillarie_mortality_rate,
-                fecundity_rates_worms,
-                time_of_last_treatment,
+                state.derived_params.microfillarie_mortality_rate,
+                state.derived_params.fecundity_rates_worms,
+                state.people.time_of_last_treatment,
                 compartment,
                 current_time,
             )
@@ -1101,19 +1093,10 @@ def run_simulation(
 
         total_people_to_die: int = np.sum(people_to_die)
         if total_people_to_die > 0:
-            np.place(
-                individual_exposure,
-                people_to_die,
-                np.random.gamma(
-                    shape=state.params.gamma_distribution,
-                    scale=state.params.gamma_distribution,
-                    size=total_people_to_die,
-                ),
-            )
-            l_extras[:, people_to_die] = 0
+            state.people.worm_delay[:, people_to_die] = 0
             mf_delay[0, people_to_die] = 0
             l1_delay[people_to_die] = 0
-            time_of_last_treatment[people_to_die] = np.nan
+            state.people.time_of_last_treatment[people_to_die] = np.nan
 
             sex_array = (
                 np.random.uniform(low=0, high=1, size=total_people_to_die)

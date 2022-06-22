@@ -81,8 +81,9 @@ class Params(BaseModel):
     microfil_move_rate: float = 8.13333  # 'mf.move.rate' #for aging in parasites
 
     microfil_age_stages = 21
+    max_microfil_age = 2.5
     worm_age_stages = 21
-
+    max_worm_age = 21
     l1_l2_per_person_per_year: float = (
         201.6189  # Per capita development rate of larvae from stage L1 to L2 'nuone'
     )
@@ -140,3 +141,5 @@ class Params(BaseModel):
 
     u_ivermectin = 0.0096  # effects of ivermectin
     shape_parameter_ivermectin = 1.25  # effects of ivermectin
+
+    give_treatment: bool = True

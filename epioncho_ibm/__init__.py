@@ -2,6 +2,12 @@ version = 1.0
 from .params import Params
 from .state import RandomConfig, State, StateStats, run_simulation
 
+# from enum import Enum
+
+# class ParamSet(Enum):
+#    param_set1 = "param_set1"
+#    param_set2 = "param_set2"
+
 
 def benchmarker_test_func(end_time: float, population: int) -> StateStats:
     params = Params(human_population=population)
