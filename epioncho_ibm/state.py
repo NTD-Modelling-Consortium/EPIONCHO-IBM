@@ -73,7 +73,7 @@ class People:
     ]  # 2D Array, (N, age stage): worm stages 29-92 (63) males(21), infertile females(21), fertile females(21)
     infertile_female_worms: NDArray[np.int_]
     fertile_female_worms: NDArray[np.int_]
-    worm_delay: NDArray[np.int_]
+
     # mf_current_quantity: NDArray[np.int_]
     # exposure: NDArray[np.float_]
     # new_worm_rate: NDArray[np.float_]
@@ -168,11 +168,41 @@ class DerivedParams:
         )  # normalise
 
 
+class DelayArrays:
+    worm_delay: NDArray[np.int_]
+    exposure_delay: NDArray[np.float_]
+    mf_delay: NDArray[np.int_]
+
+    def __init__(self, params: Params, individual_exposure) -> None:
+        number_of_worm_delay_cols = math.ceil(
+            params.l3_delay * 28 / (params.delta_time * 365)
+        )
+        self.worm_delay = np.zeros(
+            (number_of_worm_delay_cols, params.human_population), dtype=int
+        )
+        # matrix for exposure (to fly bites) for L1 delay
+        number_of_exposure_columns = math.ceil(4 / (params.delta_time * 365))
+
+        self.exposure_delay = np.tile(
+            individual_exposure, (number_of_exposure_columns, 1)
+        )  # exposure.delay
+
+        # matrix for tracking mf for L1 delay
+        number_of_mf_columns = math.ceil(4 / (params.delta_time * 365))
+        self.mf_delay = (
+            np.ones((number_of_mf_columns, params.human_population), dtype=int)
+            * params.initial_mf
+        )  # mf.delay
+        # L1 delay in flies
+        self.l1_delay = np.repeat(params.initial_L1, params.human_population)
+
+
 class State:
     current_iteration: int = 0
     people: People
     _params: Params
     _derived_params: Optional[DerivedParams]
+    _delay_arrays: Optional[DelayArrays]
 
     def __init__(self, people: People, params: Params) -> None:
         if len(people) != params.human_population:
@@ -182,6 +212,7 @@ class State:
         self.people = people
         self.params = params
         self._derived_params = None
+        self._delay_arrays = None
 
     @property
     def params(self):
@@ -198,6 +229,18 @@ class State:
             self._derived_params = DerivedParams(self.params)
         return self._derived_params
 
+    @property
+    def delay_arrays(self) -> DelayArrays:
+        if self._delay_arrays is None:
+            self._delay_arrays = DelayArrays(
+                self.params, self.derived_params.individual_exposure
+            )
+        return self._delay_arrays
+
+    @delay_arrays.setter
+    def delay_arrays(self, value):
+        self._delay_arrays = value
+
     @classmethod
     def generate_random(cls, random_config: RandomConfig, params: Params) -> "State":
         n_people = params.human_population
@@ -211,9 +254,6 @@ class State:
         )
         time_of_last_treatment = np.empty(n_people)
         time_of_last_treatment[:] = np.nan
-        number_of_worm_delay_cols = math.ceil(
-            params.l3_delay * 28 / (params.delta_time * 365)
-        )
 
         return cls(
             people=People(
@@ -236,9 +276,6 @@ class State:
                     (params.worm_age_stages, n_people), dtype=int
                 )
                 * params.initial_worms,
-                worm_delay=np.zeros(
-                    (number_of_worm_delay_cols, params.human_population), dtype=int
-                ),
                 # mf_current_quantity=np.zeros(n_people, dtype=int),
                 # exposure=np.zeros(n_people),
                 # new_worm_rate=np.zeros(n_people),
@@ -494,10 +531,8 @@ def calc_new_worms_from_inside(
 def change_in_worm_per_index(
     params: Params,
     state: State,
-    L3: float,
     last_females: NDArray[np.int_],
     last_males: NDArray[np.int_],
-    total_exposure: NDArray[np.float_],
     worm_mortality_rate: NDArray[np.float_],
     coverage_in: Optional[NDArray[np.bool_]],
     last_lost_worms: WormGroup,
@@ -820,8 +855,7 @@ def change_in_microfil(
     k2 = derive_microfil(params.delta_time * k1 / 2)
     k3 = derive_microfil(params.delta_time * k2 / 2)
     k4 = derive_microfil(params.delta_time * k3)
-    output = microfil + (params.delta_time / 6) * (k1 + 2 * k2 + 2 * k3 + k4)
-    return output
+    return microfil + (params.delta_time / 6) * (k1 + 2 * k2 + 2 * k3 + k4)
 
 
 # L1, L2, L3 (parasite life stages) dynamics in the fly population
@@ -926,27 +960,9 @@ def calc_l3(
 def run_simulation(
     state: State, start_time: float = 0, end_time: float = 0, verbose: bool = False
 ) -> State:
-
     if end_time < start_time:
         raise ValueError("End time after start")
 
-    # matrix for exposure (to fly bites) for L1 delay
-    number_of_exposure_columns = math.ceil(4 / (state.params.delta_time * 365))
-
-    exposure_delay = np.tile(
-        state.derived_params.individual_exposure, (number_of_exposure_columns, 1)
-    )  # exposure.delay
-
-    # matrix for tracking mf for L1 delay
-    number_of_mf_columns = math.ceil(4 / (state.params.delta_time * 365))
-    mf_delay = (
-        np.ones((number_of_mf_columns, state.params.human_population))
-        * state.params.initial_mf
-    )  # mf.delay
-    # L1 delay in flies
-    l1_delay = np.repeat(state.params.initial_L1, state.params.human_population)
-
-    # TODO: Move worm_delay to state  - potentially move constants to params
     current_time = start_time
     while current_time < end_time:
         if state.params.delta_time > current_time % 0.2 and verbose:
@@ -980,8 +996,9 @@ def run_simulation(
 
         # there is a delay in new parasites entering humans (from fly bites) and entering the first adult worm age class
 
-        L3_in = np.mean(state.people.blackfly.L3)
-        new_rate = w_plus_one_rate(state.params, L3_in, total_exposure)
+        new_rate = w_plus_one_rate(
+            state.params, np.mean(state.people.blackfly.L3), total_exposure
+        )
         if np.any(new_rate > 10**10):
             st_dev = np.sqrt(new_rate)
             new_worms: NDArray[np.int_] = np.round(
@@ -997,10 +1014,12 @@ def run_simulation(
         # new_worms = np.random.poisson(lam=new_rate, size=state.params.human_population)
         # Take males and females from final column of worm_delay
         last_males, last_females = get_last_males_and_females(
-            state.people.worm_delay, state.params
+            state.delay_arrays.worm_delay, state.params
         )
         # Move all columns in worm_delay along one
-        state.people.worm_delay = np.vstack((new_worms, state.people.worm_delay[:-1]))
+        state.delay_arrays.worm_delay = np.vstack(
+            (new_worms, state.delay_arrays.worm_delay[:-1])
+        )
 
         last_lost_worms = WormGroup.from_population(state.params.human_population)
         last_time_of_last_treatment = None
@@ -1010,21 +1029,18 @@ def run_simulation(
                 last_lost_worms,
                 last_time_of_last_treatment,
             ) = change_in_worm_per_index(  # res
-                state.params,
-                state,
-                L3_in,
-                last_females,
-                last_males,
-                total_exposure,
-                state.derived_params.worm_mortality_rate,
-                coverage_in,
-                last_lost_worms,
-                state.derived_params.initial_treatment_times,
-                current_time,
-                compartment,
-                state.people.time_of_last_treatment,
+                params=state.params,
+                state=state,
+                last_females=last_females,
+                last_males=last_males,
+                worm_mortality_rate=state.derived_params.worm_mortality_rate,
+                coverage_in=coverage_in,
+                last_lost_worms=last_lost_worms,
+                initial_treatment_times=state.derived_params.initial_treatment_times,
+                current_time=current_time,
+                compartment=compartment,
+                time_of_last_treatment=state.people.time_of_last_treatment,
             )
-
             if np.any(
                 np.logical_or(
                     np.logical_or(
@@ -1062,47 +1078,53 @@ def run_simulation(
 
         for compartment in range(state.params.microfil_age_stages):
             state.people.mf[compartment] = change_in_microfil(
-                old_state,
-                state.params,
-                state.derived_params.microfillarie_mortality_rate,
-                state.derived_params.fecundity_rates_worms,
-                state.people.time_of_last_treatment,
-                compartment,
-                current_time,
+                state=old_state,
+                params=state.params,
+                microfillarie_mortality_rate=state.derived_params.microfillarie_mortality_rate,
+                fecundity_rates_worms=state.derived_params.fecundity_rates_worms,
+                time_of_last_treatment=state.people.time_of_last_treatment,
+                compartment=compartment,
+                current_time=current_time,
             )
 
         # inputs for delay in L1
-        last_exposure_delay = exposure_delay[-1]  # exp.delay.temp
-        last_mf_delay = mf_delay[-1]  # mf.delay.temp
-        last_l1_delay = l1_delay  # l1.delay.temp
         new_mf = np.sum(
             old_state.people.mf, axis=0
         )  # TODO: Should this be old state? mf.temp
 
         state.people.blackfly.L1 = calc_l1(
-            state.params, new_mf, last_mf_delay, total_exposure, last_exposure_delay
+            state.params,
+            new_mf,
+            state.delay_arrays.mf_delay[-1],
+            total_exposure,
+            state.delay_arrays.exposure_delay[-1],
         )
         state.people.blackfly.L2 = calc_l2(
-            state.params, last_l1_delay, last_mf_delay, last_exposure_delay
+            state.params,
+            state.delay_arrays.l1_delay,
+            state.delay_arrays.mf_delay[-1],
+            state.delay_arrays.exposure_delay[-1],
         )
         state.people.blackfly.L3 = calc_l3(state.params, old_state.people.blackfly.L2)
 
-        exposure_delay = np.vstack((total_exposure, exposure_delay[:-1]))
-        mf_delay = np.vstack((new_mf, mf_delay[:-1]))
-        l1_delay = state.people.blackfly.L1
+        state.delay_arrays.exposure_delay = np.vstack(
+            (total_exposure, state.delay_arrays.exposure_delay[:-1])
+        )
+        state.delay_arrays.mf_delay = np.vstack(
+            (new_mf, state.delay_arrays.mf_delay[:-1])
+        )
+        state.delay_arrays.l1_delay = state.people.blackfly.L1
 
         total_people_to_die: int = np.sum(people_to_die)
         if total_people_to_die > 0:
-            state.people.worm_delay[:, people_to_die] = 0
-            mf_delay[0, people_to_die] = 0
-            l1_delay[people_to_die] = 0
+            state.delay_arrays.worm_delay[:, people_to_die] = 0
+            state.delay_arrays.mf_delay[0, people_to_die] = 0
+            state.delay_arrays.l1_delay[people_to_die] = 0
             state.people.time_of_last_treatment[people_to_die] = np.nan
 
-            sex_array = (
-                np.random.uniform(low=0, high=1, size=total_people_to_die)
-                < 0.5  # TODO: Make adjustable
-            )
-            state.people.sex_is_male[people_to_die] = sex_array
+            state.people.sex_is_male[people_to_die] = (
+                np.random.uniform(low=0, high=1, size=total_people_to_die) < 0.5
+            )  # TODO: Make adjustable
             state.people.ages[people_to_die] = 0
             state.people.blackfly.L1[people_to_die] = 0
             state.people.mf[:, people_to_die] = 0
