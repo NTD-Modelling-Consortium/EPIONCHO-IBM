@@ -67,8 +67,7 @@ def _calculate_total_exposure(
     )
 
     total_exposure = sex_age_exposure * individual_exposure
-    total_exposure = total_exposure / np.mean(total_exposure)
-    return total_exposure
+    return total_exposure / np.mean(total_exposure)
 
 
 def _shift_delay_array(new_first_column, delay_array):

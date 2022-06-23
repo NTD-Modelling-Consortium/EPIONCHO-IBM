@@ -276,7 +276,7 @@ def _delta_h(
         * L3
         * total_exposure
     )
-    return (params.delta_hz + (params.delta_hinf * multiplier)) / (1 + multiplier)
+    return (params.delta_h_zero + (params.delta_h_inf * multiplier)) / (1 + multiplier)
 
 
 def _w_plus_one_rate(
