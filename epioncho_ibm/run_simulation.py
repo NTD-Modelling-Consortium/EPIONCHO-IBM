@@ -10,6 +10,7 @@ from epioncho_ibm.worms import (
     WormGroup,
     calc_new_worms,
     change_in_worm_per_index,
+    check_no_worms_are_negative,
     get_delayed_males_and_females,
 )
 
@@ -70,6 +71,10 @@ def _calculate_total_exposure(
     return total_exposure
 
 
+def _shift_delay_array(new_first_column, delay_array):
+    return np.vstack((new_first_column, delay_array[:-1]))
+
+
 def run_simulation(
     state: State, start_time: float = 0, end_time: float = 0, verbose: bool = False
 ) -> State:
@@ -114,8 +119,8 @@ def run_simulation(
             state.delay_arrays.worm_delay, state.params
         )
         # Move all columns in worm_delay along one
-        state.delay_arrays.worm_delay = np.vstack(
-            (new_worms, state.delay_arrays.worm_delay[:-1])
+        state.delay_arrays.worm_delay = _shift_delay_array(
+            new_worms, state.delay_arrays.worm_delay
         )
 
         last_aging_worms = WormGroup.from_population(state.params.human_population)
@@ -127,7 +132,7 @@ def run_simulation(
                 last_time_of_last_treatment,
             ) = change_in_worm_per_index(  # res
                 params=state.params,
-                state=state,
+                people=state.people,
                 delayed_females=delayed_females,
                 delayed_males=delayed_males,
                 worm_mortality_rate=state.derived_params.worm_mortality_rate,
@@ -138,27 +143,7 @@ def run_simulation(
                 compartment=compartment,
                 time_of_last_treatment=state.people.time_of_last_treatment,
             )
-            if np.any(
-                np.logical_or(
-                    np.logical_or(
-                        last_total_worms.male < 0, last_total_worms.fertile < 0
-                    ),
-                    last_total_worms.infertile < 0,
-                )
-            ):
-                candidate_people_male_worms = last_total_worms.male[
-                    last_total_worms.male < 0
-                ]
-                candidate_people_fertile_worms = last_total_worms.fertile[
-                    last_total_worms.fertile < 0
-                ]
-                candidate_people_infertile_worms = last_total_worms.infertile[
-                    last_total_worms.infertile < 0
-                ]
-
-                raise RuntimeError(
-                    f"Worms became negative: \nMales: {candidate_people_male_worms} \nFertile Females: {candidate_people_fertile_worms} \nInfertile Females: {candidate_people_infertile_worms}"
-                )
+            check_no_worms_are_negative(last_total_worms)
 
             state.people.male_worms[compartment] = last_total_worms.male
             state.people.infertile_female_worms[
@@ -175,7 +160,7 @@ def run_simulation(
 
         for compartment in range(state.params.microfil_age_stages):
             state.people.mf[compartment] = change_in_microfil(
-                state=old_state,
+                people=old_state.people,
                 params=state.params,
                 microfillarie_mortality_rate=state.derived_params.microfillarie_mortality_rate,
                 fecundity_rates_worms=state.derived_params.fecundity_rates_worms,
@@ -204,11 +189,11 @@ def run_simulation(
         )
         state.people.blackfly.L3 = calc_l3(state.params, old_state.people.blackfly.L2)
 
-        state.delay_arrays.exposure_delay = np.vstack(
-            (total_exposure, state.delay_arrays.exposure_delay[:-1])
+        state.delay_arrays.exposure_delay = _shift_delay_array(
+            total_exposure, state.delay_arrays.exposure_delay
         )
-        state.delay_arrays.mf_delay = np.vstack(
-            (new_mf, state.delay_arrays.mf_delay[:-1])
+        state.delay_arrays.mf_delay = _shift_delay_array(
+            new_mf, state.delay_arrays.mf_delay
         )
         state.delay_arrays.l1_delay = state.people.blackfly.L1
 

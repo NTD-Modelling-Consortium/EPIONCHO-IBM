@@ -5,6 +5,8 @@ from typing import Optional, Tuple
 import numpy as np
 from numpy.typing import NDArray
 
+from epioncho_ibm.state import People
+
 from .params import Params
 
 
@@ -64,7 +66,7 @@ def _calc_new_worms_from_inside(
 
 def change_in_worm_per_index(
     params: Params,
-    state,
+    people: People,
     delayed_females: NDArray[np.int_],
     delayed_males: NDArray[np.int_],
     worm_mortality_rate: NDArray[np.float_],
@@ -115,7 +117,7 @@ def change_in_worm_per_index(
         params.omega * params.delta_time, params.human_population
     )  # becoming fertile
     # male worms
-    current_male_worms = state.people.male_worms[compartment]  # cur.Wm
+    current_male_worms = people.male_worms[compartment]  # cur.Wm
     compartment_mortality = np.repeat(
         worm_mortality_rate[compartment], params.human_population
     )
@@ -138,12 +140,10 @@ def change_in_worm_per_index(
 
     # female worms
 
-    current_female_worms_infertile = state.people.infertile_female_worms[
+    current_female_worms_infertile = people.infertile_female_worms[
         compartment
     ]  # cur.Wm.nf
-    current_female_worms_fertile = state.people.fertile_female_worms[
-        compartment
-    ]  # cur.Wm.f
+    current_female_worms_fertile = people.fertile_female_worms[compartment]  # cur.Wm.f
 
     female_mortalities = copy(compartment_mortality)  # mort.fems
     #########
@@ -329,3 +329,19 @@ def calc_new_worms(state, total_exposure) -> NDArray[np.int_]:
     else:
         new_worms = np.random.poisson(lam=new_rate, size=state.params.human_population)
     return new_worms
+
+
+def check_no_worms_are_negative(worms: WormGroup):
+    if np.any(
+        np.logical_or(
+            np.logical_or(worms.male < 0, worms.fertile < 0),
+            worms.infertile < 0,
+        )
+    ):
+        candidate_people_male_worms = worms.male[worms.male < 0]
+        candidate_people_fertile_worms = worms.fertile[worms.fertile < 0]
+        candidate_people_infertile_worms = worms.infertile[worms.infertile < 0]
+
+        raise RuntimeError(
+            f"Worms became negative: \nMales: {candidate_people_male_worms} \nFertile Females: {candidate_people_fertile_worms} \nInfertile Females: {candidate_people_infertile_worms}"
+        )

@@ -3,6 +3,8 @@ from typing import Callable, Optional, Union
 import numpy as np
 from numpy.typing import NDArray
 
+from epioncho_ibm.state import People
+
 from .params import Params
 
 
@@ -69,7 +71,7 @@ def construct_derive_microfil_rest(
 
 
 def change_in_microfil(
-    state,
+    people: People,
     params: Params,
     microfillarie_mortality_rate: NDArray[np.float_],
     fecundity_rates_worms: NDArray[np.float_],
@@ -94,13 +96,13 @@ def change_in_microfil(
     params.microfil_age_stages "num.mf.comps"
     params.microfil_aging "time.each.comp"
     N is params.human_population
-    state is dat
+    people is dat
     """
     compartment_mortality = np.repeat(  # mf.mu
         microfillarie_mortality_rate[compartment], params.human_population
     )
-    fertile_worms = state.people.fertile_female_worms  # fert.worms
-    microfil: NDArray[np.int_] = state.people.mf[compartment]
+    fertile_worms = people.fertile_female_worms  # fert.worms
+    microfil: NDArray[np.int_] = people.mf[compartment]
 
     # increases microfilarial mortality if treatment has started
     if (
@@ -116,7 +118,7 @@ def change_in_microfil(
         compartment_mortality += compartment_mortality_prime
 
     if compartment == 0:
-        person_has_worms = np.sum(state.people.male_worms, axis=0) > 0
+        person_has_worms = np.sum(people.male_worms, axis=0) > 0
         derive_microfil = construct_derive_microfil_one(
             fertile_worms,
             microfil,
@@ -127,7 +129,7 @@ def change_in_microfil(
         )
     else:
         derive_microfil = construct_derive_microfil_rest(
-            microfil, compartment_mortality, params, state.people.mf[compartment - 1]
+            microfil, compartment_mortality, params, people.mf[compartment - 1]
         )
     k1 = derive_microfil(0.0)
     k2 = derive_microfil(params.delta_time * k1 / 2)
