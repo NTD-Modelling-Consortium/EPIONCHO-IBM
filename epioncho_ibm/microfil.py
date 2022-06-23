@@ -101,7 +101,6 @@ def change_in_microfil(
     compartment_mortality = np.repeat(  # mf.mu
         microfillarie_mortality_rate[compartment], params.human_population
     )
-    fertile_worms = people.fertile_female_worms  # fert.worms
     microfil: NDArray[np.int_] = people.mf[compartment]
 
     # increases microfilarial mortality if treatment has started
@@ -120,7 +119,7 @@ def change_in_microfil(
     if compartment == 0:
         person_has_worms = np.sum(people.male_worms, axis=0) > 0
         derive_microfil = construct_derive_microfil_one(
-            fertile_worms,
+            people.fertile_female_worms,
             microfil,
             fecundity_rates_worms,
             compartment_mortality,

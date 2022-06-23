@@ -48,14 +48,12 @@ def _calc_new_worms_from_inside(
     human_population: int,
     prob: NDArray[np.float_],
 ) -> NDArray[np.int_]:
-    delta_fertile_female_worms = current_worms - dead_worms - aging_worms  # trans.fc
-    true_delta_fertile_female_worms = np.where(
-        delta_fertile_female_worms > 0, delta_fertile_female_worms, 0
-    )
+    delta_female_worms = current_worms - dead_worms - aging_worms  # trans.fc
+    true_delta_female_worms = np.where(delta_female_worms > 0, delta_female_worms, 0)
 
-    if np.sum(true_delta_fertile_female_worms) > 0:
+    if np.sum(true_delta_female_worms) > 0:
         new_worms = np.random.binomial(
-            n=true_delta_fertile_female_worms,
+            n=true_delta_female_worms,
             p=prob,
             size=human_population,
         )
@@ -181,9 +179,7 @@ def change_in_worm_per_index(
             params.delta_time * lam_m_temp * np.exp(-params.phi * time_since_treatment)
         )
         lambda_zero_in += fertile_to_non_fertile_rate  # update 'standard' fertile to non fertile rate to account for treatment
-    ############################################################
-    # .fi = 'from inside': worms moving from a fertile or infertile compartment
-    # .fo = 'from outside': completely new adult worms
+
     dead_infertile_worms, aging_infertile_worms = _calc_dead_and_aging_worms(
         params=params,
         current_worms=current_female_worms_infertile,
@@ -215,40 +211,31 @@ def change_in_worm_per_index(
         prob=omega,
     )  # new.worms.f.fi TODO: Are these the right way round?
 
+    delta_fertile = new_worms_fertile_from_inside - new_worms_infertile_from_inside
+
+    infertile_excl_transiting = (
+        current_female_worms_infertile - delta_fertile - dead_infertile_worms
+    )
+    fertile_excl_transiting = (
+        current_female_worms_fertile + delta_fertile - dead_fertile_worms
+    )
+
     if compartment == 0:
         infertile_out = (
-            current_female_worms_infertile
-            + delayed_females
-            + new_worms_infertile_from_inside
-            - aging_infertile_worms
-            - dead_infertile_worms
-            - new_worms_fertile_from_inside
-        )  # nf.out
-        fertile_out = (
-            current_female_worms_fertile
-            + new_worms_fertile_from_inside
-            - aging_fertile_worms
-            - dead_fertile_worms
-            - new_worms_infertile_from_inside
+            infertile_excl_transiting - aging_infertile_worms + delayed_females
         )
+        fertile_out = fertile_excl_transiting - aging_fertile_worms
 
     else:
         infertile_out = (
-            current_female_worms_infertile
-            + new_worms_infertile_from_inside
+            infertile_excl_transiting
             - aging_infertile_worms
-            - new_worms_fertile_from_inside
             + last_aging_worms.infertile
-            - dead_infertile_worms
         )
         fertile_out = (
-            current_female_worms_fertile
-            + new_worms_fertile_from_inside
-            - aging_fertile_worms
-            - dead_fertile_worms
-            - new_worms_infertile_from_inside
-            + last_aging_worms.fertile
+            fertile_excl_transiting - aging_fertile_worms + last_aging_worms.fertile
         )
+
     new_aging_worms = WormGroup(
         male=aging_male_worms,
         infertile=aging_infertile_worms,
