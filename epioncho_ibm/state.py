@@ -489,7 +489,7 @@ def get_last_males_and_females(
     return last_males, last_females
 
 
-def calc_dead_and_lost_worms(
+def calc_dead_and_aging_worms(
     params: Params, current_worms: NDArray[np.int_], mortalities: NDArray[np.float_]
 ) -> Tuple[NDArray[np.int_], NDArray[np.int_]]:
     dead_worms = np.random.binomial(
@@ -497,22 +497,22 @@ def calc_dead_and_lost_worms(
         p=mortalities,
         size=params.human_population,
     )
-    lost_worms = np.random.binomial(
+    aging_worms = np.random.binomial(
         n=current_worms - dead_worms,
         p=np.repeat(params.delta_time / params.worms_aging, params.human_population),
         size=params.human_population,
     )
-    return dead_worms, lost_worms
+    return dead_worms, aging_worms
 
 
 def calc_new_worms_from_inside(
     current_worms: NDArray[np.int_],
     dead_worms: NDArray[np.int_],
-    lost_worms: NDArray[np.int_],
+    aging_worms: NDArray[np.int_],
     human_population: int,
     prob: NDArray[np.float_],
 ) -> NDArray[np.int_]:
-    delta_fertile_female_worms = current_worms - dead_worms - lost_worms  # trans.fc
+    delta_fertile_female_worms = current_worms - dead_worms - aging_worms  # trans.fc
     true_delta_fertile_female_worms = np.where(
         delta_fertile_female_worms > 0, delta_fertile_female_worms, 0
     )
@@ -535,7 +535,7 @@ def change_in_worm_per_index(
     last_males: NDArray[np.int_],
     worm_mortality_rate: NDArray[np.float_],
     coverage_in: Optional[NDArray[np.bool_]],
-    last_lost_worms: WormGroup,
+    last_aging_worms: WormGroup,
     initial_treatment_times: Optional[NDArray[np.float_]],
     current_time: float,
     compartment: int,
@@ -585,20 +585,20 @@ def change_in_worm_per_index(
     compartment_mortality = np.repeat(
         worm_mortality_rate[compartment], params.human_population
     )
-    dead_male_worms, lost_male_worms = calc_dead_and_lost_worms(
+    dead_male_worms, aging_male_worms = calc_dead_and_aging_worms(
         params=params,
         current_worms=current_male_worms,
         mortalities=compartment_mortality,
     )
     if compartment == 0:
         total_male_worms = (
-            current_male_worms + last_males - lost_male_worms - dead_male_worms
+            current_male_worms + last_males - aging_male_worms - dead_male_worms
         )
     else:
         total_male_worms = (
             current_male_worms
-            + last_lost_worms.male
-            - lost_male_worms
+            + last_aging_worms.male
+            - aging_male_worms
             - dead_male_worms
         )
 
@@ -650,12 +650,12 @@ def change_in_worm_per_index(
     ############################################################
     # .fi = 'from inside': worms moving from a fertile or infertile compartment
     # .fo = 'from outside': completely new adult worms
-    dead_infertile_worms, lost_infertile_worms = calc_dead_and_lost_worms(
+    dead_infertile_worms, aging_infertile_worms = calc_dead_and_aging_worms(
         params=params,
         current_worms=current_female_worms_infertile,
         mortalities=female_mortalities,
     )
-    dead_fertile_worms, lost_fertile_worms = calc_dead_and_lost_worms(
+    dead_fertile_worms, aging_fertile_worms = calc_dead_and_aging_worms(
         params=params,
         current_worms=current_female_worms_fertile,
         mortalities=female_mortalities,
@@ -664,7 +664,7 @@ def change_in_worm_per_index(
     new_worms_infertile_from_inside = calc_new_worms_from_inside(
         current_worms=current_female_worms_fertile,
         dead_worms=dead_fertile_worms,
-        lost_worms=lost_fertile_worms,
+        aging_worms=aging_fertile_worms,
         human_population=params.human_population,
         prob=lambda_zero_in,
     )  # new.worms.nf.fi
@@ -676,7 +676,7 @@ def change_in_worm_per_index(
     new_worms_fertile_from_inside = calc_new_worms_from_inside(
         current_worms=current_female_worms_infertile,
         dead_worms=dead_infertile_worms,
-        lost_worms=lost_infertile_worms,
+        aging_worms=aging_infertile_worms,
         human_population=params.human_population,
         prob=omega,
     )  # new.worms.f.fi TODO: Are these the right way round?
@@ -686,14 +686,14 @@ def change_in_worm_per_index(
             current_female_worms_infertile
             + last_females
             + new_worms_infertile_from_inside
-            - lost_infertile_worms
+            - aging_infertile_worms
             - dead_infertile_worms
             - new_worms_fertile_from_inside
         )  # nf.out
         fertile_out = (
             current_female_worms_fertile
             + new_worms_fertile_from_inside
-            - lost_fertile_worms
+            - aging_fertile_worms
             - dead_fertile_worms
             - new_worms_infertile_from_inside
         )
@@ -702,28 +702,30 @@ def change_in_worm_per_index(
         infertile_out = (
             current_female_worms_infertile
             + new_worms_infertile_from_inside
-            - lost_infertile_worms
+            - aging_infertile_worms
             - new_worms_fertile_from_inside
-            + last_lost_worms.infertile
+            + last_aging_worms.infertile
             - dead_infertile_worms
         )
         fertile_out = (
             current_female_worms_fertile
             + new_worms_fertile_from_inside
-            - lost_fertile_worms
+            - aging_fertile_worms
             - dead_fertile_worms
             - new_worms_infertile_from_inside
-            + last_lost_worms.fertile
+            + last_aging_worms.fertile
         )
-    new_lost_worms = WormGroup(
-        male=lost_male_worms, infertile=lost_infertile_worms, fertile=lost_fertile_worms
+    new_aging_worms = WormGroup(
+        male=aging_male_worms,
+        infertile=aging_infertile_worms,
+        fertile=aging_fertile_worms,
     )
     new_total_worms = WormGroup(
         male=total_male_worms, infertile=infertile_out, fertile=fertile_out
     )
     return (
         new_total_worms,
-        new_lost_worms,
+        new_aging_worms,
         time_of_last_treatment,
     )
 
@@ -1021,12 +1023,12 @@ def run_simulation(
             (new_worms, state.delay_arrays.worm_delay[:-1])
         )
 
-        last_lost_worms = WormGroup.from_population(state.params.human_population)
+        last_aging_worms = WormGroup.from_population(state.params.human_population)
         last_time_of_last_treatment = None
         for compartment in range(state.params.worm_age_stages):
             (
                 last_total_worms,
-                last_lost_worms,
+                last_aging_worms,
                 last_time_of_last_treatment,
             ) = change_in_worm_per_index(  # res
                 params=state.params,
@@ -1035,7 +1037,7 @@ def run_simulation(
                 last_males=last_males,
                 worm_mortality_rate=state.derived_params.worm_mortality_rate,
                 coverage_in=coverage_in,
-                last_lost_worms=last_lost_worms,
+                last_aging_worms=last_aging_worms,
                 initial_treatment_times=state.derived_params.initial_treatment_times,
                 current_time=current_time,
                 compartment=compartment,
