@@ -626,8 +626,8 @@ def change_in_worm_per_index(
         assert time_of_last_treatment is not None
         during_treatment = np.any(
             np.logical_and(
-                current_time < initial_treatment_times,
-                initial_treatment_times <= current_time + params.delta_time,
+                current_time <= initial_treatment_times,
+                initial_treatment_times < current_time + params.delta_time,
             )
         )
         if during_treatment and current_time <= params.treatment_stop_time:
@@ -969,7 +969,7 @@ def run_simulation(
     while current_time < end_time:
         if state.params.delta_time > current_time % 0.2 and verbose:
             print(current_time)
-        current_time += state.params.delta_time
+
         if current_time >= state.params.treatment_start_time:
             coverage_in = calc_coverage(
                 state.people,
@@ -1133,4 +1133,5 @@ def run_simulation(
             state.people.male_worms[:, people_to_die] = 0
             state.people.fertile_female_worms[:, people_to_die] = 0
             state.people.infertile_female_worms[:, people_to_die] = 0
+        current_time += state.params.delta_time
     return state
