@@ -1,7 +1,10 @@
+import dis
+import io
 import json
 import math
 import os
 import time
+from contextlib import redirect_stdout
 from inspect import signature
 from multiprocessing import cpu_count
 from pathlib import Path
@@ -134,6 +137,12 @@ class PytestConfig(BaseModel):
     benchmark_path: str
 
 
+def get_func_info(func) -> str:
+    with redirect_stdout(io.StringIO()) as f:
+        dis.dis(func)
+    return f.getvalue()
+
+
 FuncReturn = TypeVar(
     "FuncReturn",
     bound=BaseModel,
@@ -170,6 +179,14 @@ class SetupFuncBenchmarker(Generic[FuncReturn]):
         self._output_data = None
         self._test_model = None
         self.est_base_time = est_base_time
+        self.func_info = (
+            get_func_info(self.func)
+            + str(self.parameters)
+            + str(self.return_type.schema())
+        )
+
+    def __str__(self) -> str:
+        return self.func_info
 
     def _generate_settings_model(self) -> Type[BaseSettingsModel]:
         attributes: Dict[str, Tuple[type, ellipsis]] = {
@@ -356,6 +373,11 @@ class AutoBenchmarker:
         self._func_benchmarkers = None
         self.settings_folder = Path(self.pytest_config.benchmark_path)
 
+    def __str__(self) -> str:
+        return ", ".join(
+            [name + str(i) for name, i in self.setup_func_benchmarkers.items()]
+        )
+
     def _generate_test_model(self) -> Type[BaseTestModel]:
         output_models_dict = {
             func_name: (List[setup_func_benchmarker.output_model], ...)  # type:ignore
@@ -459,6 +481,10 @@ class AutoBenchmarker:
         )
         benchmark_file = open(benchmark_file_path, "w+")
         json.dump(test_data.dict(), benchmark_file, indent=2)
+        benchmark_file.close()
+        hash_file_path = Path(str(self.settings_folder) + os.sep + "data_hash.txt")
+        with open(hash_file_path, "w+") as f:
+            f.write(str(self))
 
     def test_benchmark_data(
         self, benchmark_data: BaseOutputData, acceptable_st_devs: float, func_name: str

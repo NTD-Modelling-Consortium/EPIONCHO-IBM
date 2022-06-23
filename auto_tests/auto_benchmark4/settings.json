@@ -1,7 +1,21 @@
 {
   "no_treatment": {
     "max_product": 1.0,
-    "benchmark_iters": 10,
+    "benchmark_iters": 100,
+    "end_time": {
+      "minimum": 0.001,
+      "maximum": 0.1,
+      "steps": 8
+    },
+    "population": {
+      "minimum": 1,
+      "maximum": 64,
+      "steps": 8
+    }
+  },
+  "treatment": {
+    "max_product": 1.0,
+    "benchmark_iters": 100,
     "end_time": {
       "minimum": 0.001,
       "maximum": 0.1,

@@ -1,0 +1,81 @@
+no_treatment 13           0 LOAD_GLOBAL              0 (Params)
+              2 LOAD_FAST                1 (population)
+              4 LOAD_CONST               1 (('human_population',))
+              6 CALL_FUNCTION_KW         1
+              8 STORE_FAST               2 (params)
+
+ 14          10 LOAD_GLOBAL              1 (RandomConfig)
+             12 CALL_FUNCTION            0
+             14 STORE_FAST               3 (random_config)
+
+ 15          16 LOAD_GLOBAL              2 (State)
+             18 LOAD_ATTR                3 (generate_random)
+             20 LOAD_FAST                3 (random_config)
+             22 LOAD_FAST                2 (params)
+             24 LOAD_CONST               2 (('random_config', 'params'))
+             26 CALL_FUNCTION_KW         2
+             28 STORE_FAST               4 (initial_state)
+
+ 16          30 LOAD_FAST                4 (initial_state)
+             32 LOAD_ATTR                4 (dist_population_age)
+             34 LOAD_CONST               3 (15000)
+             36 LOAD_CONST               4 (('num_iter',))
+             38 CALL_FUNCTION_KW         1
+             40 POP_TOP
+
+ 17          42 LOAD_GLOBAL              5 (run_simulation)
+             44 LOAD_FAST                4 (initial_state)
+             46 LOAD_CONST               5 (0)
+             48 LOAD_FAST                0 (end_time)
+             50 LOAD_CONST               6 (('start_time', 'end_time'))
+             52 CALL_FUNCTION_KW         3
+             54 STORE_FAST               5 (new_state)
+
+ 18          56 LOAD_FAST                5 (new_state)
+             58 LOAD_METHOD              6 (to_stats)
+             60 CALL_METHOD              0
+             62 STORE_FAST               6 (stats)
+
+ 19          64 LOAD_FAST                6 (stats)
+             66 RETURN_VALUE
+{'end_time': <class 'float'>, 'population': <class 'int'>}{'title': 'StateStats', 'type': 'object', 'properties': {'percent_compliant': {'title': 'Percent Compliant', 'type': 'number'}, 'percent_male': {'title': 'Percent Male', 'type': 'number'}, 'L1': {'$ref': '#/definitions/NumericArrayStat'}, 'L2': {'$ref': '#/definitions/NumericArrayStat'}, 'L3': {'$ref': '#/definitions/NumericArrayStat'}, 'ages': {'$ref': '#/definitions/NumericArrayStat'}, 'mf': {'$ref': '#/definitions/NumericArrayStat'}, 'male_worms': {'$ref': '#/definitions/NumericArrayStat'}, 'infertile_female_worms': {'$ref': '#/definitions/NumericArrayStat'}, 'fertile_female_worms': {'$ref': '#/definitions/NumericArrayStat'}, 'mf_per_skin_snip': {'title': 'Mf Per Skin Snip', 'type': 'number'}, 'population_prevalence': {'title': 'Population Prevalence', 'type': 'number'}}, 'required': ['percent_compliant', 'percent_male', 'L1', 'L2', 'L3', 'ages', 'mf', 'male_worms', 'infertile_female_worms', 'fertile_female_worms', 'mf_per_skin_snip', 'population_prevalence'], 'definitions': {'NumericArrayStat': {'title': 'NumericArrayStat', 'type': 'object', 'properties': {'mean': {'title': 'Mean', 'type': 'number'}}, 'required': ['mean']}}}, treatment 13           0 LOAD_GLOBAL              0 (Params)
+              2 LOAD_FAST                1 (population)
+              4 LOAD_CONST               1 (('human_population',))
+              6 CALL_FUNCTION_KW         1
+              8 STORE_FAST               2 (params)
+
+ 14          10 LOAD_GLOBAL              1 (RandomConfig)
+             12 CALL_FUNCTION            0
+             14 STORE_FAST               3 (random_config)
+
+ 15          16 LOAD_GLOBAL              2 (State)
+             18 LOAD_ATTR                3 (generate_random)
+             20 LOAD_FAST                3 (random_config)
+             22 LOAD_FAST                2 (params)
+             24 LOAD_CONST               2 (('random_config', 'params'))
+             26 CALL_FUNCTION_KW         2
+             28 STORE_FAST               4 (initial_state)
+
+ 16          30 LOAD_FAST                4 (initial_state)
+             32 LOAD_ATTR                4 (dist_population_age)
+             34 LOAD_CONST               3 (15000)
+             36 LOAD_CONST               4 (('num_iter',))
+             38 CALL_FUNCTION_KW         1
+             40 POP_TOP
+
+ 17          42 LOAD_GLOBAL              5 (run_simulation)
+             44 LOAD_FAST                4 (initial_state)
+             46 LOAD_CONST               5 (0)
+             48 LOAD_FAST                0 (end_time)
+             50 LOAD_CONST               6 (('start_time', 'end_time'))
+             52 CALL_FUNCTION_KW         3
+             54 STORE_FAST               5 (new_state)
+
+ 18          56 LOAD_FAST                5 (new_state)
+             58 LOAD_METHOD              6 (to_stats)
+             60 CALL_METHOD              0
+             62 STORE_FAST               6 (stats)
+
+ 19          64 LOAD_FAST                6 (stats)
+             66 RETURN_VALUE
+{'end_time': <class 'float'>, 'population': <class 'int'>}{'title': 'StateStats', 'type': 'object', 'properties': {'percent_compliant': {'title': 'Percent Compliant', 'type': 'number'}, 'percent_male': {'title': 'Percent Male', 'type': 'number'}, 'L1': {'$ref': '#/definitions/NumericArrayStat'}, 'L2': {'$ref': '#/definitions/NumericArrayStat'}, 'L3': {'$ref': '#/definitions/NumericArrayStat'}, 'ages': {'$ref': '#/definitions/NumericArrayStat'}, 'mf': {'$ref': '#/definitions/NumericArrayStat'}, 'male_worms': {'$ref': '#/definitions/NumericArrayStat'}, 'infertile_female_worms': {'$ref': '#/definitions/NumericArrayStat'}, 'fertile_female_worms': {'$ref': '#/definitions/NumericArrayStat'}, 'mf_per_skin_snip': {'title': 'Mf Per Skin Snip', 'type': 'number'}, 'population_prevalence': {'title': 'Population Prevalence', 'type': 'number'}}, 'required': ['percent_compliant', 'percent_male', 'L1', 'L2', 'L3', 'ages', 'mf', 'male_worms', 'infertile_female_worms', 'fertile_female_worms', 'mf_per_skin_snip', 'population_prevalence'], 'definitions': {'NumericArrayStat': {'title': 'NumericArrayStat', 'type': 'object', 'properties': {'mean': {'title': 'Mean', 'type': 'number'}}, 'required': ['mean']}}}

@@ -5,24 +5,34 @@ from typing import List, Tuple
 
 import pytest
 
+from auto_tests.auto_benchmarker_config import autobenchmarker
 from auto_tests.definitions.auto_benchmarker import (
     AutoBenchmarker,
     BaseOutputData,
     BaseTestModel,
 )
 from auto_tests.definitions.pytest_config import PytestConfig
-from epioncho_ibm import benchmarker_test_func
 
 pytest_config = PytestConfig.parse_file("pytest_config.json")
 benchmark_file_path = Path(
     str(Path(pytest_config.benchmark_path)) + os.sep + "benchmark.json"
 )
-autobenchmarker = AutoBenchmarker(no_treatment=benchmarker_test_func)
-
 if not benchmark_file_path.exists():
+    autobenchmarker.generate_benchmark(verbose=True)
+hash_file_path = Path(
+    str(Path(pytest_config.benchmark_path)) + os.sep + "data_hash.txt"
+)
+with open(hash_file_path, "r") as f:
+    lines = f.readlines()
+    line = "".join(lines)
+
+if str(autobenchmarker) != line:
     autobenchmarker.generate_benchmark(verbose=True)
 
 test_data_model = autobenchmarker.test_model
+benchmark_file: test_data_model = test_data_model.parse_file(benchmark_file_path)
+
+
 benchmark_file: test_data_model = test_data_model.parse_file(benchmark_file_path)
 
 
