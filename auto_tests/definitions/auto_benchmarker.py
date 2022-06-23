@@ -30,6 +30,10 @@ from auto_tests.definitions.utils import FlatDict, flatten_dict
 
 """
 This is a prototype auto benchmarker
+
+TODO: Future feature, support enums in functions and iterate over each possibility
+
+Note - eventually make autobenchmarker and funcbenchmarker inherit from benchmarker
 """
 
 
@@ -43,8 +47,18 @@ class BenchmarkArray(BaseModel):
 
 
 class BaseSettingsModel(BaseModel):
+    """
+    The settings corresponding to one function
+    """
+
     max_product: float
     benchmark_iters: int
+
+
+class GlobalSettingsModel(BaseModel):
+    """
+    The settings corresponding to all functions
+    """
 
 
 class BaseOutputData(BaseModel):
@@ -126,7 +140,7 @@ FuncReturn = TypeVar(
 )
 
 
-class AutoBenchmarker(Generic[FuncReturn]):
+class SetupFuncBenchmarker(Generic[FuncReturn]):
     parameters: Dict[str, type]
     func: Callable[..., FuncReturn]
     return_type: FuncReturn
@@ -151,7 +165,7 @@ class AutoBenchmarker(Generic[FuncReturn]):
         self.return_type = return_type
         self.func_name = func.__name__
         self.camel_name = snake_to_camel_case(self.func_name)
-        self.pytest_config = PytestConfig.parse_file("pytest_config.json")
+
         self._settings_model = None
         self._output_data = None
         self._test_model = None
@@ -172,7 +186,7 @@ class AutoBenchmarker(Generic[FuncReturn]):
             self._settings_model = self._generate_settings_model()
         return self._settings_model
 
-    def _generate_settings_file(self, settings_path: Path) -> None:
+    def generate_settings_instance(self) -> BaseSettingsModel:
         model = self.settings_model
         attr_dict = {}
         for k, t in self.parameters.items():
@@ -221,9 +235,7 @@ class AutoBenchmarker(Generic[FuncReturn]):
         attr_dict["benchmark_iters"] = benchmark_iters
 
         settings = model.parse_obj(attr_dict)
-
-        settings_file = open(settings_path, "w+")
-        json.dump(settings.dict(), settings_file, indent=2)
+        return settings
 
     def _generate_output_model(self) -> Type[BaseOutputData]:
         attributes: Dict[str, Tuple[type, ellipsis]] = {
@@ -239,19 +251,28 @@ class AutoBenchmarker(Generic[FuncReturn]):
             self._output_data = self._generate_output_model()
         return self._output_data
 
-    def _generate_test_model(self) -> Type[BaseTestModel]:
-        OutputModel = self.output_model
-        return create_model(
-            "TestData",
-            __base__=BaseTestModel,
-            tests=(List[OutputModel], ...),  # type:ignore
+
+SettingsModel = TypeVar("SettingsModel", bound=BaseSettingsModel)
+FuncReturn = TypeVar("FuncReturn", bound=BaseModel)
+
+
+class FuncBenchmarker(Generic[SettingsModel, FuncReturn]):
+    def __init__(
+        self, settings: SettingsModel, func_setup: SetupFuncBenchmarker
+    ) -> None:
+        self.settings = settings
+        self.func_setup = func_setup
+        self.test_pairs, self.total_product = get_test_pairs(
+            settings, func_setup.parameters
         )
 
-    @property
-    def test_model(self) -> Type[BaseTestModel]:
-        if self._test_model is None:
-            self._test_model = self._generate_test_model()
-        return self._test_model
+    def __len__(self) -> int:
+        return len(self.test_pairs)
+
+    def estimate_computation_time(self) -> Tuple[float, float]:
+        est_test_time = self.func_setup.est_base_time * self.total_product
+        est_benchmark_time = est_test_time * self.settings.benchmark_iters
+        return est_test_time, est_benchmark_time
 
     def _compute_mean_and_st_dev_of_pydantic(
         self,
@@ -274,60 +295,31 @@ class AutoBenchmarker(Generic[FuncReturn]):
             k: BenchmarkArray.from_array(v) for k, v in final_dict_of_arrays.items()
         }
 
-    def generate_benchmark(self, verbose: bool = False):
-        SettingsModel = self.settings_model
-        OutputModel = self.output_model
-        TestModel = self.test_model
+    def generate_benchmark(self) -> List[BaseOutputData]:
+        OutputModel = self.func_setup.output_model
 
-        settings_folder = Path(self.pytest_config.benchmark_path)
-        settings_path = Path(str(settings_folder) + os.sep + "settings.json")
-        if not settings_path.exists():
-            if not settings_folder.exists():
-                settings_folder.mkdir(parents=True)
-            self._generate_settings_file(settings_path)
-        settings_model = SettingsModel.parse_file(settings_path)
-        test_pairs, total_product = get_test_pairs(
-            settings=settings_model, parameters=self.parameters
-        )
-        if verbose:
-            est_test_time = self.est_base_time * total_product
-            est_benchmark_time = est_test_time * settings_model.benchmark_iters
-            print(f"Benchmark will run {len(test_pairs)} tests")
-            print(f"Estimated benchmark calc time (one core): {est_benchmark_time}")
-            print(
-                f"Estimated benchmark calc time (multiple cores): {est_benchmark_time/cpu_count()}"
-            )
-            print(f"Estimated test time (no reruns): {est_test_time}")
-
-        start = time.time()
         tests: List[BaseOutputData] = []
-        headers = [k for k in self.parameters.keys()]
-        for items in test_pairs:
+        headers = [k for k in self.func_setup.parameters.keys()]
+        for items in self.test_pairs:
             list_of_stats: List[FuncReturn] = Parallel(n_jobs=cpu_count())(
-                delayed(self.func)(*items)
-                for _ in range(settings_model.benchmark_iters)
+                delayed(self.func_setup.func)(*items)
+                for _ in range(self.settings.benchmark_iters)
             )
             data = self._compute_mean_and_st_dev_of_pydantic(list_of_stats)
             values = {header: items[i] for i, header in enumerate(headers)}
 
             test_output = OutputModel(data=data, **values)
             tests.append(test_output)
-        end = time.time()
-        if verbose:
-            print(f"Benchmark calculated in: {end-start}")
-        test_data = TestModel.parse_obj({"tests": tests})
-        benchmark_file_path = Path(str(settings_folder) + os.sep + "benchmark.json")
-        benchmark_file = open(benchmark_file_path, "w+")
-        json.dump(test_data.dict(), benchmark_file, indent=2)
+        return tests
 
     def test_benchmark_data(
         self, benchmark_data: BaseOutputData, acceptable_st_devs: float
     ) -> None:
         func_args = {
             dimension: getattr(benchmark_data, dimension)
-            for dimension in self.parameters.keys()
+            for dimension in self.func_setup.parameters.keys()
         }
-        func_return = self.func(**func_args)
+        func_return = self.func_setup.func(**func_args)
         func_return_dict = flatten_dict(func_return.dict())
         for k, v in func_return_dict.items():
             if k not in benchmark_data.data:
@@ -350,3 +342,126 @@ class AutoBenchmarker(Generic[FuncReturn]):
                 raise ValueError(
                     f"For key: {k} upper bound: {benchmark_upper_bound} surpassed by value {v}"
                 )
+
+
+class AutoBenchmarker:
+    def __init__(self, **funcs: Callable) -> None:
+        self.pytest_config = PytestConfig.parse_file("pytest_config.json")
+        self.setup_func_benchmarkers = {
+            k: SetupFuncBenchmarker(v) for k, v in funcs.items()
+        }
+        self._settings_model = None
+        self._settings = None
+        self._test_model = None
+        self._func_benchmarkers = None
+        self.settings_folder = Path(self.pytest_config.benchmark_path)
+
+    def _generate_test_model(self) -> Type[BaseTestModel]:
+        output_models_dict = {
+            func_name: (List[setup_func_benchmarker.output_model], ...)  # type:ignore
+            for func_name, setup_func_benchmarker in self.setup_func_benchmarkers.items()
+        }
+        return create_model(
+            "TestData",
+            __base__=BaseTestModel,
+            tests=(create_model("FuncData", **output_models_dict), ...),  # type:ignore
+        )
+
+    @property
+    def test_model(self) -> Type[BaseTestModel]:
+        if self._test_model is None:
+            self._test_model = self._generate_test_model()
+        return self._test_model
+
+    def _generate_settings_model(self) -> Type[GlobalSettingsModel]:
+        settings_dict = {}
+        for func_name, func_benchmarker in self.setup_func_benchmarkers.items():
+            settings_dict[func_name] = (func_benchmarker.settings_model, ...)
+        return create_model(
+            "GlobalSettings", __base__=GlobalSettingsModel, **settings_dict
+        )
+
+    @property
+    def settings_model(self) -> Type[GlobalSettingsModel]:
+        if self._settings_model is None:
+            self._settings_model = self._generate_settings_model()
+        return self._settings_model
+
+    def _generate_settings_file(self, settings_path: Path) -> None:
+        model = self.settings_model
+        settings = model.parse_obj(
+            {
+                k: v.generate_settings_instance()
+                for k, v in self.setup_func_benchmarkers.items()
+            }
+        )
+        settings_file = open(settings_path, "w+")
+        json.dump(settings.dict(), settings_file, indent=2)
+
+    @property
+    def settings(self) -> GlobalSettingsModel:
+        if self._settings is None:
+            settings_path = Path(str(self.settings_folder) + os.sep + "settings.json")
+            if not settings_path.exists():
+                if not self.settings_folder.exists():
+                    self.settings_folder.mkdir(parents=True)
+                self._generate_settings_file(settings_path)
+            self._settings = self.settings_model.parse_file(settings_path)
+        return self._settings
+
+    @property
+    def func_benchmarkers(self) -> Dict[str, FuncBenchmarker]:
+        if self._func_benchmarkers is None:
+            self._func_benchmarkers = {
+                func_name: FuncBenchmarker(
+                    getattr(self.settings, func_name), func_setup
+                )
+                for func_name, func_setup in self.setup_func_benchmarkers.items()
+            }
+        return self._func_benchmarkers
+
+    def generate_benchmark(self, verbose: bool = False):
+        func_benchmarkers = self.func_benchmarkers
+
+        if verbose:
+            total_benchmark_time = 0
+            test_times = []
+            total_tests = 0
+            for func_benchmarker in func_benchmarkers.values():
+                (
+                    est_test_time,
+                    est_benchmark_time,
+                ) = func_benchmarker.estimate_computation_time()
+                total_benchmark_time += est_benchmark_time
+                total_tests += len(func_benchmarker)
+                test_times.append(est_test_time)
+            total_test_time = sum(test_times)
+            print(f"Benchmark will run {total_tests} tests")
+            print(f"Estimated benchmark calc time (one core): {total_benchmark_time}")
+            print(
+                f"Estimated benchmark calc time (multiple cores): {total_benchmark_time/cpu_count()}"
+            )
+            print(f"Estimated total test time (no reruns): {total_test_time}")
+
+        start = time.time()
+        all_benchmarks_out = {}
+        for func_name, func_benchmarker in func_benchmarkers.items():
+            benchmark_out = func_benchmarker.generate_benchmark()
+            all_benchmarks_out[func_name] = benchmark_out
+        end = time.time()
+
+        if verbose:
+            print(f"Benchmark calculated in: {end-start}")
+        test_data = self.test_model.parse_obj({"tests": all_benchmarks_out})
+
+        benchmark_file_path = Path(
+            str(self.settings_folder) + os.sep + "benchmark.json"
+        )
+        benchmark_file = open(benchmark_file_path, "w+")
+        json.dump(test_data.dict(), benchmark_file, indent=2)
+
+    def test_benchmark_data(
+        self, benchmark_data: BaseOutputData, acceptable_st_devs: float, func_name: str
+    ) -> None:
+        func_benchmarker = self.func_benchmarkers[func_name]
+        func_benchmarker.test_benchmark_data(benchmark_data, acceptable_st_devs)
