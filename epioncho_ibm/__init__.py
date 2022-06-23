@@ -1,6 +1,8 @@
 version = 1.0
+from epioncho_ibm.run_simulation import run_simulation
+
 from .params import Params
-from .state import RandomConfig, State, StateStats, run_simulation
+from .state import RandomConfig, State, StateStats
 
 # from enum import Enum
 
