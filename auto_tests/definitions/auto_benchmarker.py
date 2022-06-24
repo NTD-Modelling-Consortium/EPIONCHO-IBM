@@ -186,7 +186,7 @@ class SetupFuncBenchmarker(Generic[FuncReturn]):
         )
 
     def __str__(self) -> str:
-        return self.func_info
+        return self.func_info.replace("\n", "")
 
     def _generate_settings_model(self) -> Type[BaseSettingsModel]:
         attributes: Dict[str, Tuple[type, ellipsis]] = {
