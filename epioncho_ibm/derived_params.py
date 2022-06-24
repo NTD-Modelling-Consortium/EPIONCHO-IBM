@@ -24,18 +24,21 @@ class DerivedParams:
 
         worm_age_categories = np.arange(
             start=0,
-            stop=params.max_worm_age,
-            step=params.max_worm_age / params.worm_age_stages,
+            stop=params.worms.max_worm_age,
+            step=params.worms.max_worm_age / params.worms.worm_age_stages,
         )  # age.cats
         self.worm_mortality_rate = _weibull_mortality(
-            params.delta_time, params.mu_worms1, params.mu_worms2, worm_age_categories
+            params.delta_time,
+            params.worms.mu_worms1,
+            params.worms.mu_worms2,
+            worm_age_categories,
         )
         self.fecundity_rates_worms = (
             1.158305
-            * params.fecundity_worms_1
+            * params.worms.fecundity_worms_1
             / (
-                params.fecundity_worms_1
-                + (params.fecundity_worms_2 ** (-worm_age_categories))
+                params.worms.fecundity_worms_1
+                + (params.worms.fecundity_worms_2 ** (-worm_age_categories))
                 - 1
             )
         )
@@ -56,16 +59,16 @@ class DerivedParams:
 
         if params.give_treatment:
             treatment_number = (
-                params.treatment_stop_time - params.treatment_start_time
-            ) / params.treatment_interval_yrs
+                params.treatment.stop_time - params.treatment.start_time
+            ) / params.treatment.interval_years
             if round(treatment_number) != treatment_number:
                 raise ValueError(
-                    f"Treatment times could not be found for start: {params.treatment_start_time}, stop: {params.treatment_stop_time}, interval: {params.treatment_interval_yrs}"
+                    f"Treatment times could not be found for start: {params.treatment.start_time}, stop: {params.treatment.stop_time}, interval: {params.treatment.interval_years}"
                 )
             treatment_number_int: int = math.ceil(treatment_number)
             self.initial_treatment_times = np.linspace(  # "times.of.treat.in"
-                start=params.treatment_start_time,
-                stop=params.treatment_stop_time,
+                start=params.treatment.start_time,
+                stop=params.treatment.stop_time,
                 num=treatment_number_int + 1,
             )
         else:

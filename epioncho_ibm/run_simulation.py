@@ -85,7 +85,7 @@ def run_simulation(
         if state.params.delta_time > current_time % 0.2 and verbose:
             print(current_time)
 
-        if current_time >= state.params.treatment_start_time:
+        if current_time >= state.params.treatment.start_time:
             coverage_in = _calc_coverage(
                 state.people,
                 state.params.total_population_coverage,
@@ -124,7 +124,7 @@ def run_simulation(
 
         last_aging_worms = WormGroup.from_population(state.params.human_population)
         last_time_of_last_treatment = None
-        for compartment in range(state.params.worm_age_stages):
+        for compartment in range(state.params.worms.worm_age_stages):
             (
                 last_total_worms,
                 last_aging_worms,
@@ -153,7 +153,7 @@ def run_simulation(
         assert last_time_of_last_treatment is not None
         if (
             state.derived_params.initial_treatment_times is not None
-            and current_time >= state.params.treatment_start_time
+            and current_time >= state.params.treatment.start_time
         ):
             state.people.time_of_last_treatment = last_time_of_last_treatment
 

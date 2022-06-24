@@ -35,7 +35,9 @@ def _calc_dead_and_aging_worms(
     )
     aging_worms = np.random.binomial(
         n=current_worms - dead_worms,
-        p=np.repeat(params.delta_time / params.worms_aging, params.human_population),
+        p=np.repeat(
+            params.delta_time / params.worms.worms_aging, params.human_population
+        ),
         size=params.human_population,
     )
     return dead_worms, aging_worms
@@ -109,10 +111,10 @@ def change_in_worm_per_index(
     """
 
     lambda_zero_in = np.repeat(
-        params.lambda_zero * params.delta_time, params.human_population
+        params.worms.lambda_zero * params.delta_time, params.human_population
     )  # loss of fertility lambda.zero.in
     omega = np.repeat(
-        params.omega * params.delta_time, params.human_population
+        params.worms.omega * params.delta_time, params.human_population
     )  # becoming fertile
     # male worms
     current_male_worms = people.male_worms[compartment]  # cur.Wm
@@ -153,7 +155,7 @@ def change_in_worm_per_index(
 
     if (
         initial_treatment_times is not None
-        and current_time > params.treatment_start_time
+        and current_time > params.treatment.start_time
     ):
         assert time_of_last_treatment is not None
         during_treatment = np.any(
@@ -162,21 +164,23 @@ def change_in_worm_per_index(
                 initial_treatment_times < current_time + params.delta_time,
             )
         )
-        if during_treatment and current_time <= params.treatment_stop_time:
+        if during_treatment and current_time <= params.treatment.stop_time:
             assert coverage_in is not None
             # TODO: This only needs to be calculated at compartment 0 - all others repeat calc
             time_of_last_treatment[coverage_in] = current_time  # treat.vec
             # params.permanent_infertility is the proportion of female worms made permanently infertile, killed for simplicity
             female_mortalities[coverage_in] = (
-                female_mortalities[coverage_in] + params.permanent_infertility
+                female_mortalities[coverage_in] + params.worms.permanent_infertility
             )
 
         time_since_treatment = current_time - time_of_last_treatment  # tao
 
         # individuals which have been treated get additional infertility rate
-        lam_m_temp = np.where(time_of_last_treatment == np.nan, 0, params.lam_m)
+        lam_m_temp = np.where(time_of_last_treatment == np.nan, 0, params.worms.lam_m)
         fertile_to_non_fertile_rate = np.nan_to_num(
-            params.delta_time * lam_m_temp * np.exp(-params.phi * time_since_treatment)
+            params.delta_time
+            * lam_m_temp
+            * np.exp(-params.worms.phi * time_since_treatment)
         )
         lambda_zero_in += fertile_to_non_fertile_rate  # update 'standard' fertile to non fertile rate to account for treatment
 
@@ -269,14 +273,19 @@ def _delta_h(
     # proportion of L3 larvae (final life stage in the fly population) developing into adult worms in humans
     # expos is the total exposure for an individual
     # delta.hz, delta.hinf, c.h control the density dependent establishment of parasites
+    annual_transm_potential = (
+        params.bite_rate_per_person_per_year / params.bite_rate_per_fly_on_human
+    )
     multiplier = (
-        params.c_h
-        * params.annual_transm_potential
+        params.worms.c_h
+        * annual_transm_potential
         * params.bite_rate_per_fly_on_human
         * L3
         * total_exposure
     )
-    return (params.delta_h_zero + (params.delta_h_inf * multiplier)) / (1 + multiplier)
+    return (params.worms.delta_h_zero + (params.worms.delta_h_inf * multiplier)) / (
+        1 + multiplier
+    )
 
 
 def _w_plus_one_rate(
@@ -292,9 +301,12 @@ def _w_plus_one_rate(
     params.delta_time #"DT"
     """
     dh = _delta_h(params, L3, total_exposure)
+    annual_transm_potential = (
+        params.bite_rate_per_person_per_year / params.bite_rate_per_fly_on_human
+    )
     return (
         params.delta_time
-        * params.annual_transm_potential
+        * annual_transm_potential
         * params.bite_rate_per_fly_on_human
         * dh
         * total_exposure

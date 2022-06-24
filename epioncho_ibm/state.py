@@ -74,9 +74,6 @@ class People:
     infertile_female_worms: NDArray[np.int_]
     fertile_female_worms: NDArray[np.int_]
 
-    # mf_current_quantity: NDArray[np.int_]
-    # exposure: NDArray[np.float_]
-    # new_worm_rate: NDArray[np.float_]
     time_of_last_treatment: NDArray[np.float_]  # treat.vec
 
     def __len__(self):
@@ -181,16 +178,16 @@ class State:
                     L3=np.repeat(params.initial_L3, n_people),
                 ),
                 mf=np.ones((params.microfil_age_stages, n_people)) * params.initial_mf,
-                male_worms=np.ones((params.worm_age_stages, n_people), dtype=int)
-                * params.initial_worms,
+                male_worms=np.ones((params.worms.worm_age_stages, n_people), dtype=int)
+                * params.worms.initial_worms,
                 infertile_female_worms=np.ones(
-                    (params.worm_age_stages, n_people), dtype=int
+                    (params.worms.worm_age_stages, n_people), dtype=int
                 )
-                * params.initial_worms,
+                * params.worms.initial_worms,
                 fertile_female_worms=np.ones(
-                    (params.worm_age_stages, n_people), dtype=int
+                    (params.worms.worm_age_stages, n_people), dtype=int
                 )
-                * params.initial_worms,
+                * params.worms.initial_worms,
                 time_of_last_treatment=time_of_last_treatment,
             ),
             params=params,

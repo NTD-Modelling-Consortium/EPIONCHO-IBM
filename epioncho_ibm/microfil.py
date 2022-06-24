@@ -106,7 +106,7 @@ def change_in_microfil(
     # increases microfilarial mortality if treatment has started
     if (
         time_of_last_treatment is not None
-        and current_time >= params.treatment_start_time
+        and current_time >= params.treatment.start_time
     ):
         compartment_mortality_prime = (
             time_of_last_treatment + params.u_ivermectin

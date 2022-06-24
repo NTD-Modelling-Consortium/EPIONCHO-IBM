@@ -1,9 +1,10 @@
 import numpy as np
 
 from epioncho_ibm import Params, RandomConfig, State, run_simulation
+from epioncho_ibm.params import TreatmentParams
 
 random_config = RandomConfig()
-params = Params(human_population=440, treatment_start_time=0)
+params = Params(human_population=440, treatment=TreatmentParams(start_time=0))
 initial_state = State.generate_random(random_config=random_config, params=params)
 
 initial_state.dist_population_age(num_iter=15000)
