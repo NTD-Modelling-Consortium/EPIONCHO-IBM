@@ -212,7 +212,7 @@ class State:
         """
         # rowSums(da... sums up adult worms for all individuals giving a vector of kmfs
         # TODO: Note that the worms used here were only female, not total - is this correct?
-        kmf = self.params.slope_kmf * np.sum(
+        kmf = self.params.microfil.slope_kmf * np.sum(
             self.people.fertile_female_worms + self.people.infertile_female_worms,
             axis=0,
         )

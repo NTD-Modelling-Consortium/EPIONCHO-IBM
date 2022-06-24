@@ -1,7 +1,7 @@
 import numpy as np
 from numpy.typing import NDArray
 
-from .params import Params
+from .params import BlackflyParams
 
 # L1, L2, L3 (parasite life stages) dynamics in the fly population
 # assumed to be at equilibrium
@@ -9,7 +9,7 @@ from .params import Params
 
 
 def calc_l1(
-    params: Params,
+    blackfly_params: BlackflyParams,
     microfil: NDArray[np.float_],
     last_microfil_delay: NDArray[np.float_],
     total_exposure: NDArray[np.float_],
@@ -28,25 +28,28 @@ def calc_l1(
     exposure_delay # expos.delay
     """
     # proportion of mf per mg developing into infective larvae within the vector
-    delta_vv = params.blackfly.delta_v0 / (
-        1 + params.blackfly.c_v * microfil * total_exposure
+    delta_vv = blackfly_params.delta_v0 / (
+        1 + blackfly_params.c_v * microfil * total_exposure
     )
     return (
-        delta_vv * params.bite_rate_per_fly_on_human * microfil * total_exposure
+        delta_vv
+        * blackfly_params.bite_rate_per_fly_on_human
+        * microfil
+        * total_exposure
     ) / (
-        params.blackfly.blackfly_mort_per_person_per_year
+        blackfly_params.blackfly_mort_per_person_per_year
         + (
-            params.blackfly.blackfly_mort_from_mf_per_person_per_year
+            blackfly_params.blackfly_mort_from_mf_per_person_per_year
             * microfil
             * total_exposure
         )
-        + params.blackfly.l1_l2_per_person_per_year
+        + blackfly_params.l1_l2_per_person_per_year
         * np.exp(
             -(4 / 365)
             * (
-                params.blackfly.blackfly_mort_per_person_per_year
+                blackfly_params.blackfly_mort_per_person_per_year
                 + (
-                    params.blackfly.blackfly_mort_from_mf_per_person_per_year
+                    blackfly_params.blackfly_mort_from_mf_per_person_per_year
                     * last_microfil_delay
                     * exposure_delay
                 )
@@ -56,7 +59,7 @@ def calc_l1(
 
 
 def calc_l2(
-    params: Params,
+    blackfly_params: BlackflyParams,
     l1_delay: NDArray[np.float_],
     microfil: NDArray[np.float_],
     total_exposure: NDArray[np.float_],
@@ -73,13 +76,13 @@ def calc_l2(
     return (
         l1_delay
         * (
-            params.blackfly.l1_l2_per_person_per_year
+            blackfly_params.l1_l2_per_person_per_year
             * np.exp(
                 -(4 / 366)
                 * (
-                    params.blackfly.blackfly_mort_per_person_per_year
+                    blackfly_params.blackfly_mort_per_person_per_year
                     + (
-                        params.blackfly.blackfly_mort_from_mf_per_person_per_year
+                        blackfly_params.blackfly_mort_from_mf_per_person_per_year
                         * microfil
                         * total_exposure
                     )
@@ -87,13 +90,13 @@ def calc_l2(
             )
         )
     ) / (
-        params.blackfly.blackfly_mort_per_person_per_year
-        + params.blackfly.l2_l3_per_person_per_year
+        blackfly_params.blackfly_mort_per_person_per_year
+        + blackfly_params.l2_l3_per_person_per_year
     )
 
 
 def calc_l3(
-    params: Params,
+    blackfly_params: BlackflyParams,
     l2: NDArray[np.float_],
 ) -> NDArray[np.float_]:
     """
@@ -104,29 +107,30 @@ def calc_l3(
     params.blackfly_mort_per_person_per_year # mu.v
     params.sigma_L0 # sigma.L0
     """
-    return (params.blackfly.l2_l3_per_person_per_year * l2) / (
-        (params.blackfly.a_H / params.recip_gono_cycle)
-        + params.blackfly.blackfly_mort_per_person_per_year
-        + params.blackfly.sigma_L0
+    return (blackfly_params.l2_l3_per_person_per_year * l2) / (
+        (blackfly_params.a_H / blackfly_params.recip_gono_cycle)
+        + blackfly_params.blackfly_mort_per_person_per_year
+        + blackfly_params.sigma_L0
     )
 
 
 def delta_h(
-    params: Params, L3: float, total_exposure: NDArray[np.float_]
+    blackfly_params: BlackflyParams, L3: float, total_exposure: NDArray[np.float_]
 ) -> NDArray[np.float_]:
     # proportion of L3 larvae (final life stage in the fly population) developing into adult worms in humans
     # expos is the total exposure for an individual
     # delta.hz, delta.hinf, c.h control the density dependent establishment of parasites
     annual_transm_potential = (
-        params.bite_rate_per_person_per_year / params.bite_rate_per_fly_on_human
+        blackfly_params.bite_rate_per_person_per_year
+        / blackfly_params.bite_rate_per_fly_on_human
     )
     multiplier = (
-        params.worms.c_h
+        blackfly_params.c_h
         * annual_transm_potential
-        * params.bite_rate_per_fly_on_human
+        * blackfly_params.bite_rate_per_fly_on_human
         * L3
         * total_exposure
     )
     return (
-        params.blackfly.delta_h_zero + (params.blackfly.delta_h_inf * multiplier)
+        blackfly_params.delta_h_zero + (blackfly_params.delta_h_inf * multiplier)
     ) / (1 + multiplier)

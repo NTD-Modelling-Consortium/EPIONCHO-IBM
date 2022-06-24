@@ -8,7 +8,7 @@ from numpy.typing import NDArray
 from epioncho_ibm.blackfly import delta_h
 from epioncho_ibm.state import People
 
-from .params import Params
+from .params import BlackflyParams, Params
 
 
 @dataclass
@@ -269,7 +269,10 @@ def get_delayed_males_and_females(
 
 
 def _w_plus_one_rate(
-    params: Params, L3: float, total_exposure: NDArray[np.float_]
+    blackfly_params: BlackflyParams,
+    delta_time: float,
+    L3: float,
+    total_exposure: NDArray[np.float_],
 ) -> NDArray[np.float_]:
     """
     params.delta_hz # delta.hz
@@ -280,14 +283,15 @@ def _w_plus_one_rate(
     total_exposure # "expos"
     params.delta_time #"DT"
     """
-    dh = delta_h(params, L3, total_exposure)
+    dh = delta_h(blackfly_params, L3, total_exposure)
     annual_transm_potential = (
-        params.bite_rate_per_person_per_year / params.bite_rate_per_fly_on_human
+        blackfly_params.bite_rate_per_person_per_year
+        / blackfly_params.bite_rate_per_fly_on_human
     )
     return (
-        params.delta_time
+        delta_time
         * annual_transm_potential
-        * params.bite_rate_per_fly_on_human
+        * blackfly_params.bite_rate_per_fly_on_human
         * dh
         * total_exposure
         * L3
@@ -296,7 +300,10 @@ def _w_plus_one_rate(
 
 def calc_new_worms(state, total_exposure) -> NDArray[np.int_]:
     new_rate = _w_plus_one_rate(
-        state.params, np.mean(state.people.blackfly.L3), total_exposure
+        state.params.blackfly,
+        state.params.delta_time,
+        np.mean(state.people.blackfly.L3),
+        total_exposure,
     )
     if np.any(new_rate > 10**10):
         st_dev = np.sqrt(new_rate)

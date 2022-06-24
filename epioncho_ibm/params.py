@@ -31,8 +31,6 @@ class WormParams(BaseModel):
         0.72  # parameters controlling age-dependent fecundity in adult worms
     )
     omega: float = 0.59  # "omeg" Per capita rate of progression from non-fertile to fertile adult female
-    c_h: float = 0.004900419  # Severity of transmission intensity dependent parasite establishment within humans
-
     lambda_zero: float = (
         1 / 3
     )  # Per capita rate of reversion from fertile to non-fertile adult female worms (lambda.zero / 0.33 in 'R' code)
@@ -69,6 +67,15 @@ class BlackflyParams(BaseModel):
     initial_L2: float = 0.03  # "int.L2"
     initial_L1: float = 0.03  # "int.L1"
 
+    human_blood_index: float = 0.63  # 'h' in paper, used in 'm' and 'beta' in R code
+    recip_gono_cycle: float = 1 / 104  # 'g' in paper, used in 'm' and 'beta' in R code
+    bite_rate_per_fly_on_human: float = human_blood_index / recip_gono_cycle
+    c_h: float = 0.004900419  # Severity of transmission intensity dependent parasite establishment within humans
+
+    bite_rate_per_person_per_year: float = (
+        1000  # Annual biting rate 'ABR' in paper and in R code
+    )
+
 
 class MicrofilParams(BaseModel):
     microfil_aging: float = 0.125  # 'time.each.comp.mf'
@@ -84,6 +91,8 @@ class MicrofilParams(BaseModel):
     mu_microfillarie2: float = (
         1.428  # parameters controlling age-dependent mortality in mf
     )
+    slope_kmf = 0.0478  # "slope.kmf"
+    initial_kmf = 0.313  # "int.kMf"
 
 
 class ExposureParams(BaseModel):
@@ -98,9 +107,7 @@ class ExposureParams(BaseModel):
 class Params(BaseModel):
     # ep.equi.sim parameters (bottom of 'R' file)
     timestep_count: int = 10  # total number of timesteps of the simulation
-    bite_rate_per_person_per_year: float = (
-        1000  # Annual biting rate 'ABR' in paper and in R code
-    )
+
     treatment: TreatmentParams = TreatmentParams()
     worms: WormParams = WormParams()
     blackfly: BlackflyParams = BlackflyParams()
@@ -110,21 +117,13 @@ class Params(BaseModel):
     min_skinsnip_age: int = 5  # TODO: below
     min_treatable_age: int = 5  # TODO: check if skinsnip and treatable age differ or whether they are always the same value
     human_population: int = 440  # 'N' in R file
-
-    human_blood_index: float = 0.63  # 'h' in paper, used in 'm' and 'beta' in R code
-    recip_gono_cycle: float = 1 / 104  # 'g' in paper, used in 'm' and 'beta' in R code
-    bite_rate_per_fly_on_human: float = human_blood_index / recip_gono_cycle
-
     max_human_age: int = 80  # 'real.max.age' in R file
-
     mean_human_age: int = 50  # years 'mean.age' in R file
 
     # aging in parasites
     skin_snip_weight: int = 2  # "ss.wt" the weight of the skin snip
     skin_snip_number: int = 2  # "num.ss"
 
-    slope_kmf = 0.0478  # "slope.kmf"
-    initial_kmf = 0.313  # "int.kMf"
     l3_delay: float = 10  # "l3.delay" (months?) delay in worms entering humans and joining the first adult worm age class
     delta_time: float = 1 / 365  # DT
     total_population_coverage: float = 0.65  # "treat.prob"

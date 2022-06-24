@@ -178,19 +178,21 @@ def run_simulation(
         )  # TODO: Should this be old state? mf.temp
 
         state.people.blackfly.L1 = calc_l1(
-            state.params,
+            state.params.blackfly,
             new_mf,
             state.delay_arrays.mf_delay[-1],
             total_exposure,
             state.delay_arrays.exposure_delay[-1],
         )
         state.people.blackfly.L2 = calc_l2(
-            state.params,
+            state.params.blackfly,
             state.delay_arrays.l1_delay,
             state.delay_arrays.mf_delay[-1],
             state.delay_arrays.exposure_delay[-1],
         )
-        state.people.blackfly.L3 = calc_l3(state.params, old_state.people.blackfly.L2)
+        state.people.blackfly.L3 = calc_l3(
+            state.params.blackfly, old_state.people.blackfly.L2
+        )
 
         state.delay_arrays.exposure_delay = _shift_delay_array(
             total_exposure, state.delay_arrays.exposure_delay
