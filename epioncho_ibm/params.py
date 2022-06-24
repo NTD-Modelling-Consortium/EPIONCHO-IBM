@@ -116,10 +116,13 @@ class HumanParams(BaseModel):
 
     skin_snip_weight: int = 2  # "ss.wt" the weight of the skin snip
     skin_snip_number: int = 2  # "num.ss"
+    gender_ratio: float = 0.5
+    noncompliant_percentage: float = 0.05
 
 
 class Params(BaseModel):
     delta_time: float = 1 / 365  # DT
+
     treatment: Optional[TreatmentParams] = TreatmentParams()
     worms: WormParams = WormParams()
     blackfly: BlackflyParams = BlackflyParams()

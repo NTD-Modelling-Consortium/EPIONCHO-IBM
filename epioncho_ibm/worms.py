@@ -1,12 +1,14 @@
 from copy import copy
 from dataclasses import dataclass
-from typing import Optional, Tuple
+from typing import TYPE_CHECKING, Optional, Tuple
 
 import numpy as np
 from numpy.typing import NDArray
 
 from epioncho_ibm.blackfly import delta_h
-from epioncho_ibm.state import People, State
+
+if TYPE_CHECKING:
+    from epioncho_ibm.state import People
 
 from .params import BlackflyParams, Params
 
@@ -67,7 +69,7 @@ def _calc_new_worms_from_inside(
 
 def change_in_worm_per_index(
     params: Params,
-    people: People,
+    people: "People",
     delayed_females: NDArray[np.int_],
     delayed_males: NDArray[np.int_],
     worm_mortality_rate: NDArray[np.float_],
@@ -296,24 +298,24 @@ def _w_plus_one_rate(
     )
 
 
-def calc_new_worms(state: State, total_exposure) -> NDArray[np.int_]:
+def calc_new_worms(
+    L3: NDArray[np.float_], params: Params, total_exposure
+) -> NDArray[np.int_]:
     new_rate = _w_plus_one_rate(
-        state.params.blackfly,
-        state.params.delta_time,
-        np.mean(state.people.blackfly.L3),
+        params.blackfly,
+        params.delta_time,
+        np.mean(L3),
         total_exposure,
     )
     if np.any(new_rate > 10**10):
         st_dev = np.sqrt(new_rate)
         new_worms: NDArray[np.int_] = np.round(
             np.random.normal(
-                loc=new_rate, scale=st_dev, size=state.params.humans.human_population
+                loc=new_rate, scale=st_dev, size=params.humans.human_population
             )
         )
     else:
-        new_worms = np.random.poisson(
-            lam=new_rate, size=state.params.humans.human_population
-        )
+        new_worms = np.random.poisson(lam=new_rate, size=params.humans.human_population)
     return new_worms
 
 

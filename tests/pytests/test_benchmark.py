@@ -1,6 +1,6 @@
 import pytest
 
-from epioncho_ibm import RandomConfig, State, run_simulation
+from epioncho_ibm import State
 from tests.definitions.utils import flatten_dict
 from tests.pytests.conftest import pytest_config
 
@@ -13,16 +13,13 @@ class TestGeneral:
             pytest_config.acceptable_st_devs
         )  # TODO: Figure out where to put this?
 
-        random_config = RandomConfig()
         params = benchmark_data.params
         end_time = benchmark_data.end_year
-        initial_state = State.generate_random(
-            random_config=random_config, params=params
-        )
-        initial_state.dist_population_age(num_iter=15000)
-        new_state = run_simulation(initial_state, start_time=0, end_time=end_time)
+        state = State(params=params)
+        state.dist_population_age(num_iter=15000)
+        state.run_simulation(start_time=0, end_time=end_time)
 
-        people_stats = new_state.to_stats()
+        people_stats = state.to_stats()
         people_stats_dict = flatten_dict(people_stats.dict())
         for k, v in people_stats_dict.items():
             if k not in benchmark_data.people:

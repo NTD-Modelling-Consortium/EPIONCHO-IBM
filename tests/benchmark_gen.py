@@ -10,7 +10,7 @@ import numpy as np
 from joblib import Parallel, delayed
 from numpy.typing import NDArray
 
-from epioncho_ibm import Params, RandomConfig, State, run_simulation
+from epioncho_ibm import Params, State
 from epioncho_ibm.params import HumanParams
 from epioncho_ibm.state import StateStats
 from tests.definitions.benchmark_data_types import (
@@ -51,11 +51,10 @@ def get_test_pairs(settings: NTDSettings) -> Tuple[List[Tuple[float, int]], floa
 
 
 def run_stochastic_test(end_time: float, params: Params) -> StateStats:
-    random_config = RandomConfig()
-    initial_state = State.generate_random(random_config=random_config, params=params)
-    initial_state.dist_population_age(num_iter=15000)
-    new_state = run_simulation(initial_state, start_time=0, end_time=end_time)
-    stats = new_state.to_stats()
+    state = State(params=params)
+    state.dist_population_age(num_iter=15000)
+    state.run_simulation(start_time=0, end_time=end_time)
+    stats = state.to_stats()
     return stats
 
 

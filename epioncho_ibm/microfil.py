@@ -1,9 +1,10 @@
-from typing import Callable, Optional, Union
+from typing import TYPE_CHECKING, Callable, Optional, Union
 
 import numpy as np
 from numpy.typing import NDArray
 
-from epioncho_ibm.state import People
+if TYPE_CHECKING:
+    from epioncho_ibm.state import People
 
 from .params import Params
 
@@ -71,7 +72,7 @@ def construct_derive_microfil_rest(
 
 
 def change_in_microfil(
-    people: People,
+    people: "People",
     params: Params,
     microfillarie_mortality_rate: NDArray[np.float_],
     fecundity_rates_worms: NDArray[np.float_],

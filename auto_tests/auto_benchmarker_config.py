@@ -1,15 +1,13 @@
 from auto_tests.definitions.auto_benchmarker import AutoBenchmarker
-from epioncho_ibm import Params, RandomConfig, State, StateStats, run_simulation
-from epioncho_ibm.params import HumanParams, TreatmentParams
+from epioncho_ibm import HumanParams, Params, State, StateStats, TreatmentParams
 
 
 def benchmarker_test_func_no_treat(end_time: float, population: int) -> StateStats:
     params = Params(humans=HumanParams(human_population=population))
-    random_config = RandomConfig()
-    initial_state = State.generate_random(random_config=random_config, params=params)
-    initial_state.dist_population_age(num_iter=15000)
-    new_state = run_simulation(initial_state, start_time=0, end_time=end_time)
-    stats = new_state.to_stats()
+    state = State(params=params)
+    state.dist_population_age(num_iter=15000)
+    state.run_simulation(start_time=0, end_time=end_time)
+    stats = state.to_stats()
     return stats
 
 
@@ -18,11 +16,10 @@ def benchmarker_test_func_treat(end_time: float, population: int) -> StateStats:
         humans=HumanParams(human_population=population),
         treatment=TreatmentParams(start_time=0, interval_years=0.01),
     )
-    random_config = RandomConfig()
-    initial_state = State.generate_random(random_config=random_config, params=params)
-    initial_state.dist_population_age(num_iter=15000)
-    new_state = run_simulation(initial_state, start_time=0, end_time=end_time)
-    stats = new_state.to_stats()
+    state = State(params=params)
+    state.dist_population_age(num_iter=15000)
+    state.run_simulation(start_time=0, end_time=end_time)
+    stats = state.to_stats()
     return stats
 
 
