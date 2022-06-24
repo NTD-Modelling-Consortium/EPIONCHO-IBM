@@ -1,7 +1,7 @@
 version = 1.0
 from epioncho_ibm.run_simulation import run_simulation
 
-from .params import Params
+from .params import HumanParams, Params
 from .state import RandomConfig, State, StateStats
 
 # from enum import Enum
@@ -12,7 +12,7 @@ from .state import RandomConfig, State, StateStats
 
 
 def benchmarker_test_func(end_time: float, population: int) -> StateStats:
-    params = Params(human_population=population)
+    params = Params(humans=HumanParams(human_population=population))
     random_config = RandomConfig()
     initial_state = State.generate_random(random_config=random_config, params=params)
     initial_state.dist_population_age(num_iter=15000)

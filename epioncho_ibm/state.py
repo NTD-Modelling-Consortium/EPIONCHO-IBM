@@ -87,10 +87,10 @@ class DelayArrays:
 
     def __init__(self, params: Params, individual_exposure) -> None:
         number_of_worm_delay_cols = math.ceil(
-            params.l3_delay * 28 / (params.delta_time * 365)
+            params.blackfly.l3_delay * 28 / (params.delta_time * 365)
         )
         self.worm_delay = np.zeros(
-            (number_of_worm_delay_cols, params.human_population), dtype=int
+            (number_of_worm_delay_cols, params.humans.human_population), dtype=int
         )
         # matrix for exposure (to fly bites) for L1 delay
         number_of_exposure_columns = math.ceil(4 / (params.delta_time * 365))
@@ -102,11 +102,13 @@ class DelayArrays:
         # matrix for tracking mf for L1 delay
         number_of_mf_columns = math.ceil(4 / (params.delta_time * 365))
         self.mf_delay = (
-            np.ones((number_of_mf_columns, params.human_population), dtype=int)
+            np.ones((number_of_mf_columns, params.humans.human_population), dtype=int)
             * params.microfil.initial_mf
         )  # mf.delay
         # L1 delay in flies
-        self.l1_delay = np.repeat(params.blackfly.initial_L1, params.human_population)
+        self.l1_delay = np.repeat(
+            params.blackfly.initial_L1, params.humans.human_population
+        )
 
 
 class State:
@@ -117,9 +119,9 @@ class State:
     _delay_arrays: Optional[DelayArrays]
 
     def __init__(self, people: People, params: Params) -> None:
-        if len(people) != params.human_population:
+        if len(people) != params.humans.human_population:
             raise ValueError(
-                f"People length ({len(people)}) inconsistent with params ({params.human_population})"
+                f"People length ({len(people)}) inconsistent with params ({params.humans.human_population})"
             )
         self.people = people
         self.params = params
@@ -155,7 +157,7 @@ class State:
 
     @classmethod
     def generate_random(cls, random_config: RandomConfig, params: Params) -> "State":
-        n_people = params.human_population
+        n_people = params.humans.human_population
         sex_array = (
             np.random.uniform(low=0, high=1, size=n_people) < random_config.gender_ratio
         )
@@ -221,24 +223,29 @@ class State:
             + self.params.microfil.initial_kmf
         )
 
-        mu = self.params.skin_snip_weight * np.sum(self.people.mf, axis=0)
-        if self.params.skin_snip_number > 1:
+        mu = self.params.humans.skin_snip_weight * np.sum(self.people.mf, axis=0)
+        if self.params.humans.skin_snip_number > 1:
             total_skin_snip_mf = np.zeros(
-                (self.params.human_population, self.params.skin_snip_number)
+                (
+                    self.params.humans.human_population,
+                    self.params.humans.skin_snip_number,
+                )
             )
-            for i in range(self.params.skin_snip_number):
+            for i in range(self.params.humans.skin_snip_number):
                 total_skin_snip_mf[:, i] = negative_binomial_alt_interface(n=kmf, mu=mu)
             mfobs = np.sum(total_skin_snip_mf, axis=1)
         else:
             mfobs = negative_binomial_alt_interface(n=kmf, mu=mu)
-        mfobs = mfobs / (self.params.skin_snip_number * self.params.skin_snip_weight)
+        mfobs = mfobs / (
+            self.params.humans.skin_snip_number * self.params.humans.skin_snip_weight
+        )
         return np.mean(mfobs), mfobs
 
     def mf_prevalence_in_population(self: "State") -> float:
         """
         Returns a decimal representation of mf prevalence in skinsnip aged population.
         """
-        pop_over_min_age_array = self.people.ages >= self.params.min_skinsnip_age
+        pop_over_min_age_array = self.people.ages >= self.params.humans.min_skinsnip_age
         _, mf_skin_snip = self.microfilariae_per_skin_snip()
         infected_over_min_age = np.sum(mf_skin_snip[pop_over_min_age_array] > 0)
         total_over_min_age = np.sum(pop_over_min_age_array)
@@ -263,11 +270,13 @@ class State:
             current_ages += delta_time_vector
             death_vector = np.random.binomial(
                 n=1,
-                p=(1 / params.mean_human_age) * params.delta_time,
+                p=(1 / params.humans.mean_human_age) * params.delta_time,
                 size=size_population,
             )
             current_ages[
-                np.logical_or(death_vector == 1, current_ages >= params.max_human_age)
+                np.logical_or(
+                    death_vector == 1, current_ages >= params.humans.max_human_age
+                )
             ] = 0
         return current_ages
 

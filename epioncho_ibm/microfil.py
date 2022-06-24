@@ -99,15 +99,13 @@ def change_in_microfil(
     people is dat
     """
     compartment_mortality = np.repeat(  # mf.mu
-        microfillarie_mortality_rate[compartment], params.human_population
+        microfillarie_mortality_rate[compartment], params.humans.human_population
     )
     microfil: NDArray[np.int_] = people.mf[compartment]
 
     # increases microfilarial mortality if treatment has started
-    if (
-        time_of_last_treatment is not None
-        and current_time >= params.treatment.start_time
-    ):
+    if params.treatment is not None and current_time >= params.treatment.start_time:
+        assert time_of_last_treatment is not None
         compartment_mortality_prime = (
             time_of_last_treatment + params.microfil.u_ivermectin
         ) ** (

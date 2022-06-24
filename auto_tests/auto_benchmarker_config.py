@@ -1,10 +1,10 @@
 from auto_tests.definitions.auto_benchmarker import AutoBenchmarker
 from epioncho_ibm import Params, RandomConfig, State, StateStats, run_simulation
-from epioncho_ibm.params import TreatmentParams
+from epioncho_ibm.params import HumanParams, TreatmentParams
 
 
 def benchmarker_test_func_no_treat(end_time: float, population: int) -> StateStats:
-    params = Params(human_population=population)
+    params = Params(humans=HumanParams(human_population=population))
     random_config = RandomConfig()
     initial_state = State.generate_random(random_config=random_config, params=params)
     initial_state.dist_population_age(num_iter=15000)

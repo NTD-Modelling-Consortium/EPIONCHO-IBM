@@ -32,14 +32,14 @@ def _calc_dead_and_aging_worms(
     dead_worms = np.random.binomial(
         n=current_worms,
         p=mortalities,
-        size=params.human_population,
+        size=params.humans.human_population,
     )
     aging_worms = np.random.binomial(
         n=current_worms - dead_worms,
         p=np.repeat(
-            params.delta_time / params.worms.worms_aging, params.human_population
+            params.delta_time / params.worms.worms_aging, params.humans.human_population
         ),
-        size=params.human_population,
+        size=params.humans.human_population,
     )
     return dead_worms, aging_worms
 
@@ -112,15 +112,15 @@ def change_in_worm_per_index(
     """
 
     lambda_zero_in = np.repeat(
-        params.worms.lambda_zero * params.delta_time, params.human_population
+        params.worms.lambda_zero * params.delta_time, params.humans.human_population
     )  # loss of fertility lambda.zero.in
     omega = np.repeat(
-        params.worms.omega * params.delta_time, params.human_population
+        params.worms.omega * params.delta_time, params.humans.human_population
     )  # becoming fertile
     # male worms
     current_male_worms = people.male_worms[compartment]  # cur.Wm
     compartment_mortality = np.repeat(
-        worm_mortality_rate[compartment], params.human_population
+        worm_mortality_rate[compartment], params.humans.human_population
     )
     dead_male_worms, aging_male_worms = _calc_dead_and_aging_worms(
         params=params,
@@ -154,11 +154,9 @@ def change_in_worm_per_index(
     # approach assumes individuals which are moved from fertile to non
     # fertile class due to treatment re enter fertile class at standard rate
 
-    if (
-        initial_treatment_times is not None
-        and current_time > params.treatment.start_time
-    ):
+    if params.treatment is not None and current_time > params.treatment.start_time:
         assert time_of_last_treatment is not None
+        assert initial_treatment_times is not None
         during_treatment = np.any(
             np.logical_and(
                 current_time <= initial_treatment_times,
@@ -200,7 +198,7 @@ def change_in_worm_per_index(
         current_worms=current_female_worms_fertile,
         dead_worms=dead_fertile_worms,
         aging_worms=aging_fertile_worms,
-        human_population=params.human_population,
+        human_population=params.humans.human_population,
         prob=lambda_zero_in,
     )  # new.worms.nf.fi
 
@@ -212,7 +210,7 @@ def change_in_worm_per_index(
         current_worms=current_female_worms_infertile,
         dead_worms=dead_infertile_worms,
         aging_worms=aging_infertile_worms,
-        human_population=params.human_population,
+        human_population=params.humans.human_population,
         prob=omega,
     )  # new.worms.f.fi TODO: Are these the right way round?
 
@@ -260,7 +258,7 @@ def get_delayed_males_and_females(
     worm_delay: NDArray[np.int_], params: Params
 ) -> Tuple[NDArray[np.int_], NDArray[np.int_]]:
     final_column = np.array(worm_delay[-1], dtype=int)
-    assert len(final_column) == params.human_population
+    assert len(final_column) == params.humans.human_population
     last_males = np.random.binomial(
         n=final_column, p=0.5, size=len(final_column)
     )  # new.worms.m

@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import BaseModel
 
 
@@ -75,6 +77,7 @@ class BlackflyParams(BaseModel):
     bite_rate_per_person_per_year: float = (
         1000  # Annual biting rate 'ABR' in paper and in R code
     )
+    l3_delay: float = 10  # "l3.delay" (months?) delay in worms entering humans and joining the first adult worm age class
 
 
 class MicrofilParams(BaseModel):
@@ -105,26 +108,18 @@ class ExposureParams(BaseModel):
 
 
 class Params(BaseModel):
-    # ep.equi.sim parameters (bottom of 'R' file)
-    timestep_count: int = 10  # total number of timesteps of the simulation
-
-    treatment: TreatmentParams = TreatmentParams()
+    delta_time: float = 1 / 365  # DT
+    treatment: Optional[TreatmentParams] = TreatmentParams()
     worms: WormParams = WormParams()
     blackfly: BlackflyParams = BlackflyParams()
     microfil: MicrofilParams = MicrofilParams()
     exposure: ExposureParams = ExposureParams()
 
-    min_skinsnip_age: int = 5  # TODO: below
-    min_treatable_age: int = 5  # TODO: check if skinsnip and treatable age differ or whether they are always the same value
-    human_population: int = 440  # 'N' in R file
-    max_human_age: int = 80  # 'real.max.age' in R file
-    mean_human_age: int = 50  # years 'mean.age' in R file
+    min_skinsnip_age: int = 5
+    total_population_coverage: float = 0.65  # "treat.prob"
+    human_population: int = 440  # 'N'
+    max_human_age: int = 80  # 'real.max.age'
+    mean_human_age: int = 50  # years 'mean.age'
 
-    # aging in parasites
     skin_snip_weight: int = 2  # "ss.wt" the weight of the skin snip
     skin_snip_number: int = 2  # "num.ss"
-
-    l3_delay: float = 10  # "l3.delay" (months?) delay in worms entering humans and joining the first adult worm age class
-    delta_time: float = 1 / 365  # DT
-    total_population_coverage: float = 0.65  # "treat.prob"
-    give_treatment: bool = True

@@ -11,6 +11,7 @@ from joblib import Parallel, delayed
 from numpy.typing import NDArray
 
 from epioncho_ibm import Params, RandomConfig, State, run_simulation
+from epioncho_ibm.params import HumanParams
 from epioncho_ibm.state import StateStats
 from tests.definitions.benchmark_data_types import (
     BenchmarkArray,
@@ -175,7 +176,7 @@ print(f"Estimated test time (no reruns): {est_test_time}")
 start = time.time()
 tests: List[OutputData] = []
 for end_year, population in test_pairs:
-    params = Params(human_population=population)
+    params = Params(humans=HumanParams(human_population=440))
 
     list_of_stats: List[StateStats] = Parallel(n_jobs=cpu_count())(
         delayed(run_stochastic_test)(end_year, params)

@@ -87,11 +87,14 @@ def run_simulation(
         if state.params.delta_time > current_time % 0.2 and verbose:
             print(current_time)
 
-        if current_time >= state.params.treatment.start_time:
+        if (
+            state.params.treatment is not None
+            and current_time >= state.params.treatment.start_time
+        ):
             coverage_in = _calc_coverage(
                 state.people,
-                state.params.total_population_coverage,
-                state.params.min_skinsnip_age,
+                state.params.humans.total_population_coverage,
+                state.params.humans.min_skinsnip_age,
             )
         else:
             coverage_in = None
@@ -108,11 +111,11 @@ def run_simulation(
         people_to_die: NDArray[np.bool_] = np.logical_or(
             np.random.binomial(
                 n=1,
-                p=(1 / state.params.mean_human_age) * state.params.delta_time,
-                size=state.params.human_population,
+                p=(1 / state.params.humans.mean_human_age) * state.params.delta_time,
+                size=state.params.humans.human_population,
             )
             == 1,
-            state.people.ages >= state.params.max_human_age,
+            state.people.ages >= state.params.humans.max_human_age,
         )
 
         # there is a delay in new parasites entering humans (from fly bites) and entering the first adult worm age class
@@ -126,7 +129,9 @@ def run_simulation(
             new_worms, state.delay_arrays.worm_delay
         )
 
-        last_aging_worms = WormGroup.from_population(state.params.human_population)
+        last_aging_worms = WormGroup.from_population(
+            state.params.humans.human_population
+        )
         last_time_of_last_treatment = None
         for compartment in range(state.params.worms.worm_age_stages):
             (
@@ -156,7 +161,7 @@ def run_simulation(
 
         assert last_time_of_last_treatment is not None
         if (
-            state.derived_params.initial_treatment_times is not None
+            state.params.treatment is not None
             and current_time >= state.params.treatment.start_time
         ):
             state.people.time_of_last_treatment = last_time_of_last_treatment

@@ -58,7 +58,7 @@ class DerivedParams:
             microfillarie_age_categories,
         )
 
-        if params.give_treatment:
+        if params.treatment is not None:
             treatment_number = (
                 params.treatment.stop_time - params.treatment.start_time
             ) / params.treatment.interval_years
@@ -79,7 +79,7 @@ class DerivedParams:
             np.random.gamma(  # individual level exposure to fly bites "ex.vec"
                 shape=params.exposure.gamma_distribution,
                 scale=params.exposure.gamma_distribution,
-                size=params.human_population,
+                size=params.humans.human_population,
             )
         )
         self.individual_exposure = individual_exposure / np.mean(
