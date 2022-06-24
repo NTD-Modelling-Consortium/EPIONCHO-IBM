@@ -107,14 +107,7 @@ class ExposureParams(BaseModel):
     gamma_distribution = 0.3  # "gam.dis" individual level exposure heterogeneity
 
 
-class Params(BaseModel):
-    delta_time: float = 1 / 365  # DT
-    treatment: Optional[TreatmentParams] = TreatmentParams()
-    worms: WormParams = WormParams()
-    blackfly: BlackflyParams = BlackflyParams()
-    microfil: MicrofilParams = MicrofilParams()
-    exposure: ExposureParams = ExposureParams()
-
+class HumanParams(BaseModel):
     min_skinsnip_age: int = 5
     total_population_coverage: float = 0.65  # "treat.prob"
     human_population: int = 440  # 'N'
@@ -123,3 +116,13 @@ class Params(BaseModel):
 
     skin_snip_weight: int = 2  # "ss.wt" the weight of the skin snip
     skin_snip_number: int = 2  # "num.ss"
+
+
+class Params(BaseModel):
+    delta_time: float = 1 / 365  # DT
+    treatment: Optional[TreatmentParams] = TreatmentParams()
+    worms: WormParams = WormParams()
+    blackfly: BlackflyParams = BlackflyParams()
+    microfil: MicrofilParams = MicrofilParams()
+    exposure: ExposureParams = ExposureParams()
+    humans: HumanParams = HumanParams()

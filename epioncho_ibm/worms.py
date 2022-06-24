@@ -6,7 +6,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from epioncho_ibm.blackfly import delta_h
-from epioncho_ibm.state import People
+from epioncho_ibm.state import People, State
 
 from .params import BlackflyParams, Params
 
@@ -296,7 +296,7 @@ def _w_plus_one_rate(
     )
 
 
-def calc_new_worms(state, total_exposure) -> NDArray[np.int_]:
+def calc_new_worms(state: State, total_exposure) -> NDArray[np.int_]:
     new_rate = _w_plus_one_rate(
         state.params.blackfly,
         state.params.delta_time,
@@ -307,11 +307,13 @@ def calc_new_worms(state, total_exposure) -> NDArray[np.int_]:
         st_dev = np.sqrt(new_rate)
         new_worms: NDArray[np.int_] = np.round(
             np.random.normal(
-                loc=new_rate, scale=st_dev, size=state.params.human_population
+                loc=new_rate, scale=st_dev, size=state.params.humans.human_population
             )
         )
     else:
-        new_worms = np.random.poisson(lam=new_rate, size=state.params.human_population)
+        new_worms = np.random.poisson(
+            lam=new_rate, size=state.params.humans.human_population
+        )
     return new_worms
 
 

@@ -15,7 +15,7 @@ def benchmarker_test_func_no_treat(end_time: float, population: int) -> StateSta
 
 def benchmarker_test_func_treat(end_time: float, population: int) -> StateStats:
     params = Params(
-        human_population=population,
+        humans=HumanParams(human_population=population),
         treatment=TreatmentParams(start_time=0, interval_years=0.01),
     )
     random_config = RandomConfig()
