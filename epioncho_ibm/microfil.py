@@ -13,7 +13,7 @@ def construct_derive_microfil_one(
     microfil: NDArray[np.int_],
     fecundity_rates_worms: NDArray[np.float_],
     mortality: NDArray[np.float_],
-    params: Params,
+    microfil_move_rate: float,
     person_has_worms: NDArray[np.bool_],
 ) -> Callable[[Union[float, NDArray[np.float_]]], NDArray[np.float_]]:
     """
@@ -23,7 +23,7 @@ def construct_derive_microfil_one(
     microfil #mf.in
     fecundity_rates_worms # ep.in
     mortality # mf.mort
-    params.microfil_move_rate #mf.move
+    microfil_move_rate #mf.move
     person_has_worms # mp (once turned to 0 or 1)
     """
     new_in = np.einsum(
@@ -33,7 +33,7 @@ def construct_derive_microfil_one(
     def derive_microfil_one(k: Union[float, NDArray[np.float_]]) -> NDArray[np.float_]:
         mortality_temp = mortality * (microfil + k)
         assert np.sum(mortality_temp < 0) == 0
-        move_rate_temp = params.microfil_move_rate * (microfil + k)
+        move_rate_temp = microfil_move_rate * (microfil + k)
         assert np.sum(move_rate_temp < 0) == 0
         mortality_temp[mortality_temp < 0] = 0
         move_rate_temp[move_rate_temp < 0] = 0
@@ -45,7 +45,7 @@ def construct_derive_microfil_one(
 def construct_derive_microfil_rest(
     microfil: NDArray[np.int_],
     mortality: NDArray[np.float_],
-    params: Params,
+    microfil_move_rate: float,
     microfil_compartment_minus_one: NDArray[np.int_],
 ) -> Callable[[Union[float, NDArray[np.float_]]], NDArray[np.float_]]:
     """
@@ -53,15 +53,15 @@ def construct_derive_microfil_rest(
 
     microfil #mf.in
     mortality # mf.mort
-    params.microfil_move_rate #mf.move
+    microfil_move_rate #mf.move
     microfil_compartment_minus_one # mf.comp.minus.one
     """
-    movement_last = microfil_compartment_minus_one * params.microfil_move_rate
+    movement_last = microfil_compartment_minus_one * microfil_move_rate
 
     def derive_microfil_rest(k: Union[float, NDArray[np.float_]]) -> NDArray[np.float_]:
         mortality_temp = mortality * (microfil + k)
         assert np.sum(mortality_temp < 0) == 0
-        move_rate_temp = params.microfil_move_rate * (microfil + k)
+        move_rate_temp = microfil_move_rate * (microfil + k)
         assert np.sum(move_rate_temp < 0) == 0
         mortality_temp[mortality_temp < 0] = 0
         move_rate_temp[move_rate_temp < 0] = 0
@@ -109,9 +109,9 @@ def change_in_microfil(
         and current_time >= params.treatment.start_time
     ):
         compartment_mortality_prime = (
-            time_of_last_treatment + params.u_ivermectin
+            time_of_last_treatment + params.microfil.u_ivermectin
         ) ** (
-            -params.shape_parameter_ivermectin
+            -params.microfil.shape_parameter_ivermectin
         )  # additional mortality due to ivermectin treatment
         compartment_mortality_prime = np.nan_to_num(compartment_mortality_prime)
         compartment_mortality += compartment_mortality_prime
@@ -123,12 +123,15 @@ def change_in_microfil(
             microfil,
             fecundity_rates_worms,
             compartment_mortality,
-            params,
+            params.microfil.microfil_move_rate,
             person_has_worms,
         )
     else:
         derive_microfil = construct_derive_microfil_rest(
-            microfil, compartment_mortality, params, people.mf[compartment - 1]
+            microfil,
+            compartment_mortality,
+            params.microfil.microfil_move_rate,
+            people.mf[compartment - 1],
         )
     k1 = derive_microfil(0.0)
     k2 = derive_microfil(params.delta_time * k1 / 2)

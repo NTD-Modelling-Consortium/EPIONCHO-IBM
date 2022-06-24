@@ -103,10 +103,10 @@ class DelayArrays:
         number_of_mf_columns = math.ceil(4 / (params.delta_time * 365))
         self.mf_delay = (
             np.ones((number_of_mf_columns, params.human_population), dtype=int)
-            * params.initial_mf
+            * params.microfil.initial_mf
         )  # mf.delay
         # L1 delay in flies
-        self.l1_delay = np.repeat(params.initial_L1, params.human_population)
+        self.l1_delay = np.repeat(params.blackfly.initial_L1, params.human_population)
 
 
 class State:
@@ -173,11 +173,12 @@ class State:
                 ages=np.zeros(n_people),
                 sex_is_male=sex_array,
                 blackfly=BlackflyLarvae(
-                    L1=np.repeat(params.initial_L1, n_people),
-                    L2=np.repeat(params.initial_L2, n_people),
-                    L3=np.repeat(params.initial_L3, n_people),
+                    L1=np.repeat(params.blackfly.initial_L1, n_people),
+                    L2=np.repeat(params.blackfly.initial_L2, n_people),
+                    L3=np.repeat(params.blackfly.initial_L3, n_people),
                 ),
-                mf=np.ones((params.microfil_age_stages, n_people)) * params.initial_mf,
+                mf=np.ones((params.microfil.microfil_age_stages, n_people))
+                * params.microfil.initial_mf,
                 male_worms=np.ones((params.worms.worm_age_stages, n_people), dtype=int)
                 * params.worms.initial_worms,
                 infertile_female_worms=np.ones(

@@ -5,6 +5,7 @@ from typing import Optional, Tuple
 import numpy as np
 from numpy.typing import NDArray
 
+from epioncho_ibm.blackfly import delta_h
 from epioncho_ibm.state import People
 
 from .params import Params
@@ -267,27 +268,6 @@ def get_delayed_males_and_females(
     return last_males, last_females
 
 
-def _delta_h(
-    params: Params, L3: float, total_exposure: NDArray[np.float_]
-) -> NDArray[np.float_]:
-    # proportion of L3 larvae (final life stage in the fly population) developing into adult worms in humans
-    # expos is the total exposure for an individual
-    # delta.hz, delta.hinf, c.h control the density dependent establishment of parasites
-    annual_transm_potential = (
-        params.bite_rate_per_person_per_year / params.bite_rate_per_fly_on_human
-    )
-    multiplier = (
-        params.worms.c_h
-        * annual_transm_potential
-        * params.bite_rate_per_fly_on_human
-        * L3
-        * total_exposure
-    )
-    return (params.worms.delta_h_zero + (params.worms.delta_h_inf * multiplier)) / (
-        1 + multiplier
-    )
-
-
 def _w_plus_one_rate(
     params: Params, L3: float, total_exposure: NDArray[np.float_]
 ) -> NDArray[np.float_]:
@@ -300,7 +280,7 @@ def _w_plus_one_rate(
     total_exposure # "expos"
     params.delta_time #"DT"
     """
-    dh = _delta_h(params, L3, total_exposure)
+    dh = delta_h(params, L3, total_exposure)
     annual_transm_potential = (
         params.bite_rate_per_person_per_year / params.bite_rate_per_fly_on_human
     )

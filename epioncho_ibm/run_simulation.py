@@ -14,7 +14,7 @@ from epioncho_ibm.worms import (
     get_delayed_males_and_females,
 )
 
-from .params import Params
+from .params import ExposureParams, Params
 
 
 def _calc_coverage(
@@ -37,10 +37,12 @@ def _calc_coverage(
 
 
 def _calculate_total_exposure(
-    params: Params, people: People, individual_exposure: NDArray[np.float_]
+    exposure_params: ExposureParams,
+    people: People,
+    individual_exposure: NDArray[np.float_],
 ) -> NDArray[np.float_]:
-    male_exposure_assumed = params.male_exposure * np.exp(
-        -params.male_exposure_exponent * people.ages
+    male_exposure_assumed = exposure_params.male_exposure * np.exp(
+        -exposure_params.male_exposure_exponent * people.ages
     )
     male_exposure_assumed_of_males = male_exposure_assumed[people.sex_is_male]
     if len(male_exposure_assumed_of_males) == 0:
@@ -48,8 +50,8 @@ def _calculate_total_exposure(
         mean_male_exposure = 0
     else:
         mean_male_exposure: float = np.mean(male_exposure_assumed_of_males)
-    female_exposure_assumed = params.female_exposure * np.exp(
-        -params.female_exposure_exponent * people.ages
+    female_exposure_assumed = exposure_params.female_exposure * np.exp(
+        -exposure_params.female_exposure_exponent * people.ages
     )
     female_exposure_assumed_of_females = female_exposure_assumed[
         np.logical_not(people.sex_is_male)
@@ -95,7 +97,9 @@ def run_simulation(
             coverage_in = None
 
         total_exposure = _calculate_total_exposure(
-            state.params, state.people, state.derived_params.individual_exposure
+            state.params.exposure,
+            state.people,
+            state.derived_params.individual_exposure,
         )
         old_state = deepcopy(state)  # all.mats.cur
         # increase ages
@@ -157,7 +161,7 @@ def run_simulation(
         ):
             state.people.time_of_last_treatment = last_time_of_last_treatment
 
-        for compartment in range(state.params.microfil_age_stages):
+        for compartment in range(state.params.microfil.microfil_age_stages):
             state.people.mf[compartment] = change_in_microfil(
                 people=old_state.people,
                 params=state.params,

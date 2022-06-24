@@ -46,14 +46,15 @@ class DerivedParams:
         # TODO revisit +1 and -1
         microfillarie_age_categories = np.arange(
             start=0,
-            stop=params.max_microfil_age + 1,
-            step=params.max_microfil_age / (params.microfil_age_stages - 1),
+            stop=params.microfil.max_microfil_age + 1,
+            step=params.microfil.max_microfil_age
+            / (params.microfil.microfil_age_stages - 1),
         )  # age.cats.mf
 
         self.microfillarie_mortality_rate = _weibull_mortality(
             params.delta_time,
-            params.mu_microfillarie1,
-            params.mu_microfillarie2,
+            params.microfil.mu_microfillarie1,
+            params.microfil.mu_microfillarie2,
             microfillarie_age_categories,
         )
 
@@ -76,8 +77,8 @@ class DerivedParams:
 
         individual_exposure = (
             np.random.gamma(  # individual level exposure to fly bites "ex.vec"
-                shape=params.gamma_distribution,
-                scale=params.gamma_distribution,
+                shape=params.exposure.gamma_distribution,
+                scale=params.exposure.gamma_distribution,
                 size=params.human_population,
             )
         )
