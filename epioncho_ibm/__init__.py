@@ -20,7 +20,5 @@ from .state import State, StateStats
 
 def benchmarker_test_func(end_time: float, population: int) -> StateStats:
     state = State(params=Params(), n_people=population)
-    state.dist_population_age(num_iter=15000)
     state.run_simulation(start_time=0, end_time=end_time)
-    stats = state.to_stats()
-    return stats
+    return state.to_stats()

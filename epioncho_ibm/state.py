@@ -184,7 +184,9 @@ class State:
     _derived_params: DerivedParams
     _delay_arrays: DelayArrays
 
-    def __init__(self, params: Params, n_people: int) -> None:
+    def __init__(
+        self, params: Params, n_people: int, iters_to_distribute_pop_age: int = 15000
+    ) -> None:
         sex_array = (
             np.random.uniform(low=0, high=1, size=n_people) < params.humans.gender_ratio
         )
@@ -219,6 +221,8 @@ class State:
             time_of_last_treatment=time_of_last_treatment,
         )
         self.params = params
+
+        self._dist_population_age(num_iter=iters_to_distribute_pop_age)
 
     @property
     def params(self):
@@ -299,7 +303,7 @@ class State:
         total_over_min_age = np.sum(pop_over_min_age_array)
         return infected_over_min_age / total_over_min_age
 
-    def dist_population_age(self, num_iter: int = 1):
+    def _dist_population_age(self, num_iter: int):
         """
         Generate age distribution
         create inital age distribution and simulate stable age distribution
@@ -346,6 +350,190 @@ class State:
             population_prevalence=self.mf_prevalence_in_population(),
         )
 
+    def _advance(self: "State", current_time: float):
+        if (
+            self.params.treatment is not None
+            and current_time >= self.params.treatment.start_time
+        ):
+            coverage_in = _calc_coverage(
+                self._people,
+                self.params.humans.total_population_coverage,
+                self.params.humans.min_skinsnip_age,
+            )
+        else:
+            coverage_in = None
+
+        total_exposure = _calculate_total_exposure(
+            self.params.exposure,
+            self._people,
+            self._derived_params.individual_exposure,
+        )
+        old_state = deepcopy(self)  # all.mats.cur
+        # increase ages
+        self._people.ages += self.params.delta_time
+
+        people_to_die: NDArray[np.bool_] = np.logical_or(
+            np.random.binomial(
+                n=1,
+                p=(1 / self.params.humans.mean_human_age) * self.params.delta_time,
+                size=self.n_people,
+            )
+            == 1,
+            self._people.ages >= self.params.humans.max_human_age,
+        )
+
+        # there is a delay in new parasites entering humans (from fly bites) and entering the first adult worm age class
+        new_worms = calc_new_worms(
+            self._people.blackfly.L3,
+            self.params.blackfly,
+            self.params.delta_time,
+            total_exposure,
+            self.n_people,
+        )
+        # Take males and females from final column of worm_delay
+        delayed_males, delayed_females = get_delayed_males_and_females(
+            self._delay_arrays.worm_delay,
+            self.n_people,
+            self.params.worms.sex_ratio,
+        )
+        # Move all columns in worm_delay along one
+        self._delay_arrays.worm_delay = _shift_delay_array(
+            new_worms, self._delay_arrays.worm_delay
+        )
+
+        last_aging_worms = WormGroup.from_population(self.n_people)
+        last_time_of_last_treatment = None
+
+        for compartment in range(self.params.worms.worm_age_stages):
+            current_worms = WormGroup(
+                male=self._people.male_worms[compartment],
+                infertile=self._people.infertile_female_worms[compartment],
+                fertile=self._people.fertile_female_worms[compartment],
+            )
+            (
+                last_total_worms,
+                last_aging_worms,
+                last_time_of_last_treatment,
+            ) = change_in_worm_per_index(  # res
+                worm_params=self.params.worms,
+                treatment_params=self.params.treatment,
+                delta_time=self.params.delta_time,
+                n_people=self.n_people,
+                current_worms=current_worms,
+                delayed_females=delayed_females,
+                delayed_males=delayed_males,
+                compartment_mortality=self._derived_params.worm_mortality_rate[
+                    compartment
+                ],
+                coverage_in=coverage_in,
+                last_aging_worms=last_aging_worms,
+                initial_treatment_times=self._derived_params.initial_treatment_times,
+                current_time=current_time,
+                first_compartment=compartment == 0,
+                time_of_last_treatment=self._people.time_of_last_treatment,
+            )
+            check_no_worms_are_negative(last_total_worms)
+
+            self._people.male_worms[compartment] = last_total_worms.male
+            self._people.infertile_female_worms[
+                compartment
+            ] = last_total_worms.infertile
+            self._people.fertile_female_worms[compartment] = last_total_worms.fertile
+
+        assert last_time_of_last_treatment is not None
+
+        if (
+            self.params.treatment is not None
+            and current_time >= self.params.treatment.start_time
+        ):
+            self._people.time_of_last_treatment = last_time_of_last_treatment
+
+        for compartment in range(self.params.microfil.microfil_age_stages):
+            if compartment == 0:
+                self._people.mf[compartment] = change_in_microfil(
+                    n_people=self.n_people,
+                    delta_time=self.params.delta_time,
+                    microfil_params=self.params.microfil,
+                    treatment_params=self.params.treatment,
+                    microfillarie_mortality_rate=self._derived_params.microfillarie_mortality_rate[
+                        compartment
+                    ],
+                    fecundity_rates_worms=self._derived_params.fecundity_rates_worms,
+                    time_of_last_treatment=self._people.time_of_last_treatment,
+                    current_time=current_time,
+                    current_microfil=old_state._people.mf[compartment],
+                    previous_microfil=None,
+                    current_fertile_female_worms=old_state._people.fertile_female_worms,
+                    current_male_worms=old_state._people.male_worms,
+                )
+            else:
+                self._people.mf[compartment] = change_in_microfil(
+                    n_people=self.n_people,
+                    delta_time=self.params.delta_time,
+                    microfil_params=self.params.microfil,
+                    treatment_params=self.params.treatment,
+                    microfillarie_mortality_rate=self._derived_params.microfillarie_mortality_rate[
+                        compartment
+                    ],
+                    fecundity_rates_worms=self._derived_params.fecundity_rates_worms,
+                    time_of_last_treatment=self._people.time_of_last_treatment,
+                    current_time=current_time,
+                    current_microfil=old_state._people.mf[compartment],
+                    previous_microfil=old_state._people.mf[compartment - 1],
+                    current_fertile_female_worms=old_state._people.fertile_female_worms,
+                    current_male_worms=old_state._people.male_worms,
+                )
+
+        # inputs for delay in L1
+        old_mf = np.sum(
+            old_state._people.mf, axis=0
+        )  # TODO: Should this be old state? mf.temp
+
+        self._people.blackfly.L1 = calc_l1(
+            self.params.blackfly,
+            old_mf,
+            self._delay_arrays.mf_delay[-1],
+            total_exposure,
+            self._delay_arrays.exposure_delay[-1],
+            self.params.year_length_days,
+        )
+        self._people.blackfly.L2 = calc_l2(
+            self.params.blackfly,
+            self._delay_arrays.l1_delay,
+            self._delay_arrays.mf_delay[-1],
+            self._delay_arrays.exposure_delay[-1],
+            self.params.year_length_days,
+        )
+        self._people.blackfly.L3 = calc_l3(
+            self.params.blackfly, old_state._people.blackfly.L2
+        )
+
+        self._delay_arrays.exposure_delay = _shift_delay_array(
+            total_exposure, self._delay_arrays.exposure_delay
+        )
+        self._delay_arrays.mf_delay = _shift_delay_array(
+            old_mf, self._delay_arrays.mf_delay
+        )
+        self._delay_arrays.l1_delay = self._people.blackfly.L1
+
+        total_people_to_die: int = np.sum(people_to_die)
+        if total_people_to_die > 0:
+            self._delay_arrays.worm_delay[:, people_to_die] = 0
+            self._delay_arrays.mf_delay[0, people_to_die] = 0
+            self._delay_arrays.l1_delay[people_to_die] = 0
+            self._people.time_of_last_treatment[people_to_die] = np.nan
+
+            self._people.sex_is_male[people_to_die] = (
+                np.random.uniform(low=0, high=1, size=total_people_to_die)
+                < self.params.humans.gender_ratio
+            )
+            self._people.ages[people_to_die] = 0
+            self._people.blackfly.L1[people_to_die] = 0
+            self._people.mf[:, people_to_die] = 0
+            self._people.male_worms[:, people_to_die] = 0
+            self._people.fertile_female_worms[:, people_to_die] = 0
+            self._people.infertile_female_worms[:, people_to_die] = 0
+
     def run_simulation(
         self: "State", start_time: float = 0, end_time: float = 0, verbose: bool = False
     ) -> None:
@@ -356,190 +544,27 @@ class State:
         while current_time < end_time:
             if self.params.delta_time > current_time % 0.2 and verbose:
                 print(current_time)
-
-            if (
-                self.params.treatment is not None
-                and current_time >= self.params.treatment.start_time
-            ):
-                coverage_in = _calc_coverage(
-                    self._people,
-                    self.params.humans.total_population_coverage,
-                    self.params.humans.min_skinsnip_age,
-                )
-            else:
-                coverage_in = None
-
-            total_exposure = _calculate_total_exposure(
-                self.params.exposure,
-                self._people,
-                self._derived_params.individual_exposure,
-            )
-            old_state = deepcopy(self)  # all.mats.cur
-            # increase ages
-            self._people.ages += self.params.delta_time
-
-            people_to_die: NDArray[np.bool_] = np.logical_or(
-                np.random.binomial(
-                    n=1,
-                    p=(1 / self.params.humans.mean_human_age) * self.params.delta_time,
-                    size=self.n_people,
-                )
-                == 1,
-                self._people.ages >= self.params.humans.max_human_age,
-            )
-
-            # there is a delay in new parasites entering humans (from fly bites) and entering the first adult worm age class
-            new_worms = calc_new_worms(
-                self._people.blackfly.L3,
-                self.params.blackfly,
-                self.params.delta_time,
-                total_exposure,
-                self.n_people,
-            )
-            # Take males and females from final column of worm_delay
-            delayed_males, delayed_females = get_delayed_males_and_females(
-                self._delay_arrays.worm_delay,
-                self.n_people,
-                self.params.worms.sex_ratio,
-            )
-            # Move all columns in worm_delay along one
-            self._delay_arrays.worm_delay = _shift_delay_array(
-                new_worms, self._delay_arrays.worm_delay
-            )
-
-            last_aging_worms = WormGroup.from_population(self.n_people)
-            last_time_of_last_treatment = None
-
-            for compartment in range(self.params.worms.worm_age_stages):
-                current_worms = WormGroup(
-                    male=self._people.male_worms[compartment],
-                    infertile=self._people.infertile_female_worms[compartment],
-                    fertile=self._people.fertile_female_worms[compartment],
-                )
-                (
-                    last_total_worms,
-                    last_aging_worms,
-                    last_time_of_last_treatment,
-                ) = change_in_worm_per_index(  # res
-                    worm_params=self.params.worms,
-                    treatment_params=self.params.treatment,
-                    delta_time=self.params.delta_time,
-                    n_people=self.n_people,
-                    current_worms=current_worms,
-                    delayed_females=delayed_females,
-                    delayed_males=delayed_males,
-                    compartment_mortality=self._derived_params.worm_mortality_rate[
-                        compartment
-                    ],
-                    coverage_in=coverage_in,
-                    last_aging_worms=last_aging_worms,
-                    initial_treatment_times=self._derived_params.initial_treatment_times,
-                    current_time=current_time,
-                    first_compartment=compartment == 0,
-                    time_of_last_treatment=self._people.time_of_last_treatment,
-                )
-                check_no_worms_are_negative(last_total_worms)
-
-                self._people.male_worms[compartment] = last_total_worms.male
-                self._people.infertile_female_worms[
-                    compartment
-                ] = last_total_worms.infertile
-                self._people.fertile_female_worms[
-                    compartment
-                ] = last_total_worms.fertile
-
-            assert last_time_of_last_treatment is not None
-
-            if (
-                self.params.treatment is not None
-                and current_time >= self.params.treatment.start_time
-            ):
-                self._people.time_of_last_treatment = last_time_of_last_treatment
-
-            for compartment in range(self.params.microfil.microfil_age_stages):
-                if compartment == 0:
-                    self._people.mf[compartment] = change_in_microfil(
-                        n_people=self.n_people,
-                        delta_time=self.params.delta_time,
-                        microfil_params=self.params.microfil,
-                        treatment_params=self.params.treatment,
-                        microfillarie_mortality_rate=self._derived_params.microfillarie_mortality_rate[
-                            compartment
-                        ],
-                        fecundity_rates_worms=self._derived_params.fecundity_rates_worms,
-                        time_of_last_treatment=self._people.time_of_last_treatment,
-                        current_time=current_time,
-                        current_microfil=old_state._people.mf[compartment],
-                        previous_microfil=None,
-                        current_fertile_female_worms=old_state._people.fertile_female_worms,
-                        current_male_worms=old_state._people.male_worms,
-                    )
-                else:
-                    self._people.mf[compartment] = change_in_microfil(
-                        n_people=self.n_people,
-                        delta_time=self.params.delta_time,
-                        microfil_params=self.params.microfil,
-                        treatment_params=self.params.treatment,
-                        microfillarie_mortality_rate=self._derived_params.microfillarie_mortality_rate[
-                            compartment
-                        ],
-                        fecundity_rates_worms=self._derived_params.fecundity_rates_worms,
-                        time_of_last_treatment=self._people.time_of_last_treatment,
-                        current_time=current_time,
-                        current_microfil=old_state._people.mf[compartment],
-                        previous_microfil=old_state._people.mf[compartment - 1],
-                        current_fertile_female_worms=old_state._people.fertile_female_worms,
-                        current_male_worms=old_state._people.male_worms,
-                    )
-
-            # inputs for delay in L1
-            old_mf = np.sum(
-                old_state._people.mf, axis=0
-            )  # TODO: Should this be old state? mf.temp
-
-            self._people.blackfly.L1 = calc_l1(
-                self.params.blackfly,
-                old_mf,
-                self._delay_arrays.mf_delay[-1],
-                total_exposure,
-                self._delay_arrays.exposure_delay[-1],
-                self.params.year_length_days,
-            )
-            self._people.blackfly.L2 = calc_l2(
-                self.params.blackfly,
-                self._delay_arrays.l1_delay,
-                self._delay_arrays.mf_delay[-1],
-                self._delay_arrays.exposure_delay[-1],
-                self.params.year_length_days,
-            )
-            self._people.blackfly.L3 = calc_l3(
-                self.params.blackfly, old_state._people.blackfly.L2
-            )
-
-            self._delay_arrays.exposure_delay = _shift_delay_array(
-                total_exposure, self._delay_arrays.exposure_delay
-            )
-            self._delay_arrays.mf_delay = _shift_delay_array(
-                old_mf, self._delay_arrays.mf_delay
-            )
-            self._delay_arrays.l1_delay = self._people.blackfly.L1
-
-            total_people_to_die: int = np.sum(people_to_die)
-            if total_people_to_die > 0:
-                self._delay_arrays.worm_delay[:, people_to_die] = 0
-                self._delay_arrays.mf_delay[0, people_to_die] = 0
-                self._delay_arrays.l1_delay[people_to_die] = 0
-                self._people.time_of_last_treatment[people_to_die] = np.nan
-
-                self._people.sex_is_male[people_to_die] = (
-                    np.random.uniform(low=0, high=1, size=total_people_to_die)
-                    < self.params.humans.gender_ratio
-                )
-                self._people.ages[people_to_die] = 0
-                self._people.blackfly.L1[people_to_die] = 0
-                self._people.mf[:, people_to_die] = 0
-                self._people.male_worms[:, people_to_die] = 0
-                self._people.fertile_female_worms[:, people_to_die] = 0
-                self._people.infertile_female_worms[:, people_to_die] = 0
+            self._advance(current_time=current_time)
             current_time += self.params.delta_time
         return None
+
+    def run_simulation_output_stats(
+        self: "State",
+        sampling_interval: float,
+        start_time: float = 0,
+        end_time: float = 0,
+        verbose: bool = False,
+    ) -> list[tuple[float, StateStats]]:
+        if end_time < start_time:
+            raise ValueError("End time after start")
+
+        current_time = start_time
+        output_stats: list[tuple[float, StateStats]] = []
+        while current_time < end_time:
+            if self.params.delta_time > current_time % 0.2 and verbose:
+                print(current_time)
+            if self.params.delta_time > current_time % sampling_interval:
+                output_stats.append((current_time, self.to_stats()))
+            self._advance(current_time=current_time)
+            current_time += self.params.delta_time
+        return output_stats
