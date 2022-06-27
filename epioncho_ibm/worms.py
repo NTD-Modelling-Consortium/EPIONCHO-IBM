@@ -247,12 +247,12 @@ def change_in_worm_per_index(
 
 
 def get_delayed_males_and_females(
-    worm_delay: NDArray[np.int_], n_people: int
+    worm_delay: NDArray[np.int_], n_people: int, worm_sex_ratio: float
 ) -> Tuple[NDArray[np.int_], NDArray[np.int_]]:
     final_column = np.array(worm_delay[-1], dtype=int)
     assert len(final_column) == n_people
     last_males = np.random.binomial(
-        n=final_column, p=0.5, size=len(final_column)
+        n=final_column, p=worm_sex_ratio, size=len(final_column)
     )  # new.worms.m
     last_females = final_column - last_males  # new.worms.nf
     return last_males, last_females

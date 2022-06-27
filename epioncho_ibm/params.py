@@ -68,6 +68,7 @@ class WormParams(BaseSubParams):
     permanent_infertility = (
         0.345  # "cum.infer" permenent infertility in worms due to ivermectin
     )
+    sex_ratio = 0.5
 
 
 class BlackflyParams(BaseSubParams):
@@ -104,7 +105,8 @@ class BlackflyParams(BaseSubParams):
     bite_rate_per_person_per_year: float = (
         1000  # Annual biting rate 'ABR' in paper and in R code
     )
-    l3_delay: float = 10  # "l3.delay" (months?) delay in worms entering humans and joining the first adult worm age class
+    l1_delay: float = 4  # (days)
+    l3_delay: float = 10  # "l3.delay" (months) delay in worms entering humans and joining the first adult worm age class
 
 
 class MicrofilParams(BaseSubParams):
@@ -148,6 +150,8 @@ class HumanParams(BaseSubParams):
 
 class Params(BaseParentParams):
     delta_time: float = 1 / 365  # DT
+    year_length_days: float = 365
+    month_length_days: float = 28
     treatment: Optional[TreatmentParams] = TreatmentParams()
     worms: WormParams = WormParams()
     blackfly: BlackflyParams = BlackflyParams()

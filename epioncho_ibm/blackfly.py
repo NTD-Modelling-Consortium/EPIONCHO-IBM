@@ -14,6 +14,7 @@ def calc_l1(
     last_microfil_delay: NDArray[np.float_],
     total_exposure: NDArray[np.float_],
     exposure_delay: NDArray[np.float_],
+    year_length: float,
 ) -> NDArray[np.float_]:
     """
     microfil # mf
@@ -45,7 +46,7 @@ def calc_l1(
         )
         + blackfly_params.l1_l2_per_person_per_year
         * np.exp(
-            -(4 / 365)
+            -(blackfly_params.l1_delay / year_length)
             * (
                 blackfly_params.blackfly_mort_per_person_per_year
                 + (
@@ -63,6 +64,7 @@ def calc_l2(
     l1_delay: NDArray[np.float_],
     microfil: NDArray[np.float_],
     total_exposure: NDArray[np.float_],
+    year_length: float,
 ) -> NDArray[np.float_]:
     """
     params.l1_l2_per_person_per_year # nuone
@@ -78,7 +80,7 @@ def calc_l2(
         * (
             blackfly_params.l1_l2_per_person_per_year
             * np.exp(
-                -(4 / 366)
+                -(blackfly_params.l1_delay / (year_length + 1))
                 * (
                     blackfly_params.blackfly_mort_per_person_per_year
                     + (

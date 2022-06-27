@@ -1,12 +1,9 @@
-from typing import TYPE_CHECKING, Callable, Optional, Union
+from typing import Callable, Optional, Union
 
 import numpy as np
 from numpy.typing import NDArray
 
-if TYPE_CHECKING:
-    from epioncho_ibm.state import People
-
-from .params import MicrofilParams, Params, TreatmentParams
+from .params import MicrofilParams, TreatmentParams
 
 
 def construct_derive_microfil_one(

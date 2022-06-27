@@ -93,18 +93,24 @@ class DelayArrays:
 
     def __init__(self, params: Params, n_people: int, individual_exposure) -> None:
         number_of_worm_delay_cols = math.ceil(
-            params.blackfly.l3_delay * 28 / (params.delta_time * 365)
+            params.blackfly.l3_delay
+            * params.month_length_days
+            / (params.delta_time * params.year_length_days)
         )
         self.worm_delay = np.zeros((number_of_worm_delay_cols, n_people), dtype=int)
         # matrix for exposure (to fly bites) for L1 delay
-        number_of_exposure_columns = math.ceil(4 / (params.delta_time * 365))
+        number_of_exposure_columns = math.ceil(
+            params.blackfly.l1_delay / (params.delta_time * params.year_length_days)
+        )
 
         self.exposure_delay = np.tile(
             individual_exposure, (number_of_exposure_columns, 1)
         )  # exposure.delay
 
         # matrix for tracking mf for L1 delay
-        number_of_mf_columns = math.ceil(4 / (params.delta_time * 365))
+        number_of_mf_columns = math.ceil(
+            params.blackfly.l1_delay / (params.delta_time * params.year_length_days)
+        )
         self.mf_delay = (
             np.ones((number_of_mf_columns, n_people), dtype=int)
             * params.microfil.initial_mf
@@ -173,7 +179,6 @@ def _shift_delay_array(new_first_column, delay_array):
 
 
 class State:
-    current_iteration: int = 0
     _people: People
     _params: Params
     _derived_params: DerivedParams
@@ -393,7 +398,9 @@ class State:
             )
             # Take males and females from final column of worm_delay
             delayed_males, delayed_females = get_delayed_males_and_females(
-                self._delay_arrays.worm_delay, self.n_people
+                self._delay_arrays.worm_delay,
+                self.n_people,
+                self.params.worms.sex_ratio,
             )
             # Move all columns in worm_delay along one
             self._delay_arrays.worm_delay = _shift_delay_array(
@@ -402,6 +409,7 @@ class State:
 
             last_aging_worms = WormGroup.from_population(self.n_people)
             last_time_of_last_treatment = None
+
             for compartment in range(self.params.worms.worm_age_stages):
                 current_worms = WormGroup(
                     male=self._people.male_worms[compartment],
@@ -441,6 +449,7 @@ class State:
                 ] = last_total_worms.fertile
 
             assert last_time_of_last_treatment is not None
+
             if (
                 self.params.treatment is not None
                 and current_time >= self.params.treatment.start_time
@@ -482,23 +491,26 @@ class State:
                         current_fertile_female_worms=old_state._people.fertile_female_worms,
                         current_male_worms=old_state._people.male_worms,
                     )
+
             # inputs for delay in L1
-            new_mf = np.sum(
+            old_mf = np.sum(
                 old_state._people.mf, axis=0
             )  # TODO: Should this be old state? mf.temp
 
             self._people.blackfly.L1 = calc_l1(
                 self.params.blackfly,
-                new_mf,
+                old_mf,
                 self._delay_arrays.mf_delay[-1],
                 total_exposure,
                 self._delay_arrays.exposure_delay[-1],
+                self.params.year_length_days,
             )
             self._people.blackfly.L2 = calc_l2(
                 self.params.blackfly,
                 self._delay_arrays.l1_delay,
                 self._delay_arrays.mf_delay[-1],
                 self._delay_arrays.exposure_delay[-1],
+                self.params.year_length_days,
             )
             self._people.blackfly.L3 = calc_l3(
                 self.params.blackfly, old_state._people.blackfly.L2
@@ -508,7 +520,7 @@ class State:
                 total_exposure, self._delay_arrays.exposure_delay
             )
             self._delay_arrays.mf_delay = _shift_delay_array(
-                new_mf, self._delay_arrays.mf_delay
+                old_mf, self._delay_arrays.mf_delay
             )
             self._delay_arrays.l1_delay = self._people.blackfly.L1
 
@@ -520,8 +532,9 @@ class State:
                 self._people.time_of_last_treatment[people_to_die] = np.nan
 
                 self._people.sex_is_male[people_to_die] = (
-                    np.random.uniform(low=0, high=1, size=total_people_to_die) < 0.5
-                )  # TODO: Make adjustable
+                    np.random.uniform(low=0, high=1, size=total_people_to_die)
+                    < self.params.humans.gender_ratio
+                )
                 self._people.ages[people_to_die] = 0
                 self._people.blackfly.L1[people_to_die] = 0
                 self._people.mf[:, people_to_die] = 0
