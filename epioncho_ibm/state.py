@@ -1,7 +1,7 @@
 import math
 from copy import deepcopy
 from dataclasses import dataclass
-from typing import Optional, Tuple, Union
+from typing import Tuple, Union
 
 import numpy as np
 from numpy.typing import NDArray
@@ -298,31 +298,27 @@ class State:
         total_over_min_age = np.sum(pop_over_min_age_array)
         return infected_over_min_age / total_over_min_age
 
-    def dist_population_age(
-        self,
-        num_iter: int = 1,
-        params: Optional[Params] = None,
-    ):
+    def dist_population_age(self, num_iter: int = 1):
         """
         Generate age distribution
         create inital age distribution and simulate stable age distribution
         """
-        if params is None:
-            params = self.params
+        delta_time = self.params.delta_time
+        human_params = self.params.humans
 
         current_ages = self._people.ages
         size_population = len(self._people)
-        delta_time_vector = np.ones(size_population) * params.delta_time
+        delta_time_vector = np.ones(size_population) * delta_time
         for _ in range(num_iter):
             current_ages += delta_time_vector
             death_vector = np.random.binomial(
                 n=1,
-                p=(1 / params.humans.mean_human_age) * params.delta_time,
+                p=(1 / human_params.mean_human_age) * delta_time,
                 size=size_population,
             )
             current_ages[
                 np.logical_or(
-                    death_vector == 1, current_ages >= params.humans.max_human_age
+                    death_vector == 1, current_ages >= human_params.max_human_age
                 )
             ] = 0
         return current_ages
@@ -393,7 +389,11 @@ class State:
 
             # there is a delay in new parasites entering humans (from fly bites) and entering the first adult worm age class
             new_worms = calc_new_worms(
-                self._people.blackfly.L3, self.params, total_exposure, self.n_people
+                self._people.blackfly.L3,
+                self.params.blackfly,
+                self.params.delta_time,
+                total_exposure,
+                self.n_people,
             )
             # Take males and females from final column of worm_delay
             delayed_males, delayed_females = get_delayed_males_and_females(
@@ -407,21 +407,31 @@ class State:
             last_aging_worms = WormGroup.from_population(self.n_people)
             last_time_of_last_treatment = None
             for compartment in range(self.params.worms.worm_age_stages):
+                current_worms = WormGroup(
+                    male=self._people.male_worms[compartment],
+                    infertile=self._people.infertile_female_worms[compartment],
+                    fertile=self._people.fertile_female_worms[compartment],
+                )
                 (
                     last_total_worms,
                     last_aging_worms,
                     last_time_of_last_treatment,
                 ) = change_in_worm_per_index(  # res
-                    params=self.params,
-                    people=self._people,
+                    worm_params=self.params.worms,
+                    treatment_params=self.params.treatment,
+                    delta_time=self.params.delta_time,
+                    n_people=self.n_people,
+                    current_worms=current_worms,
                     delayed_females=delayed_females,
                     delayed_males=delayed_males,
-                    worm_mortality_rate=self._derived_params.worm_mortality_rate,
+                    compartment_mortality=self._derived_params.worm_mortality_rate[
+                        compartment
+                    ],
                     coverage_in=coverage_in,
                     last_aging_worms=last_aging_worms,
                     initial_treatment_times=self._derived_params.initial_treatment_times,
                     current_time=current_time,
-                    compartment=compartment,
+                    first_compartment=compartment == 0,
                     time_of_last_treatment=self._people.time_of_last_treatment,
                 )
                 check_no_worms_are_negative(last_total_worms)

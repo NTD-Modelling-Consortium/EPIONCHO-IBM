@@ -27,7 +27,7 @@ def construct_derive_microfil_one(
     microfil_move_rate #mf.move
     person_has_worms # mp (once turned to 0 or 1)
     """
-    new_in = np.einsum(
+    new_microfil = np.einsum(
         "ij, i -> j", fertile_worms, fecundity_rates_worms
     )  # TODO: Check?
 
@@ -38,7 +38,7 @@ def construct_derive_microfil_one(
         assert np.sum(move_rate_temp < 0) == 0
         mortality_temp[mortality_temp < 0] = 0
         move_rate_temp[move_rate_temp < 0] = 0
-        return person_has_worms * new_in - mortality_temp - move_rate_temp
+        return person_has_worms * new_microfil - mortality_temp - move_rate_temp
 
     return derive_microfil_one
 
@@ -113,8 +113,7 @@ def change_in_microfil(
         ) ** (
             -params.microfil.shape_parameter_ivermectin
         )  # additional mortality due to ivermectin treatment
-        compartment_mortality_prime = np.nan_to_num(compartment_mortality_prime)
-        compartment_mortality += compartment_mortality_prime
+        compartment_mortality += np.nan_to_num(compartment_mortality_prime)
 
     if compartment == 0:
         person_has_worms = np.sum(people.male_worms, axis=0) > 0
