@@ -452,16 +452,40 @@ class State:
                 self._people.time_of_last_treatment = last_time_of_last_treatment
 
             for compartment in range(self.params.microfil.microfil_age_stages):
-                self._people.mf[compartment] = change_in_microfil(
-                    people=old_state._people,
-                    params=self.params,
-                    microfillarie_mortality_rate=self._derived_params.microfillarie_mortality_rate,
-                    fecundity_rates_worms=self._derived_params.fecundity_rates_worms,
-                    time_of_last_treatment=self._people.time_of_last_treatment,
-                    compartment=compartment,
-                    current_time=current_time,
-                )
-
+                if compartment == 0:
+                    self._people.mf[compartment] = change_in_microfil(
+                        n_people=self.n_people,
+                        delta_time=self.params.delta_time,
+                        microfil_params=self.params.microfil,
+                        treatment_params=self.params.treatment,
+                        microfillarie_mortality_rate=self._derived_params.microfillarie_mortality_rate[
+                            compartment
+                        ],
+                        fecundity_rates_worms=self._derived_params.fecundity_rates_worms,
+                        time_of_last_treatment=self._people.time_of_last_treatment,
+                        current_time=current_time,
+                        current_microfil=old_state._people.mf[compartment],
+                        previous_microfil=None,
+                        current_fertile_female_worms=old_state._people.fertile_female_worms,
+                        current_male_worms=old_state._people.male_worms,
+                    )
+                else:
+                    self._people.mf[compartment] = change_in_microfil(
+                        n_people=self.n_people,
+                        delta_time=self.params.delta_time,
+                        microfil_params=self.params.microfil,
+                        treatment_params=self.params.treatment,
+                        microfillarie_mortality_rate=self._derived_params.microfillarie_mortality_rate[
+                            compartment
+                        ],
+                        fecundity_rates_worms=self._derived_params.fecundity_rates_worms,
+                        time_of_last_treatment=self._people.time_of_last_treatment,
+                        current_time=current_time,
+                        current_microfil=old_state._people.mf[compartment],
+                        previous_microfil=old_state._people.mf[compartment - 1],
+                        current_fertile_female_worms=old_state._people.fertile_female_worms,
+                        current_male_worms=old_state._people.male_worms,
+                    )
             # inputs for delay in L1
             new_mf = np.sum(
                 old_state._people.mf, axis=0

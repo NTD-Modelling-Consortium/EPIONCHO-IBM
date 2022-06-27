@@ -6,7 +6,7 @@ from numpy.typing import NDArray
 if TYPE_CHECKING:
     from epioncho_ibm.state import People
 
-from .params import Params
+from .params import MicrofilParams, Params, TreatmentParams
 
 
 def construct_derive_microfil_one(
@@ -72,13 +72,18 @@ def construct_derive_microfil_rest(
 
 
 def change_in_microfil(
-    people: "People",
-    params: Params,
-    microfillarie_mortality_rate: NDArray[np.float_],
+    n_people: int,
+    delta_time: float,
+    microfil_params: MicrofilParams,
+    treatment_params: Optional[TreatmentParams],
+    microfillarie_mortality_rate: float,
     fecundity_rates_worms: NDArray[np.float_],
     time_of_last_treatment: Optional[NDArray[np.float_]],
-    compartment: int,
     current_time: float,
+    current_microfil: NDArray[np.int_],
+    previous_microfil: Optional[NDArray[np.int_]],
+    current_fertile_female_worms: NDArray[np.int_],
+    current_male_worms: NDArray[np.int_],
 ) -> NDArray[np.float_]:
     """
     microfillarie_mortality_rate # mu.rates.mf
@@ -99,41 +104,38 @@ def change_in_microfil(
     N is params.human_population
     people is dat
     """
-    n_people = len(people)
-    compartment_mortality = np.repeat(  # mf.mu
-        microfillarie_mortality_rate[compartment], n_people
-    )
-    microfil: NDArray[np.int_] = people.mf[compartment]
+    compartment_mortality = np.repeat(microfillarie_mortality_rate, n_people)  # mf.mu
+    microfil: NDArray[np.int_] = current_microfil
 
     # increases microfilarial mortality if treatment has started
-    if params.treatment is not None and current_time >= params.treatment.start_time:
+    if treatment_params is not None and current_time >= treatment_params.start_time:
         assert time_of_last_treatment is not None
         compartment_mortality_prime = (
-            time_of_last_treatment + params.microfil.u_ivermectin
+            time_of_last_treatment + microfil_params.u_ivermectin
         ) ** (
-            -params.microfil.shape_parameter_ivermectin
+            -microfil_params.shape_parameter_ivermectin
         )  # additional mortality due to ivermectin treatment
         compartment_mortality += np.nan_to_num(compartment_mortality_prime)
 
-    if compartment == 0:
-        person_has_worms = np.sum(people.male_worms, axis=0) > 0
+    if previous_microfil is None:
+        person_has_worms = np.sum(current_male_worms, axis=0) > 0
         derive_microfil = construct_derive_microfil_one(
-            people.fertile_female_worms,
+            current_fertile_female_worms,
             microfil,
             fecundity_rates_worms,
             compartment_mortality,
-            params.microfil.microfil_move_rate,
+            microfil_params.microfil_move_rate,
             person_has_worms,
         )
     else:
         derive_microfil = construct_derive_microfil_rest(
             microfil,
             compartment_mortality,
-            params.microfil.microfil_move_rate,
-            people.mf[compartment - 1],
+            microfil_params.microfil_move_rate,
+            previous_microfil,
         )
     k1 = derive_microfil(0.0)
-    k2 = derive_microfil(params.delta_time * k1 / 2)
-    k3 = derive_microfil(params.delta_time * k2 / 2)
-    k4 = derive_microfil(params.delta_time * k3)
-    return microfil + (params.delta_time / 6) * (k1 + 2 * k2 + 2 * k3 + k4)
+    k2 = derive_microfil(delta_time * k1 / 2)
+    k3 = derive_microfil(delta_time * k2 / 2)
+    k4 = derive_microfil(delta_time * k3)
+    return microfil + (delta_time / 6) * (k1 + 2 * k2 + 2 * k3 + k4)
