@@ -3,8 +3,8 @@ from epioncho_ibm import HumanParams, Params, State, StateStats, TreatmentParams
 
 
 def benchmarker_test_func_no_treat(end_time: float, population: int) -> StateStats:
-    params = Params(humans=HumanParams(human_population=population))
-    state = State(params=params)
+    params = Params()
+    state = State(params=params, n_people=population)
     state.dist_population_age(num_iter=15000)
     state.run_simulation(start_time=0, end_time=end_time)
     stats = state.to_stats()
@@ -13,10 +13,9 @@ def benchmarker_test_func_no_treat(end_time: float, population: int) -> StateSta
 
 def benchmarker_test_func_treat(end_time: float, population: int) -> StateStats:
     params = Params(
-        humans=HumanParams(human_population=population),
         treatment=TreatmentParams(start_time=0, interval_years=0.01),
     )
-    state = State(params=params)
+    state = State(params=params, n_people=population)
     state.dist_population_age(num_iter=15000)
     state.run_simulation(start_time=0, end_time=end_time)
     stats = state.to_stats()

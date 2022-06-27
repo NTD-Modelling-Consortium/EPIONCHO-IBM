@@ -99,8 +99,9 @@ def change_in_microfil(
     N is params.human_population
     people is dat
     """
+    n_people = len(people)
     compartment_mortality = np.repeat(  # mf.mu
-        microfillarie_mortality_rate[compartment], params.humans.human_population
+        microfillarie_mortality_rate[compartment], n_people
     )
     microfil: NDArray[np.int_] = people.mf[compartment]
 

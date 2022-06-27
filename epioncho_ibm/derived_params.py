@@ -20,7 +20,7 @@ class DerivedParams:
     initial_treatment_times: Optional[NDArray[np.float_]]
     individual_exposure: NDArray[np.float_]
 
-    def __init__(self, params: Params) -> None:
+    def __init__(self, params: Params, n_people: int) -> None:
 
         worm_age_categories = np.arange(
             start=0,
@@ -79,7 +79,7 @@ class DerivedParams:
             np.random.gamma(  # individual level exposure to fly bites "ex.vec"
                 shape=params.exposure.gamma_distribution,
                 scale=params.exposure.gamma_distribution,
-                size=params.humans.human_population,
+                size=n_people,
             )
         )
         self.individual_exposure = individual_exposure / np.mean(

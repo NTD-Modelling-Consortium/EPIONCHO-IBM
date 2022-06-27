@@ -110,7 +110,6 @@ class ExposureParams(BaseModel):
 class HumanParams(BaseModel):
     min_skinsnip_age: int = 5
     total_population_coverage: float = 0.65  # "treat.prob"
-    human_population: int = 440  # 'N'
     max_human_age: int = 80  # 'real.max.age'
     mean_human_age: int = 50  # years 'mean.age'
 
@@ -129,3 +128,6 @@ class Params(BaseModel):
     microfil: MicrofilParams = MicrofilParams()
     exposure: ExposureParams = ExposureParams()
     humans: HumanParams = HumanParams()
+
+    class Config:
+        allow_mutation = False

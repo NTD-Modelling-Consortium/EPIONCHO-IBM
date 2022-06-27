@@ -29,19 +29,20 @@ class WormGroup:
 
 
 def _calc_dead_and_aging_worms(
-    params: Params, current_worms: NDArray[np.int_], mortalities: NDArray[np.float_]
+    params: Params,
+    n_people: int,
+    current_worms: NDArray[np.int_],
+    mortalities: NDArray[np.float_],
 ) -> Tuple[NDArray[np.int_], NDArray[np.int_]]:
     dead_worms = np.random.binomial(
         n=current_worms,
         p=mortalities,
-        size=params.humans.human_population,
+        size=n_people,
     )
     aging_worms = np.random.binomial(
         n=current_worms - dead_worms,
-        p=np.repeat(
-            params.delta_time / params.worms.worms_aging, params.humans.human_population
-        ),
-        size=params.humans.human_population,
+        p=np.repeat(params.delta_time / params.worms.worms_aging, n_people),
+        size=n_people,
     )
     return dead_worms, aging_worms
 
@@ -50,7 +51,7 @@ def _calc_new_worms_from_inside(
     current_worms: NDArray[np.int_],
     dead_worms: NDArray[np.int_],
     aging_worms: NDArray[np.int_],
-    human_population: int,
+    n_people: int,
     prob: NDArray[np.float_],
 ) -> NDArray[np.int_]:
     delta_female_worms = current_worms - dead_worms - aging_worms  # trans.fc
@@ -60,10 +61,10 @@ def _calc_new_worms_from_inside(
         new_worms = np.random.binomial(
             n=true_delta_female_worms,
             p=prob,
-            size=human_population,
+            size=n_people,
         )
     else:
-        new_worms = np.zeros(human_population, dtype=int)
+        new_worms = np.zeros(n_people, dtype=int)
     return new_worms
 
 
@@ -112,20 +113,19 @@ def change_in_worm_per_index(
     N is params.human_population
     params.worms_aging "time.each.comp"
     """
-
+    n_people = len(people)
     lambda_zero_in = np.repeat(
-        params.worms.lambda_zero * params.delta_time, params.humans.human_population
+        params.worms.lambda_zero * params.delta_time, n_people
     )  # loss of fertility lambda.zero.in
     omega = np.repeat(
-        params.worms.omega * params.delta_time, params.humans.human_population
+        params.worms.omega * params.delta_time, n_people
     )  # becoming fertile
     # male worms
     current_male_worms = people.male_worms[compartment]  # cur.Wm
-    compartment_mortality = np.repeat(
-        worm_mortality_rate[compartment], params.humans.human_population
-    )
+    compartment_mortality = np.repeat(worm_mortality_rate[compartment], n_people)
     dead_male_worms, aging_male_worms = _calc_dead_and_aging_worms(
         params=params,
+        n_people=n_people,
         current_worms=current_male_worms,
         mortalities=compartment_mortality,
     )
@@ -187,11 +187,13 @@ def change_in_worm_per_index(
 
     dead_infertile_worms, aging_infertile_worms = _calc_dead_and_aging_worms(
         params=params,
+        n_people=n_people,
         current_worms=current_female_worms_infertile,
         mortalities=female_mortalities,
     )
     dead_fertile_worms, aging_fertile_worms = _calc_dead_and_aging_worms(
         params=params,
+        n_people=n_people,
         current_worms=current_female_worms_fertile,
         mortalities=female_mortalities,
     )
@@ -200,7 +202,7 @@ def change_in_worm_per_index(
         current_worms=current_female_worms_fertile,
         dead_worms=dead_fertile_worms,
         aging_worms=aging_fertile_worms,
-        human_population=params.humans.human_population,
+        n_people=n_people,
         prob=lambda_zero_in,
     )  # new.worms.nf.fi
 
@@ -212,7 +214,7 @@ def change_in_worm_per_index(
         current_worms=current_female_worms_infertile,
         dead_worms=dead_infertile_worms,
         aging_worms=aging_infertile_worms,
-        human_population=params.humans.human_population,
+        n_people=n_people,
         prob=omega,
     )  # new.worms.f.fi TODO: Are these the right way round?
 
@@ -257,10 +259,10 @@ def change_in_worm_per_index(
 
 
 def get_delayed_males_and_females(
-    worm_delay: NDArray[np.int_], params: Params
+    worm_delay: NDArray[np.int_], n_people: int
 ) -> Tuple[NDArray[np.int_], NDArray[np.int_]]:
     final_column = np.array(worm_delay[-1], dtype=int)
-    assert len(final_column) == params.humans.human_population
+    assert len(final_column) == n_people
     last_males = np.random.binomial(
         n=final_column, p=0.5, size=len(final_column)
     )  # new.worms.m
@@ -299,7 +301,7 @@ def _w_plus_one_rate(
 
 
 def calc_new_worms(
-    L3: NDArray[np.float_], params: Params, total_exposure
+    L3: NDArray[np.float_], params: Params, total_exposure, n_people
 ) -> NDArray[np.int_]:
     new_rate = _w_plus_one_rate(
         params.blackfly,
@@ -310,12 +312,10 @@ def calc_new_worms(
     if np.any(new_rate > 10**10):
         st_dev = np.sqrt(new_rate)
         new_worms: NDArray[np.int_] = np.round(
-            np.random.normal(
-                loc=new_rate, scale=st_dev, size=params.humans.human_population
-            )
+            np.random.normal(loc=new_rate, scale=st_dev, size=n_people)
         )
     else:
-        new_worms = np.random.poisson(lam=new_rate, size=params.humans.human_population)
+        new_worms = np.random.poisson(lam=new_rate, size=n_people)
     return new_worms
 
 

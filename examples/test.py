@@ -1,9 +1,7 @@
 from epioncho_ibm import HumanParams, Params, State, TreatmentParams
 
-params = Params(
-    humans=HumanParams(human_population=440), treatment=TreatmentParams(start_time=0)
-)
-state = State(params=params)
+params = Params(treatment=TreatmentParams(start_time=0))
+state = State(params=params, n_people=440)
 
 state.dist_population_age(num_iter=15000)
 

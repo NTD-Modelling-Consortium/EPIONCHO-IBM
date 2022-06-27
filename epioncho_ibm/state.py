@@ -91,13 +91,11 @@ class DelayArrays:
     exposure_delay: NDArray[np.float_]
     mf_delay: NDArray[np.int_]
 
-    def __init__(self, params: Params, individual_exposure) -> None:
+    def __init__(self, params: Params, n_people: int, individual_exposure) -> None:
         number_of_worm_delay_cols = math.ceil(
             params.blackfly.l3_delay * 28 / (params.delta_time * 365)
         )
-        self.worm_delay = np.zeros(
-            (number_of_worm_delay_cols, params.humans.human_population), dtype=int
-        )
+        self.worm_delay = np.zeros((number_of_worm_delay_cols, n_people), dtype=int)
         # matrix for exposure (to fly bites) for L1 delay
         number_of_exposure_columns = math.ceil(4 / (params.delta_time * 365))
 
@@ -108,13 +106,11 @@ class DelayArrays:
         # matrix for tracking mf for L1 delay
         number_of_mf_columns = math.ceil(4 / (params.delta_time * 365))
         self.mf_delay = (
-            np.ones((number_of_mf_columns, params.humans.human_population), dtype=int)
+            np.ones((number_of_mf_columns, n_people), dtype=int)
             * params.microfil.initial_mf
         )  # mf.delay
         # L1 delay in flies
-        self.l1_delay = np.repeat(
-            params.blackfly.initial_L1, params.humans.human_population
-        )
+        self.l1_delay = np.repeat(params.blackfly.initial_L1, n_people)
 
 
 def _calc_coverage(
@@ -183,8 +179,7 @@ class State:
     _derived_params: DerivedParams
     _delay_arrays: DelayArrays
 
-    def __init__(self, params: Params) -> None:
-        n_people = params.humans.human_population
+    def __init__(self, params: Params, n_people: int) -> None:
         sex_array = (
             np.random.uniform(low=0, high=1, size=n_people) < params.humans.gender_ratio
         )
@@ -219,9 +214,9 @@ class State:
             time_of_last_treatment=time_of_last_treatment,
         )
         self.params = params
-        self._derived_params = DerivedParams(self.params)
+        self._derived_params = DerivedParams(self.params, self.n_people)
         self._delay_arrays = DelayArrays(
-            self.params, self._derived_params.individual_exposure
+            self.params, self.n_people, self._derived_params.individual_exposure
         )
 
     @property
@@ -230,11 +225,21 @@ class State:
 
     @params.setter
     def params(self, value):
-        self._derived_params = DerivedParams(value)
+        self._derived_params = DerivedParams(value, self.n_people)
         self._delay_arrays = DelayArrays(
-            value, self._derived_params.individual_exposure
+            value, self.n_people, self._derived_params.individual_exposure
         )
         self._params = value
+
+    @property
+    def n_people(self):
+        return len(self._people)
+
+    @n_people.setter
+    def n_people(self, value):
+        raise ValueError(
+            "Setting n_people in state not allowed. Please re-initialise state."
+        )
 
     def microfilariae_per_skin_snip(self: "State") -> Tuple[float, NDArray[np.float_]]:
         """
@@ -267,7 +272,7 @@ class State:
         if self.params.humans.skin_snip_number > 1:
             total_skin_snip_mf = np.zeros(
                 (
-                    self.params.humans.human_population,
+                    self.n_people,
                     self.params.humans.skin_snip_number,
                 )
             )
@@ -380,7 +385,7 @@ class State:
                 np.random.binomial(
                     n=1,
                     p=(1 / self.params.humans.mean_human_age) * self.params.delta_time,
-                    size=self.params.humans.human_population,
+                    size=self.n_people,
                 )
                 == 1,
                 self._people.ages >= self.params.humans.max_human_age,
@@ -388,20 +393,18 @@ class State:
 
             # there is a delay in new parasites entering humans (from fly bites) and entering the first adult worm age class
             new_worms = calc_new_worms(
-                self._people.blackfly.L3, self.params, total_exposure
+                self._people.blackfly.L3, self.params, total_exposure, self.n_people
             )
             # Take males and females from final column of worm_delay
             delayed_males, delayed_females = get_delayed_males_and_females(
-                self._delay_arrays.worm_delay, self.params
+                self._delay_arrays.worm_delay, self.n_people
             )
             # Move all columns in worm_delay along one
             self._delay_arrays.worm_delay = _shift_delay_array(
                 new_worms, self._delay_arrays.worm_delay
             )
 
-            last_aging_worms = WormGroup.from_population(
-                self.params.humans.human_population
-            )
+            last_aging_worms = WormGroup.from_population(self.n_people)
             last_time_of_last_treatment = None
             for compartment in range(self.params.worms.worm_age_stages):
                 (
