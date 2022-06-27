@@ -80,7 +80,7 @@ def calc_l2(
         * (
             blackfly_params.l1_l2_per_person_per_year
             * np.exp(
-                -(blackfly_params.l1_delay / (year_length + 1))
+                -(blackfly_params.l1_delay / year_length)
                 * (
                     blackfly_params.blackfly_mort_per_person_per_year
                     + (
