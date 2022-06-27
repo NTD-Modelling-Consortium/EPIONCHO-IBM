@@ -3,7 +3,34 @@ from typing import Optional
 from pydantic import BaseModel
 
 
-class TreatmentParams(BaseModel):
+class BaseParams(BaseModel):
+    class Config:
+        allow_mutation = False
+
+
+class BaseSubParams(BaseParams):
+    def __setattr__(self, name, value):
+        try:
+            return super().__setattr__(name, value)
+        except TypeError as e:
+            raise ValueError(
+                "Cannot alter inner values of params in-place, please replace entire params as e.g.:\n"
+                + f"state.params = Params(attr_name={self.__class__.__name__}({name}={value}))"
+            )
+
+
+class BaseParentParams(BaseParams):
+    def __setattr__(self, name, value):
+        try:
+            return super().__setattr__(name, value)
+        except TypeError as e:
+            raise ValueError(
+                "Cannot alter inner values of params in-place, please replace entire params as e.g.:\n"
+                + f"state.params = {self.__class__.__name__}({name}={value})"
+            )
+
+
+class TreatmentParams(BaseSubParams):
     interval_years: float = (
         1  # 'trt.int' treatment interval (years, 0.5 gives biannual)
     )
@@ -15,7 +42,7 @@ class TreatmentParams(BaseModel):
     stop_time: float = 130  # the iteration upon which treatment stops (treat.stop)
 
 
-class WormParams(BaseModel):
+class WormParams(BaseSubParams):
     mu_worms1: float = (
         0.09953  # parameters controlling age-dependent mortality in adult worms
     )
@@ -43,7 +70,7 @@ class WormParams(BaseModel):
     )
 
 
-class BlackflyParams(BaseModel):
+class BlackflyParams(BaseSubParams):
     delta_h_zero: float = 0.1864987  # Proportion of L3 larvae developing to the adult stage within the human host, per bite when 𝐴𝑇𝑃(𝑡) → 0
     delta_h_inf: float = 0.002772749  # Proportion of L3 larvae developing to the adult stage within the human host, per bite when 𝐴𝑇𝑃(𝑡) → ∞
     blackfly_mort_per_person_per_year: float = (
@@ -80,7 +107,7 @@ class BlackflyParams(BaseModel):
     l3_delay: float = 10  # "l3.delay" (months?) delay in worms entering humans and joining the first adult worm age class
 
 
-class MicrofilParams(BaseModel):
+class MicrofilParams(BaseSubParams):
     microfil_aging: float = 0.125  # 'time.each.comp.mf'
     microfil_move_rate: float = 8.13333  # 'mf.move.rate' #for aging in parasites
     microfil_age_stages = 21
@@ -98,7 +125,7 @@ class MicrofilParams(BaseModel):
     initial_kmf = 0.313  # "int.kMf"
 
 
-class ExposureParams(BaseModel):
+class ExposureParams(BaseSubParams):
     # age-dependent exposure to fly bites
     male_exposure: float = 1.08  # "m.exp"
     female_exposure: float = 0.9  # "f.exp"
@@ -107,7 +134,7 @@ class ExposureParams(BaseModel):
     gamma_distribution = 0.3  # "gam.dis" individual level exposure heterogeneity
 
 
-class HumanParams(BaseModel):
+class HumanParams(BaseSubParams):
     min_skinsnip_age: int = 5
     total_population_coverage: float = 0.65  # "treat.prob"
     max_human_age: int = 80  # 'real.max.age'
@@ -119,15 +146,11 @@ class HumanParams(BaseModel):
     noncompliant_percentage: float = 0.05
 
 
-class Params(BaseModel):
+class Params(BaseParentParams):
     delta_time: float = 1 / 365  # DT
-
     treatment: Optional[TreatmentParams] = TreatmentParams()
     worms: WormParams = WormParams()
     blackfly: BlackflyParams = BlackflyParams()
     microfil: MicrofilParams = MicrofilParams()
     exposure: ExposureParams = ExposureParams()
     humans: HumanParams = HumanParams()
-
-    class Config:
-        allow_mutation = False

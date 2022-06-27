@@ -214,10 +214,6 @@ class State:
             time_of_last_treatment=time_of_last_treatment,
         )
         self.params = params
-        self._derived_params = DerivedParams(self.params, self.n_people)
-        self._delay_arrays = DelayArrays(
-            self.params, self.n_people, self._derived_params.individual_exposure
-        )
 
     @property
     def params(self):
