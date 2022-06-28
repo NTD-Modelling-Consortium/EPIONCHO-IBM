@@ -1,5 +1,5 @@
-from auto_tests.definitions.auto_benchmarker import AutoBenchmarker
 from epioncho_ibm import HumanParams, Params, State, StateStats, TreatmentParams
+from tests.definitions.auto_benchmarker import AutoBenchmarker
 
 
 def benchmarker_test_func_no_treat(end_time: float, population: int) -> StateStats:

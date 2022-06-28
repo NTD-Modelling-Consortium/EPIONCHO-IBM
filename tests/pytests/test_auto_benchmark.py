@@ -2,8 +2,8 @@ from typing import Tuple
 
 import pytest
 
-from auto_tests.definitions.auto_benchmarker import AutoBenchmarker, BaseOutputData
-from auto_tests.pytests.conftest import pytest_config
+from tests.definitions.auto_benchmarker import AutoBenchmarker, BaseOutputData
+from tests.pytests.conftest import pytest_config
 
 
 @pytest.mark.flaky(reruns=pytest_config.re_runs)

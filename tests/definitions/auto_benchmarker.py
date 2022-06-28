@@ -27,7 +27,7 @@ from numpy.typing import NDArray
 from pydantic import BaseModel, create_model
 from pydantic.generics import GenericModel
 
-from auto_tests.definitions.utils import FlatDict, flatten_dict
+from tests.definitions.utils import FlatDict, flatten_dict
 
 # From here on we will only use benchmarker_test_func and StateStats
 
