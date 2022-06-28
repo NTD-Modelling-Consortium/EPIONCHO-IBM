@@ -301,13 +301,8 @@ def calc_new_worms(
         np.mean(L3),
         total_exposure,
     )
-    if np.any(new_rate > 10**10):
-        st_dev = np.sqrt(new_rate)
-        new_worms: NDArray[np.int_] = np.round(
-            np.random.normal(loc=new_rate, scale=st_dev, size=n_people)
-        )
-    else:
-        new_worms = np.random.poisson(lam=new_rate, size=n_people)
+    assert not (np.any(new_rate > 10**10))
+    new_worms = np.random.poisson(lam=new_rate, size=n_people)
     return new_worms
 
 
