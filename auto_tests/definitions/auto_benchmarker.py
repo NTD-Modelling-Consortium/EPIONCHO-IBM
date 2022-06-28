@@ -207,7 +207,7 @@ class SetupFuncBenchmarker(Generic[FuncReturn]):
         model = self.settings_model
         attr_dict = {}
         for k, t in self.parameters.items():
-            print(f"Attributes for {k}: \n")
+            print(f"Attributes for {k}:")
             while True:
                 constraints = input(
                     f"Enter (minimum: {str(t.__name__)}, maximum: {str(t.__name__)}, steps: int): "
@@ -411,12 +411,12 @@ class AutoBenchmarker:
 
     def _generate_settings_file(self, settings_path: Path) -> None:
         model = self.settings_model
-        settings = model.parse_obj(
-            {
-                k: v.generate_settings_instance()
-                for k, v in self.setup_func_benchmarkers.items()
-            }
-        )
+        model_dict = {}
+        for k, v in self.setup_func_benchmarkers.items():
+            print(f"Attributes for function {k}: \n")
+            model_dict[k] = v.generate_settings_instance()
+
+        settings = model.parse_obj(model_dict)
         settings_file = open(settings_path, "w+")
         json.dump(settings.dict(), settings_file, indent=2)
 
@@ -482,9 +482,9 @@ class AutoBenchmarker:
         benchmark_file = open(benchmark_file_path, "w+")
         json.dump(test_data.dict(), benchmark_file, indent=2)
         benchmark_file.close()
-        hash_file_path = Path(str(self.settings_folder) + os.sep + "data_hash.txt")
-        with open(hash_file_path, "w+") as f:
-            f.write(str(self))
+        # hash_file_path = Path(str(self.settings_folder) + os.sep + "data_hash.txt")
+        # with open(hash_file_path, "w+") as f:
+        #    f.write(str(self))
 
     def test_benchmark_data(
         self, benchmark_data: BaseOutputData, acceptable_st_devs: float, func_name: str

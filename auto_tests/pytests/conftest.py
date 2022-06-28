@@ -65,15 +65,7 @@ def listify_tests(
 
 
 test_data_model = autobenchmarker.test_model
-
-
-def pytest_configure(config):
-    generate_benchmark = config.option.genbenchmark
-    if generate_benchmark:
-        autobenchmarker.generate_benchmark(verbose=True)
-        raise RuntimeError("Benchmark regenerated - results of pytest must be re-run")
-
-
+benchmark_generated = False
 pytest_config = PytestConfig.parse_file("pytest_config.json")
 
 
@@ -83,11 +75,21 @@ def list_of_tests():
     )
     if not benchmark_file_path.exists():
         autobenchmarker.generate_benchmark(verbose=True)
+        global benchmark_generated
+        benchmark_generated = True
     benchmark_file: test_data_model = test_data_model.parse_file(benchmark_file_path)
     return listify_tests(getattr(benchmark_file, "tests"), autobenchmarker)
 
 
 list_of_t = list_of_tests()
+
+
+def pytest_configure(config):
+    generate_benchmark = config.option.genbenchmark
+    global benchmark_generated
+    if generate_benchmark and not benchmark_generated:
+        autobenchmarker.generate_benchmark(verbose=True)
+        raise RuntimeError("Benchmark regenerated - results of pytest must be re-run")
 
 
 @pytest.fixture(
