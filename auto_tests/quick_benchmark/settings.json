@@ -1,0 +1,30 @@
+{
+  "no_treatment": {
+    "max_product": 1.0,
+    "benchmark_iters": 10,
+    "end_time": {
+      "minimum": 0.001,
+      "maximum": 0.1,
+      "steps": 4
+    },
+    "population": {
+      "minimum": 1,
+      "maximum": 10,
+      "steps": 4
+    }
+  },
+  "treatment": {
+    "max_product": 1.0,
+    "benchmark_iters": 10,
+    "end_time": {
+      "minimum": 0.001,
+      "maximum": 0.1,
+      "steps": 4
+    },
+    "population": {
+      "minimum": 1,
+      "maximum": 10,
+      "steps": 4
+    }
+  }
+}

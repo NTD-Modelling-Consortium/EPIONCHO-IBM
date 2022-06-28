@@ -1,0 +1,1628 @@
+{
+  "tests": {
+    "no_treatment": [
+      {
+        "data": {
+          "percent_compliant": {
+            "mean": 1.0,
+            "st_dev": 0.0
+          },
+          "percent_male": {
+            "mean": 0.2,
+            "st_dev": 0.4000000000000001
+          },
+          "L1_mean": {
+            "mean": 0.0,
+            "st_dev": 0.0
+          },
+          "L2_mean": {
+            "mean": 0.019461586805633722,
+            "st_dev": 0.0
+          },
+          "L3_mean": {
+            "mean": 0.03866099255583127,
+            "st_dev": 0.0
+          },
+          "ages_mean": {
+            "mean": 34.23068493150892,
+            "st_dev": 13.74265958658265
+          },
+          "mf_mean": {
+            "mean": 0.00199928456006842,
+            "st_dev": 0.0
+          },
+          "male_worms_mean": {
+            "mean": 0.9857142857142858,
+            "st_dev": 0.021821789023599263
+          },
+          "infertile_female_worms_mean": {
+            "mean": 1.0,
+            "st_dev": 0.0
+          },
+          "fertile_female_worms_mean": {
+            "mean": 0.980952380952381,
+            "st_dev": 0.031586902765289526
+          },
+          "mf_per_skin_snip": {
+            "mean": 0.0,
+            "st_dev": 0.0
+          },
+          "population_prevalence": {
+            "mean": 0.1,
+            "st_dev": 0.30000000000000004
+          }
+        },
+        "end_time": 0.0010000000000000002,
+        "population": 1
+      },
+      {
+        "data": {
+          "percent_compliant": {
+            "mean": 1.0,
+            "st_dev": 0.0
+          },
+          "percent_male": {
+            "mean": 0.65,
+            "st_dev": 0.22912878474779197
+          },
+          "L1_mean": {
+            "mean": 0.0,
+            "st_dev": 0.0
+          },
+          "L2_mean": {
+            "mean": 0.019461586805633722,
+            "st_dev": 0.0
+          },
+          "L3_mean": {
+            "mean": 0.03866099255583127,
+            "st_dev": 0.0
+          },
+          "ages_mean": {
+            "mean": 30.027260273973326,
+            "st_dev": 10.533414407696487
+          },
+          "mf_mean": {
+            "mean": 0.00199928456006842,
+            "st_dev": 0.0
+          },
+          "male_worms_mean": {
+            "mean": 0.980952380952381,
+            "st_dev": 0.02776643759450143
+          },
+          "infertile_female_worms_mean": {
+            "mean": 0.9880952380952381,
+            "st_dev": 0.015971914124998515
+          },
+          "fertile_female_worms_mean": {
+            "mean": 0.9880952380952381,
+            "st_dev": 0.015971914124998515
+          },
+          "mf_per_skin_snip": {
+            "mean": 0.025,
+            "st_dev": 0.05000000000000001
+          },
+          "population_prevalence": {
+            "mean": 0.05,
+            "st_dev": 0.15000000000000002
+          }
+        },
+        "end_time": 0.0010000000000000002,
+        "population": 2
+      },
+      {
+        "data": {
+          "percent_compliant": {
+            "mean": 0.96,
+            "st_dev": 0.12
+          },
+          "percent_male": {
+            "mean": 0.5,
+            "st_dev": 0.2863564212655271
+          },
+          "L1_mean": {
+            "mean": 0.0,
+            "st_dev": 0.0
+          },
+          "L2_mean": {
+            "mean": 0.019461586805633722,
+            "st_dev": 0.0
+          },
+          "L3_mean": {
+            "mean": 0.03866099255583127,
+            "st_dev": 0.0
+          },
+          "ages_mean": {
+            "mean": 27.521424657534613,
+            "st_dev": 7.030360236048201
+          },
+          "mf_mean": {
+            "mean": 0.00199928456006842,
+            "st_dev": 4.336808689942018e-19
+          },
+          "male_worms_mean": {
+            "mean": 0.9933333333333334,
+            "st_dev": 0.006098213559459858
+          },
+          "infertile_female_worms_mean": {
+            "mean": 0.9895238095238096,
+            "st_dev": 0.008984743935292014
+          },
+          "fertile_female_worms_mean": {
+            "mean": 0.9895238095238096,
+            "st_dev": 0.00994314905610529
+          },
+          "mf_per_skin_snip": {
+            "mean": 0.04,
+            "st_dev": 0.03741657386773942
+          },
+          "population_prevalence": {
+            "mean": 0.2,
+            "st_dev": 0.15491933384829668
+          }
+        },
+        "end_time": 0.0010000000000000002,
+        "population": 5
+      },
+      {
+        "data": {
+          "percent_compliant": {
+            "mean": 0.95,
+            "st_dev": 0.06708203932499368
+          },
+          "percent_male": {
+            "mean": 0.45999999999999996,
+            "st_dev": 0.142828568570857
+          },
+          "L1_mean": {
+            "mean": 0.0,
+            "st_dev": 0.0
+          },
+          "L2_mean": {
+            "mean": 0.019461586805633722,
+            "st_dev": 0.0
+          },
+          "L3_mean": {
+            "mean": 0.03866099255583127,
+            "st_dev": 0.0
+          },
+          "ages_mean": {
+            "mean": 28.114191780821564,
+            "st_dev": 2.023408971609843
+          },
+          "mf_mean": {
+            "mean": 0.00199928456006842,
+            "st_dev": 0.0
+          },
+          "male_worms_mean": {
+            "mean": 0.990952380952381,
+            "st_dev": 0.00449237196764601
+          },
+          "infertile_female_worms_mean": {
+            "mean": 0.9847619047619048,
+            "st_dev": 0.006998542122237679
+          },
+          "fertile_female_worms_mean": {
+            "mean": 0.9957142857142858,
+            "st_dev": 0.004492371967645986
+          },
+          "mf_per_skin_snip": {
+            "mean": 0.03250000000000001,
+            "st_dev": 0.025124689052802227
+          },
+          "population_prevalence": {
+            "mean": 0.23972222222222223,
+            "st_dev": 0.14513749334788942
+          }
+        },
+        "end_time": 0.0010000000000000002,
+        "population": 10
+      },
+      {
+        "data": {
+          "percent_compliant": {
+            "mean": 0.9,
+            "st_dev": 0.30000000000000004
+          },
+          "percent_male": {
+            "mean": 0.6,
+            "st_dev": 0.48989794855663565
+          },
+          "L1_mean": {
+            "mean": 0.00025682911773966776,
+            "st_dev": 5.421010862427522e-20
+          },
+          "L2_mean": {
+            "mean": 0.0,
+            "st_dev": 0.0
+          },
+          "L3_mean": {
+            "mean": 0.025080142087242314,
+            "st_dev": 0.0
+          },
+          "ages_mean": {
+            "mean": 28.23369863013719,
+            "st_dev": 15.779728227417497
+          },
+          "mf_mean": {
+            "mean": 0.003987511950691314,
+            "st_dev": 2.5686854808552427e-05
+          },
+          "male_worms_mean": {
+            "mean": 0.9904761904761905,
+            "st_dev": 0.019047619047619067
+          },
+          "infertile_female_worms_mean": {
+            "mean": 0.9857142857142858,
+            "st_dev": 0.030491067797299317
+          },
+          "fertile_female_worms_mean": {
+            "mean": 0.980952380952381,
+            "st_dev": 0.023328473740792197
+          },
+          "mf_per_skin_snip": {
+            "mean": 0.025,
+            "st_dev": 0.07500000000000001
+          },
+          "population_prevalence": {
+            "mean": NaN,
+            "st_dev": NaN
+          }
+        },
+        "end_time": 0.004641588833612781,
+        "population": 1
+      },
+      {
+        "data": {
+          "percent_compliant": {
+            "mean": 1.0,
+            "st_dev": 0.0
+          },
+          "percent_male": {
+            "mean": 0.45,
+            "st_dev": 0.2692582403567252
+          },
+          "L1_mean": {
+            "mean": 0.00025667879067022687,
+            "st_dev": 9.304991427054474e-08
+          },
+          "L2_mean": {
+            "mean": 0.0,
+            "st_dev": 0.0
+          },
+          "L3_mean": {
+            "mean": 0.025080142087242314,
+            "st_dev": 0.0
+          },
+          "ages_mean": {
+            "mean": 29.529863013698264,
+            "st_dev": 7.767840772833684
+          },
+          "mf_mean": {
+            "mean": 0.003995144989820325,
+            "st_dev": 7.756155353964473e-06
+          },
+          "male_worms_mean": {
+            "mean": 0.980952380952381,
+            "st_dev": 0.01781741612749498
+          },
+          "infertile_female_worms_mean": {
+            "mean": 0.9857142857142858,
+            "st_dev": 0.01579345138264478
+          },
+          "fertile_female_worms_mean": {
+            "mean": 0.9857142857142858,
+            "st_dev": 0.01579345138264478
+          },
+          "mf_per_skin_snip": {
+            "mean": 0.075,
+            "st_dev": 0.1
+          },
+          "population_prevalence": {
+            "mean": 0.35,
+            "st_dev": 0.3905124837953327
+          }
+        },
+        "end_time": 0.004641588833612781,
+        "population": 2
+      },
+      {
+        "data": {
+          "percent_compliant": {
+            "mean": 0.9800000000000001,
+            "st_dev": 0.05999999999999999
+          },
+          "percent_male": {
+            "mean": 0.4600000000000001,
+            "st_dev": 0.15620499351813308
+          },
+          "L1_mean": {
+            "mean": 0.0002564701895828599,
+            "st_dev": 2.588518471535784e-07
+          },
+          "L2_mean": {
+            "mean": 0.0,
+            "st_dev": 0.0
+          },
+          "L3_mean": {
+            "mean": 0.025080142087242314,
+            "st_dev": 0.0
+          },
+          "ages_mean": {
+            "mean": 28.007780821917578,
+            "st_dev": 8.320561021546387
+          },
+          "mf_mean": {
+            "mean": 0.003992686903704187,
+            "st_dev": 6.855409538813046e-06
+          },
+          "male_worms_mean": {
+            "mean": 0.9800000000000001,
+            "st_dev": 0.013768411709334261
+          },
+          "infertile_female_worms_mean": {
+            "mean": 0.9857142857142858,
+            "st_dev": 0.011468185313135523
+          },
+          "fertile_female_worms_mean": {
+            "mean": 0.9866666666666667,
+            "st_dev": 0.008728715609439712
+          },
+          "mf_per_skin_snip": {
+            "mean": 0.085,
+            "st_dev": 0.045
+          },
+          "population_prevalence": {
+            "mean": 0.31999999999999995,
+            "st_dev": 0.285657137141714
+          }
+        },
+        "end_time": 0.004641588833612781,
+        "population": 5
+      },
+      {
+        "data": {
+          "percent_compliant": {
+            "mean": 0.9800000000000001,
+            "st_dev": 0.039999999999999994
+          },
+          "percent_male": {
+            "mean": 0.5,
+            "st_dev": 0.13416407864998736
+          },
+          "L1_mean": {
+            "mean": 0.0002563281376084947,
+            "st_dev": 1.5458743653919624e-07
+          },
+          "L2_mean": {
+            "mean": 0.0,
+            "st_dev": 0.0
+          },
+          "L3_mean": {
+            "mean": 0.025080142087242314,
+            "st_dev": 0.0
+          },
+          "ages_mean": {
+            "mean": 28.133917808219444,
+            "st_dev": 3.299334751122298
+          },
+          "mf_mean": {
+            "mean": 0.003993704235459072,
+            "st_dev": 1.1005928061337583e-05
+          },
+          "male_worms_mean": {
+            "mean": 0.981904761904762,
+            "st_dev": 0.00761904761904764
+          },
+          "infertile_female_worms_mean": {
+            "mean": 0.9776190476190477,
+            "st_dev": 0.013972762620115455
+          },
+          "fertile_female_worms_mean": {
+            "mean": 0.9780952380952381,
+            "st_dev": 0.00980536203903524
+          },
+          "mf_per_skin_snip": {
+            "mean": 0.095,
+            "st_dev": 0.04153311931459037
+          },
+          "population_prevalence": {
+            "mean": 0.265,
+            "st_dev": 0.1147205407463537
+          }
+        },
+        "end_time": 0.004641588833612781,
+        "population": 10
+      },
+      {
+        "data": {
+          "percent_compliant": {
+            "mean": 1.0,
+            "st_dev": 0.0
+          },
+          "percent_male": {
+            "mean": 0.4,
+            "st_dev": 0.4898979485566356
+          },
+          "L1_mean": {
+            "mean": 0.0017754563429217714,
+            "st_dev": 1.8735034707650825e-05
+          },
+          "L2_mean": {
+            "mean": 0.000989195868227044,
+            "st_dev": 9.576931630805188e-06
+          },
+          "L3_mean": {
+            "mean": 0.0010652895156030148,
+            "st_dev": 9.485725725981098e-06
+          },
+          "ages_mean": {
+            "mean": 29.900273972603316,
+            "st_dev": 13.895242530596237
+          },
+          "mf_mean": {
+            "mean": 0.0158489750793698,
+            "st_dev": 0.00018260285892921025
+          },
+          "male_worms_mean": {
+            "mean": 0.9285714285714286,
+            "st_dev": 0.043902592653775656
+          },
+          "infertile_female_worms_mean": {
+            "mean": 0.9476190476190476,
+            "st_dev": 0.04492371967646003
+          },
+          "fertile_female_worms_mean": {
+            "mean": 0.9285714285714286,
+            "st_dev": 0.06818010030131595
+          },
+          "mf_per_skin_snip": {
+            "mean": 0.125,
+            "st_dev": 0.16770509831248423
+          },
+          "population_prevalence": {
+            "mean": NaN,
+            "st_dev": NaN
+          }
+        },
+        "end_time": 0.02154434690031885,
+        "population": 1
+      },
+      {
+        "data": {
+          "percent_compliant": {
+            "mean": 0.95,
+            "st_dev": 0.15
+          },
+          "percent_male": {
+            "mean": 0.45,
+            "st_dev": 0.35000000000000003
+          },
+          "L1_mean": {
+            "mean": 0.001763331682736557,
+            "st_dev": 1.996318253444968e-05
+          },
+          "L2_mean": {
+            "mean": 0.0009820797134853332,
+            "st_dev": 1.0282683899702892e-05
+          },
+          "L3_mean": {
+            "mean": 0.0010581247209076766,
+            "st_dev": 9.914989752725785e-06
+          },
+          "ages_mean": {
+            "mean": 26.66616438356117,
+            "st_dev": 11.040419470935452
+          },
+          "mf_mean": {
+            "mean": 0.015896037125814288,
+            "st_dev": 0.00011162357355398001
+          },
+          "male_worms_mean": {
+            "mean": 0.9452380952380952,
+            "st_dev": 0.023928275288383056
+          },
+          "infertile_female_worms_mean": {
+            "mean": 0.9261904761904762,
+            "st_dev": 0.02906322765650881
+          },
+          "fertile_female_worms_mean": {
+            "mean": 0.9619047619047618,
+            "st_dev": 0.03563483225498991
+          },
+          "mf_per_skin_snip": {
+            "mean": 0.35,
+            "st_dev": 0.22912878474779202
+          },
+          "population_prevalence": {
+            "mean": 0.75,
+            "st_dev": 0.4031128874149275
+          }
+        },
+        "end_time": 0.02154434690031885,
+        "population": 2
+      },
+      {
+        "data": {
+          "percent_compliant": {
+            "mean": 0.9199999999999999,
+            "st_dev": 0.132664991614216
+          },
+          "percent_male": {
+            "mean": 0.44000000000000006,
+            "st_dev": 0.29393876913398137
+          },
+          "L1_mean": {
+            "mean": 0.0017733695211633736,
+            "st_dev": 4.2027310126534685e-05
+          },
+          "L2_mean": {
+            "mean": 0.000987969433955701,
+            "st_dev": 2.2397705288883647e-05
+          },
+          "L3_mean": {
+            "mean": 0.0010649980764776711,
+            "st_dev": 2.3062442901461143e-05
+          },
+          "ages_mean": {
+            "mean": 23.65254794520495,
+            "st_dev": 6.522837675330662
+          },
+          "mf_mean": {
+            "mean": 0.01588962541706895,
+            "st_dev": 0.00019049373980895603
+          },
+          "male_worms_mean": {
+            "mean": 0.9295238095238096,
+            "st_dev": 0.020067911910195694
+          },
+          "infertile_female_worms_mean": {
+            "mean": 0.9238095238095239,
+            "st_dev": 0.02253744679276043
+          },
+          "fertile_female_worms_mean": {
+            "mean": 0.9380952380952381,
+            "st_dev": 0.019166296949998194
+          },
+          "mf_per_skin_snip": {
+            "mean": 0.305,
+            "st_dev": 0.09340770846134702
+          },
+          "population_prevalence": {
+            "mean": 0.6533333333333333,
+            "st_dev": 0.1851125783588643
+          }
+        },
+        "end_time": 0.02154434690031885,
+        "population": 5
+      },
+      {
+        "data": {
+          "percent_compliant": {
+            "mean": 0.9700000000000001,
+            "st_dev": 0.04582575694955839
+          },
+          "percent_male": {
+            "mean": 0.5399999999999998,
+            "st_dev": 0.1562049935181331
+          },
+          "L1_mean": {
+            "mean": 0.0017523792388592716,
+            "st_dev": 2.055019325724727e-05
+          },
+          "L2_mean": {
+            "mean": 0.0009756769275628991,
+            "st_dev": 1.0873486031495795e-05
+          },
+          "L3_mean": {
+            "mean": 0.0010513871048850824,
+            "st_dev": 1.1037482379958622e-05
+          },
+          "ages_mean": {
+            "mean": 29.9338904109592,
+            "st_dev": 4.542739027175311
+          },
+          "mf_mean": {
+            "mean": 0.015887285063722726,
+            "st_dev": 0.0001034830482884393
+          },
+          "male_worms_mean": {
+            "mean": 0.9328571428571429,
+            "st_dev": 0.019453998300776664
+          },
+          "infertile_female_worms_mean": {
+            "mean": 0.9290476190476191,
+            "st_dev": 0.01910111535250626
+          },
+          "fertile_female_worms_mean": {
+            "mean": 0.9385714285714286,
+            "st_dev": 0.013875049794603297
+          },
+          "mf_per_skin_snip": {
+            "mean": 0.355,
+            "st_dev": 0.0940744386111339
+          },
+          "population_prevalence": {
+            "mean": 0.7350000000000001,
+            "st_dev": 0.1668156741310674
+          }
+        },
+        "end_time": 0.02154434690031885,
+        "population": 10
+      },
+      {
+        "data": {
+          "percent_compliant": {
+            "mean": 1.0,
+            "st_dev": 0.0
+          },
+          "percent_male": {
+            "mean": 0.6,
+            "st_dev": 0.48989794855663565
+          },
+          "L1_mean": {
+            "mean": 0.009048378081675868,
+            "st_dev": 0.0004756564091108126
+          },
+          "L2_mean": {
+            "mean": 0.005684212120528588,
+            "st_dev": 0.00029748396404173275
+          },
+          "L3_mean": {
+            "mean": 0.00713115304358559,
+            "st_dev": 0.0003708189126427625
+          },
+          "ages_mean": {
+            "mean": 31.270684931507,
+            "st_dev": 12.755506196832714
+          },
+          "mf_mean": {
+            "mean": 0.07440211422685901,
+            "st_dev": 0.00404599084920264
+          },
+          "male_worms_mean": {
+            "mean": 0.8142857142857143,
+            "st_dev": 0.04971574528052641
+          },
+          "infertile_female_worms_mean": {
+            "mean": 0.7142857142857143,
+            "st_dev": 0.09988655696858587
+          },
+          "fertile_female_worms_mean": {
+            "mean": 0.819047619047619,
+            "st_dev": 0.06998542122237651
+          },
+          "mf_per_skin_snip": {
+            "mean": 1.9,
+            "st_dev": 0.8077747210701757
+          },
+          "population_prevalence": {
+            "mean": 1.0,
+            "st_dev": 0.0
+          }
+        },
+        "end_time": 0.10000000000000002,
+        "population": 1
+      },
+      {
+        "data": {
+          "percent_compliant": {
+            "mean": 1.0,
+            "st_dev": 0.0
+          },
+          "percent_male": {
+            "mean": 0.5,
+            "st_dev": 0.3872983346207417
+          },
+          "L1_mean": {
+            "mean": 0.008390036154546244,
+            "st_dev": 0.0002329714857898485
+          },
+          "L2_mean": {
+            "mean": 0.005252861762172373,
+            "st_dev": 0.0001448404427678423
+          },
+          "L3_mean": {
+            "mean": 0.006593307034438868,
+            "st_dev": 0.00018162495500703913
+          },
+          "ages_mean": {
+            "mean": 26.29273972602731,
+            "st_dev": 7.262859530564367
+          },
+          "mf_mean": {
+            "mean": 0.0706282841055902,
+            "st_dev": 0.0017507879926387706
+          },
+          "male_worms_mean": {
+            "mean": 0.7833333333333332,
+            "st_dev": 0.03095238095238096
+          },
+          "infertile_female_worms_mean": {
+            "mean": 0.7904761904761906,
+            "st_dev": 0.04096345365258393
+          },
+          "fertile_female_worms_mean": {
+            "mean": 0.8071428571428572,
+            "st_dev": 0.05971398192373548
+          },
+          "mf_per_skin_snip": {
+            "mean": 1.3875,
+            "st_dev": 0.7674022739085413
+          },
+          "population_prevalence": {
+            "mean": 1.0,
+            "st_dev": 0.0
+          }
+        },
+        "end_time": 0.10000000000000002,
+        "population": 2
+      },
+      {
+        "data": {
+          "percent_compliant": {
+            "mean": 0.96,
+            "st_dev": 0.07999999999999999
+          },
+          "percent_male": {
+            "mean": 0.5199999999999999,
+            "st_dev": 0.20396078054371142
+          },
+          "L1_mean": {
+            "mean": 0.008274620567625072,
+            "st_dev": 0.00041350980210506125
+          },
+          "L2_mean": {
+            "mean": 0.0051543664003444335,
+            "st_dev": 0.000268125518429635
+          },
+          "L3_mean": {
+            "mean": 0.006474411291592786,
+            "st_dev": 0.00033110932356126166
+          },
+          "ages_mean": {
+            "mean": 27.656602739725617,
+            "st_dev": 6.182663973298716
+          },
+          "mf_mean": {
+            "mean": 0.07143357537910071,
+            "st_dev": 0.0014973360800666447
+          },
+          "male_worms_mean": {
+            "mean": 0.7742857142857142,
+            "st_dev": 0.02255756053776575
+          },
+          "infertile_female_worms_mean": {
+            "mean": 0.7533333333333333,
+            "st_dev": 0.034192996325745226
+          },
+          "fertile_female_worms_mean": {
+            "mean": 0.7952380952380953,
+            "st_dev": 0.024926194911052215
+          },
+          "mf_per_skin_snip": {
+            "mean": 1.4849999999999999,
+            "st_dev": 0.4811704479703632
+          },
+          "population_prevalence": {
+            "mean": 0.9800000000000001,
+            "st_dev": 0.059999999999999984
+          }
+        },
+        "end_time": 0.10000000000000002,
+        "population": 5
+      }
+    ],
+    "treatment": [
+      {
+        "data": {
+          "percent_compliant": {
+            "mean": 1.0,
+            "st_dev": 0.0
+          },
+          "percent_male": {
+            "mean": 0.5,
+            "st_dev": 0.5
+          },
+          "L1_mean": {
+            "mean": 0.0,
+            "st_dev": 0.0
+          },
+          "L2_mean": {
+            "mean": 0.019461586805633722,
+            "st_dev": 0.0
+          },
+          "L3_mean": {
+            "mean": 0.03866099255583127,
+            "st_dev": 0.0
+          },
+          "ages_mean": {
+            "mean": 29.25178082191551,
+            "st_dev": 9.802248848710864
+          },
+          "mf_mean": {
+            "mean": 0.00199928456006842,
+            "st_dev": 0.0
+          },
+          "male_worms_mean": {
+            "mean": 0.9857142857142858,
+            "st_dev": 0.021821789023599263
+          },
+          "infertile_female_worms_mean": {
+            "mean": 0.9761904761904763,
+            "st_dev": 0.03194382824999701
+          },
+          "fertile_female_worms_mean": {
+            "mean": 1.0047619047619047,
+            "st_dev": 0.02564364193873576
+          },
+          "mf_per_skin_snip": {
+            "mean": 0.025,
+            "st_dev": 0.07500000000000001
+          },
+          "population_prevalence": {
+            "mean": 0.1,
+            "st_dev": 0.30000000000000004
+          }
+        },
+        "end_time": 0.0010000000000000002,
+        "population": 1
+      },
+      {
+        "data": {
+          "percent_compliant": {
+            "mean": 1.0,
+            "st_dev": 0.0
+          },
+          "percent_male": {
+            "mean": 0.5,
+            "st_dev": 0.3872983346207417
+          },
+          "L1_mean": {
+            "mean": 0.0,
+            "st_dev": 0.0
+          },
+          "L2_mean": {
+            "mean": 0.019461586805633722,
+            "st_dev": 0.0
+          },
+          "L3_mean": {
+            "mean": 0.03866099255583127,
+            "st_dev": 0.0
+          },
+          "ages_mean": {
+            "mean": 29.24890410958913,
+            "st_dev": 7.589425440295604
+          },
+          "mf_mean": {
+            "mean": 0.00199928456006842,
+            "st_dev": 0.0
+          },
+          "male_worms_mean": {
+            "mean": 0.9833333333333334,
+            "st_dev": 0.015245533898649657
+          },
+          "infertile_female_worms_mean": {
+            "mean": 0.9952380952380953,
+            "st_dev": 0.009523809523809533
+          },
+          "fertile_female_worms_mean": {
+            "mean": 0.9857142857142858,
+            "st_dev": 0.015793451382644777
+          },
+          "mf_per_skin_snip": {
+            "mean": 0.0125,
+            "st_dev": 0.037500000000000006
+          },
+          "population_prevalence": {
+            "mean": 0.15,
+            "st_dev": 0.22912878474779197
+          }
+        },
+        "end_time": 0.0010000000000000002,
+        "population": 2
+      },
+      {
+        "data": {
+          "percent_compliant": {
+            "mean": 0.9800000000000001,
+            "st_dev": 0.05999999999999999
+          },
+          "percent_male": {
+            "mean": 0.4800000000000001,
+            "st_dev": 0.2712931993250107
+          },
+          "L1_mean": {
+            "mean": 0.0,
+            "st_dev": 0.0
+          },
+          "L2_mean": {
+            "mean": 0.019461586805633722,
+            "st_dev": 0.0
+          },
+          "L3_mean": {
+            "mean": 0.03866099255583127,
+            "st_dev": 0.0
+          },
+          "ages_mean": {
+            "mean": 26.02032876712257,
+            "st_dev": 4.667561978329768
+          },
+          "mf_mean": {
+            "mean": 0.00199928456006842,
+            "st_dev": 4.336808689942018e-19
+          },
+          "male_worms_mean": {
+            "mean": 0.9885714285714287,
+            "st_dev": 0.005714285714285739
+          },
+          "infertile_female_worms_mean": {
+            "mean": 0.9942857142857143,
+            "st_dev": 0.006317380553057905
+          },
+          "fertile_female_worms_mean": {
+            "mean": 0.9895238095238096,
+            "st_dev": 0.008984743935292014
+          },
+          "mf_per_skin_snip": {
+            "mean": 0.05,
+            "st_dev": 0.03872983346207417
+          },
+          "population_prevalence": {
+            "mean": 0.15,
+            "st_dev": 0.1341640786499874
+          }
+        },
+        "end_time": 0.0010000000000000002,
+        "population": 5
+      },
+      {
+        "data": {
+          "percent_compliant": {
+            "mean": 0.9299999999999999,
+            "st_dev": 0.09000000000000001
+          },
+          "percent_male": {
+            "mean": 0.5,
+            "st_dev": 0.2280350850198276
+          },
+          "L1_mean": {
+            "mean": 0.0,
+            "st_dev": 0.0
+          },
+          "L2_mean": {
+            "mean": 0.019461586805633722,
+            "st_dev": 0.0
+          },
+          "L3_mean": {
+            "mean": 0.03866099255583127,
+            "st_dev": 0.0
+          },
+          "ages_mean": {
+            "mean": 27.969616438355906,
+            "st_dev": 3.776290437975931
+          },
+          "mf_mean": {
+            "mean": 0.00199928456006842,
+            "st_dev": 0.0
+          },
+          "male_worms_mean": {
+            "mean": 0.9938095238095238,
+            "st_dev": 0.00428571428571427
+          },
+          "infertile_female_worms_mean": {
+            "mean": 0.9885714285714287,
+            "st_dev": 0.007126966450997996
+          },
+          "fertile_female_worms_mean": {
+            "mean": 0.99,
+            "st_dev": 0.00914732033918978
+          },
+          "mf_per_skin_snip": {
+            "mean": 0.030000000000000006,
+            "st_dev": 0.021794494717703367
+          },
+          "population_prevalence": {
+            "mean": 0.17202380952380952,
+            "st_dev": 0.16741867852895914
+          }
+        },
+        "end_time": 0.0010000000000000002,
+        "population": 10
+      },
+      {
+        "data": {
+          "percent_compliant": {
+            "mean": 1.0,
+            "st_dev": 0.0
+          },
+          "percent_male": {
+            "mean": 0.3,
+            "st_dev": 0.45825756949558394
+          },
+          "L1_mean": {
+            "mean": 0.00025682911773966776,
+            "st_dev": 5.421010862427522e-20
+          },
+          "L2_mean": {
+            "mean": 0.0,
+            "st_dev": 0.0
+          },
+          "L3_mean": {
+            "mean": 0.025080142087242314,
+            "st_dev": 0.0
+          },
+          "ages_mean": {
+            "mean": 18.198082191780028,
+            "st_dev": 13.911465389429768
+          },
+          "mf_mean": {
+            "mean": 0.003998569011025495,
+            "st_dev": 8.673617379884035e-19
+          },
+          "male_worms_mean": {
+            "mean": 0.9904761904761905,
+            "st_dev": 0.019047619047619067
+          },
+          "infertile_female_worms_mean": {
+            "mean": 0.9809523809523808,
+            "st_dev": 0.023328473740792197
+          },
+          "fertile_female_worms_mean": {
+            "mean": 1.0,
+            "st_dev": 0.0
+          },
+          "mf_per_skin_snip": {
+            "mean": 0.025,
+            "st_dev": 0.07500000000000001
+          },
+          "population_prevalence": {
+            "mean": NaN,
+            "st_dev": NaN
+          }
+        },
+        "end_time": 0.004641588833612781,
+        "population": 1
+      },
+      {
+        "data": {
+          "percent_compliant": {
+            "mean": 1.0,
+            "st_dev": 0.0
+          },
+          "percent_male": {
+            "mean": 0.55,
+            "st_dev": 0.35
+          },
+          "L1_mean": {
+            "mean": 0.00025666230037007344,
+            "st_dev": 7.317205622158537e-08
+          },
+          "L2_mean": {
+            "mean": 0.0,
+            "st_dev": 0.0
+          },
+          "L3_mean": {
+            "mean": 0.025080142087242314,
+            "st_dev": 0.0
+          },
+          "ages_mean": {
+            "mean": 31.478219178082576,
+            "st_dev": 6.933699486707988
+          },
+          "mf_mean": {
+            "mean": 0.00399458820776509,
+            "st_dev": 6.151036812188124e-06
+          },
+          "male_worms_mean": {
+            "mean": 0.9809523809523808,
+            "st_dev": 0.014285714285714301
+          },
+          "infertile_female_worms_mean": {
+            "mean": 0.9833333333333332,
+            "st_dev": 0.023928275288383073
+          },
+          "fertile_female_worms_mean": {
+            "mean": 0.9690476190476189,
+            "st_dev": 0.030210898905832173
+          },
+          "mf_per_skin_snip": {
+            "mean": 0.075,
+            "st_dev": 0.1
+          },
+          "population_prevalence": {
+            "mean": 0.3,
+            "st_dev": 0.33166247903554
+          }
+        },
+        "end_time": 0.004641588833612781,
+        "population": 2
+      },
+      {
+        "data": {
+          "percent_compliant": {
+            "mean": 0.96,
+            "st_dev": 0.07999999999999999
+          },
+          "percent_male": {
+            "mean": 0.5200000000000001,
+            "st_dev": 0.285657137141714
+          },
+          "L1_mean": {
+            "mean": 0.00025647160178213034,
+            "st_dev": 2.2638202082530516e-07
+          },
+          "L2_mean": {
+            "mean": 0.0,
+            "st_dev": 0.0
+          },
+          "L3_mean": {
+            "mean": 0.025080142087242314,
+            "st_dev": 0.0
+          },
+          "ages_mean": {
+            "mean": 28.19446575342409,
+            "st_dev": 6.283944360976867
+          },
+          "mf_mean": {
+            "mean": 0.003988131525117334,
+            "st_dev": 1.9784980846471235e-05
+          },
+          "male_worms_mean": {
+            "mean": 0.980952380952381,
+            "st_dev": 0.0134687005940295
+          },
+          "infertile_female_worms_mean": {
+            "mean": 0.9752380952380953,
+            "st_dev": 0.012196427118919707
+          },
+          "fertile_female_worms_mean": {
+            "mean": 0.9704761904761906,
+            "st_dev": 0.018783888498396215
+          },
+          "mf_per_skin_snip": {
+            "mean": 0.075,
+            "st_dev": 0.05590169943749474
+          },
+          "population_prevalence": {
+            "mean": 0.27166666666666667,
+            "st_dev": 0.16997548842896926
+          }
+        },
+        "end_time": 0.004641588833612781,
+        "population": 5
+      },
+      {
+        "data": {
+          "percent_compliant": {
+            "mean": 0.93,
+            "st_dev": 0.06403124237432847
+          },
+          "percent_male": {
+            "mean": 0.41000000000000003,
+            "st_dev": 0.12999999999999998
+          },
+          "L1_mean": {
+            "mean": 0.0002563605288293498,
+            "st_dev": 1.4949310443782544e-07
+          },
+          "L2_mean": {
+            "mean": 0.0,
+            "st_dev": 0.0
+          },
+          "L3_mean": {
+            "mean": 0.025080142087242314,
+            "st_dev": 0.0
+          },
+          "ages_mean": {
+            "mean": 28.816082191780673,
+            "st_dev": 4.606269302344404
+          },
+          "mf_mean": {
+            "mean": 0.003992990876810139,
+            "st_dev": 8.613212813964902e-06
+          },
+          "male_worms_mean": {
+            "mean": 0.9771428571428572,
+            "st_dev": 0.007315376902732014
+          },
+          "infertile_female_worms_mean": {
+            "mean": 0.9800000000000001,
+            "st_dev": 0.0046656947481584585
+          },
+          "fertile_female_worms_mean": {
+            "mean": 0.9814285714285715,
+            "st_dev": 0.007514158970504543
+          },
+          "mf_per_skin_snip": {
+            "mean": 0.11249999999999998,
+            "st_dev": 0.06046693311223913
+          },
+          "population_prevalence": {
+            "mean": 0.2517857142857143,
+            "st_dev": 0.1436425993014927
+          }
+        },
+        "end_time": 0.004641588833612781,
+        "population": 10
+      },
+      {
+        "data": {
+          "percent_compliant": {
+            "mean": 0.9,
+            "st_dev": 0.3
+          },
+          "percent_male": {
+            "mean": 0.5,
+            "st_dev": 0.5
+          },
+          "L1_mean": {
+            "mean": 0.0012382841403432245,
+            "st_dev": 0.0006562451374015966
+          },
+          "L2_mean": {
+            "mean": 0.0007235528079078391,
+            "st_dev": 0.00032401390555957893
+          },
+          "L3_mean": {
+            "mean": 0.0008357807589789038,
+            "st_dev": 0.00027893690892257346
+          },
+          "ages_mean": {
+            "mean": 23.566301369863034,
+            "st_dev": 16.287108394944212
+          },
+          "mf_mean": {
+            "mean": 0.010449223608773438,
+            "st_dev": 0.006044938256079634
+          },
+          "male_worms_mean": {
+            "mean": 0.9333333333333333,
+            "st_dev": 0.053026327265047815
+          },
+          "infertile_female_worms_mean": {
+            "mean": 0.8666666666666666,
+            "st_dev": 0.10389249632986396
+          },
+          "fertile_female_worms_mean": {
+            "mean": 0.6714285714285715,
+            "st_dev": 0.3015079260624139
+          },
+          "mf_per_skin_snip": {
+            "mean": 0.3,
+            "st_dev": 0.3840572873934304
+          },
+          "population_prevalence": {
+            "mean": NaN,
+            "st_dev": NaN
+          }
+        },
+        "end_time": 0.02154434690031885,
+        "population": 1
+      },
+      {
+        "data": {
+          "percent_compliant": {
+            "mean": 0.95,
+            "st_dev": 0.15
+          },
+          "percent_male": {
+            "mean": 0.6,
+            "st_dev": 0.3741657386773941
+          },
+          "L1_mean": {
+            "mean": 0.001189841741716306,
+            "st_dev": 0.0005483442361845337
+          },
+          "L2_mean": {
+            "mean": 0.0006993779439125106,
+            "st_dev": 0.00027106687254825336
+          },
+          "L3_mean": {
+            "mean": 0.0008163381257392856,
+            "st_dev": 0.00023098336060232763
+          },
+          "ages_mean": {
+            "mean": 29.080684931507257,
+            "st_dev": 10.20329183963842
+          },
+          "mf_mean": {
+            "mean": 0.008522021215541152,
+            "st_dev": 0.00222410511078126
+          },
+          "male_worms_mean": {
+            "mean": 0.9119047619047619,
+            "st_dev": 0.03539540177932978
+          },
+          "infertile_female_worms_mean": {
+            "mean": 0.7547619047619047,
+            "st_dev": 0.13720980508784672
+          },
+          "fertile_female_worms_mean": {
+            "mean": 0.48571428571428577,
+            "st_dev": 0.1670743313604651
+          },
+          "mf_per_skin_snip": {
+            "mean": 0.1125,
+            "st_dev": 0.11792476415070756
+          },
+          "population_prevalence": {
+            "mean": 0.3,
+            "st_dev": 0.2449489742783178
+          }
+        },
+        "end_time": 0.02154434690031885,
+        "population": 2
+      },
+      {
+        "data": {
+          "percent_compliant": {
+            "mean": 0.9400000000000001,
+            "st_dev": 0.09165151389911678
+          },
+          "percent_male": {
+            "mean": 0.5999999999999999,
+            "st_dev": 0.17888543819998318
+          },
+          "L1_mean": {
+            "mean": 0.000763136120518254,
+            "st_dev": 0.00032273932716295396
+          },
+          "L2_mean": {
+            "mean": 0.00048785896548512157,
+            "st_dev": 0.00016016509507197518
+          },
+          "L3_mean": {
+            "mean": 0.0006364776311949119,
+            "st_dev": 0.00013577081993372886
+          },
+          "ages_mean": {
+            "mean": 30.863616438356466,
+            "st_dev": 5.935708611812525
+          },
+          "mf_mean": {
+            "mean": 0.0072759093089610595,
+            "st_dev": 0.0014532756570665895
+          },
+          "male_worms_mean": {
+            "mean": 0.9380952380952381,
+            "st_dev": 0.015503638662952077
+          },
+          "infertile_female_worms_mean": {
+            "mean": 0.6676190476190476,
+            "st_dev": 0.05862367008195197
+          },
+          "fertile_female_worms_mean": {
+            "mean": 0.4552380952380952,
+            "st_dev": 0.08223631674256346
+          },
+          "mf_per_skin_snip": {
+            "mean": 0.165,
+            "st_dev": 0.105
+          },
+          "population_prevalence": {
+            "mean": 0.4,
+            "st_dev": 0.18303005217723128
+          }
+        },
+        "end_time": 0.02154434690031885,
+        "population": 5
+      },
+      {
+        "data": {
+          "percent_compliant": {
+            "mean": 0.9700000000000001,
+            "st_dev": 0.04582575694955839
+          },
+          "percent_male": {
+            "mean": 0.43000000000000005,
+            "st_dev": 0.10049875621120889
+          },
+          "L1_mean": {
+            "mean": 0.0010493799040198315,
+            "st_dev": 0.00031865664842614915
+          },
+          "L2_mean": {
+            "mean": 0.0006284739206116886,
+            "st_dev": 0.00015783462550041604
+          },
+          "L3_mean": {
+            "mean": 0.0007541326123222209,
+            "st_dev": 0.00013635859186658745
+          },
+          "ages_mean": {
+            "mean": 27.181178082191554,
+            "st_dev": 2.9776103066554422
+          },
+          "mf_mean": {
+            "mean": 0.00797300460116712,
+            "st_dev": 0.001400439692433698
+          },
+          "male_worms_mean": {
+            "mean": 0.9333333333333333,
+            "st_dev": 0.012046772038736674
+          },
+          "infertile_female_worms_mean": {
+            "mean": 0.7114285714285714,
+            "st_dev": 0.04838432684144969
+          },
+          "fertile_female_worms_mean": {
+            "mean": 0.48238095238095247,
+            "st_dev": 0.04958101092142969
+          },
+          "mf_per_skin_snip": {
+            "mean": 0.16000000000000003,
+            "st_dev": 0.07348469228349536
+          },
+          "population_prevalence": {
+            "mean": 0.40202380952380945,
+            "st_dev": 0.1156085874407601
+          }
+        },
+        "end_time": 0.02154434690031885,
+        "population": 10
+      },
+      {
+        "data": {
+          "percent_compliant": {
+            "mean": 0.9,
+            "st_dev": 0.3
+          },
+          "percent_male": {
+            "mean": 0.3,
+            "st_dev": 0.45825756949558394
+          },
+          "L1_mean": {
+            "mean": 0.0009473061924660853,
+            "st_dev": 0.0024525592457181186
+          },
+          "L2_mean": {
+            "mean": 0.0006016631598090823,
+            "st_dev": 0.0015385864009541837
+          },
+          "L3_mean": {
+            "mean": 0.0007628690153118204,
+            "st_dev": 0.0019263550384232386
+          },
+          "ages_mean": {
+            "mean": 30.198082191781584,
+            "st_dev": 14.69184957930158
+          },
+          "mf_mean": {
+            "mean": 0.007683516235844396,
+            "st_dev": 0.02015020917339467
+          },
+          "male_worms_mean": {
+            "mean": 0.7761904761904761,
+            "st_dev": 0.06751165180360867
+          },
+          "infertile_female_worms_mean": {
+            "mean": 0.15714285714285714,
+            "st_dev": 0.21930626551751342
+          },
+          "fertile_female_worms_mean": {
+            "mean": 0.08571428571428572,
+            "st_dev": 0.2416871912466575
+          },
+          "mf_per_skin_snip": {
+            "mean": 0.125,
+            "st_dev": 0.375
+          },
+          "population_prevalence": {
+            "mean": 0.1,
+            "st_dev": 0.30000000000000004
+          }
+        },
+        "end_time": 0.10000000000000002,
+        "population": 1
+      },
+      {
+        "data": {
+          "percent_compliant": {
+            "mean": 0.95,
+            "st_dev": 0.15
+          },
+          "percent_male": {
+            "mean": 0.4,
+            "st_dev": 0.30000000000000004
+          },
+          "L1_mean": {
+            "mean": 0.0003973048623456041,
+            "st_dev": 0.0005536576941248392
+          },
+          "L2_mean": {
+            "mean": 0.0002585868438011334,
+            "st_dev": 0.0003485807605774935
+          },
+          "L3_mean": {
+            "mean": 0.0003350495965725632,
+            "st_dev": 0.00043680642557777704
+          },
+          "ages_mean": {
+            "mean": 29.6064383561636,
+            "st_dev": 10.13702643550134
+          },
+          "mf_mean": {
+            "mean": 0.007592104330947122,
+            "st_dev": 0.01250212682479967
+          },
+          "male_worms_mean": {
+            "mean": 0.7619047619047619,
+            "st_dev": 0.04259177099999599
+          },
+          "infertile_female_worms_mean": {
+            "mean": 0.14523809523809522,
+            "st_dev": 0.10671873729054748
+          },
+          "fertile_female_worms_mean": {
+            "mean": 0.06428571428571428,
+            "st_dev": 0.12049124694171423
+          },
+          "mf_per_skin_snip": {
+            "mean": 0.0875,
+            "st_dev": 0.12562344526401112
+          },
+          "population_prevalence": {
+            "mean": 0.1,
+            "st_dev": 0.20000000000000004
+          }
+        },
+        "end_time": 0.10000000000000002,
+        "population": 2
+      },
+      {
+        "data": {
+          "percent_compliant": {
+            "mean": 0.9400000000000001,
+            "st_dev": 0.09165151389911678
+          },
+          "percent_male": {
+            "mean": 0.5800000000000001,
+            "st_dev": 0.22715633383201095
+          },
+          "L1_mean": {
+            "mean": 0.0018009702249982495,
+            "st_dev": 0.0023760854003697304
+          },
+          "L2_mean": {
+            "mean": 0.0011275134558910705,
+            "st_dev": 0.0014684006908205192
+          },
+          "L3_mean": {
+            "mean": 0.0014240683382659152,
+            "st_dev": 0.0018404286033529833
+          },
+          "ages_mean": {
+            "mean": 26.346684931506957,
+            "st_dev": 7.262982268914077
+          },
+          "mf_mean": {
+            "mean": 0.012896708287341917,
+            "st_dev": 0.01227882682967049
+          },
+          "male_worms_mean": {
+            "mean": 0.7828571428571428,
+            "st_dev": 0.030948717731946532
+          },
+          "infertile_female_worms_mean": {
+            "mean": 0.1961904761904762,
+            "st_dev": 0.08956432720387617
+          },
+          "fertile_female_worms_mean": {
+            "mean": 0.14095238095238094,
+            "st_dev": 0.14623312546795608
+          },
+          "mf_per_skin_snip": {
+            "mean": 0.215,
+            "st_dev": 0.2408837894089181
+          },
+          "population_prevalence": {
+            "mean": 0.16833333333333333,
+            "st_dev": 0.1467140075112121
+          }
+        },
+        "end_time": 0.10000000000000002,
+        "population": 5
+      }
+    ]
+  }
+}
