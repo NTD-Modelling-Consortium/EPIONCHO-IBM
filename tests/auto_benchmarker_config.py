@@ -1,9 +1,9 @@
-from epioncho_ibm import HumanParams, Params, State, StateStats, TreatmentParams
+from epioncho_ibm import Params, State, StateStats, TreatmentParams
 from tests.definitions.auto_benchmarker import AutoBenchmarker
 
 
 def benchmarker_test_func_no_treat(end_time: float, population: int) -> StateStats:
-    params = Params()
+    params = Params(treatment=None)
     state = State(params=params, n_people=int(population))
     state.run_simulation(start_time=0, end_time=end_time)
     return state.to_stats()
