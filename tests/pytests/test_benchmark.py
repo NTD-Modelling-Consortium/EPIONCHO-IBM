@@ -16,7 +16,6 @@ class TestGeneral:
         params = benchmark_data.params
         end_time = benchmark_data.end_year
         state = State(params=params)
-        state.dist_population_age(num_iter=15000)
         state.run_simulation(start_time=0, end_time=end_time)
 
         people_stats = state.to_stats()

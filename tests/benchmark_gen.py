@@ -50,9 +50,8 @@ def get_test_pairs(settings: NTDSettings) -> Tuple[List[Tuple[float, int]], floa
     return list(zip(years_for_test, pops_for_test)), total_pop_years
 
 
-def run_stochastic_test(end_time: float, params: Params) -> StateStats:
-    state = State(params=params)
-    state.dist_population_age(num_iter=15000)
+def run_stochastic_test(end_time: float, params: Params, n_people: int) -> StateStats:
+    state = State(params=params, n_people=n_people)
     state.run_simulation(start_time=0, end_time=end_time)
     stats = state.to_stats()
     return stats
@@ -175,7 +174,7 @@ print(f"Estimated test time (no reruns): {est_test_time}")
 start = time.time()
 tests: List[OutputData] = []
 for end_year, population in test_pairs:
-    params = Params(humans=HumanParams(human_population=440))
+    params = Params()
 
     list_of_stats: List[StateStats] = Parallel(n_jobs=cpu_count())(
         delayed(run_stochastic_test)(end_year, params)

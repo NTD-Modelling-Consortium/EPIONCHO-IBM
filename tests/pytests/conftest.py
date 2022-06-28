@@ -17,7 +17,7 @@ benchmark_file = TestData.parse_file(benchmark_file_path)
 @pytest.fixture(
     params=benchmark_file.tests,
     ids=[
-        f"year: {str(i.end_year)} pop: {str(i.params.humans.human_population)}"
+        f"year: {str(i.end_year)} "  # pop: {str(i.params.humans.human_population)}"
         for i in benchmark_file.tests
     ],
 )
