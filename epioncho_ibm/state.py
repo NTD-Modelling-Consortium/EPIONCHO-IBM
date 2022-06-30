@@ -36,6 +36,15 @@ def negative_binomial_alt_interface(
     return output
 
 
+def truncated_geometric(N: int, prob: float, maximum: float) -> NDArray[np.float_]:
+    output = np.repeat(maximum + 1, N)
+    while np.any(output > maximum):
+        output[output > maximum] = np.random.geometric(
+            p=prob, size=np.sum(output > maximum)
+        )
+    return output
+
+
 @dataclass
 class BlackflyLarvae:
     L1: NDArray[np.float_]  # 4: L1
@@ -184,9 +193,7 @@ class State:
     _derived_params: DerivedParams
     _delay_arrays: DelayArrays
 
-    def __init__(
-        self, params: Params, n_people: int, iters_to_distribute_pop_age: int = 15000
-    ) -> None:
+    def __init__(self, params: Params, n_people: int) -> None:
         sex_array = (
             np.random.uniform(low=0, high=1, size=n_people) < params.humans.gender_ratio
         )
@@ -199,7 +206,12 @@ class State:
         time_of_last_treatment[:] = np.nan
         self._people = People(
             compliance=compliance_array,
-            ages=np.zeros(n_people),
+            ages=truncated_geometric(
+                N=n_people,
+                prob=params.delta_time / params.humans.mean_human_age,
+                maximum=params.humans.max_human_age / params.delta_time,
+            )
+            * params.delta_time,
             sex_is_male=sex_array,
             blackfly=BlackflyLarvae(
                 L1=np.repeat(params.blackfly.initial_L1, n_people),
@@ -221,8 +233,6 @@ class State:
             time_of_last_treatment=time_of_last_treatment,
         )
         self.params = params
-
-        self._dist_population_age(num_iter=iters_to_distribute_pop_age)
 
     @property
     def params(self):
@@ -302,31 +312,6 @@ class State:
         infected_over_min_age = np.sum(mf_skin_snip[pop_over_min_age_array] > 0)
         total_over_min_age = np.sum(pop_over_min_age_array)
         return infected_over_min_age / total_over_min_age
-
-    def _dist_population_age(self, num_iter: int):
-        """
-        Generate age distribution
-        create inital age distribution and simulate stable age distribution
-        """
-        delta_time = self.params.delta_time
-        human_params = self.params.humans
-
-        current_ages = self._people.ages
-        size_population = len(self._people)
-        delta_time_vector = np.ones(size_population) * delta_time
-        for _ in range(num_iter):
-            current_ages += delta_time_vector
-            death_vector = np.random.binomial(
-                n=1,
-                p=(1 / human_params.mean_human_age) * delta_time,
-                size=size_population,
-            )
-            current_ages[
-                np.logical_or(
-                    death_vector == 1, current_ages >= human_params.max_human_age
-                )
-            ] = 0
-        return current_ages
 
     def to_stats(self) -> StateStats:
         return StateStats(
