@@ -510,6 +510,7 @@ class State:
                 print(current_time)
             self._advance(current_time=current_time)
             current_time += self.params.delta_time
+        print(self._people)
         return None
 
     def run_simulation_output_stats(

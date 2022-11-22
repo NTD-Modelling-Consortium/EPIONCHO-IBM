@@ -27,8 +27,8 @@ def construct_derive_microfil(
     assert np.all(mortality >= 0), "Mortality can't be negative"
     assert microfil_move_rate >= 0, "Mortality move rate can't be negative"
 
-    lagged_microfil = np.roll(microfil, 1, axis=0)
-    movement = lagged_microfil * microfil_move_rate
+    # * lagged by one compartment
+    movement = np.roll(microfil, 1, axis=0) * microfil_move_rate
 
     movement[0, :] = (
         np.einsum("ij, i -> j", fertile_worms, fecundity_rates_worms) * person_has_worms
@@ -100,11 +100,11 @@ def calculate_microfil_delta(
         fecundity_rates_worms=fecundity_rates_worms,
         mortality=mortality,
         microfil_move_rate=microfil_params.microfil_move_rate,
-        person_has_worms=np.sum(current_male_worms, axis=0) > 0,
+        person_has_worms=np.any(current_male_worms, axis=0),
     )
 
     k1 = derive_microfil(0.0)
-    k2 = derive_microfil(delta_time * k1 / 2)
-    k3 = derive_microfil(delta_time * k2 / 2)
-    k4 = derive_microfil(delta_time * k3)
+    k2 = derive_microfil(k1 * (delta_time / 2))
+    k3 = derive_microfil(k2 * (delta_time / 2))
+    k4 = derive_microfil(k3 * delta_time)
     return (delta_time / 6) * (k1 + 2 * k2 + 2 * k3 + k4)
