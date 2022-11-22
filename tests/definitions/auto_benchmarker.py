@@ -2,7 +2,6 @@ import dis
 import io
 import json
 import math
-import os
 import time
 from contextlib import redirect_stdout
 from inspect import signature
@@ -423,7 +422,7 @@ class AutoBenchmarker:
     @property
     def settings(self) -> GlobalSettingsModel:
         if self._settings is None:
-            settings_path = Path(str(self.settings_folder) + os.sep + "settings.json")
+            settings_path = self.settings_folder / "settings.json"
             if not settings_path.exists():
                 if not self.settings_folder.exists():
                     self.settings_folder.mkdir(parents=True)
@@ -476,9 +475,7 @@ class AutoBenchmarker:
             print(f"Benchmark calculated in: {end-start}")
         test_data = self.test_model.parse_obj({"tests": all_benchmarks_out})
 
-        benchmark_file_path = Path(
-            str(self.settings_folder) + os.sep + "benchmark.json"
-        )
+        benchmark_file_path = self.settings_folder / "benchmark.json"
         benchmark_file = open(benchmark_file_path, "w+")
         json.dump(test_data.dict(), benchmark_file, indent=2)
         benchmark_file.close()
