@@ -80,20 +80,18 @@ def calculate_microfil_delta(
     people is dat
     """
     # mf.mu
-    # compartment_mortality = np.repeat(microfillarie_mortality_rate, n_people).reshape(stages, n_people)
-    # TODO: we should be able to repeat/reshape here, but we can't from some reason ^
-    mortality = np.zeros((stages, n_people))
-    for i in range(stages):
-        mortality[i] = np.repeat(microfillarie_mortality_rate[i], n_people)
+    assert microfillarie_mortality_rate.shape == (stages,)
+    mortality = np.repeat(microfillarie_mortality_rate, n_people).reshape(
+        stages, n_people
+    )
 
     # increases microfilarial mortality if treatment has started
     if treatment_params is not None and current_time >= treatment_params.start_time:
         assert time_of_last_treatment is not None
+        # additional mortality due to ivermectin treatment
         mortality_prime = (
             time_of_last_treatment + microfil_params.u_ivermectin
-        ) ** (
-            -microfil_params.shape_parameter_ivermectin
-        )  # additional mortality due to ivermectin treatment
+        ) ** -microfil_params.shape_parameter_ivermectin
         mortality += np.nan_to_num(mortality_prime)
 
     derive_microfil = construct_derive_microfil(
