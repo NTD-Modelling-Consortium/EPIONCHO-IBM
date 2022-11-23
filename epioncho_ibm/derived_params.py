@@ -43,12 +43,10 @@ class DerivedParams:
             )
         )
 
-        # TODO revisit +1 and -1
         microfillarie_age_categories = np.arange(
             start=0,
-            stop=params.microfil.max_microfil_age + 1,
-            step=params.microfil.max_microfil_age
-            / (params.microfil.microfil_age_stages - 1),
+            stop=params.microfil.max_microfil_age,
+            step=params.microfil.max_microfil_age / params.microfil.microfil_age_stages,
         )  # age.cats.mf
 
         self.microfillarie_mortality_rate = _weibull_mortality(

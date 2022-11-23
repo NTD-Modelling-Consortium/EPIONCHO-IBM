@@ -1,4 +1,4 @@
-from typing import Callable, Optional, Union
+from typing import Callable
 
 import numpy as np
 from numpy.typing import NDArray
@@ -6,79 +6,57 @@ from numpy.typing import NDArray
 from .params import MicrofilParams, TreatmentParams
 
 
-def construct_derive_microfil_one(
+def construct_derive_microfil(
     fertile_worms: NDArray[np.int_],
-    microfil: NDArray[np.int_],
+    microfil: NDArray[np.float_],
     fecundity_rates_worms: NDArray[np.float_],
     mortality: NDArray[np.float_],
     microfil_move_rate: float,
     person_has_worms: NDArray[np.bool_],
-) -> Callable[[Union[float, NDArray[np.float_]]], NDArray[np.float_]]:
+) -> Callable[[float | NDArray[np.float_]], NDArray[np.float_]]:
     """
-    #function called during RK4 for first age class of microfilariae
-
     fertile_worms # fert.worms
     microfil #mf.in
     fecundity_rates_worms # ep.in
     mortality # mf.mort
     microfil_move_rate #mf.move
+    microfil_compartment_minus_one # mf.comp.minus.one
     person_has_worms # mp (once turned to 0 or 1)
     """
-    new_microfil = np.einsum(
-        "ij, i -> j", fertile_worms, fecundity_rates_worms
-    )  # TODO: Check?
 
-    def derive_microfil_one(k: Union[float, NDArray[np.float_]]) -> NDArray[np.float_]:
-        mortality_temp = mortality * (microfil + k)
-        assert np.sum(mortality_temp < 0) == 0
-        move_rate_temp = microfil_move_rate * (microfil + k)
-        assert np.sum(move_rate_temp < 0) == 0
-        mortality_temp[mortality_temp < 0] = 0
-        move_rate_temp[move_rate_temp < 0] = 0
-        return person_has_worms * new_microfil - mortality_temp - move_rate_temp
+    assert np.all(mortality >= 0), "Mortality can't be negative"
+    assert microfil_move_rate >= 0, "Mortality move rate can't be negative"
 
-    return derive_microfil_one
+    # * lagged by one compartment
+    movement = np.roll(microfil, 1, axis=0) * microfil_move_rate
 
+    movement[0, :] = (
+        np.einsum("ij, i -> j", fertile_worms, fecundity_rates_worms) * person_has_worms
+    )
 
-def construct_derive_microfil_rest(
-    microfil: NDArray[np.int_],
-    mortality: NDArray[np.float_],
-    microfil_move_rate: float,
-    microfil_compartment_minus_one: NDArray[np.int_],
-) -> Callable[[Union[float, NDArray[np.float_]]], NDArray[np.float_]]:
-    """
-    #function called during RK4 for age classes of microfilariae > 1
+    def derive_microfil_fn(k: float | NDArray[np.float_]) -> NDArray[np.float_]:
+        microfil_adjusted = microfil + k
+        assert np.all(microfil_adjusted >= 0)
 
-    microfil #mf.in
-    mortality # mf.mort
-    microfil_move_rate #mf.move
-    microfil_compartment_minus_one # mf.comp.minus.one
-    """
-    movement_last = microfil_compartment_minus_one * microfil_move_rate
+        mortality_temp = mortality * microfil_adjusted
+        move_rate_temp = microfil_move_rate * microfil_adjusted
 
-    def derive_microfil_rest(k: Union[float, NDArray[np.float_]]) -> NDArray[np.float_]:
-        mortality_temp = mortality * (microfil + k)
-        assert np.sum(mortality_temp < 0) == 0
-        move_rate_temp = microfil_move_rate * (microfil + k)
-        assert np.sum(move_rate_temp < 0) == 0
-        mortality_temp[mortality_temp < 0] = 0
-        move_rate_temp[move_rate_temp < 0] = 0
-        return movement_last - mortality_temp - move_rate_temp
+        return movement - mortality_temp - move_rate_temp
 
-    return derive_microfil_rest
+    return derive_microfil_fn
 
 
-def change_in_microfil(
+def calculate_microfil_delta(
+    stages: int,
+    exiting_microfil: NDArray[np.float_],
     n_people: int,
     delta_time: float,
     microfil_params: MicrofilParams,
-    treatment_params: Optional[TreatmentParams],
-    microfillarie_mortality_rate: float,
+    treatment_params: TreatmentParams | None,
+    microfillarie_mortality_rate: NDArray[np.float_],
     fecundity_rates_worms: NDArray[np.float_],
-    time_of_last_treatment: Optional[NDArray[np.float_]],
+    time_of_last_treatment: NDArray[np.float_] | None,
     current_time: float,
-    current_microfil: NDArray[np.int_],
-    previous_microfil: Optional[NDArray[np.int_]],
     current_fertile_female_worms: NDArray[np.int_],
     current_male_worms: NDArray[np.int_],
 ) -> NDArray[np.float_]:
@@ -101,38 +79,32 @@ def change_in_microfil(
     N is params.human_population
     people is dat
     """
-    compartment_mortality = np.repeat(microfillarie_mortality_rate, n_people)  # mf.mu
-    microfil: NDArray[np.int_] = current_microfil
+    # mf.mu
+    assert microfillarie_mortality_rate.shape == (stages,)
+    mortality = np.repeat(microfillarie_mortality_rate, n_people).reshape(
+        stages, n_people
+    )
 
     # increases microfilarial mortality if treatment has started
     if treatment_params is not None and current_time >= treatment_params.start_time:
         assert time_of_last_treatment is not None
-        compartment_mortality_prime = (
+        # additional mortality due to ivermectin treatment
+        mortality_prime = (
             time_of_last_treatment + microfil_params.u_ivermectin
-        ) ** (
-            -microfil_params.shape_parameter_ivermectin
-        )  # additional mortality due to ivermectin treatment
-        compartment_mortality += np.nan_to_num(compartment_mortality_prime)
+        ) ** -microfil_params.shape_parameter_ivermectin
+        mortality += np.nan_to_num(mortality_prime)
 
-    if previous_microfil is None:
-        person_has_worms = np.sum(current_male_worms, axis=0) > 0
-        derive_microfil = construct_derive_microfil_one(
-            current_fertile_female_worms,
-            microfil,
-            fecundity_rates_worms,
-            compartment_mortality,
-            microfil_params.microfil_move_rate,
-            person_has_worms,
-        )
-    else:
-        derive_microfil = construct_derive_microfil_rest(
-            microfil,
-            compartment_mortality,
-            microfil_params.microfil_move_rate,
-            previous_microfil,
-        )
+    derive_microfil = construct_derive_microfil(
+        fertile_worms=current_fertile_female_worms,
+        microfil=exiting_microfil,
+        fecundity_rates_worms=fecundity_rates_worms,
+        mortality=mortality,
+        microfil_move_rate=microfil_params.microfil_move_rate,
+        person_has_worms=np.any(current_male_worms, axis=0),
+    )
+
     k1 = derive_microfil(0.0)
-    k2 = derive_microfil(delta_time * k1 / 2)
-    k3 = derive_microfil(delta_time * k2 / 2)
-    k4 = derive_microfil(delta_time * k3)
-    return microfil + (delta_time / 6) * (k1 + 2 * k2 + 2 * k3 + k4)
+    k2 = derive_microfil(k1 * (delta_time / 2))
+    k3 = derive_microfil(k2 * (delta_time / 2))
+    k4 = derive_microfil(k3 * delta_time)
+    return (delta_time / 6) * (k1 + 2 * k2 + 2 * k3 + k4)
