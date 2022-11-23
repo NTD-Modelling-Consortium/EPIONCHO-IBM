@@ -1,4 +1,3 @@
-from copy import copy
 from dataclasses import dataclass
 from typing import Optional, Tuple
 
@@ -67,21 +66,76 @@ def _calc_new_worms_from_inside(
     return new_worms
 
 
+def change_in_worms(
+    stages: int,
+    current_worms: list[WormGroup],
+    worm_params: WormParams,
+    treatment_params: Optional[TreatmentParams],
+    delta_time: float,
+    n_people: int,
+    delayed_females: NDArray[np.int_],
+    delayed_males: NDArray[np.int_],
+    mortalities: NDArray[np.float_],
+    coverage_in: Optional[NDArray[np.bool_]],
+    initial_treatment_times: Optional[NDArray[np.float_]],
+    current_time: float,
+    time_of_last_treatment: Optional[NDArray[np.float_]],
+):
+    last_aging_worms = WormGroup.from_population(n_people)
+    all_male_worms = np.empty((stages, n_people), dtype=np.int_)
+    all_infertile_female_worms = np.empty((stages, n_people), dtype=np.int_)
+    all_fertile_female_worms = np.empty((stages, n_people), dtype=np.int_)
+
+    for compartment in range(stages):
+        (
+            last_total_worms,
+            last_aging_worms,
+            last_time_of_last_treatment,
+        ) = change_in_worm_per_index(  # res
+            worm_params=worm_params,
+            treatment_params=treatment_params,
+            delta_time=delta_time,
+            n_people=n_people,
+            delayed_females=delayed_females,
+            delayed_males=delayed_males,
+            mortalities=mortalities,
+            coverage_in=coverage_in,
+            initial_treatment_times=initial_treatment_times,
+            current_time=current_time,
+            time_of_last_treatment=time_of_last_treatment,
+            compartment=compartment,
+            current_worms=current_worms[compartment],
+            last_aging_worms=last_aging_worms,
+        )
+        check_no_worms_are_negative(last_total_worms)
+
+        all_male_worms[compartment, :] = last_total_worms.male
+        all_infertile_female_worms[compartment, :] = last_total_worms.infertile
+        all_fertile_female_worms[compartment, :] = last_total_worms.fertile
+
+    return (
+        all_male_worms,
+        all_infertile_female_worms,
+        all_fertile_female_worms,
+        last_time_of_last_treatment,
+    )
+
+
 def change_in_worm_per_index(
     worm_params: WormParams,
     treatment_params: Optional[TreatmentParams],
     delta_time: float,
     n_people: int,
-    current_worms: WormGroup,
     delayed_females: NDArray[np.int_],
     delayed_males: NDArray[np.int_],
-    compartment_mortality: float,
+    mortalities: NDArray[np.float_],
     coverage_in: Optional[NDArray[np.bool_]],
-    last_aging_worms: WormGroup,
     initial_treatment_times: Optional[NDArray[np.float_]],
     current_time: float,
-    first_compartment: bool,
     time_of_last_treatment: Optional[NDArray[np.float_]],
+    compartment: int,
+    current_worms: WormGroup,
+    last_aging_worms: WormGroup,
 ) -> Tuple[WormGroup, WormGroup, Optional[NDArray[np.float_]],]:
     """
     params.delta_hz # delta.hz
@@ -118,6 +172,8 @@ def change_in_worm_per_index(
     # loss of fertility lambda.zero.in
     lambda_zero_in = worm_params.lambda_zero * delta_time
     omega = worm_params.omega * delta_time  # becoming fertile
+    first_compartment = compartment == 0
+    compartment_mortality = mortalities[compartment]
 
     worm_age_rate = delta_time / worm_params.worms_aging
     dead_male_worms, aging_male_worms = _calc_dead_and_aging_worms(
@@ -126,28 +182,20 @@ def change_in_worm_per_index(
         mortalities=compartment_mortality,
         worm_age_rate=worm_age_rate,
     )
-    if first_compartment:
-        total_male_worms = (
-            current_worms.male + delayed_males - aging_male_worms - dead_male_worms
-        )
-    else:
-        total_male_worms = (
-            current_worms.male
-            + last_aging_worms.male
-            - aging_male_worms
-            - dead_male_worms
-        )
 
-    # female worms
+    total_male_worms = (
+        current_worms.male
+        + (delayed_males if first_compartment else last_aging_worms.male)
+        - aging_male_worms
+        - dead_male_worms
+    )
 
-    female_mortalities = np.repeat(compartment_mortality, n_people)  # mort.fems
     #########
     # treatment
     #########
-
     # approach assumes individuals which are moved from fertile to non
     # fertile class due to treatment re enter fertile class at standard rate
-
+    female_mortalities = compartment_mortality  # mort.fems
     if treatment_params is not None and current_time > treatment_params.start_time:
         assert time_of_last_treatment is not None
         assert initial_treatment_times is not None
@@ -158,6 +206,7 @@ def change_in_worm_per_index(
             )
         )
         if during_treatment and current_time <= treatment_params.stop_time:
+            female_mortalities = np.repeat(compartment_mortality, n_people)  # mort.fems
             assert coverage_in is not None
             # TODO: This only needs to be calculated at compartment 0 - all others repeat calc
             time_of_last_treatment[coverage_in] = current_time  # treat.vec
@@ -213,21 +262,15 @@ def change_in_worm_per_index(
     )
     fertile_excl_transiting = current_worms.fertile + delta_fertile - dead_fertile_worms
 
-    if first_compartment:
-        infertile_out = (
-            infertile_excl_transiting - aging_infertile_worms + delayed_females
-        )
-        fertile_out = fertile_excl_transiting - aging_fertile_worms
+    infertile_out = (
+        infertile_excl_transiting
+        - aging_infertile_worms
+        + (delayed_females if first_compartment else last_aging_worms.infertile)
+    )
 
-    else:
-        infertile_out = (
-            infertile_excl_transiting
-            - aging_infertile_worms
-            + last_aging_worms.infertile
-        )
-        fertile_out = (
-            fertile_excl_transiting - aging_fertile_worms + last_aging_worms.fertile
-        )
+    fertile_out = (
+        fertile_excl_transiting - aging_fertile_worms + last_aging_worms.fertile
+    )
 
     new_aging_worms = WormGroup(
         male=aging_male_worms,
