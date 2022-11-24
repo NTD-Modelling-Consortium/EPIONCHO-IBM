@@ -148,10 +148,7 @@ def change_in_worms(
     current_time: float,
     time_of_last_treatment: Optional[NDArray[np.float_]],
 ):
-    last_aging_worms = WormGroup.from_population(n_people)
-    all_infertile_female_worms = np.empty((stages, n_people), dtype=np.int_)
-    all_fertile_female_worms = np.empty((stages, n_people), dtype=np.int_)
-
+    # TODO: time_of_last_treatment is modified inside, change this!
     female_mortalities, lambda_zero_in = process_treatment(
         worm_params=worm_params,
         treatment_params=treatment_params,
@@ -204,7 +201,6 @@ def change_in_worms(
         prob=lambda_zero_in,
     )  # new.worms.nf.fi
 
-    # females worms from infertile to fertile, this happens independent of males, but production of mf depends on males
     # individuals which still have non fertile worms in an age compartment after death and aging
 
     omega = worm_params.omega * delta_time  # becoming fertile
@@ -217,115 +213,30 @@ def change_in_worms(
 
     delta_fertile = new_worms_fertile_from_inside - new_worms_infertile_from_inside
 
-    last_time_of_last_treatment = None
-    for compartment in range(stages):
-        (
-            last_total_worms,
-            last_aging_worms,
-            last_time_of_last_treatment,
-        ) = change_in_worm_per_index(  # res
-            delayed_females=delayed_females,
-            time_of_last_treatment=time_of_last_treatment,
-            compartment=compartment,
-            current_worms=current_worms,
-            last_aging_worms=last_aging_worms,
-            dead_infertile_worms=dead_infertile_worms,
-            aging_infertile_worms=aging_infertile_worms,
-            dead_fertile_worms=dead_fertile_worms,
-            aging_fertile_worms=aging_fertile_worms,
-            delta_fertile=delta_fertile,
-        )
-        # check_no_worms_are_negative(last_total_worms)
+    infertile_excl_transiting = (
+        current_worms.infertile - delta_fertile - dead_infertile_worms
+    )
+    fertile_excl_transiting = current_worms.fertile + delta_fertile - dead_fertile_worms
 
-        all_infertile_female_worms[compartment, :] = last_total_worms.infertile
-        all_fertile_female_worms[compartment, :] = last_total_worms.fertile
+    lagged_aging_infertile_worms = np.roll(aging_infertile_worms, 1, axis=0)
+    lagged_aging_infertile_worms[0, :] = delayed_females
+    infertile_out = (
+        infertile_excl_transiting - aging_infertile_worms + lagged_aging_infertile_worms
+    )
+
+    lagged_aging_fertile_worms = np.roll(aging_fertile_worms, 1, axis=0)
+    # TODO: why not delayed females? Is this is a bug?
+    lagged_aging_fertile_worms[0, :] = 0  # delayed_females
+    fertile_out = (
+        fertile_excl_transiting - aging_fertile_worms + lagged_aging_fertile_worms
+    )
+
+    # TODO: add check_no_worms_are_negative back in!
 
     return (
         total_male_worms,
-        all_infertile_female_worms,
-        all_fertile_female_worms,
-        last_time_of_last_treatment,
-    )
-
-
-def change_in_worm_per_index(
-    delayed_females: NDArray[np.int_],
-    time_of_last_treatment: Optional[NDArray[np.float_]],
-    compartment: int,
-    current_worms: WormGroup,
-    last_aging_worms: WormGroup,
-    dead_infertile_worms: NDArray[np.int_],
-    aging_infertile_worms: NDArray[np.int_],
-    dead_fertile_worms: NDArray[np.int_],
-    aging_fertile_worms: NDArray[np.int_],
-    delta_fertile: NDArray[np.int_],
-) -> Tuple[WormGroup, WormGroup, Optional[NDArray[np.float_]],]:
-    """
-    params.delta_hz # delta.hz
-    params.delta_hinf # delta.hinf
-    params.c_h # c.h
-    params.annual_transm_potential # "m"
-    params.bite_rate_per_fly_on_human #"beta"
-    "compartment" Corresponds to worm column
-    params.worm_age_stages "num.comps"
-    params.omega "omeg"
-    params.lambda_zero "lambda.zero"
-    params.human_population "N"
-    params.lam_m "lam.m"
-    params.phi "phi"
-    last_males "new.worms.m"
-    last_females "new.worms.nf.fo"
-    total_exposure "tot.ex.ai"
-    params.delta_time "DT"
-    params.treatment_start_time "treat.start"
-    params.treatment_stop_time "treat.stop"
-    worm_mortality_rate "mort.rates.worms"
-    params.total_population_coverage "treat.prob"
-    params.treatment_interval "treat.int"
-    coverage_in "onchosim.cov/inds.to.treat"
-    last_change "w.f.l.c"
-    params.permanent_infertility "cum.infer"
-    worms.start/ws used to refer to start point in giant array for worms
-    initial_treatment_times "times.of.treat.in"
-    iteration/i now means current_time
-    if initial_treatment_times is None give.treat is false etc
-    N is params.human_population
-    params.worms_aging "time.each.comp"
-    """
-    first_compartment = compartment == 0
-
-    infertile_excl_transiting = (
-        current_worms.infertile[compartment]
-        - delta_fertile[compartment]
-        - dead_infertile_worms[compartment]
-    )
-    fertile_excl_transiting = (
-        current_worms.fertile[compartment]
-        + delta_fertile[compartment]
-        - dead_fertile_worms[compartment]
-    )
-
-    infertile_out = (
-        infertile_excl_transiting
-        - aging_infertile_worms[compartment]
-        + (delayed_females if first_compartment else last_aging_worms.infertile)
-    )
-
-    fertile_out = (
-        fertile_excl_transiting
-        - aging_fertile_worms[compartment]
-        + last_aging_worms.fertile
-    )
-
-    new_aging_worms = WormGroup(
-        male=None,
-        infertile=aging_infertile_worms[compartment],
-        fertile=aging_fertile_worms[compartment],
-    )
-    new_total_worms = WormGroup(male=None, infertile=infertile_out, fertile=fertile_out)
-    return (
-        new_total_worms,
-        new_aging_worms,
+        infertile_out,
+        fertile_out,
         time_of_last_treatment,
     )
 
