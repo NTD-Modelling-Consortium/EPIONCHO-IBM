@@ -27,18 +27,25 @@ class WormGroup:
 def _calc_dead_and_aging_worms(
     n_people: int,
     current_worms: NDArray[np.int_],
-    mortalities: float | NDArray[np.float_],
+    mortalities: NDArray[np.float_],
     worm_age_rate: NDArray[np.float_] | float,
 ) -> Tuple[NDArray[np.int_], NDArray[np.int_]]:
+    # TODO: this is horrible, sort it out!
+    current_worms_shape = current_worms.shape
+    assert len(current_worms_shape) in (1, 2)
+    if len(current_worms_shape) == 2:
+        if len(mortalities.shape) == 1:
+            mortalities = np.repeat(mortalities, n_people).reshape(current_worms_shape)
+
     dead_worms = np.random.binomial(
         n=current_worms,
         p=mortalities,
-        size=n_people,
+        size=current_worms_shape,
     )
     aging_worms = np.random.binomial(
         n=current_worms - dead_worms,
         p=worm_age_rate,
-        size=n_people,
+        size=current_worms_shape,
     )
 
     return dead_worms, aging_worms
@@ -48,21 +55,28 @@ def _calc_new_worms_from_inside(
     current_worms: NDArray[np.int_],
     dead_worms: NDArray[np.int_],
     aging_worms: NDArray[np.int_],
-    n_people: int,
-    prob: NDArray[np.float_] | float,
+    prob: float | NDArray[np.float_],
 ) -> NDArray[np.int_]:
     # trans.fc
     delta_female_worms = current_worms - dead_worms - aging_worms
     delta_female_worms[delta_female_worms < 0] = 0
 
+    current_worms_shape = current_worms.shape
+    probabilities = prob
+    assert len(current_worms_shape) in (1, 2)
+    if len(current_worms_shape) == 1:
+        probabilities = np.repeat(prob, current_worms.shape[0]).reshape(
+            current_worms_shape
+        )
+
     if delta_female_worms.any():
         new_worms = np.random.binomial(
             n=delta_female_worms,
-            p=prob,
-            size=n_people,
+            p=probabilities,
+            size=current_worms.shape,
         )
     else:
-        new_worms = np.repeat(0, n_people)
+        new_worms = np.repeat(0, current_worms_shape[0])
     return new_worms
 
 
@@ -121,7 +135,7 @@ def process_treatment(
 
 def change_in_worms(
     stages: int,
-    current_worms: list[WormGroup],
+    current_worms: WormGroup,
     worm_params: WormParams,
     treatment_params: Optional[TreatmentParams],
     delta_time: float,
@@ -150,6 +164,51 @@ def change_in_worms(
         current_time=current_time,
         mortalities=mortalities,
     )
+
+    worm_age_rate = delta_time / worm_params.worms_aging
+
+    dead_male_worms, aging_male_worms = _calc_dead_and_aging_worms(
+        n_people=n_people,
+        current_worms=current_worms.male,
+        mortalities=mortalities,
+        worm_age_rate=worm_age_rate,
+    )
+
+    # TODO: make it better
+    dead_infertile_worms, aging_infertile_worms = _calc_dead_and_aging_worms(
+        n_people=n_people,
+        current_worms=current_worms.infertile,
+        mortalities=female_mortalities,
+        worm_age_rate=worm_age_rate,
+    )
+
+    dead_fertile_worms, aging_fertile_worms = _calc_dead_and_aging_worms(
+        n_people=n_people,
+        current_worms=current_worms.fertile,
+        mortalities=female_mortalities,
+        worm_age_rate=worm_age_rate,
+    )
+
+    new_worms_infertile_from_inside = _calc_new_worms_from_inside(
+        current_worms=current_worms.fertile,
+        dead_worms=dead_fertile_worms,
+        aging_worms=aging_fertile_worms,
+        prob=lambda_zero_in,
+    )  # new.worms.nf.fi
+
+    # females worms from infertile to fertile, this happens independent of males, but production of mf depends on males
+    # individuals which still have non fertile worms in an age compartment after death and aging
+
+    omega = worm_params.omega * delta_time  # becoming fertile
+    new_worms_fertile_from_inside = _calc_new_worms_from_inside(
+        current_worms=current_worms.infertile,
+        dead_worms=dead_infertile_worms,
+        aging_worms=aging_infertile_worms,
+        prob=omega,
+    )  # new.worms.f.fi TODO: Are these the right way round?
+
+    delta_fertile = new_worms_fertile_from_inside - new_worms_infertile_from_inside
+
     last_time_of_last_treatment = None
     for compartment in range(stages):
         (
@@ -157,18 +216,19 @@ def change_in_worms(
             last_aging_worms,
             last_time_of_last_treatment,
         ) = change_in_worm_per_index(  # res
-            worm_params=worm_params,
-            delta_time=delta_time,
-            n_people=n_people,
             delayed_females=delayed_females,
             delayed_males=delayed_males,
-            mortalities=mortalities,
             time_of_last_treatment=time_of_last_treatment,
             compartment=compartment,
-            current_worms=current_worms[compartment],
+            current_worms=current_worms,
             last_aging_worms=last_aging_worms,
-            female_mortalities=female_mortalities[compartment],
-            lambda_zero_in=lambda_zero_in,
+            dead_male_worms=dead_male_worms,
+            aging_male_worms=aging_male_worms,
+            dead_infertile_worms=dead_infertile_worms,
+            aging_infertile_worms=aging_infertile_worms,
+            dead_fertile_worms=dead_fertile_worms,
+            aging_fertile_worms=aging_fertile_worms,
+            delta_fertile=delta_fertile,
         )
         check_no_worms_are_negative(last_total_worms)
 
@@ -185,18 +245,19 @@ def change_in_worms(
 
 
 def change_in_worm_per_index(
-    worm_params: WormParams,
-    delta_time: float,
-    n_people: int,
     delayed_females: NDArray[np.int_],
     delayed_males: NDArray[np.int_],
-    mortalities: NDArray[np.float_],
     time_of_last_treatment: Optional[NDArray[np.float_]],
     compartment: int,
     current_worms: WormGroup,
     last_aging_worms: WormGroup,
-    female_mortalities: float | NDArray[np.float_],
-    lambda_zero_in: NDArray[np.float_],
+    dead_male_worms: NDArray[np.int_],
+    aging_male_worms: NDArray[np.int_],
+    dead_infertile_worms: NDArray[np.int_],
+    aging_infertile_worms: NDArray[np.int_],
+    dead_fertile_worms: NDArray[np.int_],
+    aging_fertile_worms: NDArray[np.int_],
+    delta_fertile: NDArray[np.int_],
 ) -> Tuple[WormGroup, WormGroup, Optional[NDArray[np.float_]],]:
     """
     params.delta_hz # delta.hz
@@ -230,80 +291,42 @@ def change_in_worm_per_index(
     N is params.human_population
     params.worms_aging "time.each.comp"
     """
-    # loss of fertility lambda.zero.in
-    omega = worm_params.omega * delta_time  # becoming fertile
     first_compartment = compartment == 0
-    compartment_mortality = mortalities[compartment]
-
-    worm_age_rate = delta_time / worm_params.worms_aging
-    dead_male_worms, aging_male_worms = _calc_dead_and_aging_worms(
-        n_people=n_people,
-        current_worms=current_worms.male,
-        mortalities=compartment_mortality,
-        worm_age_rate=worm_age_rate,
-    )
 
     total_male_worms = (
-        current_worms.male
+        current_worms.male[compartment]
         + (delayed_males if first_compartment else last_aging_worms.male)
-        - aging_male_worms
-        - dead_male_worms
+        - aging_male_worms[compartment]
+        - dead_male_worms[compartment]
     )
-
-    dead_infertile_worms, aging_infertile_worms = _calc_dead_and_aging_worms(
-        n_people=n_people,
-        current_worms=current_worms.infertile,
-        mortalities=female_mortalities,
-        worm_age_rate=worm_age_rate,
-    )
-    dead_fertile_worms, aging_fertile_worms = _calc_dead_and_aging_worms(
-        n_people=n_people,
-        current_worms=current_worms.fertile,
-        mortalities=female_mortalities,
-        worm_age_rate=worm_age_rate,
-    )
-
-    new_worms_infertile_from_inside = _calc_new_worms_from_inside(
-        current_worms=current_worms.fertile,
-        dead_worms=dead_fertile_worms,
-        aging_worms=aging_fertile_worms,
-        n_people=n_people,
-        prob=lambda_zero_in,
-    )  # new.worms.nf.fi
-
-    # females worms from infertile to fertile, this happens independent of males, but production of mf depends on males
-
-    # individuals which still have non fertile worms in an age compartment after death and aging
-
-    new_worms_fertile_from_inside = _calc_new_worms_from_inside(
-        current_worms=current_worms.infertile,
-        dead_worms=dead_infertile_worms,
-        aging_worms=aging_infertile_worms,
-        n_people=n_people,
-        prob=omega,
-    )  # new.worms.f.fi TODO: Are these the right way round?
-
-    delta_fertile = new_worms_fertile_from_inside - new_worms_infertile_from_inside
 
     infertile_excl_transiting = (
-        current_worms.infertile - delta_fertile - dead_infertile_worms
+        current_worms.infertile[compartment]
+        - delta_fertile[compartment]
+        - dead_infertile_worms[compartment]
     )
-    fertile_excl_transiting = current_worms.fertile + delta_fertile - dead_fertile_worms
+    fertile_excl_transiting = (
+        current_worms.fertile[compartment]
+        + delta_fertile[compartment]
+        - dead_fertile_worms[compartment]
+    )
 
     infertile_out = (
         infertile_excl_transiting
-        - aging_infertile_worms
+        - aging_infertile_worms[compartment]
         + (delayed_females if first_compartment else last_aging_worms.infertile)
     )
 
     fertile_out = (
-        fertile_excl_transiting - aging_fertile_worms + last_aging_worms.fertile
+        fertile_excl_transiting
+        - aging_fertile_worms[compartment]
+        + last_aging_worms.fertile
     )
 
     new_aging_worms = WormGroup(
-        male=aging_male_worms,
-        infertile=aging_infertile_worms,
-        fertile=aging_fertile_worms,
+        male=aging_male_worms[compartment],
+        infertile=aging_infertile_worms[compartment],
+        fertile=aging_fertile_worms[compartment],
     )
     new_total_worms = WormGroup(
         male=total_male_worms, infertile=infertile_out, fertile=fertile_out

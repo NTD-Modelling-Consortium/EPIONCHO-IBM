@@ -11,9 +11,7 @@ from epioncho_ibm.microfil import calculate_microfil_delta
 from epioncho_ibm.worms import (
     WormGroup,
     calc_new_worms,
-    change_in_worm_per_index,
     change_in_worms,
-    check_no_worms_are_negative,
     get_delayed_males_and_females,
 )
 
@@ -383,14 +381,11 @@ class State:
         old_fertile_female_worms = self._people.fertile_female_worms.copy()
         old_male_worms = self._people.male_worms.copy()
 
-        current_worms = [
-            WormGroup(
-                male=self._people.male_worms[compartment],
-                infertile=self._people.infertile_female_worms[compartment],
-                fertile=self._people.fertile_female_worms[compartment],
-            )
-            for compartment in range(self.params.microfil.microfil_age_stages)
-        ]
+        current_worms = WormGroup(
+            male=self._people.male_worms,
+            infertile=self._people.infertile_female_worms,
+            fertile=self._people.fertile_female_worms,
+        )
 
         (
             self._people.male_worms,
