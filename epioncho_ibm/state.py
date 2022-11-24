@@ -1,6 +1,7 @@
 import math
 from dataclasses import dataclass
 
+import h5py
 import numpy as np
 from numpy.typing import NDArray
 from pydantic import BaseModel
@@ -17,7 +18,7 @@ from epioncho_ibm.worms import (
 
 from .derived_params import DerivedParams
 from .params import ExposureParams, Params
-import h5py
+
 np.seterr(all="ignore")
 
 
@@ -50,17 +51,14 @@ class BlackflyLarvae:
     L3: NDArray[np.float_]  # 6: L3
 
     def append_to_hdf5_group(self, group: h5py.Group):
-        group.create_dataset('L1', data=self.L1)
-        group.create_dataset('L2', data = self.L2)
-        group.create_dataset('L3', data = self.L3)
+        group.create_dataset("L1", data=self.L1)
+        group.create_dataset("L2", data=self.L2)
+        group.create_dataset("L3", data=self.L3)
 
     @classmethod
     def from_hdf5_group(cls, group: h5py.Group):
-        return cls(
-            np.array(group['L1']),
-            np.array(group['L2']),
-            np.array(group['L3'])
-        )
+        return cls(np.array(group["L1"]), np.array(group["L2"]), np.array(group["L3"]))
+
 
 class NumericArrayStat(BaseModel):
     mean: float
@@ -102,33 +100,33 @@ class People:
 
     def __len__(self):
         return len(self.compliance)
-    
+
     def append_to_hdf5_group(self, group: h5py.Group):
-        blackfly_group = group.create_group('blackfly')
-        group.create_dataset('compliance', data=self.compliance)
-        group.create_dataset('sex_is_male', data = self.sex_is_male)
+        blackfly_group = group.create_group("blackfly")
+        group.create_dataset("compliance", data=self.compliance)
+        group.create_dataset("sex_is_male", data=self.sex_is_male)
         self.blackfly.append_to_hdf5_group(blackfly_group)
-        group.create_dataset('ages', data = self.ages)
-        group.create_dataset('mf', data = self.mf)
-        group.create_dataset('male_worms', data = self.male_worms)
-        group.create_dataset('infertile_female_worms', data = self.infertile_female_worms)
-        group.create_dataset('fertile_female_worms', data = self.fertile_female_worms)
-        group.create_dataset('time_of_last_treatment', data = self.time_of_last_treatment)
+        group.create_dataset("ages", data=self.ages)
+        group.create_dataset("mf", data=self.mf)
+        group.create_dataset("male_worms", data=self.male_worms)
+        group.create_dataset("infertile_female_worms", data=self.infertile_female_worms)
+        group.create_dataset("fertile_female_worms", data=self.fertile_female_worms)
+        group.create_dataset("time_of_last_treatment", data=self.time_of_last_treatment)
 
     @classmethod
     def from_hdf5_group(cls, group: h5py.Group):
-        blackfly_group = group['blackfly']
-        assert(isinstance(blackfly_group, h5py.Group))
+        blackfly_group = group["blackfly"]
+        assert isinstance(blackfly_group, h5py.Group)
         return cls(
-            np.array(group['compliance']),
-            np.array(group['sex_is_male']),
+            np.array(group["compliance"]),
+            np.array(group["sex_is_male"]),
             BlackflyLarvae.from_hdf5_group(blackfly_group),
-            np.array(group['ages']),
-            np.array(group['mf']),
-            np.array(group['male_worms']),
-            np.array(group['infertile_female_worms']),
-            np.array(group['fertile_female_worms']),
-            np.array(group['time_of_last_treatment'])
+            np.array(group["ages"]),
+            np.array(group["mf"]),
+            np.array(group["male_worms"]),
+            np.array(group["infertile_female_worms"]),
+            np.array(group["fertile_female_worms"]),
+            np.array(group["time_of_last_treatment"]),
         )
 
 
@@ -160,21 +158,22 @@ class DelayArrays:
             params.blackfly.l1_delay / (params.delta_time * params.year_length_days)
         )
         return cls(
-            worm_delay = np.zeros((number_of_worm_delay_cols, n_people), dtype=int),
-            exposure_delay = np.tile(
+            worm_delay=np.zeros((number_of_worm_delay_cols, n_people), dtype=int),
+            exposure_delay=np.tile(
                 individual_exposure, (number_of_exposure_columns, 1)
             ),
-            mf_delay = (
+            mf_delay=(
                 np.ones((number_of_mf_columns, n_people), dtype=int)
                 * params.microfil.initial_mf
             ),
-            l1_delay = np.repeat(params.blackfly.initial_L1, n_people)
+            l1_delay=np.repeat(params.blackfly.initial_L1, n_people),
         )
 
     def append_to_hdf5_group(self, group: h5py.Group):
-        group.create_dataset('worm_delay', data=self.worm_delay)
-        group.create_dataset('exposure_delay', data = self.exposure_delay)
-        group.create_dataset('mf_delay', data = self.mf_delay)
+        group.create_dataset("worm_delay", data=self.worm_delay)
+        group.create_dataset("exposure_delay", data=self.exposure_delay)
+        group.create_dataset("mf_delay", data=self.mf_delay)
+
 
 def _calc_coverage(
     people: People,
@@ -241,7 +240,9 @@ class State:
     _derived_params: DerivedParams
     _delay_arrays: DelayArrays
 
-    def __init__(self, people: People, params: Params, delay_arrays: DelayArrays | None = None) -> None:
+    def __init__(
+        self, people: People, params: Params, delay_arrays: DelayArrays | None = None
+    ) -> None:
         self._people = people
         self.params = params
         if delay_arrays is None:
@@ -263,7 +264,7 @@ class State:
         time_of_last_treatment = np.empty(n_people)
         time_of_last_treatment[:] = np.nan
         return cls(
-            people = People(
+            people=People(
                 compliance=compliance_array,
                 ages=truncated_geometric(
                     N=n_people,
@@ -291,7 +292,7 @@ class State:
                 * params.worms.initial_worms,
                 time_of_last_treatment=time_of_last_treatment,
             ),
-            params = params
+            params=params,
         )
 
     @property
@@ -360,7 +361,9 @@ class State:
             self._people.ages >= self.params.humans.min_skinsnip_age
         )
         _, mf_skin_snip = self.microfilariae_per_skin_snip()
-        infected_over_min_age: float = float(np.sum(mf_skin_snip[pop_over_min_age_array] > 0))
+        infected_over_min_age: float = float(
+            np.sum(mf_skin_snip[pop_over_min_age_array] > 0)
+        )
         total_over_min_age = float(np.sum(pop_over_min_age_array))
         return infected_over_min_age / total_over_min_age
 
@@ -573,23 +576,19 @@ class State:
             self._advance(current_time=current_time)
             current_time += self.params.delta_time
         return output_stats
-    
+
     @classmethod
     def from_hdf5(cls, filename: str):
-        f = h5py.File(filename, 'r')
-        people_group= f['people']
-        assert(isinstance(people_group, h5py.Group))
-        params: str = str(f.attrs['params'])
-        return cls(
-            People.from_hdf5_group(people_group),
-            Params.parse_raw(params)
-        )
+        f = h5py.File(filename, "r")
+        people_group = f["people"]
+        assert isinstance(people_group, h5py.Group)
+        params: str = str(f.attrs["params"])
+        return cls(People.from_hdf5_group(people_group), Params.parse_raw(params))
 
     def to_hdf5(self, filename: str):
-        f = h5py.File(filename, 'w')
-        group_people = f.create_group('people')
-        group_delay_arrays = f.create_group('delay_arrays')
+        f = h5py.File(filename, "w")
+        group_people = f.create_group("people")
+        group_delay_arrays = f.create_group("delay_arrays")
         self._people.append_to_hdf5_group(group_people)
         self._delay_arrays.append_to_hdf5_group(group_delay_arrays)
-        f.attrs['params'] = self._params.json()
-    
+        f.attrs["params"] = self._params.json()
