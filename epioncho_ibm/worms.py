@@ -149,7 +149,6 @@ def change_in_worms(
     time_of_last_treatment: Optional[NDArray[np.float_]],
 ):
     last_aging_worms = WormGroup.from_population(n_people)
-    all_male_worms = np.empty((stages, n_people), dtype=np.int_)
     all_infertile_female_worms = np.empty((stages, n_people), dtype=np.int_)
     all_fertile_female_worms = np.empty((stages, n_people), dtype=np.int_)
 
@@ -172,6 +171,15 @@ def change_in_worms(
         current_worms=current_worms.male,
         mortalities=mortalities,
         worm_age_rate=worm_age_rate,
+    )
+
+    lagged_aging_male_worms = np.roll(aging_male_worms, 1, axis=0)
+    lagged_aging_male_worms[0, :] = delayed_males
+    total_male_worms = (
+        current_worms.male
+        + lagged_aging_male_worms
+        - aging_male_worms
+        - dead_male_worms
     )
 
     # TODO: make it better
@@ -217,27 +225,23 @@ def change_in_worms(
             last_time_of_last_treatment,
         ) = change_in_worm_per_index(  # res
             delayed_females=delayed_females,
-            delayed_males=delayed_males,
             time_of_last_treatment=time_of_last_treatment,
             compartment=compartment,
             current_worms=current_worms,
             last_aging_worms=last_aging_worms,
-            dead_male_worms=dead_male_worms,
-            aging_male_worms=aging_male_worms,
             dead_infertile_worms=dead_infertile_worms,
             aging_infertile_worms=aging_infertile_worms,
             dead_fertile_worms=dead_fertile_worms,
             aging_fertile_worms=aging_fertile_worms,
             delta_fertile=delta_fertile,
         )
-        check_no_worms_are_negative(last_total_worms)
+        # check_no_worms_are_negative(last_total_worms)
 
-        all_male_worms[compartment, :] = last_total_worms.male
         all_infertile_female_worms[compartment, :] = last_total_worms.infertile
         all_fertile_female_worms[compartment, :] = last_total_worms.fertile
 
     return (
-        all_male_worms,
+        total_male_worms,
         all_infertile_female_worms,
         all_fertile_female_worms,
         last_time_of_last_treatment,
@@ -246,13 +250,10 @@ def change_in_worms(
 
 def change_in_worm_per_index(
     delayed_females: NDArray[np.int_],
-    delayed_males: NDArray[np.int_],
     time_of_last_treatment: Optional[NDArray[np.float_]],
     compartment: int,
     current_worms: WormGroup,
     last_aging_worms: WormGroup,
-    dead_male_worms: NDArray[np.int_],
-    aging_male_worms: NDArray[np.int_],
     dead_infertile_worms: NDArray[np.int_],
     aging_infertile_worms: NDArray[np.int_],
     dead_fertile_worms: NDArray[np.int_],
@@ -293,13 +294,6 @@ def change_in_worm_per_index(
     """
     first_compartment = compartment == 0
 
-    total_male_worms = (
-        current_worms.male[compartment]
-        + (delayed_males if first_compartment else last_aging_worms.male)
-        - aging_male_worms[compartment]
-        - dead_male_worms[compartment]
-    )
-
     infertile_excl_transiting = (
         current_worms.infertile[compartment]
         - delta_fertile[compartment]
@@ -324,13 +318,11 @@ def change_in_worm_per_index(
     )
 
     new_aging_worms = WormGroup(
-        male=aging_male_worms[compartment],
+        male=None,
         infertile=aging_infertile_worms[compartment],
         fertile=aging_fertile_worms[compartment],
     )
-    new_total_worms = WormGroup(
-        male=total_male_worms, infertile=infertile_out, fertile=fertile_out
-    )
+    new_total_worms = WormGroup(male=None, infertile=infertile_out, fertile=fertile_out)
     return (
         new_total_worms,
         new_aging_worms,
