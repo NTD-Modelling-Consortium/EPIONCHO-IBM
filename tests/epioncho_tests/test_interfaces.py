@@ -11,13 +11,6 @@ class TestGeneral:
         )
         state.microfilariae_per_skin_snip()
 
-    async def test_verbose(self, capfd):
-        params = Params()
-        state = State(params=params, n_people=10)
-        state.run_simulation(start_time=0, end_time=0.3, verbose=True)
-        out, err = capfd.readouterr()
-        assert out == "0\n0.202739726027397\n"
-
     async def test_output_stats(self):
         params = Params()
         state = State(params=params, n_people=10)

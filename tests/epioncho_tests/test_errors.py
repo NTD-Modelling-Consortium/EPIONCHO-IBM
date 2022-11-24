@@ -25,8 +25,8 @@ class TestGeneral:
         state = State(params=Params(), n_people=10)
 
         with pytest.raises(
-            ValueError,
-            match="Setting n_people in state not allowed. Please re-initialise state.",
+            AttributeError,
+            match="can't set attribute 'n_people'",
         ):
             state.n_people = 4
 
