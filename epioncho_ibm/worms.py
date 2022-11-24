@@ -27,7 +27,7 @@ class WormGroup:
 def _calc_dead_and_aging_worms(
     n_people: int,
     current_worms: NDArray[np.int_],
-    mortalities: NDArray[np.float_],
+    mortalities: float | NDArray[np.float_],
     worm_age_rate: NDArray[np.float_] | float,
 ) -> Tuple[NDArray[np.int_], NDArray[np.int_]]:
     dead_worms = np.random.binomial(
@@ -62,7 +62,7 @@ def _calc_new_worms_from_inside(
             size=n_people,
         )
     else:
-        new_worms = 0
+        new_worms = np.repeat(0, n_people)
     return new_worms
 
 
@@ -150,7 +150,7 @@ def change_in_worms(
         current_time=current_time,
         mortalities=mortalities,
     )
-
+    last_time_of_last_treatment = None
     for compartment in range(stages):
         (
             last_total_worms,
@@ -367,7 +367,7 @@ def calc_new_worms(
     new_rate = _w_plus_one_rate(
         blackfly_params,
         delta_time,
-        np.mean(L3),
+        float(np.mean(L3)),
         total_exposure,
     )
     assert not (np.any(new_rate > 10**10))
