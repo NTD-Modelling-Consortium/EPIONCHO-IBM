@@ -301,7 +301,9 @@ class State:
             self._people.ages >= self.params.humans.min_skinsnip_age
         )
         _, mf_skin_snip = self.microfilariae_per_skin_snip()
-        infected_over_min_age: float = float(np.sum(mf_skin_snip[pop_over_min_age_array] > 0))
+        infected_over_min_age: float = float(
+            np.sum(mf_skin_snip[pop_over_min_age_array] > 0)
+        )
         total_over_min_age = float(np.sum(pop_over_min_age_array))
         return infected_over_min_age / total_over_min_age
 
