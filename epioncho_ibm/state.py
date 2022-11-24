@@ -38,7 +38,7 @@ def truncated_geometric(N: int, prob: float, maximum: float) -> NDArray[np.float
     output = np.repeat(maximum + 1, N)
     while np.any(output > maximum):
         output[output > maximum] = np.random.geometric(
-            p=prob, size=np.sum(output > maximum)
+            p=prob, size=len(output[output > maximum])
         )
     return output
 
@@ -56,7 +56,7 @@ class NumericArrayStat(BaseModel):
 
     @classmethod
     def from_array(cls, array: NDArray[np.float_] | NDArray[np.int_]):
-        return cls(mean=np.mean(array))  # , st_dev=np.std(array))
+        return cls(mean=float(np.mean(array)))  # , st_dev=np.std(array))
 
 
 class StateStats(BaseModel):
@@ -159,7 +159,7 @@ def _calculate_total_exposure(
         # TODO: Is this correct?
         mean_male_exposure = 0
     else:
-        mean_male_exposure: float = np.mean(male_exposure_assumed_of_males)
+        mean_male_exposure: float = float(np.mean(male_exposure_assumed_of_males))
     female_exposure_assumed = exposure_params.female_exposure * np.exp(
         -exposure_params.female_exposure_exponent * people.ages
     )
@@ -170,7 +170,7 @@ def _calculate_total_exposure(
         # TODO: Is this correct?
         mean_female_exposure = 0
     else:
-        mean_female_exposure: float = np.mean(female_exposure_assumed_of_females)
+        mean_female_exposure: float = float(np.mean(female_exposure_assumed_of_females))
 
     sex_age_exposure = np.where(
         people.sex_is_male,
@@ -291,7 +291,7 @@ class State:
         mfobs = mfobs / (
             self.params.humans.skin_snip_number * self.params.humans.skin_snip_weight
         )
-        return np.mean(mfobs), mfobs
+        return float(np.mean(mfobs)), mfobs
 
     def mf_prevalence_in_population(self: "State") -> float:
         """
@@ -301,15 +301,15 @@ class State:
             self._people.ages >= self.params.humans.min_skinsnip_age
         )
         _, mf_skin_snip = self.microfilariae_per_skin_snip()
-        infected_over_min_age = np.sum(mf_skin_snip[pop_over_min_age_array] > 0)
-        total_over_min_age = np.sum(pop_over_min_age_array)
+        infected_over_min_age: float = float(np.sum(mf_skin_snip[pop_over_min_age_array] > 0))
+        total_over_min_age = float(np.sum(pop_over_min_age_array))
         return infected_over_min_age / total_over_min_age
 
     def to_stats(self) -> StateStats:
         return StateStats(
-            percent_compliant=np.sum(self._people.compliance)
+            percent_compliant=float(np.sum(self._people.compliance))
             / len(self._people.compliance),
-            percent_male=np.sum(self._people.sex_is_male)
+            percent_male=float(np.sum(self._people.sex_is_male))
             / len(self._people.compliance),
             L1=NumericArrayStat.from_array(self._people.blackfly.L1),
             L2=NumericArrayStat.from_array(self._people.blackfly.L2),
@@ -460,7 +460,7 @@ class State:
         self._delay_arrays.mf_delay = _lag_array(old_mf, self._delay_arrays.mf_delay)
         self._delay_arrays.l1_delay = self._people.blackfly.L1
 
-        total_people_to_die: int = np.sum(people_to_die)
+        total_people_to_die: int = int(np.sum(people_to_die))
         if total_people_to_die > 0:
             self._delay_arrays.worm_delay[:, people_to_die] = 0
             self._delay_arrays.mf_delay[0, people_to_die] = 0
