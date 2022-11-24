@@ -220,6 +220,17 @@ docs = ["furo (>=2022.6.21)", "sphinx (>=5.1.1)", "sphinx-autodoc-typehints (>=1
 testing = ["covdefaults (>=2.2)", "coverage (>=6.4.2)", "pytest (>=7.1.2)", "pytest-cov (>=3)", "pytest-timeout (>=2.1)"]
 
 [[package]]
+name = "h5py"
+version = "3.7.0"
+description = "Read and write HDF5 files from Python"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+
+[package.dependencies]
+numpy = ">=1.14.5"
+
+[[package]]
 name = "identify"
 version = "2.5.9"
 description = "File identification library for Python"
@@ -868,7 +879,7 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.9, <3.11"
-content-hash = "f37f79c8f31bb792617783b39f2dbe4195af81c009e05121b1cd06f2c6c61b8e"
+content-hash = "07837dd75ee31cb324814f9b8f6d1286fa798da3b46fb07bcac0500a0403fd3c"
 
 [metadata.files]
 appnope = []
@@ -891,6 +902,7 @@ exceptiongroup = []
 execnet = []
 executing = []
 filelock = []
+h5py = []
 identify = []
 iniconfig = []
 ipykernel = []

@@ -17,7 +17,7 @@ from epioncho_ibm.worms import (
 
 from .derived_params import DerivedParams
 from .params import ExposureParams, Params
-
+import h5py
 np.seterr(all="ignore")
 
 
@@ -90,7 +90,9 @@ class People:
 
     def __len__(self):
         return len(self.compliance)
-
+    def append_to_hdf5_group(self, group: h5py.Group):
+        group.create_dataset('compliance')
+        
 
 class DelayArrays:
     worm_delay: NDArray[np.int_]
@@ -514,3 +516,21 @@ class State:
             self._advance(current_time=current_time)
             current_time += self.params.delta_time
         return output_stats
+    
+    @classmethod
+    def from_hdf5(cls, filename: str):
+        f = h5py.File(filename, 'r')
+        raise NotImplementedError
+        people = f.create_group('people')
+        delay_arrays = f.create_group('delay_arrays')
+        people = People.from_hdf5()
+
+    def to_hdf5(self, filename: str):
+        f = h5py.File(filename, 'w')
+        group_people = f.create_group('people')
+        group_delay_arrays = f.create_group('delay_arrays')
+        print(group_people)
+        print(group_people.__class__.mro())
+        self._people.append_to_hdf5_group(group_people)
+        self._delay_arrays.append_to_hdf5_group(group_delay_arrays)
+
