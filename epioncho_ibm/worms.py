@@ -1,12 +1,19 @@
 from dataclasses import dataclass
-from typing import Optional, Tuple
 
 import numpy as np
 from numpy.typing import NDArray
 
-from epioncho_ibm.blackfly import delta_h
+import epioncho_ibm.blackfly as blackfly
+import epioncho_ibm.utils as utils
 
 from .params import BlackflyParams, TreatmentParams, WormParams
+
+__all__ = [
+    "WormGroup",
+    "change_in_worms",
+    "get_delayed_males_and_females",
+    "calc_new_worms",
+]
 
 
 @dataclass
@@ -24,31 +31,58 @@ class WormGroup:
         )
 
 
-def _calc_dead_and_aging_worms(
-    n_people: int,
+def _calc_dead_and_aging_worms_single_group(
     current_worms: NDArray[np.int_],
     mortalities: NDArray[np.float_],
     worm_age_rate: NDArray[np.float_] | float,
-) -> Tuple[NDArray[np.int_], NDArray[np.int_]]:
-    # TODO: this is horrible, sort it out!
-    current_worms_shape = current_worms.shape
-    assert len(current_worms_shape) in (1, 2)
-    if len(current_worms_shape) == 2:
-        if len(mortalities.shape) == 1:
-            mortalities = np.repeat(mortalities, n_people).reshape(current_worms_shape)
+) -> tuple[NDArray[np.int_], NDArray[np.int_]]:
+    assert current_worms.ndim == 2
+    n_people = current_worms.shape[1]
+
+    if mortalities.ndim == 1:
+        mortalities = np.tile(mortalities, (n_people, 1)).T
 
     dead_worms = np.random.binomial(
         n=current_worms,
         p=mortalities,
-        size=current_worms_shape,
+        size=current_worms.shape,
     )
     aging_worms = np.random.binomial(
         n=current_worms - dead_worms,
         p=worm_age_rate,
-        size=current_worms_shape,
+        size=current_worms.shape,
     )
 
     return dead_worms, aging_worms
+
+
+def _calc_dead_and_aging_worms(
+    current_worms: WormGroup,
+    female_mortalities: NDArray[np.float_],
+    male_mortalities: NDArray[np.float_],
+    worm_age_rate: NDArray[np.float_] | float,
+) -> tuple[WormGroup, WormGroup]:
+    dead_male, aging_male = _calc_dead_and_aging_worms_single_group(
+        current_worms=current_worms.male,
+        mortalities=male_mortalities,
+        worm_age_rate=worm_age_rate,
+    )
+
+    dead_infertile, aging_infertile = _calc_dead_and_aging_worms_single_group(
+        current_worms=current_worms.infertile,
+        mortalities=female_mortalities,
+        worm_age_rate=worm_age_rate,
+    )
+
+    dead_fertile, aging_fertile = _calc_dead_and_aging_worms_single_group(
+        current_worms=current_worms.fertile,
+        mortalities=female_mortalities,
+        worm_age_rate=worm_age_rate,
+    )
+
+    dead = WormGroup(male=dead_male, infertile=dead_infertile, fertile=dead_fertile)
+    aging = WormGroup(male=aging_male, infertile=aging_infertile, fertile=aging_fertile)
+    return dead, aging
 
 
 def _calc_new_worms_from_inside(
@@ -82,12 +116,12 @@ def _calc_new_worms_from_inside(
 
 def process_treatment(
     worm_params: WormParams,
-    treatment_params: Optional[TreatmentParams],
+    treatment_params: TreatmentParams | None,
     delta_time: float,
     n_people: int,
-    coverage_in: Optional[NDArray[np.bool_]],
-    initial_treatment_times: Optional[NDArray[np.float_]],
-    time_of_last_treatment: Optional[NDArray[np.float_]],
+    coverage_in: NDArray[np.bool_] | None,
+    initial_treatment_times: NDArray[np.float_] | None,
+    time_of_last_treatment: NDArray[np.float_] | None,
     current_time: float,
     mortalities: NDArray[np.float_],
 ) -> tuple[NDArray[np.float_], NDArray[np.float_]]:
@@ -95,7 +129,6 @@ def process_treatment(
     # fertile class due to treatment re enter fertile class at standard rate
 
     female_mortalities = mortalities  # mort.fems
-    # TODO: get rid of np.zeroes, use scalar
     fertile_to_non_fertile_rate = np.zeros(n_people)
 
     if treatment_params is not None and current_time > treatment_params.start_time:
@@ -108,13 +141,9 @@ def process_treatment(
             )
         )
         if during_treatment and current_time <= treatment_params.stop_time:
-            # TODO: make it better
-            female_mortalities = np.zeros((n_people, len(mortalities)))
-            for p in range(n_people):
-                female_mortalities[p, :] = mortalities
+            female_mortalities = np.tile(mortalities, (n_people, 1))
             assert coverage_in is not None
             assert coverage_in.shape == (n_people,)
-            # TODO: This only needs to be calculated at compartment 0 - all others repeat calc
             time_of_last_treatment[coverage_in] = current_time  # treat.vec
             # params.permanent_infertility is the proportion of female worms made permanently infertile, killed for simplicity
             female_mortalities[coverage_in] += worm_params.permanent_infertility
@@ -134,19 +163,18 @@ def process_treatment(
 
 
 def change_in_worms(
-    stages: int,
     current_worms: WormGroup,
     worm_params: WormParams,
-    treatment_params: Optional[TreatmentParams],
+    treatment_params: TreatmentParams | None,
     delta_time: float,
     n_people: int,
     delayed_females: NDArray[np.int_],
     delayed_males: NDArray[np.int_],
     mortalities: NDArray[np.float_],
-    coverage_in: Optional[NDArray[np.bool_]],
-    initial_treatment_times: Optional[NDArray[np.float_]],
+    coverage_in: NDArray[np.bool_] | None,
+    initial_treatment_times: NDArray[np.float_] | None,
     current_time: float,
-    time_of_last_treatment: Optional[NDArray[np.float_]],
+    time_of_last_treatment: NDArray[np.float_] | None,
 ):
     # TODO: time_of_last_treatment is modified inside, change this!
     female_mortalities, lambda_zero_in = process_treatment(
@@ -163,87 +191,60 @@ def change_in_worms(
 
     worm_age_rate = delta_time / worm_params.worms_aging
 
-    dead_male_worms, aging_male_worms = _calc_dead_and_aging_worms(
-        n_people=n_people,
-        current_worms=current_worms.male,
-        mortalities=mortalities,
+    dead, aging = _calc_dead_and_aging_worms(
+        current_worms=current_worms,
+        female_mortalities=female_mortalities,
+        male_mortalities=mortalities,
         worm_age_rate=worm_age_rate,
     )
 
-    lagged_aging_male_worms = np.roll(aging_male_worms, 1, axis=0)
-    lagged_aging_male_worms[0, :] = delayed_males
-    total_male_worms = (
-        current_worms.male
-        + lagged_aging_male_worms
-        - aging_male_worms
-        - dead_male_worms
+    lagged_aging_male = utils.lag_array(delayed_males, aging.male)
+    lagged_aging_infertile = utils.lag_array(delayed_females, aging.infertile)
+    lagged_aging_fertile = utils.lag_array(
+        np.zeros(aging.fertile.shape[1], dtype="int"), aging.fertile
     )
 
-    # TODO: make it better
-    dead_infertile_worms, aging_infertile_worms = _calc_dead_and_aging_worms(
-        n_people=n_people,
-        current_worms=current_worms.infertile,
-        mortalities=female_mortalities,
-        worm_age_rate=worm_age_rate,
-    )
-
-    dead_fertile_worms, aging_fertile_worms = _calc_dead_and_aging_worms(
-        n_people=n_people,
+    new_infertile_from_inside = _calc_new_worms_from_inside(
         current_worms=current_worms.fertile,
-        mortalities=female_mortalities,
-        worm_age_rate=worm_age_rate,
-    )
-
-    new_worms_infertile_from_inside = _calc_new_worms_from_inside(
-        current_worms=current_worms.fertile,
-        dead_worms=dead_fertile_worms,
-        aging_worms=aging_fertile_worms,
+        dead_worms=dead.fertile,
+        aging_worms=aging.fertile,
         prob=lambda_zero_in,
     )  # new.worms.nf.fi
 
     # individuals which still have non fertile worms in an age compartment after death and aging
 
     omega = worm_params.omega * delta_time  # becoming fertile
-    new_worms_fertile_from_inside = _calc_new_worms_from_inside(
+    new_fertile_from_inside = _calc_new_worms_from_inside(
         current_worms=current_worms.infertile,
-        dead_worms=dead_infertile_worms,
-        aging_worms=aging_infertile_worms,
+        dead_worms=dead.infertile,
+        aging_worms=aging.infertile,
         prob=omega,
     )  # new.worms.f.fi TODO: Are these the right way round?
 
-    delta_fertile = new_worms_fertile_from_inside - new_worms_infertile_from_inside
+    delta_fertile = new_fertile_from_inside - new_infertile_from_inside
 
-    infertile_excl_transiting = (
-        current_worms.infertile - delta_fertile - dead_infertile_worms
-    )
-    fertile_excl_transiting = current_worms.fertile + delta_fertile - dead_fertile_worms
+    infertile_excl_transiting = current_worms.infertile - delta_fertile - dead.infertile
+    fertile_excl_transiting = current_worms.fertile + delta_fertile - dead.fertile
 
-    lagged_aging_infertile_worms = np.roll(aging_infertile_worms, 1, axis=0)
-    lagged_aging_infertile_worms[0, :] = delayed_females
-    infertile_out = (
-        infertile_excl_transiting - aging_infertile_worms + lagged_aging_infertile_worms
-    )
+    new_male = current_worms.male + lagged_aging_male - aging.male - dead.male
+    new_infertile = infertile_excl_transiting - aging.infertile + lagged_aging_infertile
+    new_fertile = fertile_excl_transiting - aging.fertile + lagged_aging_fertile
 
-    lagged_aging_fertile_worms = np.roll(aging_fertile_worms, 1, axis=0)
-    # TODO: why not delayed females? Is this is a bug?
-    lagged_aging_fertile_worms[0, :] = 0  # delayed_females
-    fertile_out = (
-        fertile_excl_transiting - aging_fertile_worms + lagged_aging_fertile_worms
-    )
-
-    # TODO: add check_no_worms_are_negative back in!
+    assert np.all(
+        (new_male >= 0) & (new_infertile >= 0) & (new_fertile >= 0)
+    ), "Worms became negative!"
 
     return (
-        total_male_worms,
-        infertile_out,
-        fertile_out,
+        new_male,
+        new_infertile,
+        new_fertile,
         time_of_last_treatment,
     )
 
 
 def get_delayed_males_and_females(
     worm_delay: NDArray[np.int_], n_people: int, worm_sex_ratio: float
-) -> Tuple[NDArray[np.int_], NDArray[np.int_]]:
+) -> tuple[NDArray[np.int_], NDArray[np.int_]]:
     final_column = np.array(worm_delay[-1], dtype=int)
     assert len(final_column) == n_people
     last_males = np.random.binomial(
@@ -253,36 +254,6 @@ def get_delayed_males_and_females(
     return last_males, last_females
 
 
-def _w_plus_one_rate(
-    blackfly_params: BlackflyParams,
-    delta_time: float,
-    L3: float,
-    total_exposure: NDArray[np.float_],
-) -> NDArray[np.float_]:
-    """
-    params.delta_hz # delta.hz
-    params.delta_hinf # delta.hinf
-    params.c_h # c.h
-    params.annual_transm_potential # "m"
-    params.bite_rate_per_fly_on_human #"beta"
-    total_exposure # "expos"
-    params.delta_time #"DT"
-    """
-    dh = delta_h(blackfly_params, L3, total_exposure)
-    annual_transm_potential = (
-        blackfly_params.bite_rate_per_person_per_year
-        / blackfly_params.bite_rate_per_fly_on_human
-    )
-    return (
-        delta_time
-        * annual_transm_potential
-        * blackfly_params.bite_rate_per_fly_on_human
-        * dh
-        * total_exposure
-        * L3
-    )
-
-
 def calc_new_worms(
     L3: NDArray[np.float_],
     blackfly_params: BlackflyParams,
@@ -290,28 +261,12 @@ def calc_new_worms(
     total_exposure: NDArray[np.float_],
     n_people: int,
 ) -> NDArray[np.int_]:
-    new_rate = _w_plus_one_rate(
+    new_rate = blackfly.w_plus_one_rate(
         blackfly_params,
         delta_time,
         float(np.mean(L3)),
         total_exposure,
     )
-    assert not (np.any(new_rate > 10**10))
+    assert not np.any(new_rate > 10**10)
     new_worms = np.random.poisson(lam=new_rate, size=n_people)
     return new_worms
-
-
-def check_no_worms_are_negative(worms: WormGroup):
-    if np.any(
-        np.logical_or(
-            np.logical_or(worms.male < 0, worms.fertile < 0),
-            worms.infertile < 0,
-        )
-    ):
-        candidate_people_male_worms = worms.male[worms.male < 0]
-        candidate_people_fertile_worms = worms.fertile[worms.fertile < 0]
-        candidate_people_infertile_worms = worms.infertile[worms.infertile < 0]
-
-        raise RuntimeError(
-            f"Worms became negative: \nMales: {candidate_people_male_worms} \nFertile Females: {candidate_people_fertile_worms} \nInfertile Females: {candidate_people_infertile_worms}"
-        )
