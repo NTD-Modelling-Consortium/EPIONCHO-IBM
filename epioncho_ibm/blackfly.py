@@ -136,3 +136,33 @@ def delta_h(
     return (
         blackfly_params.delta_h_zero + (blackfly_params.delta_h_inf * multiplier)
     ) / (1 + multiplier)
+
+
+def w_plus_one_rate(
+    blackfly_params: BlackflyParams,
+    delta_time: float,
+    L3: float,
+    total_exposure: NDArray[np.float_],
+) -> NDArray[np.float_]:
+    """
+    params.delta_hz # delta.hz
+    params.delta_hinf # delta.hinf
+    params.c_h # c.h
+    params.annual_transm_potential # "m"
+    params.bite_rate_per_fly_on_human #"beta"
+    total_exposure # "expos"
+    params.delta_time #"DT"
+    """
+    dh = delta_h(blackfly_params, L3, total_exposure)
+    annual_transm_potential = (
+        blackfly_params.bite_rate_per_person_per_year
+        / blackfly_params.bite_rate_per_fly_on_human
+    )
+    return (
+        delta_time
+        * annual_transm_potential
+        * blackfly_params.bite_rate_per_fly_on_human
+        * dh
+        * total_exposure
+        * L3
+    )

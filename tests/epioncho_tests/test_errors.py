@@ -4,7 +4,6 @@ from attr import s
 
 from epioncho_ibm import Params, State, make_state_from_params
 from epioncho_ibm.params import TreatmentParams
-from epioncho_ibm.worms import WormGroup, check_no_worms_are_negative
 
 
 @pytest.mark.asyncio
@@ -47,16 +46,6 @@ class TestGeneral:
             ValueError, match="Cannot alter inner values of params in-place"
         ):
             state.params.humans.max_human_age = 80
-
-    async def test_negative_worms(self):
-        with pytest.raises(RuntimeError, match="Worms became negative"):
-            check_no_worms_are_negative(
-                WormGroup(
-                    male=np.zeros(3, dtype=int) - 1,
-                    infertile=np.zeros(3, dtype=int),
-                    fertile=np.zeros(3, dtype=int),
-                )
-            )
 
 
 @pytest.mark.asyncio

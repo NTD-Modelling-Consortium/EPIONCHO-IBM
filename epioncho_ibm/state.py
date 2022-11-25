@@ -11,6 +11,7 @@ from tqdm import tqdm
 
 from epioncho_ibm.blackfly import calc_l1, calc_l2, calc_l3
 from epioncho_ibm.microfil import calculate_microfil_delta
+from epioncho_ibm.utils import lag_array
 from epioncho_ibm.worms import (
     WormGroup,
     calc_new_worms,
@@ -232,12 +233,12 @@ def _calculate_total_exposure(
     return total_exposure / np.mean(total_exposure)
 
 
+
 def _lag_array(first_item, arr):
     return np.vstack((first_item, arr[:-1]))
 
 
 CallbackStat = TypeVar("CallbackStat")
-
 
 class State(Generic[CallbackStat]):
     _people: People
@@ -441,7 +442,7 @@ class State(Generic[CallbackStat]):
         )
 
         # Move all rows in worm_delay along one
-        self._delay_arrays.worm_delay = _lag_array(
+        self._delay_arrays.worm_delay = lag_array(
             new_worms, self._delay_arrays.worm_delay
         )
 
@@ -460,7 +461,6 @@ class State(Generic[CallbackStat]):
             self._people.fertile_female_worms,
             last_time_of_last_treatment,
         ) = change_in_worms(
-            stages=self.params.microfil.microfil_age_stages,
             current_worms=current_worms,
             worm_params=self.params.worms,
             treatment_params=self.params.treatment,
@@ -521,10 +521,10 @@ class State(Generic[CallbackStat]):
         )
         self._people.blackfly.L3 = calc_l3(self.params.blackfly, old_blackfly_L2)
 
-        self._delay_arrays.exposure_delay = _lag_array(
+        self._delay_arrays.exposure_delay = lag_array(
             total_exposure, self._delay_arrays.exposure_delay
         )
-        self._delay_arrays.mf_delay = _lag_array(old_mf, self._delay_arrays.mf_delay)
+        self._delay_arrays.mf_delay = lag_array(old_mf, self._delay_arrays.mf_delay)
         self._delay_arrays.l1_delay = self._people.blackfly.L1
 
         total_people_to_die: int = int(np.sum(people_to_die))
