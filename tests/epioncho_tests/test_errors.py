@@ -2,26 +2,26 @@ import numpy as np
 import pytest
 from attr import s
 
-from epioncho_ibm import Params, State
+from epioncho_ibm import Params, State, make_state_from_params
 from epioncho_ibm.params import TreatmentParams
 
 
 @pytest.mark.asyncio
 class TestGeneral:
     async def test_start_before_end(self):
-        state = State(params=Params(), n_people=10)
+        state = make_state_from_params(params=Params(), n_people=10)
         with pytest.raises(ValueError, match="End time after start"):
             state.run_simulation(start_time=10, end_time=0)
 
     async def test_start_before_end_output_stats(self):
-        state = State(params=Params(), n_people=10)
+        state = make_state_from_params(params=Params(), n_people=10)
         with pytest.raises(ValueError, match="End time after start"):
             state.run_simulation_output_stats(
                 sampling_interval=1, start_time=10, end_time=0
             )
 
     async def test_set_n_people(self):
-        state = State(params=Params(), n_people=10)
+        state = make_state_from_params(params=Params(), n_people=10)
 
         with pytest.raises(
             AttributeError,
@@ -30,18 +30,18 @@ class TestGeneral:
             state.n_people = 4
 
     async def test_set_params(self):
-        state = State(params=Params(), n_people=10)
+        state = make_state_from_params(params=Params(), n_people=10)
         state.params = Params()
 
     async def test_set_sub_params(self):
-        state = State(params=Params(), n_people=10)
+        state = make_state_from_params(params=Params(), n_people=10)
         with pytest.raises(
             ValueError, match="Cannot alter inner values of params in-place"
         ):
             state.params.delta_time = 0.1
 
     async def test_set_sub_sub_params(self):
-        state = State(params=Params(), n_people=10)
+        state = make_state_from_params(params=Params(), n_people=10)
         with pytest.raises(
             ValueError, match="Cannot alter inner values of params in-place"
         ):
@@ -55,7 +55,7 @@ class TestDerivedParams:
             ValueError,
             match="Treatment times could not be found for start: 0.0, stop: 10.0, interval: 3.0",
         ):
-            State(
+            make_state_from_params(
                 params=Params(
                     treatment=TreatmentParams(
                         start_time=0, stop_time=10, interval_years=3
