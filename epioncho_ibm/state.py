@@ -130,6 +130,19 @@ class People:
             np.array(group["time_of_last_treatment"]),
         )
 
+    def process_deaths(self, people_to_die: NDArray[np.bool_], gender_ratio):
+        if (total_people_to_die := int(np.sum(people_to_die))) > 0:
+            self.sex_is_male[people_to_die] = (
+                np.random.uniform(low=0, high=1, size=total_people_to_die)
+                < gender_ratio
+            )
+            self.ages[people_to_die] = 0
+            self.blackfly.L1[people_to_die] = 0
+            self.mf[:, people_to_die] = 0
+            self.worms.male[:, people_to_die] = 0
+            self.worms.fertile[:, people_to_die] = 0
+            self.worms.infertile[:, people_to_die] = 0
+
 
 class DelayArrays:
     worm_delay: NDArray[np.int_]
@@ -175,19 +188,21 @@ class DelayArrays:
         group.create_dataset("exposure_delay", data=self.exposure_delay)
         group.create_dataset("mf_delay", data=self.mf_delay)
 
+    def process_deaths(self, people_to_die: NDArray[np.bool_]):
+        if np.any(people_to_die):
+            self.worm_delay[:, people_to_die] = 0
+            self.mf_delay[0, people_to_die] = 0
+            self.l1_delay[people_to_die] = 0
+
 
 def _calc_coverage(
     people: People,
-    # percent_non_compliant: float,
     measured_coverage: float,
     age_compliance: float,
 ) -> NDArray[np.bool_]:
 
-    non_compliant_people = np.logical_or(
-        people.ages < age_compliance, np.logical_not(people.compliance)
-    )
-    non_compliant_percentage = np.sum(non_compliant_people) / len(non_compliant_people)
-    compliant_percentage = 1 - non_compliant_percentage
+    non_compliant_people = (people.ages < age_compliance) | ~people.compliance
+    compliant_percentage = 1 - np.mean(non_compliant_people)
     coverage = measured_coverage / compliant_percentage  # TODO: Is this correct?
     out_coverage = np.repeat(coverage, len(people))
     out_coverage[non_compliant_people] = 0
@@ -412,16 +427,6 @@ class State(Generic[CallbackStat]):
         # increase ages
         self._people.ages += self.params.delta_time
 
-        people_to_die: NDArray[np.bool_] = np.logical_or(
-            np.random.binomial(
-                n=1,
-                p=(1 / self.params.humans.mean_human_age) * self.params.delta_time,
-                size=self.n_people,
-            )
-            == 1,
-            self._people.ages >= self.params.humans.max_human_age,
-        )
-
         # there is a delay in new parasites entering humans (from fly bites) and entering the first adult worm age class
         new_worms = calc_new_worms(
             self._people.blackfly.L3,
@@ -512,23 +517,17 @@ class State(Generic[CallbackStat]):
         self._delay_arrays.mf_delay = lag_array(old_mf, self._delay_arrays.mf_delay)
         self._delay_arrays.l1_delay = self._people.blackfly.L1
 
-        total_people_to_die: int = int(np.sum(people_to_die))
-        if total_people_to_die > 0:
-            self._delay_arrays.worm_delay[:, people_to_die] = 0
-            self._delay_arrays.mf_delay[0, people_to_die] = 0
-            self._delay_arrays.l1_delay[people_to_die] = 0
-            self._people.time_of_last_treatment[people_to_die] = np.nan
-
-            self._people.sex_is_male[people_to_die] = (
-                np.random.uniform(low=0, high=1, size=total_people_to_die)
-                < self.params.humans.gender_ratio
+        people_to_die: NDArray[np.bool_] = np.logical_or(
+            np.random.binomial(
+                n=1,
+                p=(1 / self.params.humans.mean_human_age) * self.params.delta_time,
+                size=self.n_people,
             )
-            self._people.ages[people_to_die] = 0
-            self._people.blackfly.L1[people_to_die] = 0
-            self._people.mf[:, people_to_die] = 0
-            self._people.worms.male[:, people_to_die] = 0
-            self._people.worms.fertile[:, people_to_die] = 0
-            self._people.worms.infertile[:, people_to_die] = 0
+            == 1,
+            self._people.ages >= self.params.humans.max_human_age,
+        )
+        self._people.process_deaths(people_to_die, self.params.humans.gender_ratio)
+        self._delay_arrays.process_deaths(people_to_die)
 
     def run_simulation(
         self: "State", start_time: float = 0, end_time: float = 0, verbose: bool = False
