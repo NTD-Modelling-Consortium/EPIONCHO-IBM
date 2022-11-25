@@ -124,34 +124,38 @@ def process_treatment(
     time_of_last_treatment: NDArray[np.float_] | None,
     current_time: float,
     mortalities: NDArray[np.float_],
-) -> tuple[NDArray[np.float_], NDArray[np.float_]]:
+) -> tuple[NDArray[np.float_], NDArray[np.float_], NDArray[np.float_] | None]:
     # approach assumes individuals which are moved from fertile to non
     # fertile class due to treatment re enter fertile class at standard rate
 
     female_mortalities = mortalities  # mort.fems
     fertile_to_non_fertile_rate = np.zeros(n_people)
 
+    # We'll create a new array (a copy) only when needed, see below if-
+    modified_time_of_last_treatment = time_of_last_treatment
+
     if treatment_params is not None and current_time > treatment_params.start_time:
-        assert time_of_last_treatment is not None
+        assert modified_time_of_last_treatment is not None
         assert initial_treatment_times is not None
         during_treatment = np.any(
-            np.logical_and(
-                current_time <= initial_treatment_times,
-                initial_treatment_times < current_time + delta_time,
-            )
+            (current_time <= initial_treatment_times)
+            & (initial_treatment_times < current_time + delta_time)
         )
         if during_treatment and current_time <= treatment_params.stop_time:
             female_mortalities = np.tile(mortalities, (n_people, 1))
             assert coverage_in is not None
             assert coverage_in.shape == (n_people,)
-            time_of_last_treatment[coverage_in] = current_time  # treat.vec
+            modified_time_of_last_treatment = modified_time_of_last_treatment.copy()
+            modified_time_of_last_treatment[coverage_in] = current_time  # treat.vec
             # params.permanent_infertility is the proportion of female worms made permanently infertile, killed for simplicity
             female_mortalities[coverage_in] += worm_params.permanent_infertility
 
-        time_since_treatment = current_time - time_of_last_treatment  # tao
+        time_since_treatment = current_time - modified_time_of_last_treatment  # tao
 
         # individuals which have been treated get additional infertility rate
-        lam_m_temp = np.where(time_of_last_treatment == np.nan, 0, worm_params.lam_m)
+        lam_m_temp = np.where(
+            modified_time_of_last_treatment == np.nan, 0, worm_params.lam_m
+        )
         fertile_to_non_fertile_rate = np.nan_to_num(
             delta_time * lam_m_temp * np.exp(-worm_params.phi * time_since_treatment)
         )
@@ -159,6 +163,7 @@ def process_treatment(
     return (
         female_mortalities.T,
         worm_params.lambda_zero * delta_time + fertile_to_non_fertile_rate,
+        modified_time_of_last_treatment,
     )
 
 
@@ -175,9 +180,9 @@ def change_in_worms(
     initial_treatment_times: NDArray[np.float_] | None,
     current_time: float,
     time_of_last_treatment: NDArray[np.float_] | None,
-):
+) -> tuple[WormGroup, NDArray[np.float_] | None]:
     # TODO: time_of_last_treatment is modified inside, change this!
-    female_mortalities, lambda_zero_in = process_treatment(
+    female_mortalities, lambda_zero_in, time_of_last_treatment = process_treatment(
         worm_params=worm_params,
         treatment_params=treatment_params,
         delta_time=delta_time,
@@ -235,9 +240,7 @@ def change_in_worms(
     ), "Worms became negative!"
 
     return (
-        new_male,
-        new_infertile,
-        new_fertile,
+        WormGroup(male=new_male, infertile=new_infertile, fertile=new_fertile),
         time_of_last_treatment,
     )
 
