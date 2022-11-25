@@ -1,7 +1,7 @@
 import math
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable, Generic, TypeVar
+from typing import IO, Callable, Generic, TypeVar
 
 import h5py
 import numpy as np
@@ -94,11 +94,7 @@ class People:
     blackfly: BlackflyLarvae
     ages: NDArray[np.float_]  # 2: current age
     mf: NDArray[np.float_]  # 2D Array, (N, age stage): microfilariae stages 7-28 (21)
-    # 2D Array, (N, age stage): worm stages 29-92 (63) males(21), infertile females(21), fertile females(21)
-    male_worms: NDArray[np.int_]
-    infertile_female_worms: NDArray[np.int_]
-    fertile_female_worms: NDArray[np.int_]
-
+    worms: WormGroup
     time_of_last_treatment: NDArray[np.float_]  # treat.vec
 
     def __len__(self):
@@ -111,9 +107,9 @@ class People:
         self.blackfly.append_to_hdf5_group(blackfly_group)
         group.create_dataset("ages", data=self.ages)
         group.create_dataset("mf", data=self.mf)
-        group.create_dataset("male_worms", data=self.male_worms)
-        group.create_dataset("infertile_female_worms", data=self.infertile_female_worms)
-        group.create_dataset("fertile_female_worms", data=self.fertile_female_worms)
+        group.create_dataset("male_worms", data=self.worms.male)
+        group.create_dataset("infertile_female_worms", data=self.worms.infertile)
+        group.create_dataset("fertile_female_worms", data=self.worms.fertile)
         group.create_dataset("time_of_last_treatment", data=self.time_of_last_treatment)
 
     @classmethod
@@ -126,9 +122,11 @@ class People:
             BlackflyLarvae.from_hdf5_group(blackfly_group),
             np.array(group["ages"]),
             np.array(group["mf"]),
-            np.array(group["male_worms"]),
-            np.array(group["infertile_female_worms"]),
-            np.array(group["fertile_female_worms"]),
+            WormGroup(
+                male=np.array(group["male_worms"]),
+                infertile=np.array(group["infertile_female_worms"]),
+                fertile=np.array(group["fertile_female_worms"]),
+            ),
             np.array(group["time_of_last_treatment"]),
         )
 
@@ -233,12 +231,12 @@ def _calculate_total_exposure(
     return total_exposure / np.mean(total_exposure)
 
 
-
 def _lag_array(first_item, arr):
     return np.vstack((first_item, arr[:-1]))
 
 
 CallbackStat = TypeVar("CallbackStat")
+
 
 class State(Generic[CallbackStat]):
     _people: People
@@ -286,16 +284,16 @@ class State(Generic[CallbackStat]):
                 ),
                 mf=np.ones((params.microfil.microfil_age_stages, n_people))
                 * params.microfil.initial_mf,
-                male_worms=np.ones((params.worms.worm_age_stages, n_people), dtype=int)
-                * params.worms.initial_worms,
-                infertile_female_worms=np.ones(
-                    (params.worms.worm_age_stages, n_people), dtype=int
-                )
-                * params.worms.initial_worms,
-                fertile_female_worms=np.ones(
-                    (params.worms.worm_age_stages, n_people), dtype=int
-                )
-                * params.worms.initial_worms,
+                worms=WormGroup(
+                    male=np.ones((params.worms.worm_age_stages, n_people), dtype=int)
+                    * params.worms.initial_worms,
+                    infertile=np.ones(
+                        (params.worms.worm_age_stages, n_people), dtype=int
+                    )
+                    * params.worms.initial_worms,
+                    fertile=np.ones((params.worms.worm_age_stages, n_people), dtype=int)
+                    * params.worms.initial_worms,
+                ),
                 time_of_last_treatment=time_of_last_treatment,
             ),
             params=params,
@@ -335,7 +333,7 @@ class State(Generic[CallbackStat]):
         kmf = (
             self.params.microfil.slope_kmf
             * np.sum(
-                self._people.fertile_female_worms + self._people.infertile_female_worms,
+                self._people.worms.fertile + self._people.worms.infertile,
                 axis=0,
             )
             + self.params.microfil.initial_kmf
@@ -367,9 +365,7 @@ class State(Generic[CallbackStat]):
             self._people.ages >= self.params.humans.min_skinsnip_age
         )
         _, mf_skin_snip = self.microfilariae_per_skin_snip()
-        infected_over_min_age: float = float(
-            np.sum(mf_skin_snip[pop_over_min_age_array] > 0)
-        )
+        infected_over_min_age = float(np.sum(mf_skin_snip[pop_over_min_age_array] > 0))
         total_over_min_age = float(np.sum(pop_over_min_age_array))
         return infected_over_min_age / total_over_min_age
 
@@ -384,12 +380,12 @@ class State(Generic[CallbackStat]):
             L3=NumericArrayStat.from_array(self._people.blackfly.L3),
             ages=NumericArrayStat.from_array(self._people.ages),
             mf=NumericArrayStat.from_array(self._people.mf),
-            male_worms=NumericArrayStat.from_array(self._people.male_worms),
+            male_worms=NumericArrayStat.from_array(self._people.worms.male),
             infertile_female_worms=NumericArrayStat.from_array(
-                self._people.infertile_female_worms
+                self._people.worms.infertile
             ),
             fertile_female_worms=NumericArrayStat.from_array(
-                self._people.fertile_female_worms
+                self._people.worms.fertile
             ),
             mf_per_skin_snip=self.microfilariae_per_skin_snip()[0],
             population_prevalence=self.mf_prevalence_in_population(),
@@ -446,21 +442,16 @@ class State(Generic[CallbackStat]):
             new_worms, self._delay_arrays.worm_delay
         )
 
-        old_fertile_female_worms = self._people.fertile_female_worms.copy()
-        old_male_worms = self._people.male_worms.copy()
+        old_fertile_female_worms = self._people.worms.fertile.copy()
+        old_male_worms = self._people.worms.male.copy()
 
         current_worms = WormGroup(
-            male=self._people.male_worms,
-            infertile=self._people.infertile_female_worms,
-            fertile=self._people.fertile_female_worms,
+            male=self._people.worms.male,
+            infertile=self._people.worms.infertile,
+            fertile=self._people.worms.fertile,
         )
 
-        (
-            self._people.male_worms,
-            self._people.infertile_female_worms,
-            self._people.fertile_female_worms,
-            last_time_of_last_treatment,
-        ) = change_in_worms(
+        self._people.worms, last_time_of_last_treatment = change_in_worms(
             current_worms=current_worms,
             worm_params=self.params.worms,
             treatment_params=self.params.treatment,
@@ -541,9 +532,9 @@ class State(Generic[CallbackStat]):
             self._people.ages[people_to_die] = 0
             self._people.blackfly.L1[people_to_die] = 0
             self._people.mf[:, people_to_die] = 0
-            self._people.male_worms[:, people_to_die] = 0
-            self._people.fertile_female_worms[:, people_to_die] = 0
-            self._people.infertile_female_worms[:, people_to_die] = 0
+            self._people.worms.male[:, people_to_die] = 0
+            self._people.worms.fertile[:, people_to_die] = 0
+            self._people.worms.infertile[:, people_to_die] = 0
 
     def run_simulation(
         self: "State", start_time: float = 0, end_time: float = 0, verbose: bool = False
@@ -605,15 +596,15 @@ class State(Generic[CallbackStat]):
         return output_stats
 
     @classmethod
-    def from_hdf5(cls, filename: str | Path):
-        f = h5py.File(filename, "r")
+    def from_hdf5(cls, input_file: str | Path | IO):
+        f = h5py.File(input_file, "r")
         people_group = f["people"]
         assert isinstance(people_group, h5py.Group)
         params: str = str(f.attrs["params"])
         return cls(People.from_hdf5_group(people_group), Params.parse_raw(params))
 
-    def to_hdf5(self, filename: str | Path):
-        f = h5py.File(filename, "w")
+    def to_hdf5(self, output_file: str | Path | IO):
+        f = h5py.File(output_file, "w")
         group_people = f.create_group("people")
         group_delay_arrays = f.create_group("delay_arrays")
         self._people.append_to_hdf5_group(group_people)
@@ -625,5 +616,5 @@ def make_state_from_params(params: Params, n_people: int):
     return State.from_params(params, n_people)
 
 
-def make_state_from_hdf5(filename: str | Path):
-    return State.from_hdf5(filename)
+def make_state_from_hdf5(input_file: str | Path | IO):
+    return State.from_hdf5(input_file)
