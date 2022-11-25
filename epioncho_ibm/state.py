@@ -445,14 +445,8 @@ class State(Generic[CallbackStat]):
         old_fertile_female_worms = self._people.worms.fertile.copy()
         old_male_worms = self._people.worms.male.copy()
 
-        current_worms = WormGroup(
-            male=self._people.worms.male,
-            infertile=self._people.worms.infertile,
-            fertile=self._people.worms.fertile,
-        )
-
         self._people.worms, last_time_of_last_treatment = change_in_worms(
-            current_worms=current_worms,
+            current_worms=self._people.worms,
             worm_params=self.params.worms,
             treatment_params=self.params.treatment,
             delta_time=self.params.delta_time,
