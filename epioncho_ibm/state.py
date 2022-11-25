@@ -1,5 +1,7 @@
 import math
 from dataclasses import dataclass
+from pathlib import Path
+from typing import Callable, Generic, TypeVar
 
 import h5py
 import numpy as np
@@ -234,7 +236,10 @@ def _lag_array(first_item, arr):
     return np.vstack((first_item, arr[:-1]))
 
 
-class State:
+CallbackStat = TypeVar("CallbackStat")
+
+
+class State(Generic[CallbackStat]):
     _people: People
     _params: Params
     _derived_params: DerivedParams
@@ -577,18 +582,48 @@ class State:
             current_time += self.params.delta_time
         return output_stats
 
+    def run_simulation_output_callback(
+        self: "State",
+        output_callback: Callable[[People, float], CallbackStat],
+        sampling_interval: float,
+        start_time: float = 0,
+        end_time: float = 0,
+        verbose: bool = False,
+    ) -> list[CallbackStat]:
+        if end_time < start_time:
+            raise ValueError("End time after start")
+
+        current_time = start_time
+        output_stats: list[CallbackStat] = []
+        while current_time < end_time:
+            if self.params.delta_time > current_time % 0.2 and verbose:
+                print(current_time)
+            if self.params.delta_time > current_time % sampling_interval:
+                output_stats.append(output_callback(self._people, current_time))
+            self._advance(current_time=current_time)
+            current_time += self.params.delta_time
+        return output_stats
+
     @classmethod
-    def from_hdf5(cls, filename: str):
+    def from_hdf5(cls, filename: str | Path):
         f = h5py.File(filename, "r")
         people_group = f["people"]
         assert isinstance(people_group, h5py.Group)
         params: str = str(f.attrs["params"])
         return cls(People.from_hdf5_group(people_group), Params.parse_raw(params))
 
-    def to_hdf5(self, filename: str):
+    def to_hdf5(self, filename: str | Path):
         f = h5py.File(filename, "w")
         group_people = f.create_group("people")
         group_delay_arrays = f.create_group("delay_arrays")
         self._people.append_to_hdf5_group(group_people)
         self._delay_arrays.append_to_hdf5_group(group_delay_arrays)
         f.attrs["params"] = self._params.json()
+
+
+def make_state_from_params(params: Params, n_people: int):
+    return State.from_params(params, n_people)
+
+
+def make_state_from_hdf5(filename: str | Path):
+    return State.from_hdf5(filename)
