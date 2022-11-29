@@ -54,14 +54,12 @@ class BlackflyLarvae:
     L3: NDArray[np.float_]  # 6: L3
 
     def __eq__(self, other: object) -> bool:
-        if isinstance(other, BlackflyLarvae):
-            return (
-                array_fully_equal(self.L1, other.L1)
-                and array_fully_equal(self.L2, other.L2)
-                and array_fully_equal(self.L3, other.L3)
-            )
-        else:
-            return False
+        return (
+            isinstance(other, BlackflyLarvae)
+            and array_fully_equal(self.L1, other.L1)
+            and array_fully_equal(self.L2, other.L2)
+            and array_fully_equal(self.L3, other.L3)
+        )
 
     def append_to_hdf5_group(self, group: h5py.Group):
         group.create_dataset("L1", data=self.L1)
@@ -110,15 +108,13 @@ class DelayArrays:
         self.l1_delay = l1_delay
 
     def __eq__(self, other: object) -> bool:
-        if isinstance(other, DelayArrays):
-            return (
-                array_fully_equal(self.worm_delay, other.worm_delay)
-                and array_fully_equal(self.exposure_delay, other.exposure_delay)
-                and array_fully_equal(self.mf_delay, other.mf_delay)
-                and array_fully_equal(self.l1_delay, other.l1_delay)
-            )
-        else:
-            return False
+        return (
+            isinstance(other, DelayArrays)
+            and array_fully_equal(self.worm_delay, other.worm_delay)
+            and array_fully_equal(self.exposure_delay, other.exposure_delay)
+            and array_fully_equal(self.mf_delay, other.mf_delay)
+            and array_fully_equal(self.l1_delay, other.l1_delay)
+        )
 
     @classmethod
     def from_params(cls, params: Params, n_people: int, individual_exposure):
@@ -183,24 +179,20 @@ class People:
     individual_exposure: NDArray[np.float_]
 
     def __eq__(self, other: object) -> bool:
-        if isinstance(other, People):
-            return (
-                array_fully_equal(self.compliance, other.compliance)
-                and array_fully_equal(self.sex_is_male, other.sex_is_male)
-                and self.blackfly == other.blackfly
-                and array_fully_equal(self.ages, other.ages)
-                and array_fully_equal(self.mf, other.mf)
-                and self.worms == other.worms
-                and array_fully_equal(
-                    self.time_of_last_treatment, other.time_of_last_treatment
-                )
-                and self.delay_arrays == other.delay_arrays
-                and array_fully_equal(
-                    self.individual_exposure, other.individual_exposure
-                )
+        return (
+            isinstance(other, People)
+            and array_fully_equal(self.compliance, other.compliance)
+            and array_fully_equal(self.sex_is_male, other.sex_is_male)
+            and self.blackfly == other.blackfly
+            and array_fully_equal(self.ages, other.ages)
+            and array_fully_equal(self.mf, other.mf)
+            and self.worms == other.worms
+            and array_fully_equal(
+                self.time_of_last_treatment, other.time_of_last_treatment
             )
-        else:
-            return False
+            and self.delay_arrays == other.delay_arrays
+            and array_fully_equal(self.individual_exposure, other.individual_exposure)
+        )
 
     def __len__(self):
         return len(self.compliance)
@@ -475,10 +467,11 @@ class State(Generic[CallbackStat]):
         )
 
     def __eq__(self, other: object) -> bool:
-        if isinstance(other, State):
-            return self._people == other._people and self.params == other.params
-        else:
-            return False
+        return (
+            isinstance(other, State)
+            and self._people == other._people
+            and self.params == other.params
+        )
 
     def _advance(self: "State", current_time: float):
         if (
