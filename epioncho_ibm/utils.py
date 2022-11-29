@@ -1,8 +1,11 @@
+from typing import TypeVar
+
 import numpy as np
-from numpy.typing import ArrayLike, NDArray
+from numpy.typing import NDArray
 
+DType = TypeVar("DType", bound=np.generic)
 
-def lag_array(fill: NDArray, arr: NDArray, n: int = 1) -> NDArray:
+def lag_array(fill: NDArray[DType], arr: NDArray[DType], n: int = 1) -> NDArray[DType]:
     """Lag array by `n` and back-stack with `fill`
 
     Args:
@@ -17,5 +20,5 @@ def lag_array(fill: NDArray, arr: NDArray, n: int = 1) -> NDArray:
     return np.vstack((fill, arr[:-n]))
 
 
-def array_fully_equal(a1: ArrayLike, a2: ArrayLike):
+def array_fully_equal(a1: NDArray[DType], a2: NDArray[DType]):
     return np.array_equal(a1, a2, equal_nan=True)

@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Any, Optional
 
 from pydantic import BaseModel
 
@@ -9,10 +9,10 @@ class BaseParams(BaseModel):
 
 
 class BaseSubParams(BaseParams):
-    def __setattr__(self, name, value):
+    def __setattr__(self, name: str, value: Any):
         try:
             return super().__setattr__(name, value)
-        except TypeError as e:
+        except TypeError:
             raise ValueError(
                 "Cannot alter inner values of params in-place, please replace entire params as e.g.:\n"
                 + f"state.params = Params(attr_name={self.__class__.__name__}({name}={value}))"
@@ -20,10 +20,10 @@ class BaseSubParams(BaseParams):
 
 
 class BaseParentParams(BaseParams):
-    def __setattr__(self, name, value):
+    def __setattr__(self, name: str, value: Any):
         try:
             return super().__setattr__(name, value)
-        except TypeError as e:
+        except TypeError:
             raise ValueError(
                 "Cannot alter inner values of params in-place, please replace entire params as e.g.:\n"
                 + f"state.params = {self.__class__.__name__}({name}={value})"
