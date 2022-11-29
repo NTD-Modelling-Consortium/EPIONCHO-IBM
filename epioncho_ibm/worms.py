@@ -5,6 +5,7 @@ from numpy.typing import NDArray
 
 import epioncho_ibm.blackfly as blackfly
 import epioncho_ibm.utils as utils
+from epioncho_ibm.types import Array
 
 from .params import BlackflyParams, TreatmentParams, WormParams
 
@@ -18,9 +19,9 @@ __all__ = [
 
 @dataclass
 class WormGroup:
-    male: NDArray[np.int_]
-    infertile: NDArray[np.int_]
-    fertile: NDArray[np.int_]
+    male: Array.Person.WormCat.Int
+    infertile: Array.Person.WormCat.Int
+    fertile: Array.Person.WormCat.Int
 
     def __eq__(self, other: object) -> bool:
         if isinstance(other, WormGroup):
@@ -183,13 +184,13 @@ def change_in_worms(
     treatment_params: TreatmentParams | None,
     delta_time: float,
     n_people: int,
-    delayed_females: NDArray[np.int_],
-    delayed_males: NDArray[np.int_],
-    mortalities: NDArray[np.float_],
-    coverage_in: NDArray[np.bool_] | None,
-    initial_treatment_times: NDArray[np.float_] | None,
+    delayed_females: Array.Person.Int,
+    delayed_males: Array.Person.Int,
+    mortalities: Array.WormCat.Float,
+    coverage_in: Array.Person.Bool | None,
+    initial_treatment_times: Array.Treatments.Float | None,
     current_time: float,
-    time_of_last_treatment: NDArray[np.float_] | None,
+    time_of_last_treatment: Array.Person.Float | None,
 ) -> tuple[WormGroup, NDArray[np.float_] | None]:
     # TODO: time_of_last_treatment is modified inside, change this!
     female_mortalities, lambda_zero_in, time_of_last_treatment = process_treatment(
@@ -256,7 +257,7 @@ def change_in_worms(
 
 
 def get_delayed_males_and_females(
-    worm_delay: NDArray[np.int_], n_people: int, worm_sex_ratio: float
+    worm_delay: Array.Person.WormDelay.Int, n_people: int, worm_sex_ratio: float
 ) -> tuple[NDArray[np.int_], NDArray[np.int_]]:
     final_column = np.array(worm_delay[-1], dtype=int)
     assert len(final_column) == n_people
@@ -268,12 +269,12 @@ def get_delayed_males_and_females(
 
 
 def calc_new_worms(
-    L3: NDArray[np.float_],
+    L3: Array.Person.Float,
     blackfly_params: BlackflyParams,
     delta_time: float,
-    total_exposure: NDArray[np.float_],
+    total_exposure: Array.Person.Float,
     n_people: int,
-) -> NDArray[np.int_]:
+) -> Array.Person.Int:
     new_rate = blackfly.w_plus_one_rate(
         blackfly_params,
         delta_time,

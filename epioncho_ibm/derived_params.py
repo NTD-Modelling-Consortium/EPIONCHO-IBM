@@ -4,24 +4,25 @@ from typing import Optional
 import numpy as np
 from numpy.typing import NDArray
 
+from epioncho_ibm.types import Array
+
 from .params import Params
 
 
 def _weibull_mortality(
-    delta_time: float, mu1: float, mu2: float, age_categories: NDArray[np.float_]
-) -> NDArray[np.float_]:
+    delta_time: float, mu1: float, mu2: float, age_categories: Array.General.Float
+) -> Array.General.Float:
     return delta_time * (mu1**mu2) * mu2 * (age_categories ** (mu2 - 1))
 
 
 class DerivedParams:
-    worm_mortality_rate: NDArray[np.float_]
-    fecundity_rates_worms: NDArray[np.float_]
-    microfillarie_mortality_rate: NDArray[np.float_]
-    initial_treatment_times: Optional[NDArray[np.float_]]
+    worm_mortality_rate: Array.WormCat.Float
+    fecundity_rates_worms: Array.WormCat.Float
+    microfillarie_mortality_rate: Array.MFCat.Float
+    initial_treatment_times: Optional[Array.Treatments.Float]
 
     def __init__(self, params: Params, n_people: int) -> None:
-
-        worm_age_categories = np.arange(
+        worm_age_categories: Array.WormCat.Float = np.arange(
             start=0,
             stop=params.worms.max_worm_age,
             step=params.worms.max_worm_age / params.worms.worm_age_stages,
@@ -32,6 +33,7 @@ class DerivedParams:
             params.worms.mu_worms2,
             worm_age_categories,
         )
+
         self.fecundity_rates_worms = (
             1.158305
             * params.worms.fecundity_worms_1
