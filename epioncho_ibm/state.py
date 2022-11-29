@@ -11,7 +11,7 @@ from tqdm import tqdm
 
 from epioncho_ibm.blackfly import calc_l1, calc_l2, calc_l3
 from epioncho_ibm.microfil import calculate_microfil_delta
-from epioncho_ibm.utils import lag_array
+from epioncho_ibm.utils import array_fully_equal, lag_array
 from epioncho_ibm.worms import (
     WormGroup,
     calc_new_worms,
@@ -53,6 +53,14 @@ class BlackflyLarvae:
     L2: NDArray[np.float_]  # 5: L2
     L3: NDArray[np.float_]  # 6: L3
 
+    def __eq__(self, other: object) -> bool:
+        return (
+            isinstance(other, BlackflyLarvae)
+            and array_fully_equal(self.L1, other.L1)
+            and array_fully_equal(self.L2, other.L2)
+            and array_fully_equal(self.L3, other.L3)
+        )
+
     def append_to_hdf5_group(self, group: h5py.Group):
         group.create_dataset("L1", data=self.L1)
         group.create_dataset("L2", data=self.L2)
@@ -87,63 +95,6 @@ class StateStats(BaseModel):
     population_prevalence: float
 
 
-@dataclass
-class People:
-    compliance: NDArray[np.bool_]  # 1: 'column used during treatment'
-    sex_is_male: NDArray[np.bool_]  # 3: sex
-    blackfly: BlackflyLarvae
-    ages: NDArray[np.float_]  # 2: current age
-    mf: NDArray[np.float_]  # 2D Array, (N, age stage): microfilariae stages 7-28 (21)
-    worms: WormGroup
-    time_of_last_treatment: NDArray[np.float_]  # treat.vec
-
-    def __len__(self):
-        return len(self.compliance)
-
-    def append_to_hdf5_group(self, group: h5py.Group):
-        blackfly_group = group.create_group("blackfly")
-        group.create_dataset("compliance", data=self.compliance)
-        group.create_dataset("sex_is_male", data=self.sex_is_male)
-        self.blackfly.append_to_hdf5_group(blackfly_group)
-        group.create_dataset("ages", data=self.ages)
-        group.create_dataset("mf", data=self.mf)
-        group.create_dataset("male_worms", data=self.worms.male)
-        group.create_dataset("infertile_female_worms", data=self.worms.infertile)
-        group.create_dataset("fertile_female_worms", data=self.worms.fertile)
-        group.create_dataset("time_of_last_treatment", data=self.time_of_last_treatment)
-
-    @classmethod
-    def from_hdf5_group(cls, group: h5py.Group):
-        blackfly_group = group["blackfly"]
-        assert isinstance(blackfly_group, h5py.Group)
-        return cls(
-            np.array(group["compliance"]),
-            np.array(group["sex_is_male"]),
-            BlackflyLarvae.from_hdf5_group(blackfly_group),
-            np.array(group["ages"]),
-            np.array(group["mf"]),
-            WormGroup(
-                male=np.array(group["male_worms"]),
-                infertile=np.array(group["infertile_female_worms"]),
-                fertile=np.array(group["fertile_female_worms"]),
-            ),
-            np.array(group["time_of_last_treatment"]),
-        )
-
-    def process_deaths(self, people_to_die: NDArray[np.bool_], gender_ratio):
-        if (total_people_to_die := int(np.sum(people_to_die))) > 0:
-            self.sex_is_male[people_to_die] = (
-                np.random.uniform(low=0, high=1, size=total_people_to_die)
-                < gender_ratio
-            )
-            self.ages[people_to_die] = 0
-            self.blackfly.L1[people_to_die] = 0
-            self.mf[:, people_to_die] = 0
-            self.worms.male[:, people_to_die] = 0
-            self.worms.fertile[:, people_to_die] = 0
-            self.worms.infertile[:, people_to_die] = 0
-
-
 class DelayArrays:
     worm_delay: NDArray[np.int_]
     exposure_delay: NDArray[np.float_]
@@ -155,6 +106,15 @@ class DelayArrays:
         self.exposure_delay = exposure_delay
         self.mf_delay = mf_delay
         self.l1_delay = l1_delay
+
+    def __eq__(self, other: object) -> bool:
+        return (
+            isinstance(other, DelayArrays)
+            and array_fully_equal(self.worm_delay, other.worm_delay)
+            and array_fully_equal(self.exposure_delay, other.exposure_delay)
+            and array_fully_equal(self.mf_delay, other.mf_delay)
+            and array_fully_equal(self.l1_delay, other.l1_delay)
+        )
 
     @classmethod
     def from_params(cls, params: Params, n_people: int, individual_exposure):
@@ -187,12 +147,161 @@ class DelayArrays:
         group.create_dataset("worm_delay", data=self.worm_delay)
         group.create_dataset("exposure_delay", data=self.exposure_delay)
         group.create_dataset("mf_delay", data=self.mf_delay)
+        group.create_dataset("l1_delay", data=self.l1_delay)
+
+    @classmethod
+    def from_hdf5_group(cls, group: h5py.Group):
+        return cls(
+            np.array(group["worm_delay"]),
+            np.array(group["exposure_delay"]),
+            np.array(group["mf_delay"]),
+            np.array(group["l1_delay"]),
+        )
 
     def process_deaths(self, people_to_die: NDArray[np.bool_]):
         if np.any(people_to_die):
             self.worm_delay[:, people_to_die] = 0
             self.mf_delay[0, people_to_die] = 0
             self.l1_delay[people_to_die] = 0
+            # TODO: Do we need self.exposure_delay = 0
+
+
+@dataclass
+class People:
+    compliance: NDArray[np.bool_]  # 1: 'column used during treatment'
+    sex_is_male: NDArray[np.bool_]  # 3: sex
+    blackfly: BlackflyLarvae
+    ages: NDArray[np.float_]  # 2: current age
+    mf: NDArray[np.float_]  # 2D Array, (N, age stage): microfilariae stages 7-28 (21)
+    worms: WormGroup
+    time_of_last_treatment: NDArray[np.float_]  # treat.vec
+    delay_arrays: DelayArrays
+    individual_exposure: NDArray[np.float_]
+
+    def __eq__(self, other: object) -> bool:
+        return (
+            isinstance(other, People)
+            and array_fully_equal(self.compliance, other.compliance)
+            and array_fully_equal(self.sex_is_male, other.sex_is_male)
+            and self.blackfly == other.blackfly
+            and array_fully_equal(self.ages, other.ages)
+            and array_fully_equal(self.mf, other.mf)
+            and self.worms == other.worms
+            and array_fully_equal(
+                self.time_of_last_treatment, other.time_of_last_treatment
+            )
+            and self.delay_arrays == other.delay_arrays
+            and array_fully_equal(self.individual_exposure, other.individual_exposure)
+        )
+
+    def __len__(self):
+        return len(self.compliance)
+
+    def append_to_hdf5_group(self, group: h5py.Group):
+        blackfly_group = group.create_group("blackfly")
+        delay_arrays_group = group.create_group("delay_arrays")
+        group.create_dataset("compliance", data=self.compliance)
+        group.create_dataset("sex_is_male", data=self.sex_is_male)
+        self.blackfly.append_to_hdf5_group(blackfly_group)
+        group.create_dataset("ages", data=self.ages)
+        group.create_dataset("mf", data=self.mf)
+        group.create_dataset("male_worms", data=self.worms.male)
+        group.create_dataset("infertile_female_worms", data=self.worms.infertile)
+        group.create_dataset("fertile_female_worms", data=self.worms.fertile)
+        group.create_dataset("time_of_last_treatment", data=self.time_of_last_treatment)
+        self.delay_arrays.append_to_hdf5_group(delay_arrays_group)
+        group.create_dataset("individual_exposure", data=self.individual_exposure)
+
+    @classmethod
+    def from_hdf5_group(cls, group: h5py.Group):
+        blackfly_group = group["blackfly"]
+        assert isinstance(blackfly_group, h5py.Group)
+        delay_arrays_group = group["delay_arrays"]
+        assert isinstance(delay_arrays_group, h5py.Group)
+        return cls(
+            np.array(group["compliance"]),
+            np.array(group["sex_is_male"]),
+            BlackflyLarvae.from_hdf5_group(blackfly_group),
+            np.array(group["ages"]),
+            np.array(group["mf"]),
+            WormGroup(
+                male=np.array(group["male_worms"]),
+                infertile=np.array(group["infertile_female_worms"]),
+                fertile=np.array(group["fertile_female_worms"]),
+            ),
+            np.array(group["time_of_last_treatment"]),
+            DelayArrays.from_hdf5_group(delay_arrays_group),
+            np.array(group["individual_exposure"]),
+        )
+
+    @classmethod
+    def from_params(cls, params: Params, n_people: int, gamma_distribution=0.3):
+        sex_array = (
+            np.random.uniform(low=0, high=1, size=n_people) < params.humans.gender_ratio
+        )
+        compliance_array = (
+            np.random.uniform(low=0, high=1, size=n_people)
+            > params.humans.noncompliant_percentage
+        )
+        time_of_last_treatment = np.empty(n_people)
+        time_of_last_treatment[:] = np.nan
+
+        individual_exposure = (
+            np.random.gamma(  # individual level exposure to fly bites "ex.vec"
+                shape=gamma_distribution,
+                scale=gamma_distribution,
+                size=n_people,
+            )
+        )
+        new_individual_exposure = individual_exposure / np.mean(
+            individual_exposure
+        )  # normalise
+        new_individual_exposure.setflags(write=False)
+
+        return cls(
+            compliance=compliance_array,
+            ages=truncated_geometric(
+                N=n_people,
+                prob=params.delta_time / params.humans.mean_human_age,
+                maximum=params.humans.max_human_age / params.delta_time,
+            )
+            * params.delta_time,
+            sex_is_male=sex_array,
+            blackfly=BlackflyLarvae(
+                L1=np.repeat(params.blackfly.initial_L1, n_people),
+                L2=np.repeat(params.blackfly.initial_L2, n_people),
+                L3=np.repeat(params.blackfly.initial_L3, n_people),
+            ),
+            mf=np.ones((params.microfil.microfil_age_stages, n_people))
+            * params.microfil.initial_mf,
+            worms=WormGroup(
+                male=np.ones((params.worms.worm_age_stages, n_people), dtype=int)
+                * params.worms.initial_worms,
+                infertile=np.ones((params.worms.worm_age_stages, n_people), dtype=int)
+                * params.worms.initial_worms,
+                fertile=np.ones((params.worms.worm_age_stages, n_people), dtype=int)
+                * params.worms.initial_worms,
+            ),
+            time_of_last_treatment=time_of_last_treatment,
+            delay_arrays=DelayArrays.from_params(
+                params, n_people, new_individual_exposure
+            ),
+            individual_exposure=new_individual_exposure,
+        )
+
+    def process_deaths(self, people_to_die: NDArray[np.bool_], gender_ratio):
+        if (total_people_to_die := int(np.sum(people_to_die))) > 0:
+            self.sex_is_male[people_to_die] = (
+                np.random.uniform(low=0, high=1, size=total_people_to_die)
+                < gender_ratio
+            )
+            self.ages[people_to_die] = 0
+            self.blackfly.L1[people_to_die] = 0
+            self.mf[:, people_to_die] = 0
+            self.worms.male[:, people_to_die] = 0
+            self.worms.fertile[:, people_to_die] = 0
+            self.worms.infertile[:, people_to_die] = 0
+        self.delay_arrays.process_deaths(people_to_die)
 
 
 def _calc_coverage(
@@ -211,9 +320,7 @@ def _calc_coverage(
 
 
 def _calculate_total_exposure(
-    exposure_params: ExposureParams,
-    people: People,
-    individual_exposure: NDArray[np.float_],
+    exposure_params: ExposureParams, people: People
 ) -> NDArray[np.float_]:
     male_exposure_assumed = exposure_params.male_exposure * np.exp(
         -exposure_params.male_exposure_exponent * people.ages
@@ -242,12 +349,8 @@ def _calculate_total_exposure(
         female_exposure_assumed / mean_female_exposure,
     )
 
-    total_exposure = sex_age_exposure * individual_exposure
+    total_exposure = sex_age_exposure * people.individual_exposure
     return total_exposure / np.mean(total_exposure)
-
-
-def _lag_array(first_item, arr):
-    return np.vstack((first_item, arr[:-1]))
 
 
 CallbackStat = TypeVar("CallbackStat")
@@ -257,60 +360,17 @@ class State(Generic[CallbackStat]):
     _people: People
     _params: Params
     _derived_params: DerivedParams
-    _delay_arrays: DelayArrays
 
-    def __init__(
-        self, people: People, params: Params, delay_arrays: DelayArrays | None = None
-    ) -> None:
+    def __init__(self, people: People, params: Params) -> None:
         self._people = people
         self.params = params
-        if delay_arrays is None:
-            self._delay_arrays = DelayArrays.from_params(
-                params, self.n_people, self._derived_params.individual_exposure
-            )
-        else:
-            self._delay_arrays = delay_arrays
 
     @classmethod
-    def from_params(cls, params: Params, n_people: int):
-        sex_array = (
-            np.random.uniform(low=0, high=1, size=n_people) < params.humans.gender_ratio
-        )
-        compliance_array = (
-            np.random.uniform(low=0, high=1, size=n_people)
-            > params.humans.noncompliant_percentage
-        )
-        time_of_last_treatment = np.empty(n_people)
-        time_of_last_treatment[:] = np.nan
+    def from_params(
+        cls, params: Params, n_people: int, gamma_distribution=0.3
+    ):  # "gam.dis" individual level exposure heterogeneity
         return cls(
-            people=People(
-                compliance=compliance_array,
-                ages=truncated_geometric(
-                    N=n_people,
-                    prob=params.delta_time / params.humans.mean_human_age,
-                    maximum=params.humans.max_human_age / params.delta_time,
-                )
-                * params.delta_time,
-                sex_is_male=sex_array,
-                blackfly=BlackflyLarvae(
-                    L1=np.repeat(params.blackfly.initial_L1, n_people),
-                    L2=np.repeat(params.blackfly.initial_L2, n_people),
-                    L3=np.repeat(params.blackfly.initial_L3, n_people),
-                ),
-                mf=np.ones((params.microfil.microfil_age_stages, n_people))
-                * params.microfil.initial_mf,
-                worms=WormGroup(
-                    male=np.ones((params.worms.worm_age_stages, n_people), dtype=int)
-                    * params.worms.initial_worms,
-                    infertile=np.ones(
-                        (params.worms.worm_age_stages, n_people), dtype=int
-                    )
-                    * params.worms.initial_worms,
-                    fertile=np.ones((params.worms.worm_age_stages, n_people), dtype=int)
-                    * params.worms.initial_worms,
-                ),
-                time_of_last_treatment=time_of_last_treatment,
-            ),
+            people=People.from_params(params, n_people, gamma_distribution),
             params=params,
         )
 
@@ -406,6 +466,13 @@ class State(Generic[CallbackStat]):
             population_prevalence=self.mf_prevalence_in_population(),
         )
 
+    def __eq__(self, other: object) -> bool:
+        return (
+            isinstance(other, State)
+            and self._people == other._people
+            and self.params == other.params
+        )
+
     def _advance(self: "State", current_time: float):
         if (
             self.params.treatment is not None
@@ -419,11 +486,7 @@ class State(Generic[CallbackStat]):
         else:
             coverage_in = None
 
-        total_exposure = _calculate_total_exposure(
-            self.params.exposure,
-            self._people,
-            self._derived_params.individual_exposure,
-        )
+        total_exposure = _calculate_total_exposure(self.params.exposure, self._people)
         # increase ages
         self._people.ages += self.params.delta_time
 
@@ -437,14 +500,14 @@ class State(Generic[CallbackStat]):
         )
         # Take males and females from final column of worm_delay
         delayed_males, delayed_females = get_delayed_males_and_females(
-            self._delay_arrays.worm_delay,
+            self._people.delay_arrays.worm_delay,
             self.n_people,
             self.params.worms.sex_ratio,
         )
 
         # Move all rows in worm_delay along one
-        self._delay_arrays.worm_delay = lag_array(
-            new_worms, self._delay_arrays.worm_delay
+        self._people.delay_arrays.worm_delay = lag_array(
+            new_worms, self._people.delay_arrays.worm_delay
         )
 
         old_fertile_female_worms = self._people.worms.fertile.copy()
@@ -495,27 +558,29 @@ class State(Generic[CallbackStat]):
         self._people.blackfly.L1 = calc_l1(
             self.params.blackfly,
             old_mf,
-            self._delay_arrays.mf_delay[-1],
+            self._people.delay_arrays.mf_delay[-1],
             total_exposure,
-            self._delay_arrays.exposure_delay[-1],
+            self._people.delay_arrays.exposure_delay[-1],
             self.params.year_length_days,
         )
 
         old_blackfly_L2 = self._people.blackfly.L2
         self._people.blackfly.L2 = calc_l2(
             self.params.blackfly,
-            self._delay_arrays.l1_delay,
-            self._delay_arrays.mf_delay[-1],
-            self._delay_arrays.exposure_delay[-1],
+            self._people.delay_arrays.l1_delay,
+            self._people.delay_arrays.mf_delay[-1],
+            self._people.delay_arrays.exposure_delay[-1],
             self.params.year_length_days,
         )
         self._people.blackfly.L3 = calc_l3(self.params.blackfly, old_blackfly_L2)
 
-        self._delay_arrays.exposure_delay = lag_array(
-            total_exposure, self._delay_arrays.exposure_delay
+        self._people.delay_arrays.exposure_delay = lag_array(
+            total_exposure, self._people.delay_arrays.exposure_delay
         )
-        self._delay_arrays.mf_delay = lag_array(old_mf, self._delay_arrays.mf_delay)
-        self._delay_arrays.l1_delay = self._people.blackfly.L1
+        self._people.delay_arrays.mf_delay = lag_array(
+            old_mf, self._people.delay_arrays.mf_delay
+        )
+        self._people.delay_arrays.l1_delay = self._people.blackfly.L1
 
         people_to_die: NDArray[np.bool_] = np.logical_or(
             np.random.binomial(
@@ -527,7 +592,6 @@ class State(Generic[CallbackStat]):
             self._people.ages >= self.params.humans.max_human_age,
         )
         self._people.process_deaths(people_to_die, self.params.humans.gender_ratio)
-        self._delay_arrays.process_deaths(people_to_die)
 
     def run_simulation(
         self: "State", start_time: float = 0, end_time: float = 0, verbose: bool = False
@@ -599,9 +663,7 @@ class State(Generic[CallbackStat]):
     def to_hdf5(self, output_file: str | Path | IO):
         f = h5py.File(output_file, "w")
         group_people = f.create_group("people")
-        group_delay_arrays = f.create_group("delay_arrays")
         self._people.append_to_hdf5_group(group_people)
-        self._delay_arrays.append_to_hdf5_group(group_delay_arrays)
         f.attrs["params"] = self._params.json()
 
 

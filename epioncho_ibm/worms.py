@@ -22,6 +22,16 @@ class WormGroup:
     infertile: NDArray[np.int_]
     fertile: NDArray[np.int_]
 
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, WormGroup):
+            return (
+                np.array_equal(self.male, other.male)
+                and np.array_equal(self.infertile, other.infertile)
+                and np.array_equal(self.fertile, other.fertile)
+            )
+        else:
+            return False
+
     @classmethod
     def from_population(cls, population: int):
         return cls(

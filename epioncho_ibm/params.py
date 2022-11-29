@@ -133,7 +133,6 @@ class ExposureParams(BaseSubParams):
     female_exposure: float = 0.9  # "f.exp"
     male_exposure_exponent: float = 0.007  # "age.exp.m"
     female_exposure_exponent: float = -0.023  # "age.exp.f"
-    gamma_distribution = 0.3  # "gam.dis" individual level exposure heterogeneity
 
 
 class HumanParams(BaseSubParams):
