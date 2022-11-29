@@ -1,5 +1,5 @@
 import numpy as np
-from numpy.typing import NDArray
+from numpy.typing import ArrayLike, NDArray
 
 
 def lag_array(fill: NDArray, arr: NDArray, n: int = 1) -> NDArray:
@@ -15,3 +15,7 @@ def lag_array(fill: NDArray, arr: NDArray, n: int = 1) -> NDArray:
     """
     assert n > 0
     return np.vstack((fill, arr[:-n]))
+
+
+def array_fully_equal(a1: ArrayLike, a2: ArrayLike):
+    return np.array_equal(a1, a2, equal_nan=True)

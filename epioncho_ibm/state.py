@@ -11,7 +11,7 @@ from tqdm import tqdm
 
 from epioncho_ibm.blackfly import calc_l1, calc_l2, calc_l3
 from epioncho_ibm.microfil import calculate_microfil_delta
-from epioncho_ibm.utils import lag_array
+from epioncho_ibm.utils import array_fully_equal, lag_array
 from epioncho_ibm.worms import (
     WormGroup,
     calc_new_worms,
@@ -53,6 +53,16 @@ class BlackflyLarvae:
     L2: NDArray[np.float_]  # 5: L2
     L3: NDArray[np.float_]  # 6: L3
 
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, BlackflyLarvae):
+            return (
+                array_fully_equal(self.L1, other.L1)
+                and array_fully_equal(self.L2, other.L2)
+                and array_fully_equal(self.L3, other.L3)
+            )
+        else:
+            return False
+
     def append_to_hdf5_group(self, group: h5py.Group):
         group.create_dataset("L1", data=self.L1)
         group.create_dataset("L2", data=self.L2)
@@ -86,6 +96,7 @@ class StateStats(BaseModel):
     mf_per_skin_snip: float
     population_prevalence: float
 
+
 class DelayArrays:
     worm_delay: NDArray[np.int_]
     exposure_delay: NDArray[np.float_]
@@ -97,6 +108,17 @@ class DelayArrays:
         self.exposure_delay = exposure_delay
         self.mf_delay = mf_delay
         self.l1_delay = l1_delay
+
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, DelayArrays):
+            return (
+                array_fully_equal(self.worm_delay, other.worm_delay)
+                and array_fully_equal(self.exposure_delay, other.exposure_delay)
+                and array_fully_equal(self.mf_delay, other.mf_delay)
+                and array_fully_equal(self.l1_delay, other.l1_delay)
+            )
+        else:
+            return False
 
     @classmethod
     def from_params(cls, params: Params, n_people: int, individual_exposure):
@@ -137,7 +159,7 @@ class DelayArrays:
             np.array(group["worm_delay"]),
             np.array(group["exposure_delay"]),
             np.array(group["mf_delay"]),
-            np.array(group["l1_delay"])
+            np.array(group["l1_delay"]),
         )
 
     def process_deaths(self, people_to_die: NDArray[np.bool_]):
@@ -159,6 +181,26 @@ class People:
     time_of_last_treatment: NDArray[np.float_]  # treat.vec
     delay_arrays: DelayArrays
     individual_exposure: NDArray[np.float_]
+
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, People):
+            return (
+                array_fully_equal(self.compliance, other.compliance)
+                and array_fully_equal(self.sex_is_male, other.sex_is_male)
+                and self.blackfly == other.blackfly
+                and array_fully_equal(self.ages, other.ages)
+                and array_fully_equal(self.mf, other.mf)
+                and self.worms == other.worms
+                and array_fully_equal(
+                    self.time_of_last_treatment, other.time_of_last_treatment
+                )
+                and self.delay_arrays == other.delay_arrays
+                and array_fully_equal(
+                    self.individual_exposure, other.individual_exposure
+                )
+            )
+        else:
+            return False
 
     def __len__(self):
         return len(self.compliance)
@@ -197,11 +239,11 @@ class People:
             ),
             np.array(group["time_of_last_treatment"]),
             DelayArrays.from_hdf5_group(delay_arrays_group),
-            np.array(group["individual_exposure"])
+            np.array(group["individual_exposure"]),
         )
 
     @classmethod
-    def from_params(cls, params: Params, n_people: int, gamma_distribution = 0.3 ): 
+    def from_params(cls, params: Params, n_people: int, gamma_distribution=0.3):
         sex_array = (
             np.random.uniform(low=0, high=1, size=n_people) < params.humans.gender_ratio
         )
@@ -225,37 +267,35 @@ class People:
         new_individual_exposure.setflags(write=False)
 
         return cls(
-                compliance=compliance_array,
-                ages=truncated_geometric(
-                    N=n_people,
-                    prob=params.delta_time / params.humans.mean_human_age,
-                    maximum=params.humans.max_human_age / params.delta_time,
-                )
-                * params.delta_time,
-                sex_is_male=sex_array,
-                blackfly=BlackflyLarvae(
-                    L1=np.repeat(params.blackfly.initial_L1, n_people),
-                    L2=np.repeat(params.blackfly.initial_L2, n_people),
-                    L3=np.repeat(params.blackfly.initial_L3, n_people),
-                ),
-                mf=np.ones((params.microfil.microfil_age_stages, n_people))
-                * params.microfil.initial_mf,
-                worms=WormGroup(
-                    male=np.ones((params.worms.worm_age_stages, n_people), dtype=int)
-                    * params.worms.initial_worms,
-                    infertile=np.ones(
-                        (params.worms.worm_age_stages, n_people), dtype=int
-                    )
-                    * params.worms.initial_worms,
-                    fertile=np.ones((params.worms.worm_age_stages, n_people), dtype=int)
-                    * params.worms.initial_worms,
-                ),
-                time_of_last_treatment=time_of_last_treatment,
-                delay_arrays=DelayArrays.from_params(
-                    params, n_people, new_individual_exposure
-                ),
-                individual_exposure=new_individual_exposure
+            compliance=compliance_array,
+            ages=truncated_geometric(
+                N=n_people,
+                prob=params.delta_time / params.humans.mean_human_age,
+                maximum=params.humans.max_human_age / params.delta_time,
             )
+            * params.delta_time,
+            sex_is_male=sex_array,
+            blackfly=BlackflyLarvae(
+                L1=np.repeat(params.blackfly.initial_L1, n_people),
+                L2=np.repeat(params.blackfly.initial_L2, n_people),
+                L3=np.repeat(params.blackfly.initial_L3, n_people),
+            ),
+            mf=np.ones((params.microfil.microfil_age_stages, n_people))
+            * params.microfil.initial_mf,
+            worms=WormGroup(
+                male=np.ones((params.worms.worm_age_stages, n_people), dtype=int)
+                * params.worms.initial_worms,
+                infertile=np.ones((params.worms.worm_age_stages, n_people), dtype=int)
+                * params.worms.initial_worms,
+                fertile=np.ones((params.worms.worm_age_stages, n_people), dtype=int)
+                * params.worms.initial_worms,
+            ),
+            time_of_last_treatment=time_of_last_treatment,
+            delay_arrays=DelayArrays.from_params(
+                params, n_people, new_individual_exposure
+            ),
+            individual_exposure=new_individual_exposure,
+        )
 
     def process_deaths(self, people_to_die: NDArray[np.bool_], gender_ratio):
         if (total_people_to_die := int(np.sum(people_to_die))) > 0:
@@ -270,6 +310,7 @@ class People:
             self.worms.fertile[:, people_to_die] = 0
             self.worms.infertile[:, people_to_die] = 0
         self.delay_arrays.process_deaths(people_to_die)
+
 
 def _calc_coverage(
     people: People,
@@ -287,8 +328,7 @@ def _calc_coverage(
 
 
 def _calculate_total_exposure(
-    exposure_params: ExposureParams,
-    people: People
+    exposure_params: ExposureParams, people: People
 ) -> NDArray[np.float_]:
     male_exposure_assumed = exposure_params.male_exposure * np.exp(
         -exposure_params.male_exposure_exponent * people.ages
@@ -320,6 +360,7 @@ def _calculate_total_exposure(
     total_exposure = sex_age_exposure * people.individual_exposure
     return total_exposure / np.mean(total_exposure)
 
+
 CallbackStat = TypeVar("CallbackStat")
 
 
@@ -328,20 +369,16 @@ class State(Generic[CallbackStat]):
     _params: Params
     _derived_params: DerivedParams
 
-    def __init__(
-        self, people: People, params: Params
-    ) -> None:
+    def __init__(self, people: People, params: Params) -> None:
         self._people = people
         self.params = params
 
     @classmethod
-    def from_params(cls, params: Params, n_people: int, gamma_distribution = 0.3 ): # "gam.dis" individual level exposure heterogeneity
+    def from_params(
+        cls, params: Params, n_people: int, gamma_distribution=0.3
+    ):  # "gam.dis" individual level exposure heterogeneity
         return cls(
-            people=People.from_params(
-                params,
-                n_people,
-                gamma_distribution
-            ),
+            people=People.from_params(params, n_people, gamma_distribution),
             params=params,
         )
 
@@ -437,6 +474,12 @@ class State(Generic[CallbackStat]):
             population_prevalence=self.mf_prevalence_in_population(),
         )
 
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, State):
+            return self._people == other._people and self.params == other.params
+        else:
+            return False
+
     def _advance(self: "State", current_time: float):
         if (
             self.params.treatment is not None
@@ -450,10 +493,7 @@ class State(Generic[CallbackStat]):
         else:
             coverage_in = None
 
-        total_exposure = _calculate_total_exposure(
-            self.params.exposure,
-            self._people
-        )
+        total_exposure = _calculate_total_exposure(self.params.exposure, self._people)
         # increase ages
         self._people.ages += self.params.delta_time
 
@@ -544,7 +584,9 @@ class State(Generic[CallbackStat]):
         self._people.delay_arrays.exposure_delay = lag_array(
             total_exposure, self._people.delay_arrays.exposure_delay
         )
-        self._people.delay_arrays.mf_delay = lag_array(old_mf, self._people.delay_arrays.mf_delay)
+        self._people.delay_arrays.mf_delay = lag_array(
+            old_mf, self._people.delay_arrays.mf_delay
+        )
         self._people.delay_arrays.l1_delay = self._people.blackfly.L1
 
         people_to_die: NDArray[np.bool_] = np.logical_or(

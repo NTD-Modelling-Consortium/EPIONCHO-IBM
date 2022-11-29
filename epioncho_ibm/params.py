@@ -135,7 +135,6 @@ class ExposureParams(BaseSubParams):
     female_exposure_exponent: float = -0.023  # "age.exp.f"
 
 
-
 class HumanParams(BaseSubParams):
     min_skinsnip_age: int = 5
     total_population_coverage: float = 0.65  # "treat.prob"

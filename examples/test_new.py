@@ -22,3 +22,4 @@ with tempfile.TemporaryFile() as f:
     state.to_hdf5(f)
     new_state = make_state_from_hdf5(f)
     print(new_state.mf_prevalence_in_population())
+    assert state == new_state
