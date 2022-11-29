@@ -33,4 +33,3 @@ build-backend = "poetry.core.masonry.api"
 [tool.pyright]
 venvPath="./"
 venv=".venv"
-#typeCheckingMode="strict"

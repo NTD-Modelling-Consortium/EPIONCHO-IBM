@@ -28,6 +28,16 @@ np.seterr(all="ignore")
 def negative_binomial_alt_interface(
     n: NDArray[np.float_], mu: NDArray[np.float_]
 ) -> NDArray[np.int_]:
+    """
+    Provides an alternate interface for random negative binomial.
+
+    Args:
+        n (NDArray[np.float_]): Number of successes
+        mu (NDArray[np.float_]): Mean of the distribution
+
+    Returns:
+        NDArray[np.int_]: Samples from a negative binomial distribution
+    """
     non_zero_n = n[n > 0]
     rel_prob = non_zero_n / (non_zero_n + mu[n > 0])
     temp_output = np.random.negative_binomial(
@@ -101,7 +111,13 @@ class DelayArrays:
     mf_delay: NDArray[np.int_]
     l1_delay: NDArray[np.float_]
 
-    def __init__(self, worm_delay, exposure_delay, mf_delay, l1_delay) -> None:
+    def __init__(
+        self,
+        worm_delay: NDArray[np.int_],
+        exposure_delay: NDArray[np.float_],
+        mf_delay: NDArray[np.int_],
+        l1_delay: NDArray[np.float_],
+    ) -> None:
         self.worm_delay = worm_delay
         self.exposure_delay = exposure_delay
         self.mf_delay = mf_delay
@@ -117,7 +133,9 @@ class DelayArrays:
         )
 
     @classmethod
-    def from_params(cls, params: Params, n_people: int, individual_exposure):
+    def from_params(
+        cls, params: Params, n_people: int, individual_exposure: NDArray[np.float_]
+    ):
         number_of_worm_delay_cols = math.ceil(
             params.blackfly.l3_delay
             * params.month_length_days
@@ -235,7 +253,9 @@ class People:
         )
 
     @classmethod
-    def from_params(cls, params: Params, n_people: int, gamma_distribution=0.3):
+    def from_params(
+        cls, params: Params, n_people: int, gamma_distribution: float = 0.3
+    ):
         sex_array = (
             np.random.uniform(low=0, high=1, size=n_people) < params.humans.gender_ratio
         )
@@ -289,7 +309,7 @@ class People:
             individual_exposure=new_individual_exposure,
         )
 
-    def process_deaths(self, people_to_die: NDArray[np.bool_], gender_ratio):
+    def process_deaths(self, people_to_die: NDArray[np.bool_], gender_ratio: float):
         if (total_people_to_die := int(np.sum(people_to_die))) > 0:
             self.sex_is_male[people_to_die] = (
                 np.random.uniform(low=0, high=1, size=total_people_to_die)
@@ -367,7 +387,7 @@ class State(Generic[CallbackStat]):
 
     @classmethod
     def from_params(
-        cls, params: Params, n_people: int, gamma_distribution=0.3
+        cls, params: Params, n_people: int, gamma_distribution: float = 0.3
     ):  # "gam.dis" individual level exposure heterogeneity
         return cls(
             people=People.from_params(params, n_people, gamma_distribution),
@@ -379,7 +399,8 @@ class State(Generic[CallbackStat]):
         return self._params
 
     @params.setter
-    def params(self, value):
+    def params(self, value: object):
+        assert isinstance(value, Params)
         self._derived_params = DerivedParams(value, self.n_people)
         self._params = value
 
@@ -387,7 +408,9 @@ class State(Generic[CallbackStat]):
     def n_people(self):
         return len(self._people)
 
-    def microfilariae_per_skin_snip(self: "State") -> tuple[float, NDArray[np.float_]]:
+    def microfilariae_per_skin_snip(
+        self: "State[CallbackStat]",
+    ) -> tuple[float, NDArray[np.float_]]:
         """
         #people are tested for the presence of mf using a skin snip, we assume mf are overdispersed in the skin
         #function calculates number of mf in skin snip for all people
@@ -432,7 +455,7 @@ class State(Generic[CallbackStat]):
         )
         return float(np.mean(mfobs)), mfobs
 
-    def mf_prevalence_in_population(self: "State") -> float:
+    def mf_prevalence_in_population(self) -> float:
         """
         Returns a decimal representation of mf prevalence in skinsnip aged population.
         """
@@ -473,7 +496,7 @@ class State(Generic[CallbackStat]):
             and self.params == other.params
         )
 
-    def _advance(self: "State", current_time: float):
+    def _advance(self, current_time: float):
         if (
             self.params.treatment is not None
             and current_time >= self.params.treatment.start_time
@@ -594,7 +617,7 @@ class State(Generic[CallbackStat]):
         self._people.process_deaths(people_to_die, self.params.humans.gender_ratio)
 
     def run_simulation(
-        self: "State", start_time: float = 0, end_time: float = 0, verbose: bool = False
+        self, start_time: float = 0, end_time: float = 0, verbose: bool = False
     ) -> None:
         if end_time < start_time:
             raise ValueError("End time after start")
@@ -610,7 +633,7 @@ class State(Generic[CallbackStat]):
                 current_time += self.params.delta_time
 
     def run_simulation_output_stats(
-        self: "State",
+        self,
         sampling_interval: float,
         start_time: float = 0,
         end_time: float = 0,
@@ -631,7 +654,7 @@ class State(Generic[CallbackStat]):
         return output_stats
 
     def run_simulation_output_callback(
-        self: "State",
+        self,
         output_callback: Callable[[People, float], CallbackStat],
         sampling_interval: float,
         start_time: float = 0,
@@ -653,14 +676,14 @@ class State(Generic[CallbackStat]):
         return output_stats
 
     @classmethod
-    def from_hdf5(cls, input_file: str | Path | IO):
+    def from_hdf5(cls, input_file: str | Path | IO[bytes]):
         f = h5py.File(input_file, "r")
         people_group = f["people"]
         assert isinstance(people_group, h5py.Group)
         params: str = str(f.attrs["params"])
         return cls(People.from_hdf5_group(people_group), Params.parse_raw(params))
 
-    def to_hdf5(self, output_file: str | Path | IO):
+    def to_hdf5(self, output_file: str | Path | IO[bytes]):
         f = h5py.File(output_file, "w")
         group_people = f.create_group("people")
         self._people.append_to_hdf5_group(group_people)
@@ -671,5 +694,5 @@ def make_state_from_params(params: Params, n_people: int):
     return State.from_params(params, n_people)
 
 
-def make_state_from_hdf5(input_file: str | Path | IO):
+def make_state_from_hdf5(input_file: str | Path | IO[bytes]):
     return State.from_hdf5(input_file)

@@ -8,7 +8,7 @@ from .params import Params
 
 
 def _weibull_mortality(
-    delta_time: float, mu1: float, mu2: float, age_categories: np.ndarray
+    delta_time: float, mu1: float, mu2: float, age_categories: NDArray[np.float_]
 ) -> NDArray[np.float_]:
     return delta_time * (mu1**mu2) * mu2 * (age_categories ** (mu2 - 1))
 
