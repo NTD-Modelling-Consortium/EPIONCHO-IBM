@@ -120,7 +120,7 @@ def _calc_new_worms_from_inside(
             size=current_worms.shape,
         )
     else:
-        new_worms = np.repeat(0, current_worms_shape[0])
+        new_worms = np.zeros_like(current_worms)
     return new_worms
 
 
