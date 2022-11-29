@@ -21,22 +21,23 @@ from epioncho_ibm.worms import (
 
 from .derived_params import DerivedParams
 from .params import ExposureParams, Params
+from .types import Array
 
 np.seterr(all="ignore")
 
 
 def negative_binomial_alt_interface(
-    n: NDArray[np.float_], mu: NDArray[np.float_]
-) -> NDArray[np.int_]:
+    n: Array.General.Float, mu: Array.General.Float
+) -> Array.General.Int:
     """
     Provides an alternate interface for random negative binomial.
 
     Args:
-        n (NDArray[np.float_]): Number of successes
-        mu (NDArray[np.float_]): Mean of the distribution
+        n (Array.General.Float): Number of successes
+        mu (Array.General.Float): Mean of the distribution
 
     Returns:
-        NDArray[np.int_]: Samples from a negative binomial distribution
+        Array.General.Int: Samples from a negative binomial distribution
     """
     non_zero_n = n[n > 0]
     rel_prob = non_zero_n / (non_zero_n + mu[n > 0])
@@ -48,7 +49,7 @@ def negative_binomial_alt_interface(
     return output
 
 
-def truncated_geometric(N: int, prob: float, maximum: float) -> NDArray[np.float_]:
+def truncated_geometric(N: int, prob: float, maximum: float) -> Array.Person.Float:
     output = np.repeat(maximum + 1, N)
     while np.any(output > maximum):
         output[output > maximum] = np.random.geometric(
@@ -59,9 +60,9 @@ def truncated_geometric(N: int, prob: float, maximum: float) -> NDArray[np.float
 
 @dataclass
 class BlackflyLarvae:
-    L1: NDArray[np.float_]  # 4: L1
-    L2: NDArray[np.float_]  # 5: L2
-    L3: NDArray[np.float_]  # 6: L3
+    L1: Array.Person.Float  # 4: L1
+    L2: Array.Person.Float  # 5: L2
+    L3: Array.Person.Float  # 6: L3
 
     def __eq__(self, other: object) -> bool:
         return (
@@ -86,7 +87,7 @@ class NumericArrayStat(BaseModel):
     # st_dev: float
 
     @classmethod
-    def from_array(cls, array: NDArray[np.float_] | NDArray[np.int_]):
+    def from_array(cls, array: Array.Person.Float | Array.Person.Int):
         return cls(mean=float(np.mean(array)))  # , st_dev=np.std(array))
 
 
@@ -106,17 +107,17 @@ class StateStats(BaseModel):
 
 
 class DelayArrays:
-    worm_delay: NDArray[np.int_]
-    exposure_delay: NDArray[np.float_]
-    mf_delay: NDArray[np.int_]
-    l1_delay: NDArray[np.float_]
+    worm_delay: Array.Person.WormDelay.Int
+    exposure_delay: Array.Person.ExposureDelay.Float
+    mf_delay: Array.Person.MFDelay.Int
+    l1_delay: Array.Person.L1Delay.Float
 
     def __init__(
         self,
-        worm_delay: NDArray[np.int_],
-        exposure_delay: NDArray[np.float_],
-        mf_delay: NDArray[np.int_],
-        l1_delay: NDArray[np.float_],
+        worm_delay: Array.Person.WormDelay.Int,
+        exposure_delay: Array.Person.ExposureDelay.Float,
+        mf_delay: Array.Person.MFDelay.Int,
+        l1_delay: Array.Person.L1Delay.Float,
     ) -> None:
         self.worm_delay = worm_delay
         self.exposure_delay = exposure_delay
@@ -134,7 +135,7 @@ class DelayArrays:
 
     @classmethod
     def from_params(
-        cls, params: Params, n_people: int, individual_exposure: NDArray[np.float_]
+        cls, params: Params, n_people: int, individual_exposure: Array.Person.Float
     ):
         number_of_worm_delay_cols = math.ceil(
             params.blackfly.l3_delay
@@ -176,7 +177,7 @@ class DelayArrays:
             np.array(group["l1_delay"]),
         )
 
-    def process_deaths(self, people_to_die: NDArray[np.bool_]):
+    def process_deaths(self, people_to_die: Array.Person.Bool):
         if np.any(people_to_die):
             self.worm_delay[:, people_to_die] = 0
             self.mf_delay[0, people_to_die] = 0
@@ -186,15 +187,15 @@ class DelayArrays:
 
 @dataclass
 class People:
-    compliance: NDArray[np.bool_]  # 1: 'column used during treatment'
-    sex_is_male: NDArray[np.bool_]  # 3: sex
+    compliance: Array.Person.Bool  # 1: 'column used during treatment'
+    sex_is_male: Array.Person.Bool  # 3: sex
     blackfly: BlackflyLarvae
-    ages: NDArray[np.float_]  # 2: current age
-    mf: NDArray[np.float_]  # 2D Array, (N, age stage): microfilariae stages 7-28 (21)
+    ages: Array.Person.Float  # 2: current age
+    mf: Array.Person.Float  # 2D Array, (N, age stage): microfilariae stages 7-28 (21)
     worms: WormGroup
-    time_of_last_treatment: NDArray[np.float_]  # treat.vec
+    time_of_last_treatment: Array.Person.Float  # treat.vec
     delay_arrays: DelayArrays
-    individual_exposure: NDArray[np.float_]
+    individual_exposure: Array.Person.Float
 
     def __eq__(self, other: object) -> bool:
         return (
@@ -309,7 +310,7 @@ class People:
             individual_exposure=new_individual_exposure,
         )
 
-    def process_deaths(self, people_to_die: NDArray[np.bool_], gender_ratio: float):
+    def process_deaths(self, people_to_die: Array.Person.Bool, gender_ratio: float):
         if (total_people_to_die := int(np.sum(people_to_die))) > 0:
             self.sex_is_male[people_to_die] = (
                 np.random.uniform(low=0, high=1, size=total_people_to_die)
@@ -328,7 +329,7 @@ def _calc_coverage(
     people: People,
     measured_coverage: float,
     age_compliance: float,
-) -> NDArray[np.bool_]:
+) -> Array.Person.Bool:
 
     non_compliant_people = (people.ages < age_compliance) | ~people.compliance
     compliant_percentage = 1 - np.mean(non_compliant_people)
@@ -341,7 +342,7 @@ def _calc_coverage(
 
 def _calculate_total_exposure(
     exposure_params: ExposureParams, people: People
-) -> NDArray[np.float_]:
+) -> Array.Person.Float:
     male_exposure_assumed = exposure_params.male_exposure * np.exp(
         -exposure_params.male_exposure_exponent * people.ages
     )
