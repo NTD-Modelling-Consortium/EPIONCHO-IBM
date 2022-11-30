@@ -5,6 +5,7 @@ from numpy.typing import NDArray
 
 DType = TypeVar("DType", bound=np.generic)
 
+
 def lag_array(fill: NDArray[DType], arr: NDArray[DType], n: int = 1) -> NDArray[DType]:
     """Lag array by `n` and back-stack with `fill`
 

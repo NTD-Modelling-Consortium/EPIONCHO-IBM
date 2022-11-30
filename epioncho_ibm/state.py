@@ -153,7 +153,7 @@ class DelayArrays:
             mf_delay=(
                 np.ones((number_of_mf_columns, n_people), dtype=int)
                 * params.microfil.initial_mf
-            )
+            ),
         )
 
     def append_to_hdf5_group(self, group: h5py.Group):
@@ -166,7 +166,7 @@ class DelayArrays:
         return cls(
             np.array(group["worm_delay"]),
             np.array(group["exposure_delay"]),
-            np.array(group["mf_delay"])
+            np.array(group["mf_delay"]),
         )
 
     def process_deaths(self, people_to_die: Array.Person.Bool):
