@@ -109,19 +109,16 @@ class DelayArrays:
     worm_delay: Array.WormDelay.Person.Int
     exposure_delay: Array.ExposureDelay.Person.Float
     mf_delay: Array.MFDelay.Person.Float
-    l1_delay: Array.L1Delay.Person.Float
 
     def __init__(
         self,
         worm_delay: Array.WormDelay.Person.Int,
         exposure_delay: Array.ExposureDelay.Person.Float,
         mf_delay: Array.MFDelay.Person.Float,
-        l1_delay: Array.L1Delay.Person.Float,
     ) -> None:
         self.worm_delay = worm_delay
         self.exposure_delay = exposure_delay
         self.mf_delay = mf_delay
-        self.l1_delay = l1_delay
 
     def __eq__(self, other: object) -> bool:
         return (
@@ -129,7 +126,6 @@ class DelayArrays:
             and array_fully_equal(self.worm_delay, other.worm_delay)
             and array_fully_equal(self.exposure_delay, other.exposure_delay)
             and array_fully_equal(self.mf_delay, other.mf_delay)
-            and array_fully_equal(self.l1_delay, other.l1_delay)
         )
 
     @classmethod
@@ -157,30 +153,26 @@ class DelayArrays:
             mf_delay=(
                 np.ones((number_of_mf_columns, n_people), dtype=int)
                 * params.microfil.initial_mf
-            ),
-            l1_delay=np.repeat(params.blackfly.initial_L1, n_people),
+            )
         )
 
     def append_to_hdf5_group(self, group: h5py.Group):
         group.create_dataset("worm_delay", data=self.worm_delay)
         group.create_dataset("exposure_delay", data=self.exposure_delay)
         group.create_dataset("mf_delay", data=self.mf_delay)
-        group.create_dataset("l1_delay", data=self.l1_delay)
 
     @classmethod
     def from_hdf5_group(cls, group: h5py.Group):
         return cls(
             np.array(group["worm_delay"]),
             np.array(group["exposure_delay"]),
-            np.array(group["mf_delay"]),
-            np.array(group["l1_delay"]),
+            np.array(group["mf_delay"])
         )
 
     def process_deaths(self, people_to_die: Array.Person.Bool):
         if np.any(people_to_die):
             self.worm_delay[:, people_to_die] = 0
             self.mf_delay[0, people_to_die] = 0
-            self.l1_delay[people_to_die] = 0
             # TODO: Do we need self.exposure_delay = 0
 
 
@@ -577,7 +569,7 @@ class State(Generic[CallbackStat]):
             current_fertile_female_worms=old_fertile_female_worms,
             current_male_worms=old_male_worms,
         )
-
+        old_blackfly_L1 = self._people.blackfly.L1
         self._people.blackfly.L1 = calc_l1(
             self.params.blackfly,
             old_mf,
@@ -586,10 +578,11 @@ class State(Generic[CallbackStat]):
             self._people.delay_arrays.exposure_delay[-1],
             self.params.year_length_days,
         )
+
         old_blackfly_L2 = self._people.blackfly.L2
         self._people.blackfly.L2 = calc_l2(
             self.params.blackfly,
-            self._people.delay_arrays.l1_delay,
+            old_blackfly_L1,
             self._people.delay_arrays.mf_delay[-1],
             self._people.delay_arrays.exposure_delay[-1],
             self.params.year_length_days,
@@ -602,8 +595,6 @@ class State(Generic[CallbackStat]):
         self._people.delay_arrays.mf_delay = lag_array(
             old_mf, self._people.delay_arrays.mf_delay
         )
-        self._people.delay_arrays.l1_delay = self._people.blackfly.L1
-
         people_to_die: Array.Person.Bool = np.logical_or(
             np.random.binomial(
                 n=1,

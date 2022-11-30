@@ -63,7 +63,7 @@ def calc_l1(
 
 def calc_l2(
     blackfly_params: BlackflyParams,
-    l1_delay: NDArray[np.float_],
+    l1_in: NDArray[np.float_],
     microfil: NDArray[np.float_],
     total_exposure: NDArray[np.float_],
     year_length: float,
@@ -73,12 +73,12 @@ def calc_l2(
     params.blackfly_mort_per_person_per_year # mu.v
     params.l2_l3_per_person_per_year # nutwo
     params.blackfly_mort_from_mf_per_person_per_year # a.v
-    l1_delay # L1.in
+    l1_in # L1.in
     microfil # mf
     total_exposure # expos
     """
     return (
-        l1_delay
+        l1_in
         * (
             blackfly_params.l1_l2_per_person_per_year
             * np.exp(

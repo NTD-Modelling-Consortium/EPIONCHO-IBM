@@ -47,5 +47,4 @@ class Array(_SubAxis):
     WormDelay = _SubAxis
     MFDelay = _SubAxis
     ExposureDelay = _SubAxis
-    L1Delay = _SubAxis
     Treatments = _SubAxis
