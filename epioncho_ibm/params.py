@@ -114,7 +114,7 @@ class MicrofilParams(BaseSubParams):
     microfil_move_rate: float = 8.13333  # 'mf.move.rate' #for aging in parasites
     microfil_age_stages = 21
     max_microfil_age = 2.5
-    initial_mf: int = 0  # "int.mf"
+    initial_mf: float = 0  # "int.mf"
     u_ivermectin = 0.0096  # effects of ivermectin
     shape_parameter_ivermectin = 1.25  # effects of ivermectin
     mu_microfillarie1: float = (
