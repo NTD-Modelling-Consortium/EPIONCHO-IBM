@@ -556,9 +556,7 @@ class State(Generic[CallbackStat]):
         # TODO: Should this be the existing mf? mf.temp
         old_mf: Array.Person.Float = np.sum(self._people.mf, axis=0)
         self._people.mf += calculate_microfil_delta(
-            stages=self.params.microfil.microfil_age_stages,
-            exiting_microfil=self._people.mf,
-            n_people=self.n_people,
+            current_microfil=self._people.mf,
             delta_time=self.params.delta_time,
             microfil_params=self.params.microfil,
             treatment_params=self.params.treatment,
