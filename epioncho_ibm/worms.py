@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 
 import numpy as np
-from numpy.typing import NDArray
 
 import epioncho_ibm.blackfly as blackfly
 import epioncho_ibm.utils as utils
@@ -19,9 +18,9 @@ __all__ = [
 
 @dataclass
 class WormGroup:
-    male: Array.Person.WormCat.Int
-    infertile: Array.Person.WormCat.Int
-    fertile: Array.Person.WormCat.Int
+    male: Array.WormCat.Person.Int
+    infertile: Array.WormCat.Person.Int
+    fertile: Array.WormCat.Person.Int
 
     def __eq__(self, other: object) -> bool:
         if isinstance(other, WormGroup):
@@ -43,35 +42,34 @@ class WormGroup:
 
 
 def _calc_dead_and_aging_worms_single_group(
-    current_worms: NDArray[np.int_],
-    mortalities: NDArray[np.float_],
-    worm_age_rate: NDArray[np.float_] | float,
-) -> tuple[NDArray[np.int_], NDArray[np.int_]]:
+    current_worms: Array.WormCat.Person.Int,
+    mortalities: Array.WormCat.Float,
+    worm_age_rate: float,
+) -> tuple[Array.WormCat.Person.Int, Array.WormCat.Person.Int]:
     assert current_worms.ndim == 2
     n_people = current_worms.shape[1]
 
     if mortalities.ndim == 1:
         mortalities = np.tile(mortalities, (n_people, 1)).T
 
-    dead_worms = np.random.binomial(
+    dead_worms: Array.WormCat.Person.Int = np.random.binomial(
         n=current_worms,
         p=mortalities,
         size=current_worms.shape,
     )
-    aging_worms = np.random.binomial(
+    aging_worms: Array.WormCat.Person.Int = np.random.binomial(
         n=current_worms - dead_worms,
         p=worm_age_rate,
         size=current_worms.shape,
     )
-
     return dead_worms, aging_worms
 
 
 def _calc_dead_and_aging_worms(
     current_worms: WormGroup,
-    female_mortalities: NDArray[np.float_],
-    male_mortalities: NDArray[np.float_],
-    worm_age_rate: NDArray[np.float_] | float,
+    female_mortalities: Array.WormCat.Float | Array.WormCat.Person.Float,
+    male_mortalities: Array.WormCat.Float,
+    worm_age_rate: float,
 ) -> tuple[WormGroup, WormGroup]:
     dead_male, aging_male = _calc_dead_and_aging_worms_single_group(
         current_worms=current_worms.male,
@@ -97,11 +95,11 @@ def _calc_dead_and_aging_worms(
 
 
 def _calc_new_worms_from_inside(
-    current_worms: NDArray[np.int_],
-    dead_worms: NDArray[np.int_],
-    aging_worms: NDArray[np.int_],
-    prob: float | NDArray[np.float_],
-) -> NDArray[np.int_]:
+    current_worms: Array.WormCat.Person.Int,
+    dead_worms: Array.WormCat.Person.Int,
+    aging_worms: Array.WormCat.Person.Int,
+    prob: float | Array.Person.Float,
+) -> Array.WormCat.Person.Int:
     # trans.fc
     delta_female_worms = current_worms - dead_worms - aging_worms
     delta_female_worms[delta_female_worms < 0] = 0
@@ -130,17 +128,21 @@ def process_treatment(
     treatment_params: TreatmentParams | None,
     delta_time: float,
     n_people: int,
-    coverage_in: NDArray[np.bool_] | None,
-    initial_treatment_times: NDArray[np.float_] | None,
-    time_of_last_treatment: NDArray[np.float_] | None,
+    coverage_in: Array.Person.Bool | None,
+    initial_treatment_times: Array.Treatments.Float | None,
+    time_of_last_treatment: Array.Person.Float | None,
     current_time: float,
-    mortalities: NDArray[np.float_],
-) -> tuple[NDArray[np.float_], NDArray[np.float_], NDArray[np.float_] | None]:
+    mortalities: Array.WormCat.Float,
+) -> tuple[
+    Array.WormCat.Float | Array.WormCat.Person.Float,
+    Array.Person.Float,
+    Array.Person.Float | None,
+]:
     # approach assumes individuals which are moved from fertile to non
     # fertile class due to treatment re enter fertile class at standard rate
 
-    female_mortalities = mortalities  # mort.fems
-    fertile_to_non_fertile_rate = np.zeros(n_people)
+    female_mortalities: Array.WormCat.Float = mortalities  # mort.fems
+    fertile_to_non_fertile_rate: Array.Person.Float = np.zeros(n_people)
 
     # We'll create a new array (a copy) only when needed, see below if-
     modified_time_of_last_treatment = time_of_last_treatment
@@ -167,7 +169,7 @@ def process_treatment(
         lam_m_temp = np.where(
             modified_time_of_last_treatment == np.nan, 0, worm_params.lam_m
         )
-        fertile_to_non_fertile_rate = np.nan_to_num(
+        fertile_to_non_fertile_rate: Array.Person.Float = np.nan_to_num(
             delta_time * lam_m_temp * np.exp(-worm_params.phi * time_since_treatment)
         )
 
@@ -191,7 +193,7 @@ def change_in_worms(
     initial_treatment_times: Array.Treatments.Float | None,
     current_time: float,
     time_of_last_treatment: Array.Person.Float | None,
-) -> tuple[WormGroup, NDArray[np.float_] | None]:
+) -> tuple[WormGroup, Array.Person.Float | None]:
     # TODO: time_of_last_treatment is modified inside, change this!
     female_mortalities, lambda_zero_in, time_of_last_treatment = process_treatment(
         worm_params=worm_params,
@@ -249,7 +251,6 @@ def change_in_worms(
     assert np.all(
         (new_male >= 0) & (new_infertile >= 0) & (new_fertile >= 0)
     ), "Worms became negative!"
-
     return (
         WormGroup(male=new_male, infertile=new_infertile, fertile=new_fertile),
         time_of_last_treatment,
@@ -257,13 +258,10 @@ def change_in_worms(
 
 
 def get_delayed_males_and_females(
-    worm_delay: Array.Person.WormDelay.Int, n_people: int, worm_sex_ratio: float
-) -> tuple[NDArray[np.int_], NDArray[np.int_]]:
-    final_column = np.array(worm_delay[-1], dtype=int)
-    assert len(final_column) == n_people
-    last_males = np.random.binomial(
-        n=final_column, p=worm_sex_ratio, size=len(final_column)
-    )  # new.worms.m
+    worm_delay: Array.WormDelay.Person.Int, worm_sex_ratio: float
+) -> tuple[Array.Person.Int, Array.Person.Int]:
+    final_column: Array.Person.Int = np.array(worm_delay[-1], dtype=int)
+    last_males = np.random.binomial(n=final_column, p=worm_sex_ratio)  # new.worms.m
     last_females = final_column - last_males  # new.worms.nf
     return last_males, last_females
 

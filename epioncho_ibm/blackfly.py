@@ -1,6 +1,8 @@
 import numpy as np
 from numpy.typing import NDArray
 
+from epioncho_ibm.types import Array
+
 from .params import BlackflyParams
 
 # L1, L2, L3 (parasite life stages) dynamics in the fly population
@@ -10,12 +12,12 @@ from .params import BlackflyParams
 
 def calc_l1(
     blackfly_params: BlackflyParams,
-    microfil: NDArray[np.float_],
-    last_microfil_delay: NDArray[np.float_],
-    total_exposure: NDArray[np.float_],
-    exposure_delay: NDArray[np.float_],
+    microfil: Array.Person.Float,
+    last_microfil_delay: Array.Person.Float,
+    total_exposure: Array.Person.Float,
+    exposure_delay: Array.Person.Float,
     year_length: float,
-) -> NDArray[np.float_]:
+) -> Array.Person.Float:
     """
     microfil # mf
     last_microfil_delay # mf.delay.in
@@ -116,9 +118,9 @@ def calc_l3(
     )
 
 
-def delta_h(
-    blackfly_params: BlackflyParams, L3: float, total_exposure: NDArray[np.float_]
-) -> NDArray[np.float_]:
+def _delta_h(
+    blackfly_params: BlackflyParams, L3: float, total_exposure: Array.Person.Float
+) -> Array.Person.Float:
     # proportion of L3 larvae (final life stage in the fly population) developing into adult worms in humans
     # expos is the total exposure for an individual
     # delta.hz, delta.hinf, c.h control the density dependent establishment of parasites
@@ -126,7 +128,7 @@ def delta_h(
         blackfly_params.bite_rate_per_person_per_year
         / blackfly_params.bite_rate_per_fly_on_human
     )
-    multiplier = (
+    multiplier: Array.Person.Float = (
         blackfly_params.c_h
         * annual_transm_potential
         * blackfly_params.bite_rate_per_fly_on_human
@@ -142,8 +144,8 @@ def w_plus_one_rate(
     blackfly_params: BlackflyParams,
     delta_time: float,
     L3: float,
-    total_exposure: NDArray[np.float_],
-) -> NDArray[np.float_]:
+    total_exposure: Array.Person.Float,
+) -> Array.Person.Float:
     """
     params.delta_hz # delta.hz
     params.delta_hinf # delta.hinf
@@ -153,7 +155,7 @@ def w_plus_one_rate(
     total_exposure # "expos"
     params.delta_time #"DT"
     """
-    dh = delta_h(blackfly_params, L3, total_exposure)
+    dh = _delta_h(blackfly_params, L3, total_exposure)
     annual_transm_potential = (
         blackfly_params.bite_rate_per_person_per_year
         / blackfly_params.bite_rate_per_fly_on_human

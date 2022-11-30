@@ -5,7 +5,6 @@ from typing import IO, Callable, Generic, TypeVar
 
 import h5py
 import numpy as np
-from numpy.typing import NDArray
 from pydantic import BaseModel
 from tqdm import tqdm
 
@@ -107,17 +106,17 @@ class StateStats(BaseModel):
 
 
 class DelayArrays:
-    worm_delay: Array.Person.WormDelay.Int
-    exposure_delay: Array.Person.ExposureDelay.Float
-    mf_delay: Array.Person.MFDelay.Int
-    l1_delay: Array.Person.L1Delay.Float
+    worm_delay: Array.WormDelay.Person.Int
+    exposure_delay: Array.ExposureDelay.Person.Float
+    mf_delay: Array.MFDelay.Person.Float
+    l1_delay: Array.L1Delay.Person.Float
 
     def __init__(
         self,
-        worm_delay: Array.Person.WormDelay.Int,
-        exposure_delay: Array.Person.ExposureDelay.Float,
-        mf_delay: Array.Person.MFDelay.Int,
-        l1_delay: Array.Person.L1Delay.Float,
+        worm_delay: Array.WormDelay.Person.Int,
+        exposure_delay: Array.ExposureDelay.Person.Float,
+        mf_delay: Array.MFDelay.Person.Float,
+        l1_delay: Array.L1Delay.Person.Float,
     ) -> None:
         self.worm_delay = worm_delay
         self.exposure_delay = exposure_delay
@@ -191,7 +190,7 @@ class People:
     sex_is_male: Array.Person.Bool  # 3: sex
     blackfly: BlackflyLarvae
     ages: Array.Person.Float  # 2: current age
-    mf: Array.Person.Float  # 2D Array, (N, age stage): microfilariae stages 7-28 (21)
+    mf: Array.MFCat.Person.Float  # 2D Array, (N, age stage): microfilariae stages 7-28 (21)
     worms: WormGroup
     time_of_last_treatment: Array.Person.Float  # treat.vec
     delay_arrays: DelayArrays
@@ -411,7 +410,7 @@ class State(Generic[CallbackStat]):
 
     def microfilariae_per_skin_snip(
         self: "State[CallbackStat]",
-    ) -> tuple[float, NDArray[np.float_]]:
+    ) -> tuple[float, Array.Person.Float]:
         """
         #people are tested for the presence of mf using a skin snip, we assume mf are overdispersed in the skin
         #function calculates number of mf in skin snip for all people
@@ -448,13 +447,15 @@ class State(Generic[CallbackStat]):
             )
             for i in range(self.params.humans.skin_snip_number):
                 total_skin_snip_mf[:, i] = negative_binomial_alt_interface(n=kmf, mu=mu)
-            mfobs = np.sum(total_skin_snip_mf, axis=1)
+            mfobs: Array.Person.Int = np.sum(total_skin_snip_mf, axis=1)
+
         else:
-            mfobs = negative_binomial_alt_interface(n=kmf, mu=mu)
-        mfobs = mfobs / (
+            mfobs: Array.Person.Int = negative_binomial_alt_interface(n=kmf, mu=mu)
+
+        mfobs_percent: Array.Person.Float = mfobs / (
             self.params.humans.skin_snip_number * self.params.humans.skin_snip_weight
         )
-        return float(np.mean(mfobs)), mfobs
+        return float(np.mean(mfobs_percent)), mfobs_percent
 
     def mf_prevalence_in_population(self) -> float:
         """
@@ -525,7 +526,6 @@ class State(Generic[CallbackStat]):
         # Take males and females from final column of worm_delay
         delayed_males, delayed_females = get_delayed_males_and_females(
             self._people.delay_arrays.worm_delay,
-            self.n_people,
             self.params.worms.sex_ratio,
         )
 
@@ -562,8 +562,7 @@ class State(Generic[CallbackStat]):
 
         # inputs for delay in L1
         # TODO: Should this be the existing mf? mf.temp
-        old_mf = np.sum(self._people.mf, axis=0)
-
+        old_mf: Array.Person.Float = np.sum(self._people.mf, axis=0)
         self._people.mf += calculate_microfil_delta(
             stages=self.params.microfil.microfil_age_stages,
             exiting_microfil=self._people.mf,
@@ -587,7 +586,6 @@ class State(Generic[CallbackStat]):
             self._people.delay_arrays.exposure_delay[-1],
             self.params.year_length_days,
         )
-
         old_blackfly_L2 = self._people.blackfly.L2
         self._people.blackfly.L2 = calc_l2(
             self.params.blackfly,
@@ -606,7 +604,7 @@ class State(Generic[CallbackStat]):
         )
         self._people.delay_arrays.l1_delay = self._people.blackfly.L1
 
-        people_to_die: NDArray[np.bool_] = np.logical_or(
+        people_to_die: Array.Person.Bool = np.logical_or(
             np.random.binomial(
                 n=1,
                 p=(1 / self.params.humans.mean_human_age) * self.params.delta_time,
