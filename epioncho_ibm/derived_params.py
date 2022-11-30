@@ -2,7 +2,6 @@ import math
 from typing import Optional
 
 import numpy as np
-from numpy.typing import NDArray
 
 from epioncho_ibm.types import Array
 

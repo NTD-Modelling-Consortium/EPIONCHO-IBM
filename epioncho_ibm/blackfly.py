@@ -1,5 +1,4 @@
 import numpy as np
-from numpy.typing import NDArray
 
 from epioncho_ibm.types import Array
 
@@ -63,22 +62,22 @@ def calc_l1(
 
 def calc_l2(
     blackfly_params: BlackflyParams,
-    l1_in: NDArray[np.float_],
-    microfil: NDArray[np.float_],
-    total_exposure: NDArray[np.float_],
+    l1: Array.Person.Float,
+    microfil: Array.Person.Float,
+    total_exposure: Array.Person.Float,
     year_length: float,
-) -> NDArray[np.float_]:
+) -> Array.Person.Float:
     """
     params.l1_l2_per_person_per_year # nuone
     params.blackfly_mort_per_person_per_year # mu.v
     params.l2_l3_per_person_per_year # nutwo
     params.blackfly_mort_from_mf_per_person_per_year # a.v
-    l1_in # L1.in
+    l1 # L1.in
     microfil # mf
     total_exposure # expos
     """
     return (
-        l1_in
+        l1
         * (
             blackfly_params.l1_l2_per_person_per_year
             * np.exp(
@@ -101,8 +100,8 @@ def calc_l2(
 
 def calc_l3(
     blackfly_params: BlackflyParams,
-    l2: NDArray[np.float_],
-) -> NDArray[np.float_]:
+    l2: Array.Person.Float,
+) -> Array.Person.Float:
     """
     params.l2_l3_per_person_per_year # nutwo
     l2 # L2.in
