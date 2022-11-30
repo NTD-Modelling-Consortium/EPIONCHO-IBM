@@ -29,13 +29,17 @@ def _construct_derive_microfil(
     assert microfil_move_rate >= 0, "Mortality move rate can't be negative"
 
     # * lagged by one compartment
-    movement: Array.MFCat.Person.Float = np.roll(microfil, 1, axis=0) * microfil_move_rate
+    movement: Array.MFCat.Person.Float = (
+        np.roll(microfil, 1, axis=0) * microfil_move_rate
+    )
     # TODO reconcile compartment size
     movement[0, :] = (
         np.einsum("ij, i -> j", fertile_worms, fecundity_rates_worms) * person_has_worms
     )
 
-    def derive_microfil_fn(k: None | Array.MFCat.Person.Float) -> Array.MFCat.Person.Float:
+    def derive_microfil_fn(
+        k: None | Array.MFCat.Person.Float,
+    ) -> Array.MFCat.Person.Float:
         if k is None:
             microfil_adjusted = microfil
         else:
@@ -82,9 +86,9 @@ def calculate_microfil_delta(
     people is dat
     """
     # mf.mu
-    mortality: Array.MFCat.Person.Float = np.repeat(microfillarie_mortality_rate, current_microfil.shape[1]).reshape(
-        current_microfil.shape
-    )
+    mortality: Array.MFCat.Person.Float = np.repeat(
+        microfillarie_mortality_rate, current_microfil.shape[1]
+    ).reshape(current_microfil.shape)
     # increases microfilarial mortality if treatment has started
     if treatment_params is not None and current_time >= treatment_params.start_time:
         assert time_of_last_treatment is not None
