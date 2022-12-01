@@ -1,5 +1,3 @@
-import math
-from dataclasses import dataclass
 from pathlib import Path
 from typing import IO, Callable, Generic, TypeVar
 
@@ -8,77 +6,16 @@ import numpy as np
 from pydantic import BaseModel
 from tqdm import tqdm
 
-from epioncho_ibm.blackfly import (
-    calc_l1,
-    calc_l2,
-    calc_l3,
-    calc_new_worms_from_blackfly,
-)
-from epioncho_ibm.microfil import calculate_microfil_delta
-from epioncho_ibm.utils import array_fully_equal, lag_array
-from epioncho_ibm.worms import WormGroup, change_in_worms
-
+from .blackfly import calc_l1, calc_l2, calc_l3, calc_new_worms_from_blackfly
 from .derived_params import DerivedParams
-from .params import ExposureParams, Params
+from .exposure import calculate_total_exposure
+from .microfil import calculate_microfil_delta
+from .params import Params
+from .people import People
 from .types import Array
+from .worms import change_in_worms
 
 np.seterr(all="ignore")
-
-
-def negative_binomial_alt_interface(
-    n: Array.General.Float, mu: Array.General.Float
-) -> Array.General.Int:
-    """
-    Provides an alternate interface for random negative binomial.
-
-    Args:
-        n (Array.General.Float): Number of successes
-        mu (Array.General.Float): Mean of the distribution
-
-    Returns:
-        Array.General.Int: Samples from a negative binomial distribution
-    """
-    non_zero_n = n[n > 0]
-    rel_prob = non_zero_n / (non_zero_n + mu[n > 0])
-    temp_output = np.random.negative_binomial(
-        n=non_zero_n, p=rel_prob, size=len(non_zero_n)
-    )
-    output = np.zeros(len(n), dtype=int)
-    output[n > 0] = temp_output
-    return output
-
-
-def truncated_geometric(N: int, prob: float, maximum: float) -> Array.Person.Float:
-    output = np.repeat(maximum + 1, N)
-    while np.any(output > maximum):
-        output[output > maximum] = np.random.geometric(
-            p=prob, size=len(output[output > maximum])
-        )
-    return output
-
-
-@dataclass
-class BlackflyLarvae:
-    L1: Array.Person.Float  # 4: L1
-    L2: Array.Person.Float  # 5: L2
-    L3: Array.Person.Float  # 6: L3
-
-    def __eq__(self, other: object) -> bool:
-        return (
-            isinstance(other, BlackflyLarvae)
-            and array_fully_equal(self.L1, other.L1)
-            and array_fully_equal(self.L2, other.L2)
-            and array_fully_equal(self.L3, other.L3)
-        )
-
-    def append_to_hdf5_group(self, group: h5py.Group):
-        group.create_dataset("L1", data=self.L1)
-        group.create_dataset("L2", data=self.L2)
-        group.create_dataset("L3", data=self.L3)
-
-    @classmethod
-    def from_hdf5_group(cls, group: h5py.Group):
-        return cls(np.array(group["L1"]), np.array(group["L2"]), np.array(group["L3"]))
 
 
 class NumericArrayStat(BaseModel):
@@ -105,215 +42,27 @@ class StateStats(BaseModel):
     population_prevalence: float
 
 
-class DelayArrays:
-    worm_delay: Array.WormDelay.Person.Int
-    exposure_delay: Array.ExposureDelay.Person.Float
-    mf_delay: Array.MFDelay.Person.Float
+def negative_binomial_alt_interface(
+    n: Array.General.Float, mu: Array.General.Float
+) -> Array.General.Int:
+    """
+    Provides an alternate interface for random negative binomial.
 
-    def __init__(
-        self,
-        worm_delay: Array.WormDelay.Person.Int,
-        exposure_delay: Array.ExposureDelay.Person.Float,
-        mf_delay: Array.MFDelay.Person.Float,
-    ) -> None:
-        self.worm_delay = worm_delay
-        self.exposure_delay = exposure_delay
-        self.mf_delay = mf_delay
+    Args:
+        n (Array.General.Float): Number of successes
+        mu (Array.General.Float): Mean of the distribution
 
-    def __eq__(self, other: object) -> bool:
-        return (
-            isinstance(other, DelayArrays)
-            and array_fully_equal(self.worm_delay, other.worm_delay)
-            and array_fully_equal(self.exposure_delay, other.exposure_delay)
-            and array_fully_equal(self.mf_delay, other.mf_delay)
-        )
-
-    @classmethod
-    def from_params(
-        cls, params: Params, n_people: int, individual_exposure: Array.Person.Float
-    ):
-        number_of_worm_delay_cols = math.ceil(
-            params.blackfly.l3_delay
-            * params.month_length_days
-            / (params.delta_time * params.year_length_days)
-        )
-        # matrix for tracking mf for L1 delay
-        number_of_mf_columns = math.ceil(
-            params.blackfly.l1_delay / (params.delta_time * params.year_length_days)
-        )
-        # matrix for exposure (to fly bites) for L1 delay
-        number_of_exposure_columns: int = math.ceil(
-            params.blackfly.l1_delay / (params.delta_time * params.year_length_days)
-        )
-        return cls(
-            worm_delay=np.zeros((number_of_worm_delay_cols, n_people), dtype=int),
-            exposure_delay=np.tile(
-                individual_exposure, (number_of_exposure_columns, 1)
-            ),
-            mf_delay=(
-                np.ones((number_of_mf_columns, n_people), dtype=int)
-                * params.microfil.initial_mf
-            ),
-        )
-
-    def append_to_hdf5_group(self, group: h5py.Group):
-        group.create_dataset("worm_delay", data=self.worm_delay)
-        group.create_dataset("exposure_delay", data=self.exposure_delay)
-        group.create_dataset("mf_delay", data=self.mf_delay)
-
-    @classmethod
-    def from_hdf5_group(cls, group: h5py.Group):
-        return cls(
-            np.array(group["worm_delay"]),
-            np.array(group["exposure_delay"]),
-            np.array(group["mf_delay"]),
-        )
-
-    def process_deaths(self, people_to_die: Array.Person.Bool):
-        if np.any(people_to_die):
-            self.worm_delay[:, people_to_die] = 0
-            self.mf_delay[0, people_to_die] = 0
-            # TODO: Do we need self.exposure_delay = 0
-
-
-@dataclass
-class People:
-    compliance: Array.Person.Bool  # 1: 'column used during treatment'
-    sex_is_male: Array.Person.Bool  # 3: sex
-    blackfly: BlackflyLarvae
-    ages: Array.Person.Float  # 2: current age
-    mf: Array.MFCat.Person.Float  # 2D Array, (N, age stage): microfilariae stages 7-28 (21)
-    worms: WormGroup
-    time_of_last_treatment: Array.Person.Float  # treat.vec
-    delay_arrays: DelayArrays
-    individual_exposure: Array.Person.Float
-
-    def __eq__(self, other: object) -> bool:
-        return (
-            isinstance(other, People)
-            and array_fully_equal(self.compliance, other.compliance)
-            and array_fully_equal(self.sex_is_male, other.sex_is_male)
-            and self.blackfly == other.blackfly
-            and array_fully_equal(self.ages, other.ages)
-            and array_fully_equal(self.mf, other.mf)
-            and self.worms == other.worms
-            and array_fully_equal(
-                self.time_of_last_treatment, other.time_of_last_treatment
-            )
-            and self.delay_arrays == other.delay_arrays
-            and array_fully_equal(self.individual_exposure, other.individual_exposure)
-        )
-
-    def __len__(self):
-        return len(self.compliance)
-
-    def append_to_hdf5_group(self, group: h5py.Group):
-        blackfly_group = group.create_group("blackfly")
-        delay_arrays_group = group.create_group("delay_arrays")
-        group.create_dataset("compliance", data=self.compliance)
-        group.create_dataset("sex_is_male", data=self.sex_is_male)
-        self.blackfly.append_to_hdf5_group(blackfly_group)
-        group.create_dataset("ages", data=self.ages)
-        group.create_dataset("mf", data=self.mf)
-        group.create_dataset("male_worms", data=self.worms.male)
-        group.create_dataset("infertile_female_worms", data=self.worms.infertile)
-        group.create_dataset("fertile_female_worms", data=self.worms.fertile)
-        group.create_dataset("time_of_last_treatment", data=self.time_of_last_treatment)
-        self.delay_arrays.append_to_hdf5_group(delay_arrays_group)
-        group.create_dataset("individual_exposure", data=self.individual_exposure)
-
-    @classmethod
-    def from_hdf5_group(cls, group: h5py.Group):
-        blackfly_group = group["blackfly"]
-        assert isinstance(blackfly_group, h5py.Group)
-        delay_arrays_group = group["delay_arrays"]
-        assert isinstance(delay_arrays_group, h5py.Group)
-        return cls(
-            np.array(group["compliance"]),
-            np.array(group["sex_is_male"]),
-            BlackflyLarvae.from_hdf5_group(blackfly_group),
-            np.array(group["ages"]),
-            np.array(group["mf"]),
-            WormGroup(
-                male=np.array(group["male_worms"]),
-                infertile=np.array(group["infertile_female_worms"]),
-                fertile=np.array(group["fertile_female_worms"]),
-            ),
-            np.array(group["time_of_last_treatment"]),
-            DelayArrays.from_hdf5_group(delay_arrays_group),
-            np.array(group["individual_exposure"]),
-        )
-
-    @classmethod
-    def from_params(
-        cls, params: Params, n_people: int, gamma_distribution: float = 0.3
-    ):
-        sex_array = (
-            np.random.uniform(low=0, high=1, size=n_people) < params.humans.gender_ratio
-        )
-        compliance_array = (
-            np.random.uniform(low=0, high=1, size=n_people)
-            > params.humans.noncompliant_percentage
-        )
-        time_of_last_treatment = np.empty(n_people)
-        time_of_last_treatment[:] = np.nan
-
-        individual_exposure = (
-            np.random.gamma(  # individual level exposure to fly bites "ex.vec"
-                shape=gamma_distribution,
-                scale=gamma_distribution,
-                size=n_people,
-            )
-        )
-        new_individual_exposure = individual_exposure / np.mean(
-            individual_exposure
-        )  # normalise
-        new_individual_exposure.setflags(write=False)
-
-        return cls(
-            compliance=compliance_array,
-            ages=truncated_geometric(
-                N=n_people,
-                prob=params.delta_time / params.humans.mean_human_age,
-                maximum=params.humans.max_human_age / params.delta_time,
-            )
-            * params.delta_time,
-            sex_is_male=sex_array,
-            blackfly=BlackflyLarvae(
-                L1=np.repeat(params.blackfly.initial_L1, n_people),
-                L2=np.repeat(params.blackfly.initial_L2, n_people),
-                L3=np.repeat(params.blackfly.initial_L3, n_people),
-            ),
-            mf=np.ones((params.microfil.microfil_age_stages, n_people))
-            * params.microfil.initial_mf,
-            worms=WormGroup(
-                male=np.ones((params.worms.worm_age_stages, n_people), dtype=int)
-                * params.worms.initial_worms,
-                infertile=np.ones((params.worms.worm_age_stages, n_people), dtype=int)
-                * params.worms.initial_worms,
-                fertile=np.ones((params.worms.worm_age_stages, n_people), dtype=int)
-                * params.worms.initial_worms,
-            ),
-            time_of_last_treatment=time_of_last_treatment,
-            delay_arrays=DelayArrays.from_params(
-                params, n_people, new_individual_exposure
-            ),
-            individual_exposure=new_individual_exposure,
-        )
-
-    def process_deaths(self, people_to_die: Array.Person.Bool, gender_ratio: float):
-        if (total_people_to_die := int(np.sum(people_to_die))) > 0:
-            self.sex_is_male[people_to_die] = (
-                np.random.uniform(low=0, high=1, size=total_people_to_die)
-                < gender_ratio
-            )
-            self.ages[people_to_die] = 0
-            self.blackfly.L1[people_to_die] = 0
-            self.mf[:, people_to_die] = 0
-            self.worms.male[:, people_to_die] = 0
-            self.worms.fertile[:, people_to_die] = 0
-            self.worms.infertile[:, people_to_die] = 0
-        self.delay_arrays.process_deaths(people_to_die)
+    Returns:
+        Array.General.Int: Samples from a negative binomial distribution
+    """
+    non_zero_n = n[n > 0]
+    rel_prob = non_zero_n / (non_zero_n + mu[n > 0])
+    temp_output = np.random.negative_binomial(
+        n=non_zero_n, p=rel_prob, size=len(non_zero_n)
+    )
+    output = np.zeros(len(n), dtype=int)
+    output[n > 0] = temp_output
+    return output
 
 
 def _calc_coverage(
@@ -321,7 +70,6 @@ def _calc_coverage(
     measured_coverage: float,
     age_compliance: float,
 ) -> Array.Person.Bool:
-
     non_compliant_people = (people.ages < age_compliance) | ~people.compliance
     compliant_percentage = 1 - np.mean(non_compliant_people)
     coverage = measured_coverage / compliant_percentage  # TODO: Is this correct?
@@ -329,43 +77,6 @@ def _calc_coverage(
     out_coverage[non_compliant_people] = 0
     rand_nums = np.random.uniform(low=0, high=1, size=len(people))
     return rand_nums < out_coverage
-
-
-def _calculate_total_exposure(
-    exposure_params: ExposureParams,
-    ages: Array.Person.Float,
-    sex_is_male: Array.Person.Bool,
-    individual_exposure: Array.Person.Float,
-) -> Array.Person.Float:
-    male_exposure_assumed = exposure_params.male_exposure * np.exp(
-        -exposure_params.male_exposure_exponent * ages
-    )
-    male_exposure_assumed_of_males = male_exposure_assumed[sex_is_male]
-    if len(male_exposure_assumed_of_males) == 0:
-        # TODO: Is this correct?
-        mean_male_exposure = 0
-    else:
-        mean_male_exposure: float = float(np.mean(male_exposure_assumed_of_males))
-    female_exposure_assumed = exposure_params.female_exposure * np.exp(
-        -exposure_params.female_exposure_exponent * ages
-    )
-    female_exposure_assumed_of_females = female_exposure_assumed[
-        np.logical_not(sex_is_male)
-    ]
-    if len(female_exposure_assumed_of_females) == 0:
-        # TODO: Is this correct?
-        mean_female_exposure = 0
-    else:
-        mean_female_exposure: float = float(np.mean(female_exposure_assumed_of_females))
-
-    sex_age_exposure = np.where(
-        sex_is_male,
-        male_exposure_assumed / mean_male_exposure,
-        female_exposure_assumed / mean_female_exposure,
-    )
-
-    total_exposure = sex_age_exposure * individual_exposure
-    return total_exposure / np.mean(total_exposure)
 
 
 CallbackStat = TypeVar("CallbackStat")
@@ -403,89 +114,6 @@ class State(Generic[CallbackStat]):
     def n_people(self):
         return len(self._people)
 
-    def microfilariae_per_skin_snip(
-        self: "State[CallbackStat]",
-    ) -> tuple[float, Array.Person.Float]:
-        """
-        #people are tested for the presence of mf using a skin snip, we assume mf are overdispersed in the skin
-        #function calculates number of mf in skin snip for all people
-
-        params.skin_snip_weight # ss.wt
-        params.skin_snip_number # num.ss
-        params.slope_kmf # slope.kmf
-        params.initial_kmf # int.kMf
-        params.human_population # pop.size
-        Determined by new structure
-        nfw.start,
-        fw.end,
-        mf.start,
-        mf.end,
-        """
-        # rowSums(da... sums up adult worms for all individuals giving a vector of kmfs
-        # TODO: Note that the worms used here were only female, not total - is this correct?
-        kmf = (
-            self.params.microfil.slope_kmf
-            * np.sum(
-                self._people.worms.fertile + self._people.worms.infertile,
-                axis=0,
-            )
-            + self.params.microfil.initial_kmf
-        )
-
-        mu = self.params.humans.skin_snip_weight * np.sum(self._people.mf, axis=0)
-        if self.params.humans.skin_snip_number > 1:
-            total_skin_snip_mf = np.zeros(
-                (
-                    self.n_people,
-                    self.params.humans.skin_snip_number,
-                )
-            )
-            for i in range(self.params.humans.skin_snip_number):
-                total_skin_snip_mf[:, i] = negative_binomial_alt_interface(n=kmf, mu=mu)
-            mfobs: Array.Person.Int = np.sum(total_skin_snip_mf, axis=1)
-
-        else:
-            mfobs: Array.Person.Int = negative_binomial_alt_interface(n=kmf, mu=mu)
-
-        mfobs_percent: Array.Person.Float = mfobs / (
-            self.params.humans.skin_snip_number * self.params.humans.skin_snip_weight
-        )
-        return float(np.mean(mfobs_percent)), mfobs_percent
-
-    def mf_prevalence_in_population(self) -> float:
-        """
-        Returns a decimal representation of mf prevalence in skinsnip aged population.
-        """
-        pop_over_min_age_array = (
-            self._people.ages >= self.params.humans.min_skinsnip_age
-        )
-        _, mf_skin_snip = self.microfilariae_per_skin_snip()
-        infected_over_min_age = float(np.sum(mf_skin_snip[pop_over_min_age_array] > 0))
-        total_over_min_age = float(np.sum(pop_over_min_age_array))
-        return infected_over_min_age / total_over_min_age
-
-    def to_stats(self) -> StateStats:
-        return StateStats(
-            percent_compliant=float(np.sum(self._people.compliance))
-            / len(self._people.compliance),
-            percent_male=float(np.sum(self._people.sex_is_male))
-            / len(self._people.compliance),
-            L1=NumericArrayStat.from_array(self._people.blackfly.L1),
-            L2=NumericArrayStat.from_array(self._people.blackfly.L2),
-            L3=NumericArrayStat.from_array(self._people.blackfly.L3),
-            ages=NumericArrayStat.from_array(self._people.ages),
-            mf=NumericArrayStat.from_array(self._people.mf),
-            male_worms=NumericArrayStat.from_array(self._people.worms.male),
-            infertile_female_worms=NumericArrayStat.from_array(
-                self._people.worms.infertile
-            ),
-            fertile_female_worms=NumericArrayStat.from_array(
-                self._people.worms.fertile
-            ),
-            mf_per_skin_snip=self.microfilariae_per_skin_snip()[0],
-            population_prevalence=self.mf_prevalence_in_population(),
-        )
-
     def __eq__(self, other: object) -> bool:
         return (
             isinstance(other, State)
@@ -506,7 +134,7 @@ class State(Generic[CallbackStat]):
         else:
             coverage_in = None
 
-        total_exposure = _calculate_total_exposure(
+        total_exposure = calculate_total_exposure(
             self.params.exposure,
             self._people.ages,
             self._people.sex_is_male,
@@ -539,10 +167,7 @@ class State(Generic[CallbackStat]):
             total_exposure,
             self.n_people,
         )
-        # Move all rows in worm_delay along one
-        self._people.delay_arrays.worm_delay = lag_array(
-            new_worms, self._people.delay_arrays.worm_delay
-        )
+
         assert last_time_of_last_treatment is not None
 
         if (
@@ -552,7 +177,7 @@ class State(Generic[CallbackStat]):
             self._people.time_of_last_treatment = last_time_of_last_treatment
 
         # inputs for delay in L1
-        # TODO: Should this be the existing mf? mf.temp
+
         old_mf: Array.Person.Float = np.sum(self._people.mf, axis=0)
         self._people.mf += calculate_microfil_delta(
             current_microfil=self._people.mf,
@@ -585,12 +210,9 @@ class State(Generic[CallbackStat]):
             self.params.year_length_days,
         )
         self._people.blackfly.L3 = calc_l3(self.params.blackfly, old_blackfly_L2)
-
-        self._people.delay_arrays.exposure_delay = lag_array(
-            total_exposure, self._people.delay_arrays.exposure_delay
-        )
-        self._people.delay_arrays.mf_delay = lag_array(
-            old_mf, self._people.delay_arrays.mf_delay
+        # TODO: Resolve new_mf=old_mf
+        self._people.delay_arrays.lag_all_arrays(
+            new_worms=new_worms, total_exposure=total_exposure, new_mf=old_mf
         )
         people_to_die: Array.Person.Bool = np.logical_or(
             np.random.binomial(
@@ -675,6 +297,89 @@ class State(Generic[CallbackStat]):
         group_people = f.create_group("people")
         self._people.append_to_hdf5_group(group_people)
         f.attrs["params"] = self._params.json()
+
+    def microfilariae_per_skin_snip(
+        self,
+    ) -> tuple[float, Array.Person.Float]:
+        """
+        #people are tested for the presence of mf using a skin snip, we assume mf are overdispersed in the skin
+        #function calculates number of mf in skin snip for all people
+
+        params.skin_snip_weight # ss.wt
+        params.skin_snip_number # num.ss
+        params.slope_kmf # slope.kmf
+        params.initial_kmf # int.kMf
+        params.human_population # pop.size
+        Determined by new structure
+        nfw.start,
+        fw.end,
+        mf.start,
+        mf.end,
+        """
+        # rowSums(da... sums up adult worms for all individuals giving a vector of kmfs
+        # TODO: Note that the worms used here were only female, not total - is this correct?
+        kmf = (
+            self.params.microfil.slope_kmf
+            * np.sum(
+                self._people.worms.fertile + self._people.worms.infertile,
+                axis=0,
+            )
+            + self.params.microfil.initial_kmf
+        )
+
+        mu = self.params.humans.skin_snip_weight * np.sum(self._people.mf, axis=0)
+        if self.params.humans.skin_snip_number > 1:
+            total_skin_snip_mf = np.zeros(
+                (
+                    self.n_people,
+                    self.params.humans.skin_snip_number,
+                )
+            )
+            for i in range(self.params.humans.skin_snip_number):
+                total_skin_snip_mf[:, i] = negative_binomial_alt_interface(n=kmf, mu=mu)
+            mfobs: Array.Person.Int = np.sum(total_skin_snip_mf, axis=1)
+
+        else:
+            mfobs: Array.Person.Int = negative_binomial_alt_interface(n=kmf, mu=mu)
+
+        mfobs_percent: Array.Person.Float = mfobs / (
+            self.params.humans.skin_snip_number * self.params.humans.skin_snip_weight
+        )
+        return float(np.mean(mfobs_percent)), mfobs_percent
+
+    def mf_prevalence_in_population(self) -> float:
+        """
+        Returns a decimal representation of mf prevalence in skinsnip aged population.
+        """
+        pop_over_min_age_array = (
+            self._people.ages >= self.params.humans.min_skinsnip_age
+        )
+        _, mf_skin_snip = self.microfilariae_per_skin_snip()
+        infected_over_min_age = float(np.sum(mf_skin_snip[pop_over_min_age_array] > 0))
+        total_over_min_age = float(np.sum(pop_over_min_age_array))
+        return infected_over_min_age / total_over_min_age
+
+    def to_stats(self) -> StateStats:
+        return StateStats(
+            percent_compliant=float(np.sum(self._people.compliance))
+            / len(self._people.compliance),
+            percent_male=float(np.sum(self._people.sex_is_male))
+            / len(self._people.compliance),
+            L1=NumericArrayStat.from_array(self._people.blackfly.L1),
+            L2=NumericArrayStat.from_array(self._people.blackfly.L2),
+            L3=NumericArrayStat.from_array(self._people.blackfly.L3),
+            ages=NumericArrayStat.from_array(self._people.ages),
+            mf=NumericArrayStat.from_array(self._people.mf),
+            male_worms=NumericArrayStat.from_array(self._people.worms.male),
+            infertile_female_worms=NumericArrayStat.from_array(
+                self._people.worms.infertile
+            ),
+            fertile_female_worms=NumericArrayStat.from_array(
+                self._people.worms.fertile
+            ),
+            mf_per_skin_snip=self.microfilariae_per_skin_snip()[0],
+            population_prevalence=self.mf_prevalence_in_population(),
+        )
 
 
 def make_state_from_params(params: Params, n_people: int):

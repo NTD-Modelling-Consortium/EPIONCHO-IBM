@@ -2,8 +2,7 @@ from typing import Callable
 
 import numpy as np
 
-from epioncho_ibm.types import Array
-
+from .types import Array
 from .params import MicrofilParams, TreatmentParams
 
 
