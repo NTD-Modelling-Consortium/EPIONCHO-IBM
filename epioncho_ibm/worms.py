@@ -260,7 +260,7 @@ def process_treatment(
 
         # individuals which have been treated get additional infertility rate
         lam_m_temp = np.where(
-            modified_time_of_last_treatment == np.nan, 0, worm_params.lam_m
+            np.isnan(modified_time_of_last_treatment), 0, worm_params.lam_m
         )
         fertile_to_non_fertile_rate: Array.Person.Float = np.nan_to_num(
             delta_time * lam_m_temp * np.exp(-worm_params.phi * time_since_treatment)
