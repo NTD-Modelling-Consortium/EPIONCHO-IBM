@@ -299,7 +299,7 @@ class State(Generic[CallbackStat]):
         f.attrs["params"] = self._params.json()
 
     def microfilariae_per_skin_snip(
-        self: "State[CallbackStat]",
+        self,
     ) -> tuple[float, Array.Person.Float]:
         """
         #people are tested for the presence of mf using a skin snip, we assume mf are overdispersed in the skin
