@@ -49,52 +49,40 @@ def _calc_dead_worms(
 ) -> WormGroup:
     def _calc_dead_worms_single_group(
         current_worms: Array.WormCat.Person.Int,
-        mortalities: Array.WormCat.Float,
+        mortalities: Array.WormCat.Float | Array.WormCat.Person.Float,
+        treatment_occurred_and_female: bool = False,
     ) -> Array.WormCat.Person.Int:
         assert current_worms.ndim == 2
-        n_people = current_worms.shape[1]
-        mortalities = np.tile(mortalities, (n_people, 1)).T
-        return np.random.binomial(
-            n=current_worms,
-            p=mortalities,
-            size=current_worms.shape,
-        )
+        if treatment_occurred_and_female:
+            return np.random.binomial(
+                n=current_worms,
+                p=mortalities,
+                size=current_worms.shape,
+            )
+        else:
+            n_people = current_worms.shape[1]
+            mortalities = np.tile(mortalities, (n_people, 1)).T
+            return np.random.binomial(
+                n=current_worms,
+                p=mortalities,
+                size=current_worms.shape,
+            )
 
-    def _calc_female_dead_worms_in_treatment_single_group(
-        current_worms: Array.WormCat.Person.Int,
-        mortalities: Array.WormCat.Person.Float,
-    ) -> Array.WormCat.Person.Int:
-        assert current_worms.ndim == 2
-        return np.random.binomial(
-            n=current_worms,
-            p=mortalities,
-            size=current_worms.shape,
-        )
-
-    if treatment_occurred:
-        return WormGroup(
-            male=_calc_dead_worms_single_group(
-                current_worms=current_worms.male, mortalities=male_mortalities
-            ),
-            infertile=_calc_female_dead_worms_in_treatment_single_group(
-                current_worms.infertile, female_mortalities
-            ),
-            fertile=_calc_female_dead_worms_in_treatment_single_group(
-                current_worms.fertile, female_mortalities
-            ),
-        )
-    else:
-        return WormGroup(
-            male=_calc_dead_worms_single_group(
-                current_worms=current_worms.male, mortalities=male_mortalities
-            ),
-            infertile=_calc_dead_worms_single_group(
-                current_worms.infertile, female_mortalities
-            ),
-            fertile=_calc_dead_worms_single_group(
-                current_worms.fertile, female_mortalities
-            ),
-        )
+    return WormGroup(
+        male=_calc_dead_worms_single_group(
+            current_worms=current_worms.male, mortalities=male_mortalities
+        ),
+        infertile=_calc_dead_worms_single_group(
+            current_worms.infertile,
+            female_mortalities,
+            treatment_occurred_and_female=treatment_occurred,
+        ),
+        fertile=_calc_dead_worms_single_group(
+            current_worms.fertile,
+            female_mortalities,
+            treatment_occurred_and_female=treatment_occurred,
+        ),
+    )
 
 
 def _calc_aging_worms(
