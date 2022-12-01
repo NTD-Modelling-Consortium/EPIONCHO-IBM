@@ -8,15 +8,15 @@ import numpy as np
 from pydantic import BaseModel
 from tqdm import tqdm
 
-from epioncho_ibm.blackfly import calc_l1, calc_l2, calc_l3
+from epioncho_ibm.blackfly import (
+    calc_l1,
+    calc_l2,
+    calc_l3,
+    calc_new_worms_from_blackfly,
+)
 from epioncho_ibm.microfil import calculate_microfil_delta
 from epioncho_ibm.utils import array_fully_equal, lag_array
-from epioncho_ibm.worms import (
-    WormGroup,
-    calc_new_worms,
-    change_in_worms,
-    get_delayed_males_and_females,
-)
+from epioncho_ibm.worms import WormGroup, change_in_worms
 
 from .derived_params import DerivedParams
 from .params import ExposureParams, Params
@@ -332,22 +332,25 @@ def _calc_coverage(
 
 
 def _calculate_total_exposure(
-    exposure_params: ExposureParams, people: People
+    exposure_params: ExposureParams,
+    ages: Array.Person.Float,
+    sex_is_male: Array.Person.Bool,
+    individual_exposure: Array.Person.Float,
 ) -> Array.Person.Float:
     male_exposure_assumed = exposure_params.male_exposure * np.exp(
-        -exposure_params.male_exposure_exponent * people.ages
+        -exposure_params.male_exposure_exponent * ages
     )
-    male_exposure_assumed_of_males = male_exposure_assumed[people.sex_is_male]
+    male_exposure_assumed_of_males = male_exposure_assumed[sex_is_male]
     if len(male_exposure_assumed_of_males) == 0:
         # TODO: Is this correct?
         mean_male_exposure = 0
     else:
         mean_male_exposure: float = float(np.mean(male_exposure_assumed_of_males))
     female_exposure_assumed = exposure_params.female_exposure * np.exp(
-        -exposure_params.female_exposure_exponent * people.ages
+        -exposure_params.female_exposure_exponent * ages
     )
     female_exposure_assumed_of_females = female_exposure_assumed[
-        np.logical_not(people.sex_is_male)
+        np.logical_not(sex_is_male)
     ]
     if len(female_exposure_assumed_of_females) == 0:
         # TODO: Is this correct?
@@ -356,12 +359,12 @@ def _calculate_total_exposure(
         mean_female_exposure: float = float(np.mean(female_exposure_assumed_of_females))
 
     sex_age_exposure = np.where(
-        people.sex_is_male,
+        sex_is_male,
         male_exposure_assumed / mean_male_exposure,
         female_exposure_assumed / mean_female_exposure,
     )
 
-    total_exposure = sex_age_exposure * people.individual_exposure
+    total_exposure = sex_age_exposure * individual_exposure
     return total_exposure / np.mean(total_exposure)
 
 
@@ -503,28 +506,14 @@ class State(Generic[CallbackStat]):
         else:
             coverage_in = None
 
-        total_exposure = _calculate_total_exposure(self.params.exposure, self._people)
+        total_exposure = _calculate_total_exposure(
+            self.params.exposure,
+            self._people.ages,
+            self._people.sex_is_male,
+            self._people.individual_exposure,
+        )
         # increase ages
         self._people.ages += self.params.delta_time
-
-        # there is a delay in new parasites entering humans (from fly bites) and entering the first adult worm age class
-        new_worms = calc_new_worms(
-            self._people.blackfly.L3,
-            self.params.blackfly,
-            self.params.delta_time,
-            total_exposure,
-            self.n_people,
-        )
-        # Take males and females from final column of worm_delay
-        delayed_males, delayed_females = get_delayed_males_and_females(
-            self._people.delay_arrays.worm_delay,
-            self.params.worms.sex_ratio,
-        )
-
-        # Move all rows in worm_delay along one
-        self._people.delay_arrays.worm_delay = lag_array(
-            new_worms, self._people.delay_arrays.worm_delay
-        )
 
         old_fertile_female_worms = self._people.worms.fertile.copy()
         old_male_worms = self._people.worms.male.copy()
@@ -535,15 +524,25 @@ class State(Generic[CallbackStat]):
             treatment_params=self.params.treatment,
             delta_time=self.params.delta_time,
             n_people=self.n_people,
-            delayed_females=delayed_females,
-            delayed_males=delayed_males,
+            worm_delay_array=self._people.delay_arrays.worm_delay,
             mortalities=self._derived_params.worm_mortality_rate,
             coverage_in=coverage_in,
             initial_treatment_times=self._derived_params.initial_treatment_times,
             current_time=current_time,
             time_of_last_treatment=self._people.time_of_last_treatment,
         )
-
+        # there is a delay in new parasites entering humans (from fly bites) and entering the first adult worm age class
+        new_worms = calc_new_worms_from_blackfly(
+            self._people.blackfly.L3,
+            self.params.blackfly,
+            self.params.delta_time,
+            total_exposure,
+            self.n_people,
+        )
+        # Move all rows in worm_delay along one
+        self._people.delay_arrays.worm_delay = lag_array(
+            new_worms, self._people.delay_arrays.worm_delay
+        )
         assert last_time_of_last_treatment is not None
 
         if (
