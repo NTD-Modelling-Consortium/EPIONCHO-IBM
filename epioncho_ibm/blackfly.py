@@ -167,3 +167,21 @@ def w_plus_one_rate(
         * total_exposure
         * L3
     )
+
+
+def calc_new_worms_from_blackfly(
+    L3: Array.Person.Float,
+    blackfly_params: BlackflyParams,
+    delta_time: float,
+    total_exposure: Array.Person.Float,
+    n_people: int,
+) -> Array.Person.Int:
+    new_rate = w_plus_one_rate(
+        blackfly_params,
+        delta_time,
+        float(np.mean(L3)),
+        total_exposure,
+    )
+    assert not np.any(new_rate > 10**10)
+    new_worms = np.random.poisson(lam=new_rate, size=n_people)
+    return new_worms

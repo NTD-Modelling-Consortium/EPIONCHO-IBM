@@ -2,18 +2,12 @@ from dataclasses import dataclass
 
 import numpy as np
 
-import epioncho_ibm.blackfly as blackfly
 import epioncho_ibm.utils as utils
 from epioncho_ibm.types import Array
 
-from .params import BlackflyParams, TreatmentParams, WormParams
+from .params import TreatmentParams, WormParams
 
-__all__ = [
-    "WormGroup",
-    "change_in_worms",
-    "get_delayed_males_and_females",
-    "calc_new_worms",
-]
+__all__ = ["WormGroup", "change_in_worms"]
 
 
 @dataclass
@@ -262,20 +256,33 @@ def process_treatment(
     )
 
 
+def _get_delayed_males_and_females(
+    worm_delay: Array.WormDelay.Person.Int, worm_sex_ratio: float
+) -> tuple[Array.Person.Int, Array.Person.Int]:
+    final_column: Array.Person.Int = np.array(worm_delay[-1], dtype=int)
+    last_males = np.random.binomial(n=final_column, p=worm_sex_ratio)  # new.worms.m
+    last_females = final_column - last_males  # new.worms.nf
+    return last_males, last_females
+
+
 def change_in_worms(
     current_worms: WormGroup,
     worm_params: WormParams,
     treatment_params: TreatmentParams | None,
     delta_time: float,
     n_people: int,
-    delayed_females: Array.Person.Int,
-    delayed_males: Array.Person.Int,
+    worm_delay_array: Array.WormDelay.Person.Int,
     mortalities: Array.WormCat.Float,
     coverage_in: Array.Person.Bool | None,
     initial_treatment_times: Array.Treatments.Float | None,
     current_time: float,
     time_of_last_treatment: Array.Person.Float | None,
 ) -> tuple[WormGroup, Array.Person.Float | None]:
+    # Take males and females from final column of worm_delay
+    delayed_males, delayed_females = _get_delayed_males_and_females(
+        worm_delay_array,
+        worm_params.sex_ratio,
+    )
     # TODO: time_of_last_treatment is modified inside, change this!
     (
         treatment_occurred,
@@ -326,30 +333,3 @@ def change_in_worms(
         new_worms,
         time_of_last_treatment,
     )
-
-
-def get_delayed_males_and_females(
-    worm_delay: Array.WormDelay.Person.Int, worm_sex_ratio: float
-) -> tuple[Array.Person.Int, Array.Person.Int]:
-    final_column: Array.Person.Int = np.array(worm_delay[-1], dtype=int)
-    last_males = np.random.binomial(n=final_column, p=worm_sex_ratio)  # new.worms.m
-    last_females = final_column - last_males  # new.worms.nf
-    return last_males, last_females
-
-
-def calc_new_worms(
-    L3: Array.Person.Float,
-    blackfly_params: BlackflyParams,
-    delta_time: float,
-    total_exposure: Array.Person.Float,
-    n_people: int,
-) -> Array.Person.Int:
-    new_rate = blackfly.w_plus_one_rate(
-        blackfly_params,
-        delta_time,
-        float(np.mean(L3)),
-        total_exposure,
-    )
-    assert not np.any(new_rate > 10**10)
-    new_worms = np.random.poisson(lam=new_rate, size=n_people)
-    return new_worms
