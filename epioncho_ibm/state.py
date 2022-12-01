@@ -13,7 +13,7 @@ from .microfil import calculate_microfil_delta
 from .params import Params
 from .people import People
 from .types import Array
-from .worms import change_in_worms
+from .worms import calculate_new_worms
 
 np.seterr(all="ignore")
 
@@ -66,16 +66,29 @@ def negative_binomial_alt_interface(
 
 
 def _calc_coverage(
-    people: People,
+    ages: Array.Person.Float,
+    compliance: Array.Person.Bool,
     measured_coverage: float,
-    age_compliance: float,
+    age_of_compliance: float,
 ) -> Array.Person.Bool:
-    non_compliant_people = (people.ages < age_compliance) | ~people.compliance
+    """
+    Calculates whether each person in the model is covered by a treatment.
+
+    Args:
+        ages (Array.Person.Float): The ages of the people in the model
+        compliance (Array.Person.Bool): Whether each person in the model is compliant
+        measured_coverage (float): A measured value of coverage assuming all people are compliant.
+        age_of_compliance (float): How old a person must be to be compliant
+
+    Returns:
+        Array.Person.Bool: An array stating if each person in the model is treated
+    """
+    non_compliant_people = (ages < age_of_compliance) | ~compliance
     compliant_percentage = 1 - np.mean(non_compliant_people)
-    coverage = measured_coverage / compliant_percentage  # TODO: Is this correct?
-    out_coverage = np.repeat(coverage, len(people))
+    coverage = measured_coverage / compliant_percentage
+    out_coverage = np.repeat(coverage, len(ages))
     out_coverage[non_compliant_people] = 0
-    rand_nums = np.random.uniform(low=0, high=1, size=len(people))
+    rand_nums = np.random.uniform(low=0, high=1, size=len(ages))
     return rand_nums < out_coverage
 
 
@@ -88,13 +101,31 @@ class State(Generic[CallbackStat]):
     _derived_params: DerivedParams
 
     def __init__(self, people: People, params: Params) -> None:
+        """
+        The state of the model at any one time.
+
+        Args:
+            people (People): A representation of the People in the model.
+            params (Params): A set of fixed parameters for controlling the model.
+        """
         self._people = people
         self.params = params
 
     @classmethod
     def from_params(
         cls, params: Params, n_people: int, gamma_distribution: float = 0.3
-    ):  # "gam.dis" individual level exposure heterogeneity
+    ):
+        """
+        Generate the initial state of the model, based on parameters.
+
+        Args:
+            params (Params): A set of fixed parameters for controlling the model.
+            n_people (int): The number of people to be simulated
+            gamma_distribution (float, optional): Individual level exposure heterogeneity. Defaults to 0.3.
+
+        Returns:
+            State: The state of the model
+        """
         return cls(
             people=People.from_params(params, n_people, gamma_distribution),
             params=params,
@@ -102,16 +133,22 @@ class State(Generic[CallbackStat]):
 
     @property
     def params(self):
+        """
+        A set of fixed parameters for controlling the model.
+        """
         return self._params
 
     @params.setter
     def params(self, value: object):
         assert isinstance(value, Params)
-        self._derived_params = DerivedParams(value, self.n_people)
+        self._derived_params = DerivedParams(value)
         self._params = value
 
     @property
     def n_people(self):
+        """
+        The number of people simulated.
+        """
         return len(self._people)
 
     def __eq__(self, other: object) -> bool:
@@ -122,12 +159,19 @@ class State(Generic[CallbackStat]):
         )
 
     def _advance(self, current_time: float):
+        """
+        Advance the state forward one time step from t to t + dt
+
+        Args:
+            current_time (float): The current time (t) in the model.
+        """
         if (
             self.params.treatment is not None
             and current_time >= self.params.treatment.start_time
         ):
             coverage_in = _calc_coverage(
-                self._people,
+                self._people.ages,
+                self._people.compliance,
                 self.params.humans.total_population_coverage,
                 self.params.humans.min_skinsnip_age,
             )
@@ -146,7 +190,7 @@ class State(Generic[CallbackStat]):
         old_fertile_female_worms = self._people.worms.fertile.copy()
         old_male_worms = self._people.worms.male.copy()
 
-        self._people.worms, last_time_of_last_treatment = change_in_worms(
+        self._people.worms, last_time_of_last_treatment = calculate_new_worms(
             current_worms=self._people.worms,
             worm_params=self.params.worms,
             treatment_params=self.params.treatment,
@@ -155,7 +199,7 @@ class State(Generic[CallbackStat]):
             worm_delay_array=self._people.delay_arrays.worm_delay,
             mortalities=self._derived_params.worm_mortality_rate,
             coverage_in=coverage_in,
-            initial_treatment_times=self._derived_params.initial_treatment_times,
+            treatment_times=self._derived_params.treatment_times,
             current_time=current_time,
             time_of_last_treatment=self._people.time_of_last_treatment,
         )
@@ -228,6 +272,17 @@ class State(Generic[CallbackStat]):
     def run_simulation(
         self, start_time: float = 0, end_time: float = 0, verbose: bool = False
     ) -> None:
+        """
+        Run the simulation between two times.
+
+        Args:
+            start_time (float, optional): The time (in years) to start the simulation. Defaults to 0.
+            end_time (float, optional): The time (in years) to end the simulation. Defaults to 0.
+            verbose (bool, optional): When true, the model displays a progress bar. Defaults to False.
+
+        Raises:
+            ValueError: End time after start
+        """
         if end_time < start_time:
             raise ValueError("End time after start")
 
@@ -302,22 +357,14 @@ class State(Generic[CallbackStat]):
         self,
     ) -> tuple[float, Array.Person.Float]:
         """
-        #people are tested for the presence of mf using a skin snip, we assume mf are overdispersed in the skin
-        #function calculates number of mf in skin snip for all people
+        Calculates number of mf in skin snip for all people.
+        
+        People are tested for the presence of mf using a skin snip.
+        We assume mf are overdispersed in the skin
 
-        params.skin_snip_weight # ss.wt
-        params.skin_snip_number # num.ss
-        params.slope_kmf # slope.kmf
-        params.initial_kmf # int.kMf
-        params.human_population # pop.size
-        Determined by new structure
-        nfw.start,
-        fw.end,
-        mf.start,
-        mf.end,
+        Returns:
+            tuple[float, Array.Person.Float]: Mean mf, mf by person. 
         """
-        # rowSums(da... sums up adult worms for all individuals giving a vector of kmfs
-        # TODO: Note that the worms used here were only female, not total - is this correct?
         kmf = (
             self.params.microfil.slope_kmf
             * np.sum(
@@ -349,7 +396,10 @@ class State(Generic[CallbackStat]):
 
     def mf_prevalence_in_population(self) -> float:
         """
-        Returns a decimal representation of mf prevalence in skinsnip aged population.
+        Calculates mf prevalence in population.
+
+        Returns:
+            float: mf_prevalence
         """
         pop_over_min_age_array = (
             self._people.ages >= self.params.humans.min_skinsnip_age

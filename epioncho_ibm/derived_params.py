@@ -18,9 +18,9 @@ class DerivedParams:
     worm_mortality_rate: Array.WormCat.Float
     fecundity_rates_worms: Array.WormCat.Float
     microfillarie_mortality_rate: Array.MFCat.Float
-    initial_treatment_times: Optional[Array.Treatments.Float]
+    treatment_times: Optional[Array.Treatments.Float]
 
-    def __init__(self, params: Params, n_people: int) -> None:
+    def __init__(self, params: Params) -> None:
         worm_age_categories: Array.WormCat.Float = np.arange(
             start=0,
             stop=params.worms.max_worm_age,
@@ -65,10 +65,10 @@ class DerivedParams:
                     f"Treatment times could not be found for start: {params.treatment.start_time}, stop: {params.treatment.stop_time}, interval: {params.treatment.interval_years}"
                 )
             treatment_number_int: int = math.ceil(treatment_number)
-            self.initial_treatment_times = np.linspace(  # "times.of.treat.in"
+            self.treatment_times = np.linspace(  # "times.of.treat.in"
                 start=params.treatment.start_time,
                 stop=params.treatment.stop_time,
                 num=treatment_number_int + 1,
             )
         else:
-            self.initial_treatment_times = None
+            self.treatment_times = None
