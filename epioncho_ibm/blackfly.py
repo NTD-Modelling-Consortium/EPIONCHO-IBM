@@ -201,6 +201,7 @@ def calc_new_worms_from_blackfly(
     delta_time: float,
     total_exposure: Array.Person.Float,
     n_people: int,
+    debug: bool
 ) -> Array.Person.Int:
     """
     Calculates the number of new worms produced based on the number of L3 larvae
@@ -211,6 +212,7 @@ def calc_new_worms_from_blackfly(
         delta_time (float): dt - one unit of time
         total_exposure (Array.Person.Float): The overall exposure of each person to infection
         n_people (int): The total number of people
+        debug (bool): Runs in debug mode
 
     Returns:
         Array.Person.Int: The number of new worms produced by L3 larvae
@@ -221,6 +223,7 @@ def calc_new_worms_from_blackfly(
         float(np.mean(L3)),
         total_exposure,
     )
-    assert not np.any(new_rate > 10**10)
+    if debug:
+        assert not np.any(new_rate > 10**10)
     new_worms = np.random.poisson(lam=new_rate, size=n_people)
     return new_worms

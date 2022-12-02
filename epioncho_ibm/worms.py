@@ -206,6 +206,7 @@ def _calc_new_worms(
     dead: WormGroup,
     current_worms: WormGroup,
     delta_fertility: Array.WormCat.Person.Int,
+    debug: bool
 ) -> WormGroup:
     """
     Calculates the change in worms 
@@ -216,6 +217,7 @@ def _calc_new_worms(
         dead (WormGroup): Worms dying in each compartment
         current_worms (WormGroup): The current number of worms
         delta_fertility (Array.WormCat.Person.Int): Worms becoming fertile in each compartment
+        debug (bool): Runs in debug mode
 
     Returns:
         WormGroup: The new value for total worms
@@ -232,9 +234,10 @@ def _calc_new_worms(
     new_fertile = (
         current_worms.fertile + delta_fertility - dead.fertile + transit_fertile
     )
-    assert np.all(
-        (new_male >= 0) & (new_infertile >= 0) & (new_fertile >= 0)
-    ), "Worms became negative!"
+    if debug:
+        assert np.all(
+            (new_male >= 0) & (new_infertile >= 0) & (new_fertile >= 0)
+        ), "Worms became negative!"
     return WormGroup(male=new_male, infertile=new_infertile, fertile=new_fertile)
 
 
@@ -330,6 +333,7 @@ def calculate_new_worms(
     treatment_times: Array.Treatments.Float | None,
     current_time: float,
     time_of_last_treatment: Array.Person.Float | None,
+    debug: bool
 ) -> tuple[WormGroup, Array.Person.Float | None]:
     """
     Calculates the new total worms in the model for one time step. 
@@ -347,6 +351,7 @@ def calculate_new_worms(
         current_time (float): The current time, t, in the model
         time_of_last_treatment (Array.Person.Float | None): The last time a particular person was 
             treated (None if treatment has not started).
+        debug (bool): Runs in debug mode
 
     Returns:
         tuple[WormGroup, Array.Person.Float | None]: Returns new total worms, last time people were treated, respectively
@@ -399,7 +404,7 @@ def calculate_new_worms(
     )
 
     delta_worms = _calc_new_worms(
-        inbound, outbound, dead, current_worms, delta_fertility
+        inbound, outbound, dead, current_worms, delta_fertility, debug
     )
 
     return (

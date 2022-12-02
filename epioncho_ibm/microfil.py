@@ -13,6 +13,7 @@ def _construct_derive_microfil(
     mortality: Array.MFCat.Person.Float,
     microfil_move_rate: float,
     person_has_worms: Array.Person.Bool,
+    debug: bool
 ) -> Callable[[None | Array.MFCat.Person.Float], Array.MFCat.Person.Float]:
     """
     fertile_worms # fert.worms
@@ -23,8 +24,9 @@ def _construct_derive_microfil(
     microfil_compartment_minus_one # mf.comp.minus.one
     person_has_worms # mp (once turned to 0 or 1)
     """
-    assert np.all(mortality >= 0), "Mortality can't be negative"
-    assert microfil_move_rate >= 0, "Mortality move rate can't be negative"
+    if debug:
+        assert np.all(mortality >= 0), "Mortality can't be negative"
+        assert microfil_move_rate >= 0, "Mortality move rate can't be negative"
 
     # * lagged by one compartment
     movement: Array.MFCat.Person.Float = (
@@ -43,7 +45,8 @@ def _construct_derive_microfil(
             microfil_adjusted = microfil
         else:
             microfil_adjusted = microfil + k
-        assert np.all(microfil_adjusted >= 0)
+        if debug:
+            assert np.all(microfil_adjusted >= 0)
 
         mortality_temp = mortality * microfil_adjusted
         move_rate_temp = microfil_move_rate * microfil_adjusted
@@ -64,6 +67,7 @@ def calculate_microfil_delta(
     current_time: float,
     current_fertile_female_worms: Array.WormCat.Person.Int,
     current_male_worms: Array.WormCat.Person.Int,
+    debug: bool
 ) -> Array.MFCat.Person.Float:
     """
     microfillarie_mortality_rate # mu.rates.mf
@@ -105,6 +109,7 @@ def calculate_microfil_delta(
         mortality=mortality,
         microfil_move_rate=microfil_params.microfil_move_rate,
         person_has_worms=np.any(current_male_worms, axis=0),
+        debug=debug
     )
 
     k1 = derive_microfil(None)
