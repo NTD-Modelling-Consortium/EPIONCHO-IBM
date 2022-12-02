@@ -44,15 +44,15 @@ class BlackflyLarvae:
 
 
 class DelayArrays:
-    worm_delay: Array.WormDelay.Person.Int
-    exposure_delay: Array.ExposureDelay.Person.Float
-    mf_delay: Array.MFDelay.Person.Float
+    worm_delay: Array.L3Delay.Person.Int
+    exposure_delay: Array.L1Delay.Person.Float
+    mf_delay: Array.L1Delay.Person.Float
 
     def __init__(
         self,
-        worm_delay: Array.WormDelay.Person.Int,
-        exposure_delay: Array.ExposureDelay.Person.Float,
-        mf_delay: Array.MFDelay.Person.Float,
+        worm_delay: Array.L3Delay.Person.Int,
+        exposure_delay: Array.L1Delay.Person.Float,
+        mf_delay: Array.L1Delay.Person.Float,
     ) -> None:
         self.worm_delay = worm_delay
         self.exposure_delay = exposure_delay

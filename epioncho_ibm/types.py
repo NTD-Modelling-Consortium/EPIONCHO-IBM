@@ -30,9 +30,7 @@ class Array(_SubAxis):
     Person: Number of people
     WormCat: Number of Worm Categories
     MFCat: Number of MF  Categories
-    WormDelay: Worm Delay Columns (Time steps of delay)
-    MFDelay: MF Delay Columns (Time steps of delay)
-    ExposureDelay: Exposure Delay Columns (Time steps of delay)
+    L3Delay: L3 Delay Delay Columns (Time steps of delay)
     L1Delay: L1 Delay Columns (Time steps of delay)
     Treatments: Number of treatments
     General: Any length
@@ -44,7 +42,6 @@ class Array(_SubAxis):
 
     WormCat = _SubAxis
     MFCat = _SubAxis
-    WormDelay = _SubAxis
-    MFDelay = _SubAxis
-    ExposureDelay = _SubAxis
+    L3Delay = _SubAxis
+    L1Delay = _SubAxis
     Treatments = _SubAxis
