@@ -300,13 +300,13 @@ def process_treatment(
 
 
 def _get_delayed_males_and_females(
-    worm_delay: Array.WormDelay.Person.Int, worm_sex_ratio: float
+    worm_delay: Array.L3Delay.Person.Int, worm_sex_ratio: float
 ) -> tuple[Array.Person.Int, Array.Person.Int]:
     """
     Uses the delayed worms array to get worms of each sex at random
 
     Args:
-        worm_delay (Array.WormDelay.Person.Int): The array of worms delayed
+        worm_delay (Array.L3Delay.Person.Int): The array of worms delayed
         worm_sex_ratio (float): The ratio to select worm sex at random
 
     Returns:
@@ -324,7 +324,7 @@ def calculate_new_worms(
     treatment_params: TreatmentParams | None,
     delta_time: float,
     n_people: int,
-    worm_delay_array: Array.WormDelay.Person.Int,
+    worm_delay_array: Array.L3Delay.Person.Int,
     mortalities: Array.WormCat.Float,
     coverage_in: Array.Person.Bool | None,
     treatment_times: Array.Treatments.Float | None,
@@ -340,7 +340,7 @@ def calculate_new_worms(
         treatment_params (TreatmentParams | None): The fixed parameters relating to treatment
         delta_time (float): dt - The amount of time advance in one time step
         n_people (int): The number of people in the model
-        worm_delay_array (Array.WormDelay.Person.Int): The array for the worms being delayed
+        worm_delay_array (Array.L3Delay.Person.Int): The array for the worms being delayed
         mortalities (Array.WormCat.Float): The default worm mortality rate
         coverage_in (Array.Person.Bool | None): The people covered by treatment
         treatment_times (Array.Treatments.Float | None): The times each treatment occurs

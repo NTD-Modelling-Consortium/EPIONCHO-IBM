@@ -4,10 +4,11 @@ from epioncho_ibm.types import Array
 
 from .params import BlackflyParams
 
-# L1, L2, L3 (parasite life stages) dynamics in the fly population
-# assumed to be at equilibrium
-# delay of 4 days for parasites moving from L1 to L2
-
+"""
+L1, L2, L3 (parasite life stages) dynamics in the fly population
+Assumed to be at equilibrium
+Delay of 4 days for parasites moving from L1 to L2
+"""
 
 def calc_l1(
     blackfly_params: BlackflyParams,
@@ -18,16 +19,18 @@ def calc_l1(
     year_length: float,
 ) -> Array.Person.Float:
     """
-    microfil # mf
-    last_microfil_delay # mf.delay.in
-    total_exposure # expos
-    params.delta_v0 #delta.vo
-    params.bite_rate_per_fly_on_human # beta
-    params.c_v #c.v
-    params.l1_l2_per_person_per_year # nuone
-    params.blackfly_mort_per_person_per_year # mu.v
-    params.blackfly_mort_from_mf_per_person_per_year # a.v
-    exposure_delay # expos.delay
+    Calculates the amount of L1 larvae in the blackflies, associated by person
+
+    Args:
+        blackfly_params (BlackflyParams): A fixed set of parameters associated with blackflies
+        microfil (Array.Person.Float): The amount of microfilariae at time t
+        last_microfil_delay (Array.Person.Float): The final column of microfil delay
+        total_exposure (Array.Person.Float): The overall exposure of each person to infection
+        exposure_delay (Array.Person.Float): The final column of exposure delay
+        year_length (float): The length of a year
+
+    Returns:
+        Array.Person.Float: The number of L1 Larvae associated with each person
     """
     # proportion of mf per mg developing into infective larvae within the vector
     delta_vv = blackfly_params.delta_v0 / (
@@ -63,18 +66,22 @@ def calc_l1(
 def calc_l2(
     blackfly_params: BlackflyParams,
     l1: Array.Person.Float,
-    microfil: Array.Person.Float,
+    last_microfil_delay: Array.Person.Float,
     total_exposure: Array.Person.Float,
     year_length: float,
 ) -> Array.Person.Float:
     """
-    params.l1_l2_per_person_per_year # nuone
-    params.blackfly_mort_per_person_per_year # mu.v
-    params.l2_l3_per_person_per_year # nutwo
-    params.blackfly_mort_from_mf_per_person_per_year # a.v
-    l1 # L1.in
-    microfil # mf
-    total_exposure # expos
+    Calculates the amount of L2 larvae in the blackflies, associated by person
+
+    Args:
+        blackfly_params (BlackflyParams): A fixed set of parameters associated with blackflies
+        l1 (Array.Person.Float): The amount of L1 Larvae associated with each person at time t
+        last_microfil_delay (Array.Person.Float): The final column of microfil delay
+        total_exposure (Array.Person.Float): The overall exposure of each person to infection
+        year_length (float): The length of a year
+
+    Returns:
+        Array.Person.Float: The number of L2 Larvae associated with each person
     """
     return (
         l1
@@ -86,7 +93,7 @@ def calc_l2(
                     blackfly_params.blackfly_mort_per_person_per_year
                     + (
                         blackfly_params.blackfly_mort_from_mf_per_person_per_year
-                        * microfil
+                        * last_microfil_delay
                         * total_exposure
                     )
                 )
@@ -103,12 +110,17 @@ def calc_l3(
     l2: Array.Person.Float,
 ) -> Array.Person.Float:
     """
-    params.l2_l3_per_person_per_year # nutwo
-    l2 # L2.in
-    params.a_H # a.H
-    params.recip_gono_cycle # g
-    params.blackfly_mort_per_person_per_year # mu.v
-    params.sigma_L0 # sigma.L0
+    Calculates the amount of L3 larvae in the blackflies, associated by person
+
+    Args:
+        blackfly_params (BlackflyParams): A fixed set of parameters associated with blackflies
+        l1 (Array.Person.Float): The amount of L1 Larvae associated with each person at time t
+        last_microfil_delay (Array.Person.Float): The final column of microfil delay
+        total_exposure (Array.Person.Float): The overall exposure of each person to infection
+        year_length (float): The length of a year
+
+    Returns:
+        Array.Person.Float: The number of L2 Larvae associated with each person
     """
     return (blackfly_params.l2_l3_per_person_per_year * l2) / (
         (blackfly_params.a_H / blackfly_params.recip_gono_cycle)
@@ -120,9 +132,19 @@ def calc_l3(
 def _delta_h(
     blackfly_params: BlackflyParams, L3: float, total_exposure: Array.Person.Float
 ) -> Array.Person.Float:
-    # proportion of L3 larvae (final life stage in the fly population) developing into adult worms in humans
-    # expos is the total exposure for an individual
-    # delta.hz, delta.hinf, c.h control the density dependent establishment of parasites
+    """
+    Calculates the proportion of L3 larvae (final life stage in the fly population)
+    developing into adult worms in humans
+
+    Args:
+        blackfly_params (BlackflyParams): A fixed set of parameters associated with blackflies.
+            Parameters delta.hz, delta.hinf, c.h control the density dependent establishment of parasites
+        L3 (float): The average amount of L3 larvae
+        total_exposure (Array.Person.Float): The overall exposure of each person to infection
+
+    Returns:
+        Array.Person.Float: The proportion of L3 larvae developing into adult worms for each person
+    """
     annual_transm_potential = (
         blackfly_params.bite_rate_per_person_per_year
         / blackfly_params.bite_rate_per_fly_on_human
@@ -139,20 +161,24 @@ def _delta_h(
     ) / (1 + multiplier)
 
 
-def w_plus_one_rate(
+def _calc_rate_of_l3_to_worms(
     blackfly_params: BlackflyParams,
     delta_time: float,
     L3: float,
     total_exposure: Array.Person.Float,
 ) -> Array.Person.Float:
     """
-    params.delta_hz # delta.hz
-    params.delta_hinf # delta.hinf
-    params.c_h # c.h
-    params.annual_transm_potential # "m"
-    params.bite_rate_per_fly_on_human #"beta"
-    total_exposure # "expos"
-    params.delta_time #"DT"
+    Calculates the rate at which L3 Larvae become worms in the human host
+    AKA: W+1 rate
+
+    Args:
+        blackfly_params (BlackflyParams): A fixed set of parameters associated with blackflies
+        delta_time (float): dt - one unit of time
+        L3 (float): The average amount of L3 larvae
+        total_exposure (Array.Person.Float): The overall exposure of each person to infection
+
+    Returns:
+        Array.Person.Float: The rate at which L3 larvae become worms in each person
     """
     dh = _delta_h(blackfly_params, L3, total_exposure)
     annual_transm_potential = (
@@ -176,7 +202,20 @@ def calc_new_worms_from_blackfly(
     total_exposure: Array.Person.Float,
     n_people: int,
 ) -> Array.Person.Int:
-    new_rate = w_plus_one_rate(
+    """
+    Calculates the number of new worms produced based on the number of L3 larvae
+
+    Args:
+        L3 (Array.Person.Float): The number of L3 Larvae associated with each person
+        blackfly_params (BlackflyParams): A fixed set of parameters associated with blackflies
+        delta_time (float): dt - one unit of time
+        total_exposure (Array.Person.Float): The overall exposure of each person to infection
+        n_people (int): The total number of people
+
+    Returns:
+        Array.Person.Int: The number of new worms produced by L3 larvae
+    """
+    new_rate = _calc_rate_of_l3_to_worms(
         blackfly_params,
         delta_time,
         float(np.mean(L3)),

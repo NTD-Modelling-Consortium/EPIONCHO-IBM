@@ -10,6 +10,19 @@ def calculate_total_exposure(
     sex_is_male: Array.Person.Bool,
     individual_exposure: Array.Person.Float,
 ) -> Array.Person.Float:
+    """
+    Calculates how much each person is exposed to infection, taking
+    into account their age, gender and individual exposure bias.
+
+    Args:
+        exposure_params (ExposureParams): A set of fixed parameters that control exposure
+        ages (Array.Person.Float): An array of the ages of the people in the model
+        sex_is_male (Array.Person.Bool): The gender of each person in the model
+        individual_exposure (Array.Person.Float): The individual bias to exposure set at random
+
+    Returns:
+        Array.Person.Float: The overall exposure of each person to infection
+    """
     male_exposure_assumed = exposure_params.male_exposure * np.exp(
         -exposure_params.male_exposure_exponent * ages
     )
