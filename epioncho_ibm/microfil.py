@@ -23,7 +23,6 @@ def _construct_derive_microfil(
     microfil_compartment_minus_one # mf.comp.minus.one
     person_has_worms # mp (once turned to 0 or 1)
     """
-
     assert np.all(mortality >= 0), "Mortality can't be negative"
     assert microfil_move_rate >= 0, "Mortality move rate can't be negative"
 
@@ -32,8 +31,9 @@ def _construct_derive_microfil(
         np.roll(microfil, 1, axis=0) * microfil_move_rate
     )
     # TODO reconcile compartment size
+
     movement[0, :] = (
-        np.einsum("ij, i -> j", fertile_worms, fecundity_rates_worms) * person_has_worms
+        np.dot(fertile_worms.T, fecundity_rates_worms) * person_has_worms
     )
 
     def derive_microfil_fn(

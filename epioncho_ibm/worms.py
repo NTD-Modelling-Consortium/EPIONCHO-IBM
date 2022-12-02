@@ -72,7 +72,7 @@ def _calc_dead_worms(
             )
         else:
             n_people = current_worms.shape[1]
-            mortalities = np.tile(mortalities, (n_people, 1)).T
+            mortalities = np.repeat(mortalities, n_people).reshape((len(mortalities),n_people))
             return np.random.binomial(
                 n=current_worms,
                 p=mortalities,
