@@ -16,13 +16,20 @@ def _construct_derive_microfil(
     debug: bool
 ) -> Callable[[None | Array.MFCat.Person.Float], Array.MFCat.Person.Float]:
     """
-    fertile_worms # fert.worms
-    microfil #mf.in
-    fecundity_rates_worms # ep.in
-    mortality # mf.mort
-    microfil_move_rate #mf.move
-    microfil_compartment_minus_one # mf.comp.minus.one
-    person_has_worms # mp (once turned to 0 or 1)
+    Produces a function that takes a k value and produces the next in the sequence.
+    
+    Args:
+        fertile_worms (Array.WormCat.Person.Int): The current number of fertile worms
+        microfil (Array.MFCat.Person.Float): The current number of microfilariae
+        fecundity_rates_worms (Array.WormCat.Float): The rate at which worms reproduce
+        mortality (Array.MFCat.Person.Float): The death rate for microfilariae
+        microfil_move_rate (float): The rate which microfil move compartments
+        person_has_worms (Array.Person.Bool): Whether or not each person has worms
+        debug (bool): Runs in debug mode
+
+    Returns:
+        Callable[[None | Array.MFCat.Person.Float], Array.MFCat.Person.Float]: A function that takes
+         a k value and produces the next in the sequence.
     """
     if debug:
         assert np.all(mortality >= 0), "Mortality can't be negative"
@@ -70,23 +77,23 @@ def calculate_microfil_delta(
     debug: bool
 ) -> Array.MFCat.Person.Float:
     """
-    microfillarie_mortality_rate # mu.rates.mf
-    fecundity_rates_worms # fec.rates
-    params.delta_time "DT"
-    worms.start/ws used to refer to start point in giant array for worms
-    if initial_treatment_times is None give.treat is false etc
-    params.treatment_start_time "treat.start"
-    time_of_last_treatment # "treat.vec"
-    "compartment" Corresponds to mf column mf.cpt
-    "current_time" corresponds to iteration
-    params.up up
-    params.kap kap
-    params.microfil_move_rate # mf.move.rate
-    params.worm_age_stages "num.comps"
-    params.microfil_age_stages "num.mf.comps"
-    params.microfil_aging "time.each.comp"
-    N is params.human_population
-    people is dat
+    Calculates the change of microfilariae.
+
+    Args:
+        current_microfil (Array.MFCat.Person.Float): The current number of microfilariae in each person
+        delta_time (float): dt - The amount of time advance in one time step
+        microfil_params (MicrofilParams): The fixed parameters relating to microfilariae
+        treatment_params (TreatmentParams | None): The fixed parameters relating to treatment
+        microfillarie_mortality_rate (Array.MFCat.Float): The death rate for microfilariae
+        fecundity_rates_worms (Array.WormCat.Float): The rate at which worms reproduce
+        time_of_last_treatment (Array.Person.Float | None): The last time each person was treated
+        current_time (float): The current time t in the model
+        current_fertile_female_worms (Array.WormCat.Person.Int): The current number of fertile worms
+        current_male_worms (Array.WormCat.Person.Int): The current number of male worms
+        debug (bool): Runs in debug mode
+
+    Returns:
+        Array.MFCat.Person.Float: The change of microfilariae in each person and age category
     """
     # mf.mu
     mortality: Array.MFCat.Person.Float = np.repeat(
