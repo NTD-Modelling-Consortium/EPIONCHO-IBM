@@ -158,7 +158,7 @@ class State(Generic[CallbackStat]):
             and self.params == other.params
         )
 
-    def _advance(self, current_time: float):
+    def _advance(self, current_time: float, debug: bool):
         """
         Advance the state forward one time step from t to t + dt
 
@@ -202,6 +202,7 @@ class State(Generic[CallbackStat]):
             treatment_times=self._derived_params.treatment_times,
             current_time=current_time,
             time_of_last_treatment=self._people.time_of_last_treatment,
+            debug=debug
         )
         # there is a delay in new parasites entering humans (from fly bites) and entering the first adult worm age class
         new_worms = calc_new_worms_from_blackfly(
@@ -210,6 +211,7 @@ class State(Generic[CallbackStat]):
             self.params.delta_time,
             total_exposure,
             self.n_people,
+            debug
         )
 
         assert last_time_of_last_treatment is not None
@@ -234,6 +236,7 @@ class State(Generic[CallbackStat]):
             current_time=current_time,
             current_fertile_female_worms=old_fertile_female_worms,
             current_male_worms=old_male_worms,
+            debug=debug
         )
         old_blackfly_L1 = self._people.blackfly.L1
         self._people.blackfly.L1 = calc_l1(
@@ -270,7 +273,7 @@ class State(Generic[CallbackStat]):
         self._people.process_deaths(people_to_die, self.params.humans.gender_ratio)
 
     def run_simulation(
-        self, start_time: float = 0, end_time: float = 0, verbose: bool = False
+        self, start_time: float = 0, end_time: float = 0, verbose: bool = False, debug: bool = False
     ) -> None:
         """
         Run the simulation between two times.
@@ -293,7 +296,7 @@ class State(Generic[CallbackStat]):
         ) as progress_bar:
             while current_time < end_time:
                 progress_bar.update(self.params.delta_time)
-                self._advance(current_time=current_time)
+                self._advance(current_time=current_time, debug=debug)
                 current_time += self.params.delta_time
 
     def run_simulation_output_stats(
@@ -302,6 +305,7 @@ class State(Generic[CallbackStat]):
         start_time: float = 0,
         end_time: float = 0,
         verbose: bool = False,
+        debug: bool = False
     ) -> list[tuple[float, StateStats]]:
         if end_time < start_time:
             raise ValueError("End time after start")
@@ -313,7 +317,7 @@ class State(Generic[CallbackStat]):
                 print(current_time)
             if self.params.delta_time > current_time % sampling_interval:
                 output_stats.append((current_time, self.to_stats()))
-            self._advance(current_time=current_time)
+            self._advance(current_time=current_time, debug=debug)
             current_time += self.params.delta_time
         return output_stats
 
@@ -323,7 +327,7 @@ class State(Generic[CallbackStat]):
         sampling_interval: float,
         start_time: float = 0,
         end_time: float = 0,
-        verbose: bool = False,
+        verbose: bool = False, debug: bool = False
     ) -> list[CallbackStat]:
         if end_time < start_time:
             raise ValueError("End time after start")
@@ -335,7 +339,7 @@ class State(Generic[CallbackStat]):
                 print(current_time)
             if self.params.delta_time > current_time % sampling_interval:
                 output_stats.append(output_callback(self._people, current_time))
-            self._advance(current_time=current_time)
+            self._advance(current_time=current_time, debug = debug)
             current_time += self.params.delta_time
         return output_stats
 
