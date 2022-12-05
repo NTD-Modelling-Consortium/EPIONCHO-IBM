@@ -42,6 +42,19 @@ def _is_during_treatment(
     delta_time: float,
     treatment_times: Optional[Array.Treatments.Float],
 ) -> tuple[bool, bool]:
+    """
+    Returns two booleans describing if treatment has started, and if it occurred.
+
+    Args:
+        treatment_params (TreatmentParams | None): The fixed parameters relating to treatment
+        current_time (float): The current time, t, in the model
+        delta_time (float): dt - The amount of time advance in one time step
+        treatment_times (Optional[Array.Treatments.Float]): The times for treatment across the model.
+
+    Returns:
+        tuple[bool, bool]: bool describing if treatment started, 
+            bool describing if treatment occurred, respectively
+    """
     treatment_started = current_time > treatment.start_time
     if treatment_started:
         assert treatment_times is not None
@@ -76,6 +89,22 @@ def get_treatment(
     ages: Array.Person.Float,
     compliance: Array.Person.Bool,
 ) -> Optional[TreatmentGroup]:
+    """
+    Generates a treatment group, and calculates coverage, based on the current time
+
+    Args:
+        treatment_params (TreatmentParams | None): The fixed parameters relating to treatment
+        human_params (HumanParams): The fixed parameters relating to humans
+        delta_time (float): dt - The amount of time advance in one time step
+        current_time (float): The current time, t, in the model
+        treatment_times (Optional[Array.Treatments.Float]): The times for treatment across the model.
+        ages (Array.Person.Float): The ages of the people
+        compliance (Array.Person.Bool): The compliance of the people
+
+    Returns:
+        Optional[TreatmentGroup]: A treatment group containing information for later treatment
+            calculation
+    """
     if treatment_params is not None:
         assert treatment_times is not None
         treatment_started, treatment_occurred = _is_during_treatment(

@@ -345,20 +345,18 @@ def calculate_new_worms(
         current_worms (WormGroup): The current worms in the model
         worm_params (WormParams): The fixed parameters relating to worms
         treatment_params (TreatmentParams | None): The fixed parameters relating to treatment
-        delta_time (float): dt - The amount of time advance in one time step
-        n_people (int): The number of people in the model
-        worm_delay_array (Array.L3Delay.Person.Int): The array for the worms being delayed
-        mortalities (Array.WormCat.Float): The default worm mortality rate
-        coverage_in (Array.Person.Bool | None): The people covered by treatment
-        treatment_times (Array.Treatments.Float | None): The times each treatment occurs
-        current_time (float): The current time, t, in the model
         time_of_last_treatment (Array.Person.Float | None): The last time a particular person was
             treated (None if treatment has not started).
+        delta_time (float): dt - The amount of time advance in one time step
+        worm_delay_array (Array.L3Delay.Person.Int): The array for the worms being delayed
+        mortalities (Array.WormCat.Float): The default worm mortality rate
+        current_time (float): The current time, t, in the model
         debug (bool): Runs in debug mode
 
     Returns:
-        tuple[WormGroup, Array.Person.Float | None]: Returns new total worms, last time people were treated, respectively
+        tuple[WormGroup, Array.Person.Float]: Returns new total worms, last time people were treated, respectively
     """
+
     # Take males and females from final column of worm_delay
     delayed_males, delayed_females = _get_delayed_males_and_females(
         worm_delay_array,
