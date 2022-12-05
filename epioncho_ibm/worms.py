@@ -296,12 +296,13 @@ def _calc_female_mortalities(
     infertile. For simplicity these are killed.
 
     Args:
-        mortalities (Array.WormCat.Float): _description_
-        permanent_infertility (float): _description_
-        coverage_in (Array.Person.Bool): _description_
+        mortalities (Array.WormCat.Float): The default worm mortality rate
+        permanent_infertility (float): Permenent infertility in worms due to ivermectin
+        coverage_in (Array.Person.Bool): An array stating if each person in the model is treated
 
     Returns:
-        Array.WormCat.Person.Float: _description_
+        Array.WormCat.Person.Float: The mortality rate of female worms in each treated person
+            and compartment
     """
     female_mortalities = np.tile(mortalities, (len(coverage_in), 1))
     female_mortalities[coverage_in] += permanent_infertility
