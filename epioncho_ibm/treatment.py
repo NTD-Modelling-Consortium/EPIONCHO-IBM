@@ -74,6 +74,12 @@ def _is_during_treatment(
 
 @dataclass
 class TreatmentGroup:
+    """
+    treatment_params (TreatmentParams): The fixed parameters relating to treatment
+    coverage_in (Array.Person.Bool): An array stating if each person in the model is treated
+    treatment_times (Array.Treatments.Float): The times for treatment across the model.
+    treatment_occurred (bool): A boolean stating if treatment occurred in this time step.
+    """
     treatment_params: TreatmentParams
     coverage_in: Array.Person.Bool
     treatment_times: Array.Treatments.Float
