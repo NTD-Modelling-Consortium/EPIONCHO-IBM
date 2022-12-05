@@ -10,6 +10,7 @@ Assumed to be at equilibrium
 Delay of 4 days for parasites moving from L1 to L2
 """
 
+
 def calc_l1(
     blackfly_params: BlackflyParams,
     microfil: Array.Person.Float,
@@ -201,7 +202,7 @@ def calc_new_worms_from_blackfly(
     delta_time: float,
     total_exposure: Array.Person.Float,
     n_people: int,
-    debug: bool
+    debug: bool,
 ) -> Array.Person.Int:
     """
     Calculates the number of new worms produced based on the number of L3 larvae

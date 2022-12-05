@@ -3,9 +3,10 @@ from dataclasses import dataclass
 import numpy as np
 
 import epioncho_ibm.utils as utils
+from epioncho_ibm.treatment import TreatmentGroup
 from epioncho_ibm.types import Array
 
-from .params import TreatmentParams, WormParams
+from .params import WormParams
 
 __all__ = ["WormGroup", "calculate_new_worms"]
 
@@ -15,9 +16,11 @@ class WormGroup:
     """
     A group of worms, separated by sex and fertility
     """
+
     male: Array.WormCat.Person.Int
     infertile: Array.WormCat.Person.Int
     fertile: Array.WormCat.Person.Int
+
     def __eq__(self, other: object) -> bool:
         if isinstance(other, WormGroup):
             return (
@@ -41,7 +44,7 @@ def _calc_dead_worms(
     current_worms: WormGroup,
     female_mortalities: Array.WormCat.Float | Array.WormCat.Person.Float,
     male_mortalities: Array.WormCat.Float,
-    treatment_occurred: bool,
+    treatment_occurred: bool = False,
 ) -> WormGroup:
     """
     Calculates the number of worms dying in each compartment
@@ -58,6 +61,7 @@ def _calc_dead_worms(
     Returns:
         WormGroup: The number of worms dying in each compartment
     """
+
     def _calc_dead_worms_single_group(
         current_worms: Array.WormCat.Person.Int,
         mortalities: Array.WormCat.Float | Array.WormCat.Person.Float,
@@ -72,7 +76,9 @@ def _calc_dead_worms(
             )
         else:
             n_people = current_worms.shape[1]
-            mortalities = np.repeat(mortalities, n_people).reshape((len(mortalities),n_people))
+            mortalities = np.repeat(mortalities, n_people).reshape(
+                (len(mortalities), n_people)
+            )
             return np.random.binomial(
                 n=current_worms,
                 p=mortalities,
@@ -112,6 +118,7 @@ def _calc_outbound_worms(
     Returns:
         WormGroup: The number of worms leaving each compartment due to aging.
     """
+
     def _calc_outbound_worms_single_group(
         current_worms: Array.WormCat.Person.Int,
         dead_worms: Array.WormCat.Person.Int,
@@ -147,7 +154,7 @@ def _calc_delta_fertility(
     dead_worms: WormGroup,
     outbound_worms: WormGroup,
     worm_params: WormParams,
-    fertile_to_non_fertile_rate: Array.Person.Float,
+    fertile_to_non_fertile_rate: Array.Person.Float | None,
     delta_time: float,
 ) -> Array.WormCat.Person.Int:
     """
@@ -158,12 +165,14 @@ def _calc_delta_fertility(
         dead_worms (WormGroup): Worms dying in each compartment
         outbound_worms (WormGroup): Worms moving out of each age compartment
         worm_params (WormParams): The fixed parameters relating to worms
-        fertile_to_non_fertile_rate (Array.Person.Float): The rate at which worms move from fertile to infertile
+        fertile_to_non_fertile_rate (Array.Person.Float | None): The rate at which worms
+            move from fertile to infertile, from treatment
         delta_time (float): dt - The amount of time advance in one time step
 
     Returns:
         Array.WormCat.Person.Int: The number of worms going from infertile to fertile in each compartment
     """
+
     def _calc_new_worms_fertility(
         current_worms: Array.WormCat.Person.Int,
         dead_worms: Array.WormCat.Person.Int,
@@ -183,7 +192,13 @@ def _calc_delta_fertility(
         else:
             return np.zeros_like(current_worms)
 
-    lambda_zero_in = worm_params.lambda_zero * delta_time + fertile_to_non_fertile_rate
+    if fertile_to_non_fertile_rate is not None:
+        lambda_zero_in = (
+            worm_params.lambda_zero * delta_time + fertile_to_non_fertile_rate
+        )
+    else:
+        lambda_zero_in = worm_params.lambda_zero * delta_time
+
     new_infertile_from_inside = _calc_new_worms_fertility(
         current_worms=current_worms.fertile,
         dead_worms=dead_worms.fertile,
@@ -191,13 +206,15 @@ def _calc_delta_fertility(
         prob=lambda_zero_in,
     )
 
+    # approach assumes individuals which are moved from fertile to non
+    # fertile class due to treatment re enter fertile class at standard rate
     new_fertile_from_inside = _calc_new_worms_fertility(
         current_worms=current_worms.infertile,
         dead_worms=dead_worms.infertile,
         outbound_worms=outbound_worms.infertile,
         prob=worm_params.omega * delta_time,
     )
-    return  new_fertile_from_inside - new_infertile_from_inside
+    return new_fertile_from_inside - new_infertile_from_inside
 
 
 def _calc_new_worms(
@@ -206,10 +223,10 @@ def _calc_new_worms(
     dead: WormGroup,
     current_worms: WormGroup,
     delta_fertility: Array.WormCat.Person.Int,
-    debug: bool
+    debug: bool,
 ) -> WormGroup:
     """
-    Calculates the change in worms 
+    Calculates the change in worms
 
     Args:
         inbound (WormGroup): Worms moving into each age compartment
@@ -241,66 +258,54 @@ def _calc_new_worms(
     return WormGroup(male=new_male, infertile=new_infertile, fertile=new_fertile)
 
 
-def process_treatment(
-    worm_params: WormParams,
-    treatment_params: TreatmentParams | None,
-    delta_time: float,
-    n_people: int,
-    coverage_in: Array.Person.Bool | None,
-    treatment_times: Array.Treatments.Float | None,
-    time_of_last_treatment: Array.Person.Float | None,
+def _calc_fertile_to_non_fertile_rate(
     current_time: float,
+    lam_m: float,
+    phi: float,
+    time_of_last_treatment: Array.Person.Float,
+    delta_time: float,
+) -> Array.Person.Float:
+    """
+    Calculates the rate of conversion from fertile to non fertile worms based on treatment
+
+    Args:
+        current_time (float): The current time, t, in the model
+        lam_m (float): From the effects of ivermectin
+        phi (float): From the effects of ivermectin
+        time_of_last_treatment (_type_): The last time each individual was treated
+        delta_time (float): dt - The amount of time advance in one time step
+
+    Returns:
+        Array.Person.Float: The rate of conversion from fertile to non fertile worms
+        based on treatment
+    """
+    # individuals which have been treated get additional infertility rate
+    lam_m_temp = np.where(np.isnan(time_of_last_treatment), 0, lam_m)
+    time_since_treatment = current_time - time_of_last_treatment
+    return np.nan_to_num(delta_time * lam_m_temp * np.exp(-phi * time_since_treatment))
+
+
+def _calc_female_mortalities(
     mortalities: Array.WormCat.Float,
-) -> tuple[
-    bool,
-    Array.WormCat.Float | Array.WormCat.Person.Float,
-    Array.Person.Float,
-    Array.Person.Float | None,
-]:
-    # TODO: Rework this function
-    # approach assumes individuals which are moved from fertile to non
-    # fertile class due to treatment re enter fertile class at standard rate
+    permanent_infertility: float,
+    coverage_in: Array.Person.Bool,
+) -> Array.WormCat.Person.Float:
+    """
+    Calculates the number of mortalities amongst female worms, under treatment.
+    permanent_infertility is the proportion of female worms made permanently
+    infertile. For simplicity these are killed.
 
-    female_mortalities: Array.WormCat.Float = mortalities
-    fertile_to_non_fertile_rate: Array.Person.Float = np.zeros(n_people)
+    Args:
+        mortalities (Array.WormCat.Float): _description_
+        permanent_infertility (float): _description_
+        coverage_in (Array.Person.Bool): _description_
 
-    # We'll create a new array (a copy) only when needed, see below if-
-    modified_time_of_last_treatment = time_of_last_treatment
-    treatment_occurred: bool = False
-    if treatment_params is not None and current_time > treatment_params.start_time:
-        assert modified_time_of_last_treatment is not None
-        assert treatment_times is not None
-        during_treatment = np.any(
-            (current_time <= treatment_times)
-            & (treatment_times < current_time + delta_time)
-        )
-        if during_treatment and current_time <= treatment_params.stop_time:
-            treatment_occurred: bool = True
-            female_mortalities = np.tile(mortalities, (n_people, 1))
-            assert coverage_in is not None
-            assert coverage_in.shape == (n_people,)
-            modified_time_of_last_treatment = modified_time_of_last_treatment.copy()
-            modified_time_of_last_treatment[coverage_in] = current_time
-            # params.permanent_infertility is the proportion of female worms made permanently 
-            # infertile, killed for simplicity
-            female_mortalities[coverage_in] += worm_params.permanent_infertility
-
-        time_since_treatment = current_time - modified_time_of_last_treatment
-
-        # individuals which have been treated get additional infertility rate
-        lam_m_temp = np.where(
-            np.isnan(modified_time_of_last_treatment), 0, worm_params.lam_m
-        )
-        fertile_to_non_fertile_rate: Array.Person.Float = np.nan_to_num(
-            delta_time * lam_m_temp * np.exp(-worm_params.phi * time_since_treatment)
-        )
-
-    return (
-        treatment_occurred,
-        female_mortalities.T,
-        fertile_to_non_fertile_rate,
-        modified_time_of_last_treatment,
-    )
+    Returns:
+        Array.WormCat.Person.Float: _description_
+    """
+    female_mortalities = np.tile(mortalities, (len(coverage_in), 1))
+    female_mortalities[coverage_in] += permanent_infertility
+    return female_mortalities.T
 
 
 def _get_delayed_males_and_females(
@@ -325,19 +330,16 @@ def _get_delayed_males_and_females(
 def calculate_new_worms(
     current_worms: WormGroup,
     worm_params: WormParams,
-    treatment_params: TreatmentParams | None,
+    treatment: TreatmentGroup | None,
+    time_of_last_treatment: Array.Treatments.Float,
     delta_time: float,
-    n_people: int,
     worm_delay_array: Array.L3Delay.Person.Int,
     mortalities: Array.WormCat.Float,
-    coverage_in: Array.Person.Bool | None,
-    treatment_times: Array.Treatments.Float | None,
     current_time: float,
-    time_of_last_treatment: Array.Person.Float | None,
-    debug: bool
-) -> tuple[WormGroup, Array.Person.Float | None]:
+    debug: bool,
+) -> tuple[WormGroup, Array.Person.Float]:
     """
-    Calculates the new total worms in the model for one time step. 
+    Calculates the new total worms in the model for one time step.
 
     Args:
         current_worms (WormGroup): The current worms in the model
@@ -350,7 +352,7 @@ def calculate_new_worms(
         coverage_in (Array.Person.Bool | None): The people covered by treatment
         treatment_times (Array.Treatments.Float | None): The times each treatment occurs
         current_time (float): The current time, t, in the model
-        time_of_last_treatment (Array.Person.Float | None): The last time a particular person was 
+        time_of_last_treatment (Array.Person.Float | None): The last time a particular person was
             treated (None if treatment has not started).
         debug (bool): Runs in debug mode
 
@@ -362,32 +364,46 @@ def calculate_new_worms(
         worm_delay_array,
         worm_params.sex_ratio,
     )
-    # TODO: time_of_last_treatment is modified inside, change this!
-    (
-        treatment_occurred,
-        female_mortalities,
-        fertile_to_non_fertile_rate,
-        time_of_last_treatment,
-    ) = process_treatment(
-        worm_params=worm_params,
-        treatment_params=treatment_params,
-        delta_time=delta_time,
-        n_people=n_people,
-        coverage_in=coverage_in,
-        treatment_times=treatment_times,
-        time_of_last_treatment=time_of_last_treatment,
-        current_time=current_time,
-        mortalities=mortalities,
-    )
+
+    if treatment is not None:
+        if treatment.treatment_occurred:
+            female_mortalities = _calc_female_mortalities(
+                mortalities, worm_params.permanent_infertility, treatment.coverage_in
+            )
+            time_of_last_treatment = time_of_last_treatment.copy()
+            time_of_last_treatment[treatment.coverage_in] = current_time
+            dead = _calc_dead_worms(
+                current_worms=current_worms,
+                female_mortalities=female_mortalities,
+                male_mortalities=mortalities,
+                treatment_occurred=True,
+            )
+        else:
+            dead = _calc_dead_worms(
+                current_worms=current_worms,
+                female_mortalities=mortalities,
+                male_mortalities=mortalities,
+            )
+
+        fertile_to_non_fertile_rate = _calc_fertile_to_non_fertile_rate(
+            current_time=current_time,
+            lam_m=worm_params.lam_m,
+            phi=worm_params.phi,
+            time_of_last_treatment=time_of_last_treatment,
+            delta_time=delta_time,
+        )
+
+    else:
+        female_mortalities: Array.WormCat.Float = mortalities
+        fertile_to_non_fertile_rate = None
+        dead = _calc_dead_worms(
+            current_worms=current_worms,
+            female_mortalities=mortalities,
+            male_mortalities=mortalities,
+        )
 
     worm_age_rate = delta_time / worm_params.worms_aging
 
-    dead = _calc_dead_worms(
-        current_worms=current_worms,
-        female_mortalities=female_mortalities,
-        male_mortalities=mortalities,
-        treatment_occurred=treatment_occurred,
-    )
     outbound = _calc_outbound_worms(
         current_worms=current_worms, worm_age_rate=worm_age_rate, dead_worms=dead
     )
@@ -401,7 +417,12 @@ def calculate_new_worms(
     )
 
     delta_fertility = _calc_delta_fertility(
-        current_worms, dead, outbound, worm_params, fertile_to_non_fertile_rate, delta_time
+        current_worms,
+        dead,
+        outbound,
+        worm_params,
+        fertile_to_non_fertile_rate,
+        delta_time,
     )
 
     delta_worms = _calc_new_worms(

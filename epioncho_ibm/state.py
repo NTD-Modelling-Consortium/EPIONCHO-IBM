@@ -6,6 +6,8 @@ import numpy as np
 from pydantic import BaseModel
 from tqdm import tqdm
 
+from epioncho_ibm.treatment import get_treatment
+
 from .blackfly import calc_l1, calc_l2, calc_l3, calc_new_worms_from_blackfly
 from .derived_params import DerivedParams
 from .exposure import calculate_total_exposure
@@ -63,33 +65,6 @@ def negative_binomial_alt_interface(
     output = np.zeros(len(n), dtype=int)
     output[n > 0] = temp_output
     return output
-
-
-def _calc_coverage(
-    ages: Array.Person.Float,
-    compliance: Array.Person.Bool,
-    measured_coverage: float,
-    age_of_compliance: float,
-) -> Array.Person.Bool:
-    """
-    Calculates whether each person in the model is covered by a treatment.
-
-    Args:
-        ages (Array.Person.Float): The ages of the people in the model
-        compliance (Array.Person.Bool): Whether each person in the model is compliant
-        measured_coverage (float): A measured value of coverage assuming all people are compliant.
-        age_of_compliance (float): How old a person must be to be compliant
-
-    Returns:
-        Array.Person.Bool: An array stating if each person in the model is treated
-    """
-    non_compliant_people = (ages < age_of_compliance) | ~compliance
-    compliant_percentage = 1 - np.mean(non_compliant_people)
-    coverage = measured_coverage / compliant_percentage
-    out_coverage = np.repeat(coverage, len(ages))
-    out_coverage[non_compliant_people] = 0
-    rand_nums = np.random.uniform(low=0, high=1, size=len(ages))
-    return rand_nums < out_coverage
 
 
 CallbackStat = TypeVar("CallbackStat")
@@ -165,18 +140,16 @@ class State(Generic[CallbackStat]):
         Args:
             current_time (float): The current time (t) in the model.
         """
-        if (
-            self.params.treatment is not None
-            and current_time >= self.params.treatment.start_time
-        ):
-            coverage_in = _calc_coverage(
-                self._people.ages,
-                self._people.compliance,
-                self.params.humans.total_population_coverage,
-                self.params.humans.min_skinsnip_age,
-            )
-        else:
-            coverage_in = None
+
+        treatment = get_treatment(
+            self.params.treatment,
+            self.params.humans,
+            self.params.delta_time,
+            current_time,
+            self._derived_params.treatment_times,
+            self._people.ages,
+            self._people.compliance,
+        )
 
         total_exposure = calculate_total_exposure(
             self.params.exposure,
@@ -193,18 +166,15 @@ class State(Generic[CallbackStat]):
         self._people.worms, last_time_of_last_treatment = calculate_new_worms(
             current_worms=self._people.worms,
             worm_params=self.params.worms,
-            treatment_params=self.params.treatment,
+            treatment=treatment,
+            time_of_last_treatment=self._people.time_of_last_treatment,
             delta_time=self.params.delta_time,
-            n_people=self.n_people,
             worm_delay_array=self._people.delay_arrays.worm_delay,
             mortalities=self._derived_params.worm_mortality_rate,
-            coverage_in=coverage_in,
-            treatment_times=self._derived_params.treatment_times,
             current_time=current_time,
-            time_of_last_treatment=self._people.time_of_last_treatment,
-            debug=debug
+            debug=debug,
         )
-        # there is a delay in new parasites entering humans (from fly bites) and 
+        # there is a delay in new parasites entering humans (from fly bites) and
         # entering the first adult worm age class
         new_worms = calc_new_worms_from_blackfly(
             self._people.blackfly.L3,
@@ -212,10 +182,10 @@ class State(Generic[CallbackStat]):
             self.params.delta_time,
             total_exposure,
             self.n_people,
-            debug
+            debug,
         )
 
-        assert last_time_of_last_treatment is not None
+        # assert last_time_of_last_treatment is not None
 
         if (
             self.params.treatment is not None
@@ -237,7 +207,7 @@ class State(Generic[CallbackStat]):
             current_time=current_time,
             current_fertile_female_worms=old_fertile_female_worms,
             current_male_worms=old_male_worms,
-            debug=debug
+            debug=debug,
         )
         old_blackfly_L1 = self._people.blackfly.L1
         self._people.blackfly.L1 = calc_l1(
@@ -274,7 +244,11 @@ class State(Generic[CallbackStat]):
         self._people.process_deaths(people_to_die, self.params.humans.gender_ratio)
 
     def run_simulation(
-        self, start_time: float = 0, end_time: float = 0, verbose: bool = False, debug: bool = False
+        self,
+        start_time: float = 0,
+        end_time: float = 0,
+        verbose: bool = False,
+        debug: bool = False,
     ) -> None:
         """
         Run the simulation between two times.
@@ -306,7 +280,7 @@ class State(Generic[CallbackStat]):
         start_time: float = 0,
         end_time: float = 0,
         verbose: bool = False,
-        debug: bool = False
+        debug: bool = False,
     ) -> list[tuple[float, StateStats]]:
         if end_time < start_time:
             raise ValueError("End time after start")
@@ -328,7 +302,8 @@ class State(Generic[CallbackStat]):
         sampling_interval: float,
         start_time: float = 0,
         end_time: float = 0,
-        verbose: bool = False, debug: bool = False
+        verbose: bool = False,
+        debug: bool = False,
     ) -> list[CallbackStat]:
         if end_time < start_time:
             raise ValueError("End time after start")
@@ -340,7 +315,7 @@ class State(Generic[CallbackStat]):
                 print(current_time)
             if self.params.delta_time > current_time % sampling_interval:
                 output_stats.append(output_callback(self._people, current_time))
-            self._advance(current_time=current_time, debug = debug)
+            self._advance(current_time=current_time, debug=debug)
             current_time += self.params.delta_time
         return output_stats
 
@@ -363,12 +338,12 @@ class State(Generic[CallbackStat]):
     ) -> tuple[float, Array.Person.Float]:
         """
         Calculates number of mf in skin snip for all people.
-        
+
         People are tested for the presence of mf using a skin snip.
         We assume mf are overdispersed in the skin
 
         Returns:
-            tuple[float, Array.Person.Float]: Mean mf, mf by person. 
+            tuple[float, Array.Person.Float]: Mean mf, mf by person.
         """
         kmf = (
             self.params.microfil.slope_kmf
