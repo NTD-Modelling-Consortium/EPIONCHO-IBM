@@ -95,7 +95,6 @@ def calculate_microfil_delta(
     Returns:
         Array.MFCat.Person.Float: The change of microfilariae in each person and age category
     """
-    # mf.mu
     mortality: Array.MFCat.Person.Float = np.repeat(
         microfillarie_mortality_rate, current_microfil.shape[1]
     ).reshape(current_microfil.shape)

@@ -204,7 +204,8 @@ class State(Generic[CallbackStat]):
             time_of_last_treatment=self._people.time_of_last_treatment,
             debug=debug
         )
-        # there is a delay in new parasites entering humans (from fly bites) and entering the first adult worm age class
+        # there is a delay in new parasites entering humans (from fly bites) and 
+        # entering the first adult worm age class
         new_worms = calc_new_worms_from_blackfly(
             self._people.blackfly.L3,
             self.params.blackfly,

@@ -261,7 +261,7 @@ def process_treatment(
     # approach assumes individuals which are moved from fertile to non
     # fertile class due to treatment re enter fertile class at standard rate
 
-    female_mortalities: Array.WormCat.Float = mortalities  # mort.fems
+    female_mortalities: Array.WormCat.Float = mortalities
     fertile_to_non_fertile_rate: Array.Person.Float = np.zeros(n_people)
 
     # We'll create a new array (a copy) only when needed, see below if-
@@ -280,8 +280,9 @@ def process_treatment(
             assert coverage_in is not None
             assert coverage_in.shape == (n_people,)
             modified_time_of_last_treatment = modified_time_of_last_treatment.copy()
-            modified_time_of_last_treatment[coverage_in] = current_time  # treat.vec
-            # params.permanent_infertility is the proportion of female worms made permanently infertile, killed for simplicity
+            modified_time_of_last_treatment[coverage_in] = current_time
+            # params.permanent_infertility is the proportion of female worms made permanently 
+            # infertile, killed for simplicity
             female_mortalities[coverage_in] += worm_params.permanent_infertility
 
         time_since_treatment = current_time - modified_time_of_last_treatment

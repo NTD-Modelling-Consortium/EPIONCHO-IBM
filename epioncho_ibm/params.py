@@ -32,14 +32,14 @@ class BaseParentParams(BaseParams):
 
 class TreatmentParams(BaseSubParams):
     interval_years: float = (
-        1  # 'trt.int' treatment interval (years, 0.5 gives biannual)
+        1  # treatment interval (years, 0.5 gives biannual)
     )
     probability: float = 0.65  # The probability that a 'treatable' person is actually treated in an iteration
 
     start_time: float = (
-        100  # The iteration upon which treatment commences (treat.start in R code)
+        100  # The iteration upon which treatment commences
     )
-    stop_time: float = 130  # the iteration upon which treatment stops (treat.stop)
+    stop_time: float = 130  # the iteration upon which treatment stops
 
 
 class WormParams(BaseSubParams):
@@ -50,23 +50,23 @@ class WormParams(BaseSubParams):
         6.00569  # parameters controlling age-dependent mortality in adult worms
     )
     initial_worms: int = (
-        1  # "int.worms" initial number of worms in each worm age compartment
+        1  # initial number of worms in each worm age compartment
     )
-    worms_aging: float = 1  # 'time.each.comp.worms'
+    worms_aging: float = 1  # the time worms spend in each age compartment
     worm_age_stages = 21
     max_worm_age = 21
     fecundity_worms_1: float = 70
     fecundity_worms_2: float = (
         0.72  # parameters controlling age-dependent fecundity in adult worms
     )
-    omega: float = 0.59  # "omeg" Per capita rate of progression from non-fertile to fertile adult female
+    omega: float = 0.59  # Per capita rate of progression from non-fertile to fertile adult female
     lambda_zero: float = (
         1 / 3
-    )  # Per capita rate of reversion from fertile to non-fertile adult female worms (lambda.zero / 0.33 in 'R' code)
-    lam_m = 32.4  # "lam.m" effects of ivermectin
+    )  # Per capita rate of reversion from fertile to non-fertile adult female worms
+    lam_m = 32.4  # effects of ivermectin
     phi = 19.6  # effects of ivermectin
     permanent_infertility = (
-        0.345  # "cum.infer" permenent infertility in worms due to ivermectin
+        0.345  # permenent infertility in worms due to ivermectin
     )
     sex_ratio = 0.5
 
@@ -75,13 +75,13 @@ class BlackflyParams(BaseSubParams):
     delta_h_zero: float = 0.1864987  # Proportion of L3 larvae developing to the adult stage within the human host, per bite when 𝐴𝑇𝑃(𝑡) → 0
     delta_h_inf: float = 0.002772749  # Proportion of L3 larvae developing to the adult stage within the human host, per bite when 𝐴𝑇𝑃(𝑡) → ∞
     blackfly_mort_per_person_per_year: float = (
-        26  # Per capita mortality rate of blackfly vectors 'mu.v'
+        26  # Per capita mortality rate of blackfly vectors
     )
     blackfly_mort_from_mf_per_person_per_year: float = (
-        0.39  # Per capita microfilaria-induced mortality of blackfly vectors 'a.v'
+        0.39  # Per capita microfilaria-induced mortality of blackfly vectors
     )
     sigma_L0: int = (
-        52  # TODO: unclear where this comes from, and what it means #sigma.L0
+        52  # mu_l3: Per capita mortality of L3 Larvae
     )
     a_H: float = 0.8  # Time delay between L3 entering the host and establishing as adult worms in years # a.H
     l1_l2_per_person_per_year: float = (
