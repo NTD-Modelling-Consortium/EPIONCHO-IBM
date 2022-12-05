@@ -332,7 +332,7 @@ def calculate_new_worms(
     current_worms: WormGroup,
     worm_params: WormParams,
     treatment: TreatmentGroup | None,
-    time_of_last_treatment: Array.Treatments.Float,
+    time_of_last_treatment: Array.Person.Float,
     delta_time: float,
     worm_delay_array: Array.L3Delay.Person.Int,
     mortalities: Array.WormCat.Float,
