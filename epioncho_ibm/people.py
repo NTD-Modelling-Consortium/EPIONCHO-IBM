@@ -21,9 +21,9 @@ def truncated_geometric(N: int, prob: float, maximum: float) -> Array.Person.Flo
 
 @dataclass
 class BlackflyLarvae:
-    L1: Array.Person.Float  # 4: L1
-    L2: Array.Person.Float  # 5: L2
-    L3: Array.Person.Float  # 6: L3
+    L1: Array.Person.Float
+    L2: Array.Person.Float
+    L3: Array.Person.Float
 
     def __eq__(self, other: object) -> bool:
         return (
@@ -126,13 +126,13 @@ class DelayArrays:
 
 @dataclass
 class People:
-    compliance: Array.Person.Bool  # 1: 'column used during treatment'
-    sex_is_male: Array.Person.Bool  # 3: sex
+    compliance: Array.Person.Bool
+    sex_is_male: Array.Person.Bool
     blackfly: BlackflyLarvae
-    ages: Array.Person.Float  # 2: current age
-    mf: Array.MFCat.Person.Float  # 2D Array, (N, age stage): microfilariae stages 7-28 (21)
+    ages: Array.Person.Float
+    mf: Array.MFCat.Person.Float
     worms: WormGroup
-    time_of_last_treatment: Array.Person.Float  # treat.vec
+    time_of_last_treatment: Array.Person.Float
     delay_arrays: DelayArrays
     individual_exposure: Array.Person.Float
 
@@ -206,8 +206,9 @@ class People:
         time_of_last_treatment = np.empty(n_people)
         time_of_last_treatment[:] = np.nan
 
+        # individual exposure to fly bites
         individual_exposure = (
-            np.random.gamma(  # individual level exposure to fly bites "ex.vec"
+            np.random.gamma(  
                 shape=gamma_distribution,
                 scale=gamma_distribution,
                 size=n_people,
@@ -215,7 +216,7 @@ class People:
         )
         new_individual_exposure = individual_exposure / np.mean(
             individual_exposure
-        )  # normalise
+        )
         new_individual_exposure.setflags(write=False)
 
         return cls(
