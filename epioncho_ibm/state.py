@@ -157,7 +157,6 @@ class State(Generic[CallbackStat]):
             self._people.sex_is_male,
             self._people.individual_exposure,
         )
-        # increase ages
         self._people.ages += self.params.delta_time
 
         old_fertile_female_worms = self._people.worms.fertile.copy()
@@ -184,8 +183,6 @@ class State(Generic[CallbackStat]):
             self.n_people,
             debug,
         )
-
-        # assert last_time_of_last_treatment is not None
 
         if (
             self.params.treatment is not None
