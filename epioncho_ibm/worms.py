@@ -346,7 +346,7 @@ def calculate_new_worms(
         current_worms (WormGroup): The current worms in the model
         worm_params (WormParams): The fixed parameters relating to worms
         treatment_params (TreatmentParams | None): The fixed parameters relating to treatment
-        time_of_last_treatment (Array.Person.Float | None): The last time a particular person was
+        time_of_last_treatment (Array.Person.Float): The last time a particular person was
             treated (None if treatment has not started).
         delta_time (float): dt - The amount of time advance in one time step
         worm_delay_array (Array.L3Delay.Person.Int): The array for the worms being delayed
