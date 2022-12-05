@@ -4,10 +4,10 @@ from dataclasses import dataclass
 import h5py
 import numpy as np
 
-from .utils import array_fully_equal, lag_array
-from .worms import WormGroup
 from .params import Params
 from .types import Array
+from .utils import array_fully_equal, lag_array
+from .worms import WormGroup
 
 
 def truncated_geometric(N: int, prob: float, maximum: float) -> Array.Person.Float:
@@ -207,16 +207,12 @@ class People:
         time_of_last_treatment[:] = np.nan
 
         # individual exposure to fly bites
-        individual_exposure = (
-            np.random.gamma(  
-                shape=gamma_distribution,
-                scale=gamma_distribution,
-                size=n_people,
-            )
+        individual_exposure = np.random.gamma(
+            shape=gamma_distribution,
+            scale=gamma_distribution,
+            size=n_people,
         )
-        new_individual_exposure = individual_exposure / np.mean(
-            individual_exposure
-        )
+        new_individual_exposure = individual_exposure / np.mean(individual_exposure)
         new_individual_exposure.setflags(write=False)
 
         return cls(

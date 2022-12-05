@@ -2,8 +2,8 @@ from typing import Callable
 
 import numpy as np
 
-from .types import Array
 from .params import MicrofilParams, TreatmentParams
+from .types import Array
 
 
 def _construct_derive_microfil(
@@ -13,11 +13,11 @@ def _construct_derive_microfil(
     mortality: Array.MFCat.Person.Float,
     microfil_move_rate: float,
     person_has_worms: Array.Person.Bool,
-    debug: bool
+    debug: bool,
 ) -> Callable[[None | Array.MFCat.Person.Float], Array.MFCat.Person.Float]:
     """
     Produces a function that takes a k value and produces the next in the sequence.
-    
+
     Args:
         fertile_worms (Array.WormCat.Person.Int): The current number of fertile worms
         microfil (Array.MFCat.Person.Float): The current number of microfilariae
@@ -41,9 +41,7 @@ def _construct_derive_microfil(
     )
     # TODO reconcile compartment size
 
-    movement[0, :] = (
-        np.dot(fertile_worms.T, fecundity_rates_worms) * person_has_worms
-    )
+    movement[0, :] = np.dot(fertile_worms.T, fecundity_rates_worms) * person_has_worms
 
     def derive_microfil_fn(
         k: None | Array.MFCat.Person.Float,
@@ -74,7 +72,7 @@ def calculate_microfil_delta(
     current_time: float,
     current_fertile_female_worms: Array.WormCat.Person.Int,
     current_male_worms: Array.WormCat.Person.Int,
-    debug: bool
+    debug: bool,
 ) -> Array.MFCat.Person.Float:
     """
     Calculates the change of microfilariae.
@@ -115,7 +113,7 @@ def calculate_microfil_delta(
         mortality=mortality,
         microfil_move_rate=microfil_params.microfil_move_rate,
         person_has_worms=np.any(current_male_worms, axis=0),
-        debug=debug
+        debug=debug,
     )
 
     k1 = derive_microfil(None)

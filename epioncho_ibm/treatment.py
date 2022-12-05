@@ -1,0 +1,100 @@
+from dataclasses import dataclass
+from typing import Optional
+
+import numpy as np
+
+from epioncho_ibm.types import Array
+
+from .params import HumanParams, TreatmentParams
+from .types import Array
+
+
+def _calc_coverage(
+    ages: Array.Person.Float,
+    compliance: Array.Person.Bool,
+    measured_coverage: float,
+    age_of_compliance: float,
+) -> Array.Person.Bool:
+    """
+    Calculates whether each person in the model is covered by a treatment.
+
+    Args:
+        ages (Array.Person.Float): The ages of the people in the model
+        compliance (Array.Person.Bool): Whether each person in the model is compliant
+        measured_coverage (float): A measured value of coverage assuming all people are compliant.
+        age_of_compliance (float): How old a person must be to be compliant
+
+    Returns:
+        Array.Person.Bool: An array stating if each person in the model is treated
+    """
+    non_compliant_people = (ages < age_of_compliance) | ~compliance
+    compliant_percentage = 1 - np.mean(non_compliant_people)
+    coverage = measured_coverage / compliant_percentage
+    out_coverage = np.repeat(coverage, len(ages))
+    out_coverage[non_compliant_people] = 0
+    rand_nums = np.random.uniform(low=0, high=1, size=len(ages))
+    return rand_nums < out_coverage
+
+
+def _is_during_treatment(
+    treatment: TreatmentParams,
+    current_time: float,
+    delta_time: float,
+    treatment_times: Optional[Array.Treatments.Float],
+) -> tuple[bool, bool]:
+    treatment_started = current_time > treatment.start_time
+    if treatment_started:
+        assert treatment_times is not None
+        treatment_occurred: bool = (
+            bool(
+                np.any(
+                    (current_time <= treatment_times)
+                    & (treatment_times < current_time + delta_time)
+                )
+            )
+            and current_time <= treatment.stop_time
+        )
+    else:
+        treatment_occurred = False
+    return treatment_started, treatment_occurred
+
+
+@dataclass
+class TreatmentGroup:
+    treatment_params: TreatmentParams
+    coverage_in: Array.Person.Bool
+    treatment_times: Array.Treatments.Float
+    treatment_occurred: bool
+
+
+def get_treatment(
+    treatment_params: Optional[TreatmentParams],
+    human_params: HumanParams,
+    delta_time: float,
+    current_time: float,
+    treatment_times: Optional[Array.Treatments.Float],
+    ages: Array.Person.Float,
+    compliance: Array.Person.Bool,
+) -> Optional[TreatmentGroup]:
+    if treatment_params is not None:
+        assert treatment_times is not None
+        treatment_started, treatment_occurred = _is_during_treatment(
+            treatment_params,
+            current_time,
+            delta_time,
+            treatment_times,
+        )
+        if treatment_started:
+            coverage_in = _calc_coverage(
+                ages,
+                compliance,
+                human_params.total_population_coverage,
+                human_params.min_skinsnip_age,
+            )
+            return TreatmentGroup(
+                treatment_params, coverage_in, treatment_times, treatment_occurred
+            )
+        else:
+            return None
+    else:
+        return None
