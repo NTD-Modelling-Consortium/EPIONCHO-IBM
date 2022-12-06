@@ -75,14 +75,12 @@ def _calc_dead_worms(
                 size=current_worms.shape,
             )
         else:
-            n_people = current_worms.shape[1]
-            mortalities = np.repeat(mortalities, n_people).reshape(
-                (len(mortalities), n_people)
-            )
+            mortalities_by_person: Array.WormCat.Person.Float = np.tile(
+                mortalities, (current_worms.shape[1], 1)
+            ).T
             return np.random.binomial(
                 n=current_worms,
-                p=mortalities,
-                size=current_worms.shape,
+                p=mortalities_by_person,
             )
 
     return WormGroup(
