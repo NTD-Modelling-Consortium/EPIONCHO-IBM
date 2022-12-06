@@ -242,8 +242,9 @@ class State(Generic[CallbackStat]):
 
     def run_simulation(
         self,
+        *,
         start_time: float = 0,
-        end_time: float = 0,
+        end_time: float,
         verbose: bool = False,
         debug: bool = False,
     ) -> None:
@@ -252,9 +253,9 @@ class State(Generic[CallbackStat]):
 
         Args:
             start_time (float, optional): The time (in years) to start the simulation. Defaults to 0.
-            end_time (float, optional): The time (in years) to end the simulation. Defaults to 0.
+            end_time (float): The time (in years) to end the simulation. Defaults to 0.
             verbose (bool, optional): When true, the model displays a progress bar. Defaults to False.
-
+            debug (bool, optional): When true, the model makes additional validations on the data. Defaults to False.
         Raises:
             ValueError: End time after start
         """
