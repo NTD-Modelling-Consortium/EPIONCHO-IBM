@@ -93,9 +93,10 @@ def calculate_microfil_delta(
     Returns:
         Array.MFCat.Person.Float: The change of microfilariae in each person and age category
     """
-    mortality: Array.MFCat.Person.Float = np.repeat(
-        microfillarie_mortality_rate, current_microfil.shape[1]
-    ).reshape(current_microfil.shape)
+    mortality: Array.MFCat.Person.Float = np.tile(
+        microfillarie_mortality_rate,
+        (current_microfil.shape[1], 1)
+    ).T
     # increases microfilarial mortality if treatment has started
     if treatment_params is not None and current_time >= treatment_params.start_time:
         assert time_of_last_treatment is not None
