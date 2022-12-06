@@ -159,7 +159,7 @@ class SetupFuncBenchmarker(Generic[FuncReturn]):
     _output_data: Optional[Type[BaseOutputData]]
 
     def __init__(
-        self, func: Callable[..., FuncReturn], est_base_time: float = 0.46
+        self, func: Callable[..., FuncReturn], est_base_time: float = 0.015
     ) -> None:
         sig = signature(func)
         return_type: FuncReturn = sig.return_annotation
