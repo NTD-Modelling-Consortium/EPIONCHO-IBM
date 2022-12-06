@@ -69,16 +69,15 @@ def _calc_dead_worms(
     ) -> Array.WormCat.Person.Int:
         assert current_worms.ndim == 2
         if treatment_occurred_and_female:
-            return np.random.binomial(
+            return utils.fast_binomial(
                 n=current_worms,
-                p=mortalities,
-                size=current_worms.shape,
+                p=mortalities
             )
         else:
             mortalities_by_person: Array.WormCat.Person.Float = np.tile(
                 mortalities, (current_worms.shape[1], 1)
             ).T
-            return np.random.binomial(
+            return utils.fast_binomial(
                 n=current_worms,
                 p=mortalities_by_person,
             )
@@ -122,10 +121,9 @@ def _calc_outbound_worms(
         dead_worms: Array.WormCat.Person.Int,
         worm_age_rate: float,
     ) -> Array.WormCat.Person.Int:
-        return np.random.binomial(
+        return utils.fast_binomial(
             n=current_worms - dead_worms,
-            p=worm_age_rate,
-            size=current_worms.shape,
+            p=worm_age_rate
         )
 
     return WormGroup(
@@ -165,7 +163,7 @@ def _calc_inbound_worms(
     # Takes males and females from final column of worm_delay
     final_column: Array.Person.Int = worm_delay[-1]
     # Gets worms of each sex at random
-    delayed_males = np.random.binomial(n=final_column, p=worm_sex_ratio)
+    delayed_males = utils.fast_binomial(n=final_column, p=worm_sex_ratio)
     delayed_females = final_column - delayed_males
     return WormGroup(
         male=utils.lag_array(delayed_males, outbound.male),
@@ -211,18 +209,15 @@ def _calc_delta_fertility(
         remaining_female_worms[remaining_female_worms < 0] = 0
 
         if remaining_female_worms.any():
-            return np.random.binomial(
+            return utils.fast_binomial(
                 n=remaining_female_worms,
-                p=prob,
-                size=current_worms.shape,
+                p=prob
             )
         else:
             return np.zeros_like(current_worms)
 
     if fertile_to_non_fertile_rate is not None:
-        lambda_zero_in = (
-            worm_params.lambda_zero * delta_time + fertile_to_non_fertile_rate
-        )
+        lambda_zero_in = np.tile(worm_params.lambda_zero * delta_time + fertile_to_non_fertile_rate, (current_worms.fertile.shape[0], 1))
     else:
         lambda_zero_in = worm_params.lambda_zero * delta_time
 
