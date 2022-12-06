@@ -149,6 +149,35 @@ def _calc_outbound_worms(
     )
 
 
+def _calc_inbound_worms(
+    worm_delay: Array.L3Delay.Person.Int, worm_sex_ratio: float, outbound: WormGroup
+):
+    """
+    Calculates the inbound worms into each compartment, drawing from the final column of
+    worm delay at random
+
+    Args:
+        worm_delay (Array.L3Delay.Person.Int): The array of worms delayed
+        worm_sex_ratio (float): The ratio to select worm sex at random
+        outbound (WormGroup): The outbound worms from each compartment
+
+    Returns:
+        WormGroup: The number of worms entering each compartment due to aging.
+    """
+    # Takes males and females from final column of worm_delay
+    final_column: Array.Person.Int = worm_delay[-1]
+    # Gets worms of each sex at random
+    delayed_males = np.random.binomial(n=final_column, p=worm_sex_ratio)
+    delayed_females = final_column - delayed_males
+    return WormGroup(
+        male=utils.lag_array(delayed_males, outbound.male),
+        infertile=utils.lag_array(delayed_females, outbound.infertile),
+        fertile=utils.lag_array(
+            np.zeros(outbound.fertile.shape[1], dtype="int"), outbound.fertile
+        ),
+    )
+
+
 def _calc_delta_fertility(
     current_worms: WormGroup,
     dead_worms: WormGroup,
@@ -309,25 +338,6 @@ def _calc_female_mortalities(
     return female_mortalities.T
 
 
-def _get_delayed_males_and_females(
-    worm_delay: Array.L3Delay.Person.Int, worm_sex_ratio: float
-) -> tuple[Array.Person.Int, Array.Person.Int]:
-    """
-    Uses the delayed worms array to get worms of each sex at random
-
-    Args:
-        worm_delay (Array.L3Delay.Person.Int): The array of worms delayed
-        worm_sex_ratio (float): The ratio to select worm sex at random
-
-    Returns:
-        tuple[Array.Person.Int, Array.Person.Int]: (delayed male worms, delayed female worms) , respectively
-    """
-    final_column: Array.Person.Int = np.array(worm_delay[-1], dtype=int)
-    last_males = np.random.binomial(n=final_column, p=worm_sex_ratio)
-    last_females = final_column - last_males
-    return last_males, last_females
-
-
 def calculate_new_worms(
     current_worms: WormGroup,
     worm_params: WormParams,
@@ -383,24 +393,16 @@ def calculate_new_worms(
         treatment_occurred=treatment is not None and treatment.treatment_occurred,
     )
 
-    worm_age_rate = delta_time / worm_params.worms_aging
-
     outbound = _calc_outbound_worms(
-        current_worms=current_worms, worm_age_rate=worm_age_rate, dead_worms=dead
+        current_worms=current_worms,
+        worm_age_rate=delta_time / worm_params.worms_aging,
+        dead_worms=dead,
     )
 
-    # Take males and females from final column of worm_delay
-    delayed_males, delayed_females = _get_delayed_males_and_females(
-        worm_delay_array,
-        worm_params.sex_ratio,
-    )
-
-    inbound = WormGroup(
-        male=utils.lag_array(delayed_males, outbound.male),
-        infertile=utils.lag_array(delayed_females, outbound.infertile),
-        fertile=utils.lag_array(
-            np.zeros(outbound.fertile.shape[1], dtype="int"), outbound.fertile
-        ),
+    inbound = _calc_inbound_worms(
+        worm_delay=worm_delay_array,
+        worm_sex_ratio=worm_params.sex_ratio,
+        outbound=outbound,
     )
 
     delta_fertility = _calc_delta_fertility(
@@ -411,12 +413,7 @@ def calculate_new_worms(
         fertile_to_non_fertile_rate,
         delta_time,
     )
-
-    delta_worms = _calc_new_worms(
-        inbound, outbound, dead, current_worms, delta_fertility, debug
-    )
-
     return (
-        delta_worms,
+        _calc_new_worms(inbound, outbound, dead, current_worms, delta_fertility, debug),
         time_of_last_treatment,
     )
