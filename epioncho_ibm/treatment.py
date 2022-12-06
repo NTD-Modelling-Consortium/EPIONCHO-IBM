@@ -52,7 +52,7 @@ def _is_during_treatment(
         treatment_times (Optional[Array.Treatments.Float]): The times for treatment across the model.
 
     Returns:
-        tuple[bool, bool]: bool describing if treatment started, 
+        tuple[bool, bool]: bool describing if treatment started,
             bool describing if treatment occurred, respectively
     """
     treatment_started = current_time > treatment.start_time
@@ -80,6 +80,7 @@ class TreatmentGroup:
     treatment_times (Array.Treatments.Float): The times for treatment across the model.
     treatment_occurred (bool): A boolean stating if treatment occurred in this time step.
     """
+
     treatment_params: TreatmentParams
     coverage_in: Array.Person.Bool
     treatment_times: Array.Treatments.Float
