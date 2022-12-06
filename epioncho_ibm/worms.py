@@ -358,12 +358,8 @@ def calculate_new_worms(
         tuple[WormGroup, Array.Person.Float]: Returns new total worms, last time people were treated, respectively
     """
 
-    # Take males and females from final column of worm_delay
-    delayed_males, delayed_females = _get_delayed_males_and_females(
-        worm_delay_array,
-        worm_params.sex_ratio,
-    )
-
+    female_mortalities: Array.WormCat.Float | Array.WormCat.Person.Float = mortalities
+    fertile_to_non_fertile_rate = None
     if treatment is not None:
         if treatment.treatment_occurred:
             female_mortalities = _calc_female_mortalities(
@@ -371,18 +367,6 @@ def calculate_new_worms(
             )
             time_of_last_treatment = time_of_last_treatment.copy()
             time_of_last_treatment[treatment.coverage_in] = current_time
-            dead = _calc_dead_worms(
-                current_worms=current_worms,
-                female_mortalities=female_mortalities,
-                male_mortalities=mortalities,
-                treatment_occurred=True,
-            )
-        else:
-            dead = _calc_dead_worms(
-                current_worms=current_worms,
-                female_mortalities=mortalities,
-                male_mortalities=mortalities,
-            )
 
         fertile_to_non_fertile_rate = _calc_fertile_to_non_fertile_rate(
             current_time=current_time,
@@ -392,19 +376,23 @@ def calculate_new_worms(
             delta_time=delta_time,
         )
 
-    else:
-        female_mortalities: Array.WormCat.Float = mortalities
-        fertile_to_non_fertile_rate = None
-        dead = _calc_dead_worms(
-            current_worms=current_worms,
-            female_mortalities=mortalities,
-            male_mortalities=mortalities,
-        )
+    dead = _calc_dead_worms(
+        current_worms=current_worms,
+        female_mortalities=female_mortalities,
+        male_mortalities=mortalities,
+        treatment_occurred=treatment is not None and treatment.treatment_occurred,
+    )
 
     worm_age_rate = delta_time / worm_params.worms_aging
 
     outbound = _calc_outbound_worms(
         current_worms=current_worms, worm_age_rate=worm_age_rate, dead_worms=dead
+    )
+
+    # Take males and females from final column of worm_delay
+    delayed_males, delayed_females = _get_delayed_males_and_females(
+        worm_delay_array,
+        worm_params.sex_ratio,
     )
 
     inbound = WormGroup(
