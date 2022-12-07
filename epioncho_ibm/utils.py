@@ -124,7 +124,7 @@ class BlockBinomialGenerator:
         binoms = np.take(self.array,full_indices)
 
         #increment next_access
-        self.next_access[unique] = counts
+        self.next_access[unique] = last_requested_block
         self.next_access[0] = 0
 
         sorter = np.argsort(flat_n_array)
