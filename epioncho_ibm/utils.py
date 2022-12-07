@@ -27,6 +27,17 @@ def array_fully_equal(a1: NDArray[DType], a2: NDArray[DType]):
     return np.array_equal(a1, a2, equal_nan=True)
 
 
+def _get_indices(unique, counts, block_samples, next_access):
+    part_start = unique*block_samples + next_access[unique]
+    full_indices = np.array([], dtype = int)
+    for i, start in enumerate(part_start):
+        new_requested_blocks = np.arange(
+            start = start, 
+            stop = start + counts[i])
+
+        full_indices = np.concatenate((full_indices, new_requested_blocks))
+    return full_indices
+
 class BlockBinomialGenerator:
     def __init__(
         self, 
@@ -39,8 +50,7 @@ class BlockBinomialGenerator:
         # Excluding the initial generation means we can have this go to higher n
         # with less of a performance hit
         # requires [2,1,2,3,3,3,4]
-        # converts to [(2,34),(1,56),(2,35),...]  or [134, 56, 135] in 1D
-        # convert in one line - no need for shapes
+        # converts to  [134, 56, 135]
         # each shape has a certain requirement from each line, and order to require in
         # increment array of required vals [10,5,1,0,0,0...]
         # (trials, blocks)
@@ -84,15 +94,7 @@ class BlockBinomialGenerator:
         for i in rows_to_regen:
             self.generate_row(i)
 
-        part_start = unique*self.block_samples + self.next_access[unique]
-        full_indices = np.array([], dtype = int)
-        for i, start in enumerate(part_start):
-            new_requested_blocks = np.arange(
-                start = start, 
-                stop = start + counts[i])
-
-            full_indices = np.concatenate((full_indices, new_requested_blocks))
-
+        full_indices = _get_indices(unique, counts, self.block_samples, self.next_access)
         binoms = np.take(self.array,full_indices)
 
         sorter = np.argsort(flat_n_array)
