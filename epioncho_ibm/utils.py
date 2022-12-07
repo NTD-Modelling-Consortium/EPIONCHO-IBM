@@ -94,9 +94,11 @@ class BlockBinomialGenerator:
             np.ndarray: binomial array for all values
         """
         old_shape = n_array.shape
-        
+        flat_array_non_zero = n_array.flatten()
         # Flatten on way in - reshape on way out
-        flat_n_array = n_array.flatten()
+        flat_n_array = flat_array_non_zero[flat_array_non_zero > 0]
+        if len(flat_n_array) == 0:
+            return n_array
         if len(flat_n_array) > self.block_samples:
             raise ValueError("Too few block samples for array")
         
@@ -121,16 +123,16 @@ class BlockBinomialGenerator:
                 stop = start + counts[i])
 
             full_indices = np.concatenate((full_indices, new_requested_blocks))
-        binoms = np.take(self.array,full_indices)
+        inverse_sorter = np.argsort(np.argsort(flat_n_array))
+        full_indices_correct_order = full_indices[inverse_sorter]
+        binoms = np.take(self.array,full_indices_correct_order)
 
         #increment next_access
         self.next_access[unique] = self.next_access[unique] + counts
         self.next_access[0] = 0
-
-        inverse_sorter = np.argsort(np.argsort(flat_n_array))
-        flat_output = binoms[inverse_sorter]
-
-        return flat_output.reshape(old_shape)
+        output = np.zeros_like(flat_array_non_zero)
+        output[flat_array_non_zero > 0] = binoms
+        return output.reshape(old_shape)
 
 
 @cache
