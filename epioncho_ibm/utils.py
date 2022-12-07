@@ -39,35 +39,46 @@ def _get_indices(unique, counts, block_samples, next_access):
     return full_indices
 
 class BlockBinomialGenerator:
+    block_samples: int
+    prob: float
+    array: NDArray[np.int_] # (n_trials, block_samples)
+    next_access: NDArray[np.int_]
+    generator: Generator
     def __init__(
         self, 
         prob: float, 
-        block_samples = 100
+        block_samples = 1000
     ) -> None:
-        # Regenerate row by row rather than as a block (except initial perhaps)
-        # Consider as a list of rows, where each row has shape (block_samples, *shape)
-        # Have values for current sample - when sample==block sample regenerate row
-        # Excluding the initial generation means we can have this go to higher n
-        # with less of a performance hit
-        # requires [2,1,2,3,3,3,4]
-        # converts to  [134, 56, 135]
-        # each shape has a certain requirement from each line, and order to require in
-        # increment array of required vals [10,5,1,0,0,0...]
-        # (trials, blocks)
+        """
+        Create block binomial generator. Creates rows of each trial n previously requested, and
+        regenerates in blocks of block samples when each has been used up.
+
+        Args:
+            prob (float): The fixed probability
+            block_samples (int, optional): The number of block samples. Defaults to 1000.
+        """
         self.block_samples = block_samples
         self.prob = prob
-        self.array: np.ndarray = np.zeros((1, block_samples))
+        self.array = np.zeros((1, block_samples), dtype = int)
         self.next_access = np.zeros(1, dtype=int)
+        self.generator = Generator(SFC64())
 
 
     def generate_row(self, n: int):
+        """
+        Regenerates a single row of the stored array, or if required, all rows up to
+        specified row that are not already generated.
+
+        Args:
+            n (int): The number of row required.
+        """
         existing_rows = self.array.shape[0]
         if n==0:
             pass
         elif n+1 > existing_rows:
             row_to_make_array = np.arange(existing_rows, n+1)
             full_rows_to_make = np.tile(row_to_make_array, (self.block_samples, 1)).T
-            new_rows = np.random.binomial(n=full_rows_to_make, p=self.prob)
+            new_rows = self.generator.binomial(n=full_rows_to_make, p=self.prob)
             self.array = np.concatenate((self.array,new_rows), axis=0)
             self.next_access = np.concatenate((self.next_access, np.zeros_like(row_to_make_array)), axis=0)
         else:
@@ -76,12 +87,27 @@ class BlockBinomialGenerator:
             self.next_access[n] = 0
 
 
-    def __call__(self, n_array: np.ndarray):
+    def __call__(self, n_array: np.ndarray) -> np.ndarray:
+        """
+        Generate Binomial array for fixed probability
+
+        Args:
+            n_array (np.ndarray): Array of n trials
+
+        Raises:
+            ValueError: Block samples must exceed array element number
+
+        Returns:
+            np.ndarray: binomial array for all values
+        """
         old_shape = n_array.shape
+        
+        # Flatten on way in - reshape on way out
         flat_n_array = n_array.flatten()
         if len(flat_n_array) > self.block_samples:
             raise ValueError("Too few block samples for array")
-        # flatten on way in - reshape on way out
+        
+        # Generate up to max value in array
         max_val = np.amax(flat_n_array)
         if max_val+1 > self.array.shape[0]:
             self.generate_row(max_val)
