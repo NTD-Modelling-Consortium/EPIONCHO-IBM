@@ -27,16 +27,9 @@ def array_fully_equal(a1: NDArray[DType], a2: NDArray[DType]):
     return np.array_equal(a1, a2, equal_nan=True)
 
 
-def _get_indices(unique, counts, block_samples, next_access):
-    part_start = unique*block_samples + next_access[unique]
-    full_indices = np.array([], dtype = int)
-    for i, start in enumerate(part_start):
-        new_requested_blocks = np.arange(
-            start = start, 
-            stop = start + counts[i])
-
-        full_indices = np.concatenate((full_indices, new_requested_blocks))
-    return full_indices
+@cache
+def random_generator():
+    return Generator(SFC64())
 
 class BlockBinomialGenerator:
     block_samples: int
@@ -47,7 +40,7 @@ class BlockBinomialGenerator:
     def __init__(
         self, 
         prob: float, 
-        block_samples = 1000
+        block_samples = 10000
     ) -> None:
         """
         Create block binomial generator. Creates rows of each trial n previously requested, and
@@ -61,7 +54,7 @@ class BlockBinomialGenerator:
         self.prob = prob
         self.array = np.zeros((1, block_samples), dtype = int)
         self.next_access = np.zeros(1, dtype=int)
-        self.generator = Generator(SFC64())
+        self.generator = random_generator()
 
 
     def generate_row(self, n: int):
@@ -87,7 +80,7 @@ class BlockBinomialGenerator:
             self.next_access[n] = 0
 
 
-    def __call__(self, n_array: np.ndarray) -> np.ndarray:
+    def __call__(self, n_array: np.ndarray, debug=True) -> np.ndarray:
         """
         Generate Binomial array for fixed probability
 
@@ -120,22 +113,35 @@ class BlockBinomialGenerator:
         for i in rows_to_regen:
             self.generate_row(i)
 
-        full_indices = _get_indices(unique, counts, self.block_samples, self.next_access)
+        part_start = unique*self.block_samples + self.next_access[unique]
+        full_indices = np.array([], dtype = int)
+        for i, start in enumerate(part_start):
+            new_requested_blocks = np.arange(
+                start = start, 
+                stop = start + counts[i])
+
+            full_indices = np.concatenate((full_indices, new_requested_blocks))
         binoms = np.take(self.array,full_indices)
 
         #increment next_access
-        self.next_access[unique] = last_requested_block
+        self.next_access[unique] = self.next_access[unique] + counts
         self.next_access[0] = 0
 
-        sorter = np.argsort(flat_n_array)
-        flat_output = binoms[sorter]
+        inverse_sorter = np.argsort(np.argsort(flat_n_array))
+        flat_output = binoms[inverse_sorter]
 
         return flat_output.reshape(old_shape)
 
 
 @cache
-def random_generator():
-    return Generator(SFC64())
+def binomial_generator(p: float):
+    return BlockBinomialGenerator(p)
 
-def fast_binomial(n: NDArray[np.int_], p: NDArray[np.float_] | float) -> NDArray[np.int_]:
-    return random_generator().binomial(n, p)
+def fast_binomial(
+    n: NDArray[np.int_], p: NDArray[np.float_] | float
+) -> NDArray[np.int_]:
+    if isinstance(p, float):
+        binom = binomial_generator(p)(n)
+        return binom
+    else:
+        return random_generator().binomial(n, p)
