@@ -123,6 +123,10 @@ class BlockBinomialGenerator:
         full_indices = _get_indices(unique, counts, self.block_samples, self.next_access)
         binoms = np.take(self.array,full_indices)
 
+        #increment next_access
+        self.next_access[unique] = counts
+        self.next_access[0] = 0
+
         sorter = np.argsort(flat_n_array)
         flat_output = binoms[sorter]
 
