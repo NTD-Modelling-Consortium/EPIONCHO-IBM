@@ -125,7 +125,7 @@ def calc_l3(
         Array.Person.Float: The number of L2 Larvae associated with each person
     """
     return (blackfly_params.l2_l3_per_larva_per_year * l2) / (
-        (blackfly_params.a_H / blackfly_params.gono_cycle_length)
+        (blackfly_params.a_H / blackfly_params.gonotrophic_cycle_length)
         + blackfly_params.blackfly_mort_per_fly_per_year
         + blackfly_params.mu_L3
     )
