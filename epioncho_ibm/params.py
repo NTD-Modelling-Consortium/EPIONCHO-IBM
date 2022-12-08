@@ -89,8 +89,10 @@ class BlackflyParams(BaseSubParams):
     initial_L1: float = 0.03  # "int.L1"
 
     human_blood_index: float = 0.63  # 'h' in paper, used in 'm' and 'beta' in R code
-    gono_cycle_length: float = 1 / 104  # 'g' in paper, used in 'm' and 'beta' in R code
-    bite_rate_per_fly_on_human: float = human_blood_index / gono_cycle_length
+    gonotrophic_cycle_length: float = (
+        1 / 104
+    )  # 'g' in paper, used in 'm' and 'beta' in R code
+    bite_rate_per_fly_on_human: float = human_blood_index / gonotrophic_cycle_length
     c_h: float = 0.004900419  # Severity of transmission intensity dependent parasite establishment within humans
 
     bite_rate_per_person_per_year: float = (
