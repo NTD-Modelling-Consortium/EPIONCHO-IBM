@@ -100,7 +100,7 @@ class BlackflyParams(BaseSubParams):
     )
     l1_delay: float = 4  # (days)
     l3_delay: float = 10  # "l3.delay" (months) delay in worms entering humans and joining the first adult worm age class
-    immunity = 0.03962022  # strength of immunity
+    immunity: float = 0.03962022  # strength of immunity
     with_immunity: bool = False
 
 
