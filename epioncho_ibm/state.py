@@ -409,8 +409,8 @@ class State(Generic[CallbackStat]):
         )
 
 
-def make_state_from_params(params: Params, n_people: int):
-    return State.from_params(params, n_people)
+def make_state_from_params(params: Params, n_people: int, gamma_distribution: float = 0.3):
+    return State.from_params(params, n_people, gamma_distribution=gamma_distribution)
 
 
 def make_state_from_hdf5(input_file: str | Path | IO[bytes]):

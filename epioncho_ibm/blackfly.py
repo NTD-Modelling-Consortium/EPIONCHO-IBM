@@ -43,19 +43,19 @@ def calc_l1(
         * microfil
         * total_exposure
     ) / (
-        blackfly_params.blackfly_mort_per_person_per_year
+        blackfly_params.blackfly_mort_per_fly_per_year
         + (
-            blackfly_params.blackfly_mort_from_mf_per_person_per_year
+            blackfly_params.blackfly_mort_from_mf_per_fly_per_year
             * microfil
             * total_exposure
         )
-        + blackfly_params.l1_l2_per_person_per_year
+        + blackfly_params.l1_l2_per_larva_per_year
         * np.exp(
             -(blackfly_params.l1_delay / year_length)
             * (
-                blackfly_params.blackfly_mort_per_person_per_year
+                blackfly_params.blackfly_mort_per_fly_per_year
                 + (
-                    blackfly_params.blackfly_mort_from_mf_per_person_per_year
+                    blackfly_params.blackfly_mort_from_mf_per_fly_per_year
                     * last_microfil_delay
                     * exposure_delay
                 )
@@ -87,13 +87,13 @@ def calc_l2(
     return (
         l1
         * (
-            blackfly_params.l1_l2_per_person_per_year
+            blackfly_params.l1_l2_per_larva_per_year
             * np.exp(
                 -(blackfly_params.l1_delay / year_length)
                 * (
-                    blackfly_params.blackfly_mort_per_person_per_year
+                    blackfly_params.blackfly_mort_per_fly_per_year
                     + (
-                        blackfly_params.blackfly_mort_from_mf_per_person_per_year
+                        blackfly_params.blackfly_mort_from_mf_per_fly_per_year
                         * last_microfil_delay
                         * total_exposure
                     )
@@ -101,8 +101,8 @@ def calc_l2(
             )
         )
     ) / (
-        blackfly_params.blackfly_mort_per_person_per_year
-        + blackfly_params.l2_l3_per_person_per_year
+        blackfly_params.blackfly_mort_per_fly_per_year
+        + blackfly_params.l2_l3_per_larva_per_year
     )
 
 
@@ -123,10 +123,10 @@ def calc_l3(
     Returns:
         Array.Person.Float: The number of L2 Larvae associated with each person
     """
-    return (blackfly_params.l2_l3_per_person_per_year * l2) / (
-        (blackfly_params.a_H / blackfly_params.recip_gono_cycle)
-        + blackfly_params.blackfly_mort_per_person_per_year
-        + blackfly_params.sigma_L0
+    return (blackfly_params.l2_l3_per_larva_per_year * l2) / (
+        (blackfly_params.a_H / blackfly_params.gono_cycle_length)
+        + blackfly_params.blackfly_mort_per_fly_per_year
+        + blackfly_params.mu_L3
     )
 
 
