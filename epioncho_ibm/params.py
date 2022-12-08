@@ -61,7 +61,7 @@ class WormParams(BaseSubParams):
     phi = 19.6  # effects of ivermectin
     permanent_infertility = 0.345  # permenent infertility in worms due to ivermectin
     sex_ratio = 0.5
-    mf_production_per_worm = 1.158305 # Per capita rate of production of mf per mg of skin snip per fertile female adult worm at age 0
+    mf_production_per_worm = 1.158305  # Per capita rate of production of mf per mg of skin snip per fertile female adult worm at age 0
 
 
 class BlackflyParams(BaseSubParams):
@@ -98,7 +98,9 @@ class BlackflyParams(BaseSubParams):
     )
     l1_delay: float = 4  # (days)
     l3_delay: float = 10  # "l3.delay" (months) delay in worms entering humans and joining the first adult worm age class
-    immunity = 0.03962022 # strength of immunity 
+    immunity = 0.03962022  # strength of immunity
+    with_immunity: bool = False
+
 
 class MicrofilParams(BaseSubParams):
     microfil_aging: float = 0.125  # 'time.each.comp.mf'

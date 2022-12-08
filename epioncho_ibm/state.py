@@ -15,7 +15,7 @@ from .microfil import calculate_microfil_delta
 from .params import Params
 from .people import People
 from .types import Array
-from .worms import calculate_new_worms
+from .worms import WormGroup, calculate_new_worms
 
 np.seterr(all="ignore")
 
@@ -161,7 +161,7 @@ class State(Generic[CallbackStat]):
 
         old_fertile_female_worms = self._people.worms.fertile.copy()
         old_male_worms = self._people.worms.male.copy()
-
+        old_infertile_female_worms = self._people.worms.infertile.copy()
         self._people.worms, last_time_of_last_treatment = calculate_new_worms(
             current_worms=self._people.worms,
             worm_params=self.params.worms,
@@ -181,6 +181,11 @@ class State(Generic[CallbackStat]):
             self.params.delta_time,
             total_exposure,
             self.n_people,
+            WormGroup(
+                male=old_male_worms,
+                fertile=old_fertile_female_worms,
+                infertile=old_infertile_female_worms,
+            ),
             debug,
         )
 
@@ -409,7 +414,9 @@ class State(Generic[CallbackStat]):
         )
 
 
-def make_state_from_params(params: Params, n_people: int, gamma_distribution: float = 0.3):
+def make_state_from_params(
+    params: Params, n_people: int, gamma_distribution: float = 0.3
+):
     return State.from_params(params, n_people, gamma_distribution=gamma_distribution)
 
 
