@@ -61,23 +61,24 @@ class WormParams(BaseSubParams):
     phi = 19.6  # effects of ivermectin
     permanent_infertility = 0.345  # permenent infertility in worms due to ivermectin
     sex_ratio = 0.5
+    mf_production_per_worm = 1.158305 # Per capita rate of production of mf per mg of skin snip per fertile female adult worm at age 0
 
 
 class BlackflyParams(BaseSubParams):
     delta_h_zero: float = 0.1864987  # Proportion of L3 larvae developing to the adult stage within the human host, per bite when 𝐴𝑇𝑃(𝑡) → 0
     delta_h_inf: float = 0.002772749  # Proportion of L3 larvae developing to the adult stage within the human host, per bite when 𝐴𝑇𝑃(𝑡) → ∞
-    blackfly_mort_per_person_per_year: float = (
+    blackfly_mort_per_fly_per_year: float = (
         26  # Per capita mortality rate of blackfly vectors
     )
-    blackfly_mort_from_mf_per_person_per_year: float = (
+    blackfly_mort_from_mf_per_fly_per_year: float = (
         0.39  # Per capita microfilaria-induced mortality of blackfly vectors
     )
-    sigma_L0: int = 52  # mu_l3: Per capita mortality of L3 Larvae
-    a_H: float = 0.8  # Time delay between L3 entering the host and establishing as adult worms in years # a.H
-    l1_l2_per_person_per_year: float = (
+    mu_L3: int = 52  # Per capita mortality of L3 Larvae
+    a_H: float = 0.8  # Proportion of infected larvae shed per bite a.H
+    l1_l2_per_larva_per_year: float = (
         201.6189  # Per capita development rate of larvae from stage L1 to L2 'nuone'
     )
-    l2_l3_per_person_per_year: float = (
+    l2_l3_per_larva_per_year: float = (
         207.7384  # Per capita development rate of larvae from stage L2 to L3 'nutwo'
     )
     delta_v0: float = 0.0166
@@ -88,8 +89,8 @@ class BlackflyParams(BaseSubParams):
     initial_L1: float = 0.03  # "int.L1"
 
     human_blood_index: float = 0.63  # 'h' in paper, used in 'm' and 'beta' in R code
-    recip_gono_cycle: float = 1 / 104  # 'g' in paper, used in 'm' and 'beta' in R code
-    bite_rate_per_fly_on_human: float = human_blood_index / recip_gono_cycle
+    gono_cycle_length: float = 1 / 104  # 'g' in paper, used in 'm' and 'beta' in R code
+    bite_rate_per_fly_on_human: float = human_blood_index / gono_cycle_length
     c_h: float = 0.004900419  # Severity of transmission intensity dependent parasite establishment within humans
 
     bite_rate_per_person_per_year: float = (
@@ -97,7 +98,7 @@ class BlackflyParams(BaseSubParams):
     )
     l1_delay: float = 4  # (days)
     l3_delay: float = 10  # "l3.delay" (months) delay in worms entering humans and joining the first adult worm age class
-
+    immunity = 0.03962022 # strength of immunity 
 
 class MicrofilParams(BaseSubParams):
     microfil_aging: float = 0.125  # 'time.each.comp.mf'

@@ -34,7 +34,7 @@ class DerivedParams:
         )
 
         self.fecundity_rates_worms = (
-            1.158305
+            params.worms.mf_production_per_worm
             * params.worms.fecundity_worms_1
             / (
                 params.worms.fecundity_worms_1
