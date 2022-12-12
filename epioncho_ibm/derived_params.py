@@ -2,7 +2,8 @@ import math
 from typing import Optional
 
 import numpy as np
-from fast_binomial import SFC64, Generator
+import numpy.random
+from fast_binomial import SFC64, FBVectorSFC64Block8, Generator
 
 from epioncho_ibm.types import Array
 
@@ -26,7 +27,7 @@ class DerivedParams:
     worm_lambda_zero_generator: Generator
     worm_omega_generator: Generator
 
-    def __init__(self, params: Params) -> None:
+    def __init__(self, params: Params, n_people: int) -> None:
         worm_age_categories: Array.WormCat.Float = np.arange(
             start=0,
             stop=params.worms.max_worm_age,
@@ -92,3 +93,23 @@ class DerivedParams:
         self.worm_omega_generator = Generator(
             SFC64(), params.worms.omega * params.delta_time
         )
+        mortalities_by_person: Array.WormCat.Person.Float = np.tile(
+            self.worm_mortality_rate, (n_people, 1)
+        ).T
+        # self.worm_mortality_generator = Generator(
+        #     SFC64(), mortalities_by_person
+        # )
+
+        class NewTest:
+            def binomial(self, n):
+                gen = numpy.random.Generator(numpy.random.SFC64())
+                return gen.binomial(p=mortalities_by_person, n=n)
+
+        self.worm_mortality_generator = NewTest()
+
+        # class FBTest:
+        #     def __init__(self) -> None:
+        #         self._gen = FBVectorSFC64Block8(mortalities_by_person)
+        #     def binomial(self, n):
+        #         return self._gen.generate(n)
+        # self.worm_mortality_generator = FBTest()
