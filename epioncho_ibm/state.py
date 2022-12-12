@@ -6,7 +6,7 @@ import numpy as np
 from pydantic import BaseModel
 from tqdm import tqdm
 
-from epioncho_ibm.treatment import get_treatment 
+from epioncho_ibm.treatment import get_treatment
 
 from .blackfly import calc_l1, calc_l2, calc_l3, calc_new_worms_from_blackfly
 from .derived_params import DerivedParams
@@ -116,7 +116,7 @@ class State(Generic[CallbackStat]):
     @params.setter
     def params(self, value: object):
         assert isinstance(value, Params)
-        self._derived_params = DerivedParams(value)
+        self._derived_params = DerivedParams(value, self.n_people)
         self._params = value
 
     @property
@@ -170,6 +170,7 @@ class State(Generic[CallbackStat]):
             delta_time=self.params.delta_time,
             worm_delay_array=self._people.delay_arrays.worm_delay,
             mortalities=self._derived_params.worm_mortality_rate,
+            mortalities_generator=self._derived_params.worm_mortality_generator,
             current_time=current_time,
             debug=debug,
             worm_age_rate_generator=self._derived_params.worm_age_rate_generator,

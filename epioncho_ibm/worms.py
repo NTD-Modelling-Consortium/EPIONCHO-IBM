@@ -43,9 +43,8 @@ class WormGroup:
 
 def _calc_dead_worms(
     current_worms: WormGroup,
-    female_mortalities: Array.WormCat.Float | Array.WormCat.Person.Float,
-    male_mortalities: Array.WormCat.Float,
-    treatment_occurred: bool = False,
+    female_mortalities_override: Array.WormCat.Person.Float | None,
+    mortalities_generator: Generator,
 ) -> WormGroup:
     """
     Calculates the number of worms dying in each compartment
@@ -65,34 +64,30 @@ def _calc_dead_worms(
 
     def _calc_dead_worms_single_group(
         current_worms: Array.WormCat.Person.Int,
-        mortalities: Array.WormCat.Float | Array.WormCat.Person.Float,
-        treatment_occurred_and_female: bool = False,
+        mortalities_override: None | Array.WormCat.Person.Float,
+        mortalities_generator: Generator,
     ) -> Array.WormCat.Person.Int:
         assert current_worms.ndim == 2
-        if treatment_occurred_and_female:
-            return utils.fast_binomial(n=current_worms, p=mortalities)
+        if mortalities_override is not None:
+            return utils.fast_binomial(n=current_worms, p=mortalities_override)
         else:
-            mortalities_by_person: Array.WormCat.Person.Float = np.tile(
-                mortalities, (current_worms.shape[1], 1)
-            ).T
-            return utils.fast_binomial(
-                n=current_worms,
-                p=mortalities_by_person,
-            )
+            return mortalities_generator.binomial(n=current_worms)
 
     return WormGroup(
         male=_calc_dead_worms_single_group(
-            current_worms=current_worms.male, mortalities=male_mortalities
+            current_worms=current_worms.male,
+            mortalities_override=None,
+            mortalities_generator=mortalities_generator,
         ),
         infertile=_calc_dead_worms_single_group(
-            current_worms.infertile,
-            female_mortalities,
-            treatment_occurred_and_female=treatment_occurred,
+            current_worms=current_worms.infertile,
+            mortalities_override=female_mortalities_override,
+            mortalities_generator=mortalities_generator,
         ),
         fertile=_calc_dead_worms_single_group(
-            current_worms.fertile,
-            female_mortalities,
-            treatment_occurred_and_female=treatment_occurred,
+            current_worms=current_worms.fertile,
+            mortalities_override=female_mortalities_override,
+            mortalities_generator=mortalities_generator,
         ),
     )
 
@@ -353,6 +348,7 @@ def calculate_new_worms(
     worm_sex_ratio_generator: Generator,
     worm_lambda_zero_generator: Generator,
     worm_omega_generator: Generator,
+    mortalities_generator: Generator,
 ) -> tuple[WormGroup, Array.Person.Float]:
     """
     Calculates the new total worms in the model for one time step.
@@ -376,7 +372,7 @@ def calculate_new_worms(
         tuple[WormGroup, Array.Person.Float]: Returns new total worms, last time people were treated, respectively
     """
 
-    female_mortalities: Array.WormCat.Float | Array.WormCat.Person.Float = mortalities
+    female_mortalities: None | Array.WormCat.Person.Float = None
     fertile_to_non_fertile_rate = None
     if treatment is not None:
         if treatment.treatment_occurred:
@@ -396,9 +392,8 @@ def calculate_new_worms(
 
     dead = _calc_dead_worms(
         current_worms=current_worms,
-        female_mortalities=female_mortalities,
-        male_mortalities=mortalities,
-        treatment_occurred=treatment is not None and treatment.treatment_occurred,
+        female_mortalities_override=female_mortalities,
+        mortalities_generator=mortalities_generator,
     )
 
     outbound = _calc_outbound_worms(
