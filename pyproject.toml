@@ -10,6 +10,7 @@ numpy = "^1.22.3"
 pydantic = "^1.9.0"
 tqdm = "^4.64.1"
 h5py = "^3.7.0"
+fast-binomial = {git = "git@github.com:dreamingspires/fast-binomial.git"}
 
 [tool.poetry.dev-dependencies]
 black = "^22.3.0"
