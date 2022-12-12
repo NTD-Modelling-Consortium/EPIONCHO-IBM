@@ -93,37 +93,23 @@ class DerivedParams:
         self.worm_omega_generator = Generator(
             SFC64(), params.worms.omega * params.delta_time
         )
-        mortalities_by_person: Array.WormCat.Person.Float = np.tile(
-            self.worm_mortality_rate, (n_people, 1)
-        ).T
 
-        # CORRECT WITH TILE
-
-        # self.worm_mortality_generator = Generator(
-        #     SFC64(), mortalities_by_person
-        # )
-
-
-        # WORKING BUT SLOW
-
-        # wm = self.worm_mortality_rate
-        # class NewTest:
-        #     def binomial(self, n):
-        #         return FBVectorSFC64Block8(p=wm).generate( n=n.T.flatten().tolist()).reshape(n.T.shape).T
-        # self.worm_mortality_generator = NewTest()
-
-
-        # BROKEN BUT FAST
-        # self.worm_mortality_generator = Generator(
-        #     SFC64(), self.worm_mortality_rate
-        # )
-
+        wm = self.worm_mortality_rate
+        class NewTest:
+            def __init__(self, p) -> None:
+                self._gen = FBVectorSFC64Block8(p=p)
+            def binomial(self, n):
+                return self._gen.generate( n=n.T.flatten()).reshape(n.T.shape).T
+        self.worm_mortality_generator = NewTest(wm)
 
         # NUMPY
 
-        class NewTest:
-            def binomial(self, n):
-                gen = numpy.random.Generator(numpy.random.SFC64())
-                return gen.binomial(p=mortalities_by_person, n=n)
+        # mortalities_by_person: Array.WormCat.Person.Float = np.tile(
+        #     self.worm_mortality_rate, (n_people, 1)
+        # ).T
+        # class NewTest:
+        #     def binomial(self, n):
+        #         gen = numpy.random.Generator(numpy.random.SFC64())
+        #         return gen.binomial(p=mortalities_by_person, n=n)
 
-        self.worm_mortality_generator = NewTest()
+        # self.worm_mortality_generator = NewTest()
