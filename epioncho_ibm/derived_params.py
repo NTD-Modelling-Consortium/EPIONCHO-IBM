@@ -3,7 +3,7 @@ from typing import Optional
 
 import numpy as np
 import numpy.random
-from fast_binomial import SFC64, FBVectorSFC64Block8, Generator
+from fast_binomial import SFC64, FBVectorSFC64Block8, Generator, FBScalarSFC64Block8, FBVectorSFC64Block128
 
 from epioncho_ibm.types import Array
 
@@ -106,10 +106,3 @@ class DerivedParams:
                 return gen.binomial(p=mortalities_by_person, n=n)
 
         self.worm_mortality_generator = NewTest()
-
-        # class FBTest:
-        #     def __init__(self) -> None:
-        #         self._gen = FBVectorSFC64Block8(mortalities_by_person)
-        #     def binomial(self, n):
-        #         return self._gen.generate(n)
-        # self.worm_mortality_generator = FBTest()
