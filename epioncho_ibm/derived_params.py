@@ -96,9 +96,30 @@ class DerivedParams:
         mortalities_by_person: Array.WormCat.Person.Float = np.tile(
             self.worm_mortality_rate, (n_people, 1)
         ).T
+
+        # CORRECT WITH TILE
+
         # self.worm_mortality_generator = Generator(
         #     SFC64(), mortalities_by_person
         # )
+
+
+        # WORKING BUT SLOW
+
+        # wm = self.worm_mortality_rate
+        # class NewTest:
+        #     def binomial(self, n):
+        #         return FBVectorSFC64Block8(p=wm).generate( n=n.T.flatten().tolist()).reshape(n.T.shape).T
+        # self.worm_mortality_generator = NewTest()
+
+
+        # BROKEN BUT FAST
+        # self.worm_mortality_generator = Generator(
+        #     SFC64(), self.worm_mortality_rate
+        # )
+
+
+        # NUMPY
 
         class NewTest:
             def binomial(self, n):
