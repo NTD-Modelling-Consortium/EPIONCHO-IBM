@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 
 import numpy as np
+from fast_binomial import Generator
 
 import epioncho_ibm.utils as utils
 from epioncho_ibm.treatment import TreatmentGroup
@@ -69,10 +70,7 @@ def _calc_dead_worms(
     ) -> Array.WormCat.Person.Int:
         assert current_worms.ndim == 2
         if treatment_occurred_and_female:
-            return utils.fast_binomial(
-                n=current_worms,
-                p=mortalities
-            )
+            return utils.fast_binomial(n=current_worms, p=mortalities)
         else:
             mortalities_by_person: Array.WormCat.Person.Float = np.tile(
                 mortalities, (current_worms.shape[1], 1)
@@ -101,7 +99,7 @@ def _calc_dead_worms(
 
 def _calc_outbound_worms(
     current_worms: WormGroup,
-    worm_age_rate: float,
+    worm_age_rate_generator: Generator,
     dead_worms: WormGroup,
 ) -> WormGroup:
     """
@@ -109,7 +107,8 @@ def _calc_outbound_worms(
 
     Args:
         current_worms (WormGroup): The current number of worms
-        worm_age_rate (float): The rate at which worms move from one compartment to the next
+        worm_age_rate_generator (Generator): Generates worms at a pre-defined rate.
+            The rate at which worms move from one compartment to the next
         dead_worms (WormGroup): Worms dying in each compartment
 
     Returns:
@@ -119,34 +118,33 @@ def _calc_outbound_worms(
     def _calc_outbound_worms_single_group(
         current_worms: Array.WormCat.Person.Int,
         dead_worms: Array.WormCat.Person.Int,
-        worm_age_rate: float,
+        worm_age_rate_generator: Generator,
     ) -> Array.WormCat.Person.Int:
-        return utils.fast_binomial(
-            n=current_worms - dead_worms,
-            p=worm_age_rate
-        )
+        return worm_age_rate_generator.binomial(n=current_worms - dead_worms)
 
     return WormGroup(
         male=_calc_outbound_worms_single_group(
             dead_worms=dead_worms.male,
             current_worms=current_worms.male,
-            worm_age_rate=worm_age_rate,
+            worm_age_rate_generator=worm_age_rate_generator,
         ),
         infertile=_calc_outbound_worms_single_group(
             dead_worms=dead_worms.infertile,
             current_worms=current_worms.infertile,
-            worm_age_rate=worm_age_rate,
+            worm_age_rate_generator=worm_age_rate_generator,
         ),
         fertile=_calc_outbound_worms_single_group(
             dead_worms=dead_worms.fertile,
             current_worms=current_worms.fertile,
-            worm_age_rate=worm_age_rate,
+            worm_age_rate_generator=worm_age_rate_generator,
         ),
     )
 
 
 def _calc_inbound_worms(
-    worm_delay: Array.L3Delay.Person.Int, worm_sex_ratio: float, outbound: WormGroup
+    worm_delay: Array.L3Delay.Person.Int,
+    worm_sex_ratio_generator: Generator,
+    outbound: WormGroup,
 ):
     """
     Calculates the inbound worms into each compartment, drawing from the final column of
@@ -154,7 +152,7 @@ def _calc_inbound_worms(
 
     Args:
         worm_delay (Array.L3Delay.Person.Int): The array of worms delayed
-        worm_sex_ratio (float): The ratio to select worm sex at random
+        worm_sex_ratio_generator (Generator): Generates worms at a pre-defined sex ratio
         outbound (WormGroup): The outbound worms from each compartment
 
     Returns:
@@ -163,7 +161,7 @@ def _calc_inbound_worms(
     # Takes males and females from final column of worm_delay
     final_column: Array.Person.Int = worm_delay[-1]
     # Gets worms of each sex at random
-    delayed_males = utils.fast_binomial(n=final_column, p=worm_sex_ratio)
+    delayed_males = worm_sex_ratio_generator.binomial(n=final_column)
     delayed_females = final_column - delayed_males
     return WormGroup(
         male=utils.lag_array(delayed_males, outbound.male),
@@ -181,6 +179,8 @@ def _calc_delta_fertility(
     worm_params: WormParams,
     fertile_to_non_fertile_rate: Array.Person.Float | None,
     delta_time: float,
+    worm_lambda_zero_generator: Generator,
+    worm_omega_generator: Generator,
 ) -> Array.WormCat.Person.Int:
     """
     Calculates how many worms go from infertile to fertile.
@@ -193,6 +193,8 @@ def _calc_delta_fertility(
         fertile_to_non_fertile_rate (Array.Person.Float | None): The rate at which worms
             move from fertile to infertile, from treatment
         delta_time (float): dt - The amount of time advance in one time step
+        worm_lambda_zero_generator (Generator): Generates infertile worms at a pre-defined rate
+        worm_omega_generator (Generator): Generates fertile worms at a pre-defined rate
 
     Returns:
         Array.WormCat.Person.Int: The number of worms going from infertile to fertile in each compartment
@@ -202,30 +204,35 @@ def _calc_delta_fertility(
         current_worms: Array.WormCat.Person.Int,
         dead_worms: Array.WormCat.Person.Int,
         outbound_worms: Array.WormCat.Person.Int,
-        prob: float | Array.Person.Float,
+        prob: None | Array.Person.Float,
+        worm_generator: Generator,
     ) -> Array.WormCat.Person.Int:
 
         remaining_female_worms = current_worms - dead_worms - outbound_worms
         remaining_female_worms[remaining_female_worms < 0] = 0
 
         if remaining_female_worms.any():
-            return utils.fast_binomial(
-                n=remaining_female_worms,
-                p=prob
-            )
+            if prob is None:
+                return worm_generator.binomial(n=remaining_female_worms)
+            else:
+                return utils.fast_binomial(n=remaining_female_worms, p=prob)
         else:
             return np.zeros_like(current_worms)
 
     if fertile_to_non_fertile_rate is not None:
-        lambda_zero_in = np.tile(worm_params.lambda_zero * delta_time + fertile_to_non_fertile_rate, (current_worms.fertile.shape[0], 1))
+        lambda_zero_in = np.tile(
+            worm_params.lambda_zero * delta_time + fertile_to_non_fertile_rate,
+            (current_worms.fertile.shape[0], 1),
+        )
     else:
-        lambda_zero_in = worm_params.lambda_zero * delta_time
+        lambda_zero_in = None
 
     new_infertile_from_inside = _calc_new_worms_fertility(
         current_worms=current_worms.fertile,
         dead_worms=dead_worms.fertile,
         outbound_worms=outbound_worms.fertile,
         prob=lambda_zero_in,
+        worm_generator=worm_lambda_zero_generator,
     )
 
     # approach assumes individuals which are moved from fertile to non
@@ -234,7 +241,8 @@ def _calc_delta_fertility(
         current_worms=current_worms.infertile,
         dead_worms=dead_worms.infertile,
         outbound_worms=outbound_worms.infertile,
-        prob=worm_params.omega * delta_time,
+        prob=None,
+        worm_generator=worm_omega_generator,
     )
     return new_fertile_from_inside - new_infertile_from_inside
 
@@ -341,6 +349,10 @@ def calculate_new_worms(
     mortalities: Array.WormCat.Float,
     current_time: float,
     debug: bool,
+    worm_age_rate_generator: Generator,
+    worm_sex_ratio_generator: Generator,
+    worm_lambda_zero_generator: Generator,
+    worm_omega_generator: Generator,
 ) -> tuple[WormGroup, Array.Person.Float]:
     """
     Calculates the new total worms in the model for one time step.
@@ -356,7 +368,10 @@ def calculate_new_worms(
         mortalities (Array.WormCat.Float): The default worm mortality rate
         current_time (float): The current time, t, in the model
         debug (bool): Runs in debug mode
-
+        worm_age_rate_generator (Generator): Generates worms at a pre-defined aging rate
+        worm_sex_ratio_generator (Generator): Generates worms at a pre-defined sex ratio
+        worm_lambda_zero_generator (Generator): Generates infertile worms at a pre-defined rate
+        worm_omega_generator (Generator): Generates fertile worms at a pre-defined rate
     Returns:
         tuple[WormGroup, Array.Person.Float]: Returns new total worms, last time people were treated, respectively
     """
@@ -388,13 +403,13 @@ def calculate_new_worms(
 
     outbound = _calc_outbound_worms(
         current_worms=current_worms,
-        worm_age_rate=delta_time / worm_params.worms_aging,
+        worm_age_rate_generator=worm_age_rate_generator,
         dead_worms=dead,
     )
 
     inbound = _calc_inbound_worms(
         worm_delay=worm_delay_array,
-        worm_sex_ratio=worm_params.sex_ratio,
+        worm_sex_ratio_generator=worm_sex_ratio_generator,
         outbound=outbound,
     )
 
@@ -405,6 +420,8 @@ def calculate_new_worms(
         worm_params,
         fertile_to_non_fertile_rate,
         delta_time,
+        worm_lambda_zero_generator,
+        worm_omega_generator,
     )
     return (
         _calc_new_worms(inbound, outbound, dead, current_worms, delta_fertility, debug),

@@ -2,6 +2,7 @@ import math
 from typing import Optional
 
 import numpy as np
+from fast_binomial import SFC64, Generator
 
 from epioncho_ibm.types import Array
 
@@ -19,6 +20,11 @@ class DerivedParams:
     fecundity_rates_worms: Array.WormCat.Float
     microfillarie_mortality_rate: Array.MFCat.Float
     treatment_times: Optional[Array.Treatments.Float]
+    people_to_die_generator: Generator
+    worm_age_rate_generator: Generator
+    worm_sex_ratio_generator: Generator
+    worm_lambda_zero_generator: Generator
+    worm_omega_generator: Generator
 
     def __init__(self, params: Params) -> None:
         worm_age_categories: Array.WormCat.Float = np.arange(
@@ -72,3 +78,17 @@ class DerivedParams:
             )
         else:
             self.treatment_times = None
+
+        self.people_to_die_generator = Generator(
+            SFC64(), params.delta_time / params.humans.mean_human_age
+        )
+        self.worm_age_rate_generator = Generator(
+            SFC64(), params.delta_time / params.worms.worms_aging
+        )
+        self.worm_sex_ratio_generator = Generator(SFC64(), params.worms.sex_ratio)
+        self.worm_lambda_zero_generator = Generator(
+            SFC64(), params.worms.lambda_zero * params.delta_time
+        )
+        self.worm_omega_generator = Generator(
+            SFC64(), params.worms.omega * params.delta_time
+        )

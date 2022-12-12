@@ -6,7 +6,7 @@ import numpy as np
 from pydantic import BaseModel
 from tqdm import tqdm
 
-from epioncho_ibm.treatment import get_treatment
+from epioncho_ibm.treatment import get_treatment 
 
 from .blackfly import calc_l1, calc_l2, calc_l3, calc_new_worms_from_blackfly
 from .derived_params import DerivedParams
@@ -172,6 +172,10 @@ class State(Generic[CallbackStat]):
             mortalities=self._derived_params.worm_mortality_rate,
             current_time=current_time,
             debug=debug,
+            worm_age_rate_generator=self._derived_params.worm_age_rate_generator,
+            worm_sex_ratio_generator=self._derived_params.worm_sex_ratio_generator,
+            worm_lambda_zero_generator=self._derived_params.worm_lambda_zero_generator,
+            worm_omega_generator=self._derived_params.worm_omega_generator,
         )
         # there is a delay in new parasites entering humans (from fly bites) and
         # entering the first adult worm age class
@@ -235,10 +239,8 @@ class State(Generic[CallbackStat]):
             new_worms=new_worms, total_exposure=total_exposure, new_mf=old_mf
         )
         people_to_die: Array.Person.Bool = np.logical_or(
-            np.random.binomial(
-                n=1,
-                p=(1 / self.params.humans.mean_human_age) * self.params.delta_time,
-                size=self.n_people,
+            self._derived_params.people_to_die_generator.binomial(
+                np.repeat(1, self.n_people)
             )
             == 1,
             self._people.ages >= self.params.humans.max_human_age,
@@ -368,7 +370,6 @@ class State(Generic[CallbackStat]):
             for i in range(self.params.humans.skin_snip_number):
                 total_skin_snip_mf[:, i] = negative_binomial_alt_interface(n=kmf, mu=mu)
             mfobs: Array.Person.Int = np.sum(total_skin_snip_mf, axis=1)
-
         else:
             mfobs: Array.Person.Int = negative_binomial_alt_interface(n=kmf, mu=mu)
 
