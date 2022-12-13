@@ -2,8 +2,7 @@ import math
 from typing import Optional
 
 import numpy as np
-import numpy.random
-from fast_binomial import SFC64, FBVectorSFC64Block8, Generator, FBScalarSFC64Block8, FBVectorSFC64Block128
+from fast_binomial import SFC64, Generator
 
 from epioncho_ibm.types import Array
 
@@ -94,10 +93,4 @@ class DerivedParams:
             SFC64(), params.worms.omega * params.delta_time
         )
 
-        wm = self.worm_mortality_rate
-        class NewTest:
-            def __init__(self, p) -> None:
-                self._gen = FBVectorSFC64Block8(p=p)
-            def binomial(self, n):
-                return self._gen.generate(n=n.flatten()).reshape(n.shape)
-        self.worm_mortality_generator = NewTest(wm)
+        self.worm_mortality_generator = Generator(SFC64(), self.worm_mortality_rate)
