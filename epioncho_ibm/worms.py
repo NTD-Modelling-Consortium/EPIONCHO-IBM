@@ -71,7 +71,7 @@ def _calc_dead_worms(
         if mortalities_override is not None:
             return utils.fast_binomial(n=current_worms, p=mortalities_override)
         else:
-            return mortalities_generator.binomial(n=current_worms)
+            return mortalities_generator.binomial(n=current_worms.T).T
 
     return WormGroup(
         male=_calc_dead_worms_single_group(

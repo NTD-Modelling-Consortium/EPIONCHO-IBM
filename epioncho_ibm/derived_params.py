@@ -99,17 +99,5 @@ class DerivedParams:
             def __init__(self, p) -> None:
                 self._gen = FBVectorSFC64Block8(p=p)
             def binomial(self, n):
-                return self._gen.generate( n=n.T.flatten()).reshape(n.T.shape).T
+                return self._gen.generate(n=n.flatten()).reshape(n.shape)
         self.worm_mortality_generator = NewTest(wm)
-
-        # NUMPY
-
-        # mortalities_by_person: Array.WormCat.Person.Float = np.tile(
-        #     self.worm_mortality_rate, (n_people, 1)
-        # ).T
-        # class NewTest:
-        #     def binomial(self, n):
-        #         gen = numpy.random.Generator(numpy.random.SFC64())
-        #         return gen.binomial(p=mortalities_by_person, n=n)
-
-        # self.worm_mortality_generator = NewTest()
