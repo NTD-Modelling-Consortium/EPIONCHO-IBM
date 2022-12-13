@@ -146,7 +146,7 @@ class DelayArrays:
             np.array(group["mf_delay"]),
             group.attrs["worm_delay_current"],
             group.attrs["exposure_delay_current"],
-            group.attrs["mf_delay_current"]
+            group.attrs["mf_delay_current"],
         )
 
     def process_deaths(self, people_to_die: Array.Person.Bool):

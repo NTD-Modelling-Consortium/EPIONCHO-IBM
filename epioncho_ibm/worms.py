@@ -51,12 +51,10 @@ def _calc_dead_worms(
 
     Args:
         current_worms (WormGroup): The current number of worms
-        female_mortalities (Array.WormCat.Float | Array.WormCat.Person.Float): The rate of
-            mortality for female worms, either assumed to be the same in each compartment,
-            or by person in the case of treatment.
-        male_mortalities (Array.WormCat.Float): The rate of mortality for male worms,
+        female_mortalities_override (Array.WormCat.Person.Float | None): The rate of
+            mortality for female worms, by person in the case of treatment.
+        mortalities_generator (Generator): Generates the rate of mortality,
             assumed to be the same in each compartment
-        treatment_occurred (bool): Whether or not treatment occurred in this time step
 
     Returns:
         WormGroup: The number of worms dying in each compartment
@@ -146,7 +144,7 @@ def _calc_inbound_worms(
     worm delay at random
 
     Args:
-        worm_delay (Array.L3Delay.Person.Int): The array of worms delayed
+        worm_delay (Array.Person.Int): The array of worms delayed
         worm_sex_ratio_generator (Generator): Generates worms at a pre-defined sex ratio
         outbound (WormGroup): The outbound worms from each compartment
 
@@ -295,7 +293,7 @@ def _calc_fertile_to_non_fertile_rate(
         current_time (float): The current time, t, in the model
         lam_m (float): From the effects of ivermectin
         phi (float): From the effects of ivermectin
-        time_of_last_treatment (_type_): The last time each individual was treated
+        time_of_last_treatment (Array.Person.Float): The last time each individual was treated
         delta_time (float): dt - The amount of time advance in one time step
 
     Returns:
@@ -358,7 +356,7 @@ def calculate_new_worms(
         time_of_last_treatment (Array.Person.Float): The last time a particular person was
             treated (None if treatment has not started).
         delta_time (float): dt - The amount of time advance in one time step
-        worm_delay_array (Array.L3Delay.Person.Int): The array for the worms being delayed
+        worm_delay_array (Array.Person.Int): The array for the worms being delayed
         mortalities (Array.WormCat.Float): The default worm mortality rate
         current_time (float): The current time, t, in the model
         debug (bool): Runs in debug mode
@@ -366,6 +364,8 @@ def calculate_new_worms(
         worm_sex_ratio_generator (Generator): Generates worms at a pre-defined sex ratio
         worm_lambda_zero_generator (Generator): Generates infertile worms at a pre-defined rate
         worm_omega_generator (Generator): Generates fertile worms at a pre-defined rate
+        mortalities_generator (Generator): Generates dead worms at a pre-defined rate
+
     Returns:
         tuple[WormGroup, Array.Person.Float]: Returns new total worms, last time people were treated, respectively
     """
