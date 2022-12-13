@@ -26,7 +26,7 @@ class DerivedParams:
     worm_lambda_zero_generator: Generator
     worm_omega_generator: Generator
 
-    def __init__(self, params: Params, n_people: int) -> None:
+    def __init__(self, params: Params) -> None:
         worm_age_categories: Array.WormCat.Float = np.arange(
             start=0,
             stop=params.worms.max_worm_age,
