@@ -220,9 +220,9 @@ class State(Generic[CallbackStat]):
         self._people.blackfly.L1 = calc_l1(
             self.params.blackfly,
             old_mf,
-            self._people.delay_arrays.mf_delay[-1],
+            self._people.delay_arrays.mf_delay,
             total_exposure,
-            self._people.delay_arrays.exposure_delay[-1],
+            self._people.delay_arrays.exposure_delay,
             self.params.year_length_days,
         )
 
@@ -230,8 +230,8 @@ class State(Generic[CallbackStat]):
         self._people.blackfly.L2 = calc_l2(
             self.params.blackfly,
             old_blackfly_L1,
-            self._people.delay_arrays.mf_delay[-1],
-            self._people.delay_arrays.exposure_delay[-1],
+            self._people.delay_arrays.mf_delay,
+            self._people.delay_arrays.exposure_delay,
             self.params.year_length_days,
         )
         self._people.blackfly.L3 = calc_l3(self.params.blackfly, old_blackfly_L2)
