@@ -1,8 +1,5 @@
-from epioncho_ibm import (
-    Params,
-    TreatmentParams,
-    make_state_from_params,
-)
+from epioncho_ibm import Params, TreatmentParams, make_state_from_params
+
 params = Params(treatment=TreatmentParams(start_time=3))
 
 state = make_state_from_params(params=params, n_people=400)
