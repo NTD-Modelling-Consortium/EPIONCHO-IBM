@@ -161,23 +161,7 @@ class State(Generic[CallbackStat]):
 
         old_fertile_female_worms = self._people.worms.fertile.copy()
         old_male_worms = self._people.worms.male.copy()
-        old_infertile_female_worms = self._people.worms.infertile.copy()
-        self._people.worms, last_time_of_last_treatment = calculate_new_worms(
-            current_worms=self._people.worms,
-            worm_params=self.params.worms,
-            treatment=treatment,
-            time_of_last_treatment=self._people.time_of_last_treatment,
-            delta_time=self.params.delta_time,
-            worm_delay_array=self._people.delay_arrays.worm_delay,
-            mortalities=self._derived_params.worm_mortality_rate,
-            mortalities_generator=self._derived_params.worm_mortality_generator,
-            current_time=current_time,
-            debug=debug,
-            worm_age_rate_generator=self._derived_params.worm_age_rate_generator,
-            worm_sex_ratio_generator=self._derived_params.worm_sex_ratio_generator,
-            worm_lambda_zero_generator=self._derived_params.worm_lambda_zero_generator,
-            worm_omega_generator=self._derived_params.worm_omega_generator,
-        )
+
         # there is a delay in new parasites entering humans (from fly bites) and
         # entering the first adult worm age class
         new_worms = calc_new_worms_from_blackfly(
@@ -189,9 +173,31 @@ class State(Generic[CallbackStat]):
             WormGroup(
                 male=old_male_worms,
                 fertile=old_fertile_female_worms,
-                infertile=old_infertile_female_worms,
+                infertile=self._people.worms.infertile.copy(),
             ),
             debug,
+        )
+
+        if self._people.delay_arrays.worm_delay is None:
+            worm_delay: Array.Person.Int = new_worms
+        else:
+            worm_delay: Array.Person.Int = self._people.delay_arrays.worm_delay
+
+        self._people.worms, last_time_of_last_treatment = calculate_new_worms(
+            current_worms=self._people.worms,
+            worm_params=self.params.worms,
+            treatment=treatment,
+            time_of_last_treatment=self._people.time_of_last_treatment,
+            delta_time=self.params.delta_time,
+            worm_delay_array=worm_delay,
+            mortalities=self._derived_params.worm_mortality_rate,
+            mortalities_generator=self._derived_params.worm_mortality_generator,
+            current_time=current_time,
+            debug=debug,
+            worm_age_rate_generator=self._derived_params.worm_age_rate_generator,
+            worm_sex_ratio_generator=self._derived_params.worm_sex_ratio_generator,
+            worm_lambda_zero_generator=self._derived_params.worm_lambda_zero_generator,
+            worm_omega_generator=self._derived_params.worm_omega_generator,
         )
 
         if (
@@ -217,12 +223,25 @@ class State(Generic[CallbackStat]):
             debug=debug,
         )
         old_blackfly_L1 = self._people.blackfly.L1
+
+        if self._people.delay_arrays.exposure_delay is None:
+            exposure_delay: Array.Person.Float = total_exposure
+        else:
+            exposure_delay: Array.Person.Float = (
+                self._people.delay_arrays.exposure_delay
+            )
+
+        if self._people.delay_arrays.mf_delay is None:
+            mf_delay: Array.Person.Float = old_mf
+        else:
+            mf_delay: Array.Person.Float = self._people.delay_arrays.mf_delay
+
         self._people.blackfly.L1 = calc_l1(
             self.params.blackfly,
             old_mf,
-            self._people.delay_arrays.mf_delay,
+            mf_delay,
             total_exposure,
-            self._people.delay_arrays.exposure_delay,
+            exposure_delay,
             self.params.year_length_days,
         )
 
@@ -230,8 +249,8 @@ class State(Generic[CallbackStat]):
         self._people.blackfly.L2 = calc_l2(
             self.params.blackfly,
             old_blackfly_L1,
-            self._people.delay_arrays.mf_delay,
-            self._people.delay_arrays.exposure_delay,
+            mf_delay,
+            exposure_delay,
             self.params.year_length_days,
         )
         self._people.blackfly.L3 = calc_l3(self.params.blackfly, old_blackfly_L2)

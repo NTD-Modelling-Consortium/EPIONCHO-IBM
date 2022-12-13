@@ -1,4 +1,3 @@
-import math
 from dataclasses import dataclass
 
 import h5py
@@ -80,52 +79,60 @@ class DelayArrays:
 
     @property
     def worm_delay(self):
-        return self._worm_delay[self._worm_delay_current]
+        if self._worm_delay.shape[0] == 0:
+            return None
+        else:
+            return self._worm_delay[self._worm_delay_current]
 
     @worm_delay.setter
     def worm_delay(self, value):
+        assert self._worm_delay.shape[0] != 0
         self._worm_delay[self._worm_delay_current] = value
 
     @property
     def exposure_delay(self):
-        return self._exposure_delay[self._exposure_delay_current]
+        if self._exposure_delay.shape[0] == 0:
+            return None
+        else:
+            return self._exposure_delay[self._exposure_delay_current]
 
     @exposure_delay.setter
     def exposure_delay(self, value):
+        assert self._exposure_delay.shape[0] != 0
         self._exposure_delay[self._exposure_delay_current] = value
 
     @property
     def mf_delay(self):
-        return self._mf_delay[self._mf_delay_current]
+        if self._mf_delay.shape[0] == 0:
+            return None
+        else:
+            return self._mf_delay[self._mf_delay_current]
 
     @mf_delay.setter
     def mf_delay(self, value):
+        assert self._mf_delay.shape[0] != 0
         self._mf_delay[self._mf_delay_current] = value
 
     @classmethod
     def from_params(
         cls, params: Params, n_people: int, individual_exposure: Array.Person.Float
     ):
-        number_of_worm_delay_cols = math.ceil(
+        number_of_l3_delay_cols: int = round(
             params.blackfly.l3_delay
             * params.month_length_days
             / (params.delta_time * params.year_length_days)
         )
-        # matrix for tracking mf for L1 delay
-        number_of_mf_columns = math.ceil(
+        number_of_l1_delay_columns: int = round(
             params.blackfly.l1_delay / (params.delta_time * params.year_length_days)
         )
-        # matrix for exposure (to fly bites) for L1 delay
-        number_of_exposure_columns: int = math.ceil(
-            params.blackfly.l1_delay / (params.delta_time * params.year_length_days)
-        )
+
         return cls(
-            worm_delay=np.zeros((number_of_worm_delay_cols, n_people), dtype=int),
+            worm_delay=np.zeros((number_of_l3_delay_cols, n_people), dtype=int),
             exposure_delay=np.tile(
-                individual_exposure, (number_of_exposure_columns, 1)
+                individual_exposure, (number_of_l1_delay_columns, 1)
             ),
             mf_delay=(
-                np.ones((number_of_mf_columns, n_people), dtype=int)
+                np.ones((number_of_l1_delay_columns, n_people), dtype=int)
                 * params.microfil.initial_mf
             ),
         )
@@ -151,8 +158,10 @@ class DelayArrays:
 
     def process_deaths(self, people_to_die: Array.Person.Bool):
         if np.any(people_to_die):
-            self._worm_delay[:, people_to_die] = 0
-            self._mf_delay[self._mf_delay_current, people_to_die] = 0
+            if self._worm_delay.shape[0] != 0:
+                self._worm_delay[:, people_to_die] = 0
+            if self._mf_delay.shape[0] != 0:
+                self._mf_delay[self._mf_delay_current, people_to_die] = 0
             # TODO: Do we need self.exposure_delay = 0
 
     def lag_all_arrays(
@@ -161,16 +170,23 @@ class DelayArrays:
         total_exposure: Array.Person.Float,
         new_mf: Array.Person.Float,
     ):
-        self.worm_delay = new_worms
-        self._worm_delay_current = (
-            1 + self._worm_delay_current
-        ) % self._worm_delay.shape[0]
-        self.exposure_delay = total_exposure
-        self._exposure_delay_current = (
-            1 + self._exposure_delay_current
-        ) % self._exposure_delay.shape[0]
-        self.mf_delay = new_mf
-        self._mf_delay_current = (1 + self._mf_delay_current) % self._mf_delay.shape[0]
+        if self._worm_delay.shape[0] != 0:
+            self.worm_delay = new_worms
+            self._worm_delay_current = (
+                1 + self._worm_delay_current
+            ) % self._worm_delay.shape[0]
+
+        if self._exposure_delay.shape[0] != 0:
+            self.exposure_delay = total_exposure
+            self._exposure_delay_current = (
+                1 + self._exposure_delay_current
+            ) % self._exposure_delay.shape[0]
+
+        if self._mf_delay.shape[0] != 0:
+            self.mf_delay = new_mf
+            self._mf_delay_current = (
+                1 + self._mf_delay_current
+            ) % self._mf_delay.shape[0]
 
 
 @dataclass
