@@ -31,7 +31,7 @@ class DerivedParams:
             start=0,
             stop=params.worms.max_worm_age,
             step=params.worms.max_worm_age / params.worms.worm_age_stages,
-        )  # age.cats
+        )
         self.worm_mortality_rate = _weibull_mortality(
             params.delta_time,
             params.worms.mu_worms1,
@@ -53,7 +53,7 @@ class DerivedParams:
             start=0,
             stop=params.microfil.max_microfil_age,
             step=params.microfil.max_microfil_age / params.microfil.microfil_age_stages,
-        )  # age.cats.mf
+        )
 
         self.microfillarie_mortality_rate = _weibull_mortality(
             params.delta_time,
@@ -71,7 +71,7 @@ class DerivedParams:
                     f"Treatment times could not be found for start: {params.treatment.start_time}, stop: {params.treatment.stop_time}, interval: {params.treatment.interval_years}"
                 )
             treatment_number_int: int = math.ceil(treatment_number)
-            self.treatment_times = np.linspace(  # "times.of.treat.in"
+            self.treatment_times = np.linspace(
                 start=params.treatment.start_time,
                 stop=params.treatment.stop_time,
                 num=treatment_number_int + 1,
