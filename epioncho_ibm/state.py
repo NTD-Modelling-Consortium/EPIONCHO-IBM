@@ -116,7 +116,7 @@ class State(Generic[CallbackStat]):
     @params.setter
     def params(self, value: object):
         assert isinstance(value, Params)
-        self._derived_params = DerivedParams(value, self.n_people)
+        self._derived_params = DerivedParams(value)
         self._params = value
 
     @property
