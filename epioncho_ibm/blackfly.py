@@ -69,7 +69,7 @@ def calc_l2(
     blackfly_params: BlackflyParams,
     l1: Array.Person.Float,
     last_microfil_delay: Array.Person.Float,
-    total_exposure: Array.Person.Float,
+    exposure_delay: Array.Person.Float,
     year_length: float,
 ) -> Array.Person.Float:
     """
@@ -79,7 +79,7 @@ def calc_l2(
         blackfly_params (BlackflyParams): A fixed set of parameters associated with blackflies
         l1 (Array.Person.Float): The amount of L1 Larvae associated with each person at time t
         last_microfil_delay (Array.Person.Float): The final column of microfil delay
-        total_exposure (Array.Person.Float): The overall exposure of each person to infection
+        exposure_delay (Array.Person.Float): The final column of exposure delay
         year_length (float): The length of a year
 
     Returns:
@@ -96,7 +96,7 @@ def calc_l2(
                     + (
                         blackfly_params.blackfly_mort_from_mf_per_fly_per_year
                         * last_microfil_delay
-                        * total_exposure
+                        * exposure_delay
                     )
                 )
             )
@@ -116,14 +116,12 @@ def calc_l3(
 
     Args:
         blackfly_params (BlackflyParams): A fixed set of parameters associated with blackflies
-        l1 (Array.Person.Float): The amount of L1 Larvae associated with each person at time t
-        last_microfil_delay (Array.Person.Float): The final column of microfil delay
-        total_exposure (Array.Person.Float): The overall exposure of each person to infection
-        year_length (float): The length of a year
+        l2 (Array.Person.Float): The amount of L2 Larvae associated with each person at time t
 
     Returns:
-        Array.Person.Float: The number of L2 Larvae associated with each person
+        Array.Person.Float: The number of L3 Larvae associated with each person
     """
+
     return (blackfly_params.l2_l3_per_larva_per_year * l2) / (
         (blackfly_params.a_H / blackfly_params.gonotrophic_cycle_length)
         + blackfly_params.blackfly_mort_per_fly_per_year
