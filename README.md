@@ -10,4 +10,4 @@ Welcome to EPIONCHO-IBM
 `poetry run python test.py`
 
 # With snakeviz
-poetry run python -m cProfile -o program.prof test_new.py; poetry run  snakeviz program.prof -s
+poetry run python -m cProfile -o program.prof test_new.py; poetry run snakeviz program.prof -s
