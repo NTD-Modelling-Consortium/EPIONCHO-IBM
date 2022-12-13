@@ -6,7 +6,7 @@ import numpy as np
 
 from .params import Params
 from .types import Array
-from .utils import array_fully_equal, lag_array
+from .utils import array_fully_equal
 from .worms import WormGroup
 
 
@@ -44,27 +44,63 @@ class BlackflyLarvae:
 
 
 class DelayArrays:
-    worm_delay: Array.L3Delay.Person.Int
-    exposure_delay: Array.L1Delay.Person.Float
-    mf_delay: Array.L1Delay.Person.Float
+    _worm_delay: Array.L3Delay.Person.Int
+    _exposure_delay: Array.L1Delay.Person.Float
+    _mf_delay: Array.L1Delay.Person.Float
+    _worm_delay_current: int
+    _exposure_delay_current: int
+    _mf_delay_current: int
 
     def __init__(
         self,
         worm_delay: Array.L3Delay.Person.Int,
         exposure_delay: Array.L1Delay.Person.Float,
         mf_delay: Array.L1Delay.Person.Float,
+        worm_delay_current: int = 0,
+        exposure_delay_current: int = 0,
+        mf_delay_current: int = 0,
     ) -> None:
-        self.worm_delay = worm_delay
-        self.exposure_delay = exposure_delay
-        self.mf_delay = mf_delay
+        self._worm_delay = worm_delay
+        self._exposure_delay = exposure_delay
+        self._mf_delay = mf_delay
+        self._worm_delay_current = worm_delay_current
+        self._exposure_delay_current = exposure_delay_current
+        self._mf_delay_current = mf_delay_current
 
     def __eq__(self, other: object) -> bool:
         return (
             isinstance(other, DelayArrays)
-            and array_fully_equal(self.worm_delay, other.worm_delay)
-            and array_fully_equal(self.exposure_delay, other.exposure_delay)
-            and array_fully_equal(self.mf_delay, other.mf_delay)
+            and array_fully_equal(self._worm_delay, other._worm_delay)
+            and array_fully_equal(self._exposure_delay, other._exposure_delay)
+            and array_fully_equal(self._mf_delay, other._mf_delay)
+            and self._worm_delay_current == other._worm_delay_current
+            and self._exposure_delay_current == other._exposure_delay_current
+            and self._mf_delay_current == other._mf_delay_current
         )
+
+    @property
+    def worm_delay(self):
+        return self._worm_delay[self._worm_delay_current]
+
+    @worm_delay.setter
+    def worm_delay(self, value):
+        self._worm_delay[self._worm_delay_current] = value
+
+    @property
+    def exposure_delay(self):
+        return self._exposure_delay[self._exposure_delay_current]
+
+    @exposure_delay.setter
+    def exposure_delay(self, value):
+        self._exposure_delay[self._exposure_delay_current] = value
+
+    @property
+    def mf_delay(self):
+        return self._mf_delay[self._mf_delay_current]
+
+    @mf_delay.setter
+    def mf_delay(self, value):
+        self._mf_delay[self._mf_delay_current] = value
 
     @classmethod
     def from_params(
@@ -95,9 +131,12 @@ class DelayArrays:
         )
 
     def append_to_hdf5_group(self, group: h5py.Group):
-        group.create_dataset("worm_delay", data=self.worm_delay)
-        group.create_dataset("exposure_delay", data=self.exposure_delay)
-        group.create_dataset("mf_delay", data=self.mf_delay)
+        group.create_dataset("worm_delay", data=self._worm_delay)
+        group.create_dataset("exposure_delay", data=self._exposure_delay)
+        group.create_dataset("mf_delay", data=self._mf_delay)
+        group.attrs["worm_delay_current"] = self._worm_delay_current
+        group.attrs["exposure_delay_current"] = self._exposure_delay_current
+        group.attrs["mf_delay_current"] = self._mf_delay_current
 
     @classmethod
     def from_hdf5_group(cls, group: h5py.Group):
@@ -105,12 +144,15 @@ class DelayArrays:
             np.array(group["worm_delay"]),
             np.array(group["exposure_delay"]),
             np.array(group["mf_delay"]),
+            group.attrs["worm_delay_current"],
+            group.attrs["exposure_delay_current"],
+            group.attrs["mf_delay_current"]
         )
 
     def process_deaths(self, people_to_die: Array.Person.Bool):
         if np.any(people_to_die):
-            self.worm_delay[:, people_to_die] = 0
-            self.mf_delay[0, people_to_die] = 0
+            self._worm_delay[:, people_to_die] = 0
+            self._mf_delay[self._mf_delay_current, people_to_die] = 0
             # TODO: Do we need self.exposure_delay = 0
 
     def lag_all_arrays(
@@ -119,9 +161,16 @@ class DelayArrays:
         total_exposure: Array.Person.Float,
         new_mf: Array.Person.Float,
     ):
-        self.worm_delay = lag_array(new_worms, self.worm_delay)
-        self.exposure_delay = lag_array(total_exposure, self.exposure_delay)
-        self.mf_delay = lag_array(new_mf, self.mf_delay)
+        self.worm_delay = new_worms
+        self._worm_delay_current = (
+            1 + self._worm_delay_current
+        ) % self._worm_delay.shape[0]
+        self.exposure_delay = total_exposure
+        self._exposure_delay_current = (
+            1 + self._exposure_delay_current
+        ) % self._exposure_delay.shape[0]
+        self.mf_delay = new_mf
+        self._mf_delay_current = (1 + self._mf_delay_current) % self._mf_delay.shape[0]
 
 
 @dataclass

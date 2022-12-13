@@ -137,7 +137,7 @@ def _calc_outbound_worms(
 
 
 def _calc_inbound_worms(
-    worm_delay: Array.L3Delay.Person.Int,
+    worm_delay: Array.Person.Int,
     worm_sex_ratio_generator: Generator,
     outbound: WormGroup,
 ):
@@ -153,11 +153,9 @@ def _calc_inbound_worms(
     Returns:
         WormGroup: The number of worms entering each compartment due to aging.
     """
-    # Takes males and females from final column of worm_delay
-    final_column: Array.Person.Int = worm_delay[-1]
     # Gets worms of each sex at random
-    delayed_males = worm_sex_ratio_generator.binomial(n=final_column)
-    delayed_females = final_column - delayed_males
+    delayed_males = worm_sex_ratio_generator.binomial(n=worm_delay)
+    delayed_females = worm_delay - delayed_males
     return WormGroup(
         male=utils.lag_array(delayed_males, outbound.male),
         infertile=utils.lag_array(delayed_females, outbound.infertile),
@@ -340,7 +338,7 @@ def calculate_new_worms(
     treatment: TreatmentGroup | None,
     time_of_last_treatment: Array.Person.Float,
     delta_time: float,
-    worm_delay_array: Array.L3Delay.Person.Int,
+    worm_delay_array: Array.Person.Int,
     mortalities: Array.WormCat.Float,
     current_time: float,
     debug: bool,
