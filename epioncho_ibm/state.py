@@ -159,8 +159,7 @@ class State(Generic[CallbackStat]):
         )
         self._people.ages += self.params.delta_time
 
-        old_fertile_female_worms = self._people.worms.fertile.copy()
-        old_male_worms = self._people.worms.male.copy()
+        old_worms = self._people.worms.copy()
 
         # there is a delay in new parasites entering humans (from fly bites) and
         # entering the first adult worm age class
@@ -170,11 +169,7 @@ class State(Generic[CallbackStat]):
             self.params.delta_time,
             total_exposure,
             self.n_people,
-            WormGroup(
-                male=old_male_worms,
-                fertile=old_fertile_female_worms,
-                infertile=self._people.worms.infertile.copy(),
-            ),
+            old_worms,
             debug,
         )
 
@@ -218,8 +213,8 @@ class State(Generic[CallbackStat]):
             fecundity_rates_worms=self._derived_params.fecundity_rates_worms,
             time_of_last_treatment=self._people.time_of_last_treatment,
             current_time=current_time,
-            current_fertile_female_worms=old_fertile_female_worms,
-            current_male_worms=old_male_worms,
+            current_fertile_female_worms=old_worms.fertile,
+            current_male_worms=old_worms.male,
             debug=debug,
         )
         old_blackfly_L1 = self._people.blackfly.L1

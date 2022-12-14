@@ -79,38 +79,38 @@ class DelayArrays:
 
     @property
     def worm_delay(self):
-        if self._worm_delay.shape[0] == 0:
-            return None
-        else:
+        if self._worm_delay.size:
             return self._worm_delay[self._worm_delay_current]
+        else:
+            return None
 
     @worm_delay.setter
     def worm_delay(self, value):
-        assert self._worm_delay.shape[0] != 0
+        assert self._worm_delay.size
         self._worm_delay[self._worm_delay_current] = value
 
     @property
     def exposure_delay(self):
-        if self._exposure_delay.shape[0] == 0:
-            return None
-        else:
+        if self._exposure_delay.size:
             return self._exposure_delay[self._exposure_delay_current]
+        else:
+            return None
 
     @exposure_delay.setter
     def exposure_delay(self, value):
-        assert self._exposure_delay.shape[0] != 0
+        assert self._exposure_delay.size
         self._exposure_delay[self._exposure_delay_current] = value
 
     @property
     def mf_delay(self):
-        if self._mf_delay.shape[0] == 0:
-            return None
-        else:
+        if self._mf_delay.size:
             return self._mf_delay[self._mf_delay_current]
+        else:
+            return None
 
     @mf_delay.setter
     def mf_delay(self, value):
-        assert self._mf_delay.shape[0] != 0
+        assert self._mf_delay.size
         self._mf_delay[self._mf_delay_current] = value
 
     @classmethod
@@ -158,9 +158,9 @@ class DelayArrays:
 
     def process_deaths(self, people_to_die: Array.Person.Bool):
         if np.any(people_to_die):
-            if self._worm_delay.shape[0] != 0:
+            if self._worm_delay.size:
                 self._worm_delay[:, people_to_die] = 0
-            if self._mf_delay.shape[0] != 0:
+            if self._mf_delay.size:
                 self._mf_delay[self._mf_delay_current, people_to_die] = 0
             # TODO: Do we need self.exposure_delay = 0
 
@@ -170,19 +170,19 @@ class DelayArrays:
         total_exposure: Array.Person.Float,
         new_mf: Array.Person.Float,
     ):
-        if self._worm_delay.shape[0] != 0:
+        if self._worm_delay.size:
             self.worm_delay = new_worms
             self._worm_delay_current = (
                 1 + self._worm_delay_current
             ) % self._worm_delay.shape[0]
 
-        if self._exposure_delay.shape[0] != 0:
+        if self._exposure_delay.size:
             self.exposure_delay = total_exposure
             self._exposure_delay_current = (
                 1 + self._exposure_delay_current
             ) % self._exposure_delay.shape[0]
 
-        if self._mf_delay.shape[0] != 0:
+        if self._mf_delay.size:
             self.mf_delay = new_mf
             self._mf_delay_current = (
                 1 + self._mf_delay_current
