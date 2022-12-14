@@ -40,6 +40,13 @@ class WormGroup:
             fertile=np.zeros(population, dtype=int),
         )
 
+    def copy(self):
+        return WormGroup(
+            male=self.male.copy(),
+            infertile=self.infertile.copy(),
+            fertile=self.fertile.copy(),
+        )
+
 
 def _calc_dead_worms(
     current_worms: WormGroup,
