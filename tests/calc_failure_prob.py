@@ -1,6 +1,6 @@
 import scipy.stats
 
-from tests.definitions.pytest_config import PytestConfig
+from pytest_trust_random import PytestConfig
 
 pytest_config = PytestConfig.parse_file("pytest_config.json")
 

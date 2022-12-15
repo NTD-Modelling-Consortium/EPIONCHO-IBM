@@ -1,6 +1,6 @@
 from epioncho_ibm import Params, State, StateStats, TreatmentParams
 from epioncho_ibm.state import make_state_from_params
-from tests.definitions.auto_benchmarker import AutoBenchmarker
+from pytest_trust_random import AutoBenchmarker
 
 
 def benchmarker_test_func_no_treat(end_time: float, population: int) -> StateStats:
@@ -19,6 +19,6 @@ def benchmarker_test_func_treat(end_time: float, population: int) -> StateStats:
     return state.to_stats()
 
 
-autobenchmarker = AutoBenchmarker(
+trust_random = AutoBenchmarker(
     no_treatment=benchmarker_test_func_no_treat, treatment=benchmarker_test_func_treat
 )
