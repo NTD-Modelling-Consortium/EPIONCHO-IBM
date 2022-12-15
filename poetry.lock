@@ -68,7 +68,6 @@ mypy-extensions = ">=0.4.3"
 pathspec = ">=0.9.0"
 platformdirs = ">=2"
 tomli = {version = ">=1.1.0", markers = "python_full_version < \"3.11.0a7\""}
-typing-extensions = {version = ">=3.10.0.0", markers = "python_version < \"3.10\""}
 
 [package.extras]
 colorama = ["colorama (>=0.4.3)"]
@@ -362,7 +361,7 @@ test_extra = ["pytest (<7.1)", "pytest-asyncio", "testpath", "curio", "matplotli
 
 [[package]]
 name = "isort"
-version = "5.11.1"
+version = "5.11.2"
 description = "A Python utility / library to sort Python imports."
 category = "dev"
 optional = false
@@ -970,8 +969,8 @@ python-versions = "*"
 
 [metadata]
 lock-version = "1.1"
-python-versions = ">=3.9, <3.11"
-content-hash = "14ccc67875b4323c52727cbd2a3b07e02b62549d78f12524bccf37d628775519"
+python-versions = ">=3.10, <3.11"
+content-hash = "f560cd1470cc1db467dcd84777aab8a8a744cbe5b80a71206c72145d6ded4dfc"
 
 [metadata.files]
 appnope = []
