@@ -760,7 +760,7 @@ pytest-rerunfailures = "^10.3"
 type = "git"
 url = "git@github.com:dreamingspires/pytest-trust-random.git"
 reference = "master"
-resolved_reference = "3711ff05fe3dfb8ebb9c3212f94dab39799b9bad"
+resolved_reference = "1bfe536fee6011d42eaeb4fad426787c7b85da68"
 
 [[package]]
 name = "pytest-xdist"
