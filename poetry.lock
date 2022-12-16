@@ -270,7 +270,7 @@ numpy = ">=1.14.5"
 
 [[package]]
 name = "identify"
-version = "2.5.9"
+version = "2.5.10"
 description = "File identification library for Python"
 category = "dev"
 optional = false
@@ -760,7 +760,7 @@ pytest-rerunfailures = "^10.3"
 type = "git"
 url = "git@github.com:dreamingspires/pytest-trust-random.git"
 reference = "master"
-resolved_reference = "1bfe536fee6011d42eaeb4fad426787c7b85da68"
+resolved_reference = "22603e0b037c23fee96171581da00a8f07cb6e04"
 
 [[package]]
 name = "pytest-xdist"
