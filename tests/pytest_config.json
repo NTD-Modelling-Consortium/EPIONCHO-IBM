@@ -1,5 +1,0 @@
-{
-    "acceptable_st_devs": 2.5,
-    "re_runs": 5,
-    "benchmark_path": "benchmark"
-}
