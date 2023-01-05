@@ -29,4 +29,9 @@ def treatment(end_time: float, population: int) -> StateStats:
 
 
 if __name__ == "__main__":
-    calc_failure_prob(pytest_config)
+    calc_failure_prob(
+        acceptable_st_devs=pytest_config.acceptable_st_devs,
+        re_runs=pytest_config.re_runs,
+        independent_variables=10,
+        n_tests=44,
+    )
