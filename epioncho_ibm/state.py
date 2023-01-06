@@ -173,10 +173,10 @@ class State(Generic[CallbackStat]):
             debug,
         )
 
-        if self._people.delay_arrays.worm_delay is None:
+        if self._people.delay_arrays.current_worm_delay is None:
             worm_delay: Array.Person.Int = new_worms
         else:
-            worm_delay: Array.Person.Int = self._people.delay_arrays.worm_delay
+            worm_delay: Array.Person.Int = self._people.delay_arrays.current_worm_delay
 
         self._people.worms, last_time_of_last_treatment = calculate_new_worms(
             current_worms=self._people.worms,
@@ -226,10 +226,10 @@ class State(Generic[CallbackStat]):
                 self._people.delay_arrays.exposure_delay
             )
 
-        if self._people.delay_arrays.mf_delay is None:
+        if self._people.delay_arrays.current_mf_delay is None:
             mf_delay: Array.Person.Float = old_mf
         else:
-            mf_delay: Array.Person.Float = self._people.delay_arrays.mf_delay
+            mf_delay: Array.Person.Float = self._people.delay_arrays.current_mf_delay
 
         self._people.blackfly.L1 = calc_l1(
             self.params.blackfly,
@@ -345,12 +345,12 @@ class State(Generic[CallbackStat]):
         people_group = f["people"]
         assert isinstance(people_group, h5py.Group)
         params: str = str(f.attrs["params"])
-        return cls(People.from_hdf5_group(people_group), Params.parse_raw(params))
+        return cls(People.from_hdf5(people_group), Params.parse_raw(params))
 
     def to_hdf5(self, output_file: str | Path | IO[bytes]):
         f = h5py.File(output_file, "w")
         group_people = f.create_group("people")
-        self._people.append_to_hdf5_group(group_people)
+        self._people.to_hdf5(group_people)
         f.attrs["params"] = self._params.json()
 
     def microfilariae_per_skin_snip(
@@ -435,7 +435,3 @@ def make_state_from_params(
     params: Params, n_people: int, gamma_distribution: float = 0.3
 ):
     return State.from_params(params, n_people, gamma_distribution=gamma_distribution)
-
-
-def make_state_from_hdf5(input_file: str | Path | IO[bytes]):
-    return State.from_hdf5(input_file)

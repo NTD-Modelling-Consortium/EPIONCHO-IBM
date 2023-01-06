@@ -1,7 +1,6 @@
-from dataclasses import dataclass
-
 import numpy as np
 from fast_binomial import Generator
+from hdf5_dataclass import HDF5Dataclass
 
 import epioncho_ibm.utils as utils
 from epioncho_ibm.treatment import TreatmentGroup
@@ -12,8 +11,7 @@ from .params import WormParams
 __all__ = ["WormGroup", "calculate_new_worms"]
 
 
-@dataclass
-class WormGroup:
+class WormGroup(HDF5Dataclass):
     """
     A group of worms, separated by sex and fertility
     """
