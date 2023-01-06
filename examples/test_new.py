@@ -2,7 +2,12 @@ import tempfile
 
 import numpy as np
 
-from epioncho_ibm import Params, State, TreatmentParams, make_state_from_params
+from epioncho_ibm import (
+    Params,
+    TreatmentParams,
+    make_state_from_hdf5,
+    make_state_from_params,
+)
 
 np.random.seed(0)
 
@@ -15,6 +20,6 @@ print(state.mf_prevalence_in_population())
 
 with tempfile.TemporaryFile() as f:
     state.to_hdf5(f)
-    new_state = State.from_hdf5(f)
+    new_state = make_state_from_hdf5(f)
     print(new_state.mf_prevalence_in_population())
     assert state == new_state
