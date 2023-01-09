@@ -35,25 +35,9 @@ class DelayArrays(HDF5Dataclass):
     _worm_delay: Array.L3Delay.Person.Int
     _exposure_delay: Array.L1Delay.Person.Float
     _mf_delay: Array.L1Delay.Person.Float
-    _worm_delay_current: int
-    _exposure_delay_current: int
-    _mf_delay_current: int
-
-    def __init__(
-        self,
-        worm_delay: Array.L3Delay.Person.Int,
-        exposure_delay: Array.L1Delay.Person.Float,
-        mf_delay: Array.L1Delay.Person.Float,
-        worm_delay_current: int = 0,
-        exposure_delay_current: int = 0,
-        mf_delay_current: int = 0,
-    ):
-        self._worm_delay = worm_delay
-        self._exposure_delay = exposure_delay
-        self._mf_delay = mf_delay
-        self._worm_delay_current = worm_delay_current
-        self._exposure_delay_current = exposure_delay_current
-        self._mf_delay_current = mf_delay_current
+    _worm_delay_current: int = 0
+    _exposure_delay_current: int = 0
+    _mf_delay_current: int = 0
 
     def __eq__(self, other: object) -> bool:
         return (
@@ -116,11 +100,11 @@ class DelayArrays(HDF5Dataclass):
         )
 
         return cls(
-            worm_delay=np.zeros((number_of_l3_delay_cols, n_people), dtype=int),
-            exposure_delay=np.tile(
+            _worm_delay=np.zeros((number_of_l3_delay_cols, n_people), dtype=int),
+            _exposure_delay=np.tile(
                 individual_exposure, (number_of_l1_delay_columns, 1)
             ),
-            mf_delay=(
+            _mf_delay=(
                 np.ones((number_of_l1_delay_columns, n_people), dtype=int)
                 * params.microfil.initial_mf
             ),
