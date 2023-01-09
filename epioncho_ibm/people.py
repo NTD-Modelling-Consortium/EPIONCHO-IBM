@@ -32,59 +32,75 @@ class BlackflyLarvae(HDF5Dataclass):
 
 
 class DelayArrays(HDF5Dataclass):
-    worm_delay: Array.L3Delay.Person.Int
-    exposure_delay: Array.L1Delay.Person.Float
-    mf_delay: Array.L1Delay.Person.Float
-    worm_delay_current: int = 0
-    exposure_delay_current: int = 0
-    mf_delay_current: int = 0
+    _worm_delay: Array.L3Delay.Person.Int
+    _exposure_delay: Array.L1Delay.Person.Float
+    _mf_delay: Array.L1Delay.Person.Float
+    _worm_delay_current: int
+    _exposure_delay_current: int
+    _mf_delay_current: int
+
+    def __init__(
+        self,
+        worm_delay: Array.L3Delay.Person.Int,
+        exposure_delay: Array.L1Delay.Person.Float,
+        mf_delay: Array.L1Delay.Person.Float,
+        worm_delay_current: int = 0,
+        exposure_delay_current: int = 0,
+        mf_delay_current: int = 0,
+    ):
+        self._worm_delay = worm_delay
+        self._exposure_delay = exposure_delay
+        self._mf_delay = mf_delay
+        self._worm_delay_current = worm_delay_current
+        self._exposure_delay_current = exposure_delay_current
+        self._mf_delay_current = mf_delay_current
 
     def __eq__(self, other: object) -> bool:
         return (
             isinstance(other, DelayArrays)
-            and array_fully_equal(self.worm_delay, other.worm_delay)
-            and array_fully_equal(self.exposure_delay, other.exposure_delay)
-            and array_fully_equal(self.mf_delay, other.mf_delay)
-            and self.worm_delay_current == other.worm_delay_current
-            and self.exposure_delay_current == other.exposure_delay_current
-            and self.mf_delay_current == other.mf_delay_current
+            and array_fully_equal(self._worm_delay, other._worm_delay)
+            and array_fully_equal(self._exposure_delay, other._exposure_delay)
+            and array_fully_equal(self._mf_delay, other._mf_delay)
+            and self._worm_delay_current == other._worm_delay_current
+            and self._exposure_delay_current == other._exposure_delay_current
+            and self._mf_delay_current == other._mf_delay_current
         )
 
     @property
-    def current_worm_delay(self):
-        if self.worm_delay.size:
-            return self.worm_delay[self.worm_delay_current]
+    def worm_delay(self):
+        if self._worm_delay.size:
+            return self._worm_delay[self._worm_delay_current]
         else:
             return None
 
-    @current_worm_delay.setter
-    def current_worm_delay(self, value):
-        assert self.worm_delay.size
-        self.worm_delay[self.worm_delay_current] = value
+    @worm_delay.setter
+    def worm_delay(self, value):
+        assert self._worm_delay.size
+        self._worm_delay[self._worm_delay_current] = value
 
     @property
-    def current_exposure_delay(self):
-        if self.exposure_delay.size:
-            return self.exposure_delay[self.exposure_delay_current]
+    def exposure_delay(self):
+        if self._exposure_delay.size:
+            return self._exposure_delay[self._exposure_delay_current]
         else:
             return None
 
-    @current_exposure_delay.setter
-    def current_exposure_delay(self, value):
-        assert self.exposure_delay.size
-        self.exposure_delay[self.exposure_delay_current] = value
+    @exposure_delay.setter
+    def exposure_delay(self, value):
+        assert self._exposure_delay.size
+        self._exposure_delay[self._exposure_delay_current] = value
 
     @property
-    def current_mf_delay(self):
-        if self.mf_delay.size:
-            return self.mf_delay[self.mf_delay_current]
+    def mf_delay(self):
+        if self._mf_delay.size:
+            return self._mf_delay[self._mf_delay_current]
         else:
             return None
 
-    @current_mf_delay.setter
-    def current_mf_delay(self, value):
-        assert self.mf_delay.size
-        self.mf_delay[self.mf_delay_current] = value
+    @mf_delay.setter
+    def mf_delay(self, value):
+        assert self._mf_delay.size
+        self._mf_delay[self._mf_delay_current] = value
 
     @classmethod
     def from_params(
@@ -112,10 +128,10 @@ class DelayArrays(HDF5Dataclass):
 
     def process_deaths(self, people_to_die: Array.Person.Bool):
         if np.any(people_to_die):
-            if self.worm_delay.size:
-                self.worm_delay[:, people_to_die] = 0
-            if self.mf_delay.size:
-                self.mf_delay[self.mf_delay_current, people_to_die] = 0
+            if self._worm_delay.size:
+                self._worm_delay[:, people_to_die] = 0
+            if self._mf_delay.size:
+                self._mf_delay[self._mf_delay_current, people_to_die] = 0
             # TODO: Do we need self.exposure_delay = 0
 
     def lag_all_arrays(
@@ -124,21 +140,23 @@ class DelayArrays(HDF5Dataclass):
         total_exposure: Array.Person.Float,
         new_mf: Array.Person.Float,
     ):
-        if self.worm_delay.size:
-            self.current_worm_delay = new_worms
-            self.worm_delay_current = (
-                1 + self.worm_delay_current
-            ) % self.worm_delay.shape[0]
+        if self._worm_delay.size:
+            self.worm_delay = new_worms
+            self._worm_delay_current = (
+                1 + self._worm_delay_current
+            ) % self._worm_delay.shape[0]
 
-        if self.exposure_delay.size:
+        if self._exposure_delay.size:
             self.exposure_delay = total_exposure
-            self.exposure_delay_current = (
-                1 + self.exposure_delay_current
-            ) % self.exposure_delay.shape[0]
+            self._exposure_delay_current = (
+                1 + self._exposure_delay_current
+            ) % self._exposure_delay.shape[0]
 
-        if self.mf_delay.size:
-            self.current_mf_delay = new_mf
-            self.mf_delay_current = (1 + self.mf_delay_current) % self.mf_delay.shape[0]
+        if self._mf_delay.size:
+            self.mf_delay = new_mf
+            self._mf_delay_current = (
+                1 + self._mf_delay_current
+            ) % self._mf_delay.shape[0]
 
 
 class People(HDF5Dataclass):
