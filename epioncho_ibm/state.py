@@ -173,10 +173,10 @@ class State(Generic[CallbackStat]):
             debug,
         )
 
-        if self._people.delay_arrays.current_worm_delay is None:
+        if self._people.delay_arrays.worm_delay is None:
             worm_delay: Array.Person.Int = new_worms
         else:
-            worm_delay: Array.Person.Int = self._people.delay_arrays.current_worm_delay
+            worm_delay: Array.Person.Int = self._people.delay_arrays.worm_delay
 
         self._people.worms, last_time_of_last_treatment = calculate_new_worms(
             current_worms=self._people.worms,
@@ -226,10 +226,10 @@ class State(Generic[CallbackStat]):
                 self._people.delay_arrays.exposure_delay
             )
 
-        if self._people.delay_arrays.current_mf_delay is None:
+        if self._people.delay_arrays.mf_delay is None:
             mf_delay: Array.Person.Float = old_mf
         else:
-            mf_delay: Array.Person.Float = self._people.delay_arrays.current_mf_delay
+            mf_delay: Array.Person.Float = self._people.delay_arrays.mf_delay
 
         self._people.blackfly.L1 = calc_l1(
             self.params.blackfly,
