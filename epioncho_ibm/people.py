@@ -1,4 +1,3 @@
-import h5py
 import numpy as np
 from hdf5_dataclass import HDF5Dataclass
 
