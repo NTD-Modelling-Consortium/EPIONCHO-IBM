@@ -2,8 +2,8 @@ import numpy as np
 from fast_binomial import Generator
 
 import epioncho_ibm.utils as utils
-
 from epioncho_ibm.state import Array, WormGroup, WormParams
+
 from .treatment import TreatmentGroup
 
 __all__ = ["calculate_new_worms"]

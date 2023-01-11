@@ -1,11 +1,10 @@
 import numpy as np
 from hdf5_dataclass import HDF5Dataclass
 
-from .params import Params
-from .types import Array
 from epioncho_ibm.utils import array_fully_equal
 
-
+from .params import Params
+from .types import Array
 
 
 def truncated_geometric(N: int, prob: float, maximum: float) -> Array.Person.Float:
@@ -141,6 +140,7 @@ class DelayArrays(HDF5Dataclass):
             self._mf_delay_current = (
                 1 + self._mf_delay_current
             ) % self._mf_delay.shape[0]
+
 
 class WormGroup(HDF5Dataclass):
     """
