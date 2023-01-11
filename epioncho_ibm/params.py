@@ -3,7 +3,7 @@ from typing import Optional
 from pydantic import BaseModel
 
 
-class BaseImmutatableParams(BaseModel):
+class BaseImmutableParams(BaseModel):
     class Config:
         allow_mutation = False
 
@@ -135,31 +135,31 @@ class Params(BaseParams):
     humans: HumanParams = HumanParams()
 
 
-class ImmutableTreatmentParams(TreatmentParams, BaseImmutatableParams):
+class ImmutableTreatmentParams(TreatmentParams, BaseImmutableParams):
     pass
 
 
-class ImmutableWormParams(WormParams, BaseImmutatableParams):
+class ImmutableWormParams(WormParams, BaseImmutableParams):
     pass
 
 
-class ImmutableBlackflyParams(BlackflyParams, BaseImmutatableParams):
+class ImmutableBlackflyParams(BlackflyParams, BaseImmutableParams):
     pass
 
 
-class ImmutableMicrofilParams(MicrofilParams, BaseImmutatableParams):
+class ImmutableMicrofilParams(MicrofilParams, BaseImmutableParams):
     pass
 
 
-class ImmutableExposureParams(ExposureParams, BaseImmutatableParams):
+class ImmutableExposureParams(ExposureParams, BaseImmutableParams):
     pass
 
 
-class ImmutableHumanParams(HumanParams, BaseImmutatableParams):
+class ImmutableHumanParams(HumanParams, BaseImmutableParams):
     pass
 
 
-class ImmutableParams(BaseParams, BaseImmutatableParams):
+class ImmutableParams(BaseParams, BaseImmutableParams):
     treatment: Optional[ImmutableTreatmentParams] = ImmutableTreatmentParams()
     worms: ImmutableWormParams = ImmutableWormParams()
     blackfly: ImmutableBlackflyParams = ImmutableBlackflyParams()
