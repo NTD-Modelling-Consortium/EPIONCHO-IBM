@@ -97,13 +97,13 @@ class Simulation:
         self.debug = debug
 
     @property
-    def immutable_params(self):
+    def _immutable_params(self):
         return self.state._params
 
     def _derive_params(self) -> None:
-        assert self.immutable_params
+        assert self._immutable_params
         self._derived_params = DerivedParams(
-            immutable_to_mutable(self.immutable_params)
+            immutable_to_mutable(self._immutable_params)
         )
 
     def get_current_params(self) -> Params:
@@ -127,9 +127,9 @@ class Simulation:
         """Advance the state forward one time step from t to t + dt"""
 
         treatment = get_treatment(
-            self.immutable_params.treatment,
-            self.immutable_params.humans,
-            self.immutable_params.delta_time,
+            self._immutable_params.treatment,
+            self._immutable_params.humans,
+            self._immutable_params.delta_time,
             self.state.current_time,
             self._derived_params.treatment_times,
             self.state.people.ages,
@@ -137,12 +137,12 @@ class Simulation:
         )
 
         total_exposure = calculate_total_exposure(
-            self.immutable_params.exposure,
+            self._immutable_params.exposure,
             self.state.people.ages,
             self.state.people.sex_is_male,
             self.state.people.individual_exposure,
         )
-        self.state.people.ages += self.immutable_params.delta_time
+        self.state.people.ages += self._immutable_params.delta_time
 
         old_worms = self.state.people.worms.copy()
 
@@ -150,8 +150,8 @@ class Simulation:
         # entering the first adult worm age class
         new_worms = calc_new_worms_from_blackfly(
             self.state.people.blackfly.L3,
-            self.immutable_params.blackfly,
-            self.immutable_params.delta_time,
+            self._immutable_params.blackfly,
+            self._immutable_params.delta_time,
             total_exposure,
             self.state.n_people,
             old_worms,
@@ -165,10 +165,10 @@ class Simulation:
 
         self.state.people.worms, last_time_of_last_treatment = calculate_new_worms(
             current_worms=self.state.people.worms,
-            worm_params=self.immutable_params.worms,
+            worm_params=self._immutable_params.worms,
             treatment=treatment,
             time_of_last_treatment=self.state.people.time_of_last_treatment,
-            delta_time=self.immutable_params.delta_time,
+            delta_time=self._immutable_params.delta_time,
             worm_delay_array=worm_delay,
             mortalities=self._derived_params.worm_mortality_rate,
             mortalities_generator=self._derived_params.worm_mortality_generator,
@@ -181,8 +181,8 @@ class Simulation:
         )
 
         if (
-            self.immutable_params.treatment is not None
-            and self.state.current_time >= self.immutable_params.treatment.start_time
+            self._immutable_params.treatment is not None
+            and self.state.current_time >= self._immutable_params.treatment.start_time
         ):
             self.state.people.time_of_last_treatment = last_time_of_last_treatment
 
@@ -191,9 +191,9 @@ class Simulation:
         old_mf: Array.Person.Float = np.sum(self.state.people.mf, axis=0)
         self.state.people.mf += calculate_microfil_delta(
             current_microfil=self.state.people.mf,
-            delta_time=self.immutable_params.delta_time,
-            microfil_params=self.immutable_params.microfil,
-            treatment_params=self.immutable_params.treatment,
+            delta_time=self._immutable_params.delta_time,
+            microfil_params=self._immutable_params.microfil,
+            treatment_params=self._immutable_params.treatment,
             microfillarie_mortality_rate=self._derived_params.microfillarie_mortality_rate,
             fecundity_rates_worms=self._derived_params.fecundity_rates_worms,
             time_of_last_treatment=self.state.people.time_of_last_treatment,
@@ -217,24 +217,24 @@ class Simulation:
             mf_delay: Array.Person.Float = self.state.people.delay_arrays.mf_delay
 
         self.state.people.blackfly.L1 = calc_l1(
-            self.immutable_params.blackfly,
+            self._immutable_params.blackfly,
             old_mf,
             mf_delay,
             total_exposure,
             exposure_delay,
-            self.immutable_params.year_length_days,
+            self._immutable_params.year_length_days,
         )
 
         old_blackfly_L2 = self.state.people.blackfly.L2
         self.state.people.blackfly.L2 = calc_l2(
-            self.immutable_params.blackfly,
+            self._immutable_params.blackfly,
             old_blackfly_L1,
             mf_delay,
             exposure_delay,
-            self.immutable_params.year_length_days,
+            self._immutable_params.year_length_days,
         )
         self.state.people.blackfly.L3 = calc_l3(
-            self.immutable_params.blackfly, old_blackfly_L2
+            self._immutable_params.blackfly, old_blackfly_L2
         )
         # TODO: Resolve new_mf=old_mf
         self.state.people.delay_arrays.lag_all_arrays(
@@ -245,13 +245,13 @@ class Simulation:
                 np.repeat(1, self.state.n_people)
             )
             == 1,
-            self.state.people.ages >= self.immutable_params.humans.max_human_age,
+            self.state.people.ages >= self._immutable_params.humans.max_human_age,
         )
         self.state.people.process_deaths(
-            people_to_die, self.immutable_params.humans.gender_ratio
+            people_to_die, self._immutable_params.humans.gender_ratio
         )
 
-        self.state.current_time += self.immutable_params.delta_time
+        self.state.current_time += self._immutable_params.delta_time
 
     def save(self, output: FileType) -> None:
         """Save the simulation to a file/stream.
@@ -345,14 +345,14 @@ class Simulation:
             is_on_sampling_interval = (
                 sampling_interval is not None
                 and self.state.current_time % sampling_interval
-                < self.immutable_params.delta_time
+                < self._immutable_params.delta_time
             )
 
             is_on_sampling_year = (
                 sampling_years
                 and sampling_years_idx < len(sampling_years)
                 and abs(self.state.current_time - sampling_years[sampling_years_idx])
-                < self.immutable_params.delta_time
+                < self._immutable_params.delta_time
             )
 
             if is_on_sampling_interval or is_on_sampling_year:
@@ -373,9 +373,11 @@ class Simulation:
 
         # total progress bar must be a bit over so that the loop doesn't exceed total
         with tqdm.tqdm(
-            total=end_time - self.state.current_time + self.immutable_params.delta_time,
+            total=end_time
+            - self.state.current_time
+            + self._immutable_params.delta_time,
             disable=not self.verbose,
         ) as progress_bar:
             while self.state.current_time <= end_time:
-                progress_bar.update(self.immutable_params.delta_time)
+                progress_bar.update(self._immutable_params.delta_time)
                 self._advance()
