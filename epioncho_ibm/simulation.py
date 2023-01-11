@@ -96,16 +96,18 @@ class Simulation:
         self.verbose = verbose
         self.debug = debug
 
-    def _derive_params(self) -> None:
-        assert self.state._params
-        self._derived_params = DerivedParams(immutable_to_mutable(self.state._params))
-
-    def get_current_params(self) -> Params:
-        return self.state.get_params()
-
     @property
     def immutable_params(self):
         return self.state._params
+
+    def _derive_params(self) -> None:
+        assert self.immutable_params
+        self._derived_params = DerivedParams(
+            immutable_to_mutable(self.immutable_params)
+        )
+
+    def get_current_params(self) -> Params:
+        return self.state.get_params()
 
     @property
     def derived_params(self) -> DerivedParams:
