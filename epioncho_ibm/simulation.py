@@ -100,7 +100,6 @@ class Simulation:
         assert self.state._params
         self._derived_params = DerivedParams(immutable_to_mutable(self.state._params))
 
-
     def get_current_params(self) -> Params:
         return self.state.get_params()
 
@@ -232,7 +231,9 @@ class Simulation:
             exposure_delay,
             self.immutable_params.year_length_days,
         )
-        self.state.people.blackfly.L3 = calc_l3(self.immutable_params.blackfly, old_blackfly_L2)
+        self.state.people.blackfly.L3 = calc_l3(
+            self.immutable_params.blackfly, old_blackfly_L2
+        )
         # TODO: Resolve new_mf=old_mf
         self.state.people.delay_arrays.lag_all_arrays(
             new_worms=new_worms, total_exposure=total_exposure, new_mf=old_mf
@@ -244,7 +245,9 @@ class Simulation:
             == 1,
             self.state.people.ages >= self.immutable_params.humans.max_human_age,
         )
-        self.state.people.process_deaths(people_to_die, self.immutable_params.humans.gender_ratio)
+        self.state.people.process_deaths(
+            people_to_die, self.immutable_params.humans.gender_ratio
+        )
 
         self.state.current_time += self.immutable_params.delta_time
 
@@ -339,7 +342,8 @@ class Simulation:
         while self.state.current_time <= end_time:
             is_on_sampling_interval = (
                 sampling_interval is not None
-                and self.state.current_time % sampling_interval < self.immutable_params.delta_time
+                and self.state.current_time % sampling_interval
+                < self.immutable_params.delta_time
             )
 
             is_on_sampling_year = (
