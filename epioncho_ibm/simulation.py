@@ -1,22 +1,11 @@
 from typing import Iterator, overload
 
-import numpy as np
 import tqdm
 from hdf5_dataclass import FileType
 
-from epioncho_ibm.blackfly import (
-    calc_l1,
-    calc_l2,
-    calc_l3,
-    calc_new_worms_from_blackfly,
-)
-from epioncho_ibm.exposure import calculate_total_exposure
-from epioncho_ibm.microfil import calculate_microfil_delta
+from epioncho_ibm.advance import advance_state
 from epioncho_ibm.params import Params
 from epioncho_ibm.state import State
-from epioncho_ibm.treatment import get_treatment
-from epioncho_ibm.types import Array
-from epioncho_ibm.worms import calculate_new_worms
 
 
 class Simulation:
@@ -95,8 +84,8 @@ class Simulation:
         self.debug = debug
 
     @property
-    def _immutable_params(self):
-        return self.state._params
+    def _delta_time(self):
+        return self.state._params.delta_time
 
     def get_current_params(self) -> Params:
         return self.state.get_params()
@@ -108,136 +97,6 @@ class Simulation:
             params (Params): New set of parameters
         """
         self.state.reset_params(params)
-
-    def _advance(self):
-        """Advance the state forward one time step from t to t + dt"""
-
-        treatment = get_treatment(
-            self._immutable_params.treatment,
-            self._immutable_params.humans,
-            self._immutable_params.delta_time,
-            self.state.current_time,
-            self.state.derived_params.treatment_times,
-            self.state.people.ages,
-            self.state.people.compliance,
-        )
-
-        total_exposure = calculate_total_exposure(
-            self._immutable_params.exposure,
-            self.state.people.ages,
-            self.state.people.sex_is_male,
-            self.state.people.individual_exposure,
-        )
-        self.state.people.ages += self._immutable_params.delta_time
-
-        old_worms = self.state.people.worms.copy()
-
-        # there is a delay in new parasites entering humans (from fly bites) and
-        # entering the first adult worm age class
-        new_worms = calc_new_worms_from_blackfly(
-            self.state.people.blackfly.L3,
-            self._immutable_params.blackfly,
-            self._immutable_params.delta_time,
-            total_exposure,
-            self.state.n_people,
-            old_worms,
-            self.debug,
-        )
-
-        if self.state.people.delay_arrays.worm_delay is None:
-            worm_delay: Array.Person.Int = new_worms
-        else:
-            worm_delay: Array.Person.Int = self.state.people.delay_arrays.worm_delay
-
-        self.state.people.worms, last_time_of_last_treatment = calculate_new_worms(
-            current_worms=self.state.people.worms,
-            worm_params=self._immutable_params.worms,
-            treatment=treatment,
-            time_of_last_treatment=self.state.people.time_of_last_treatment,
-            delta_time=self._immutable_params.delta_time,
-            worm_delay_array=worm_delay,
-            mortalities=self.state.derived_params.worm_mortality_rate,
-            mortalities_generator=self.state.derived_params.worm_mortality_generator,
-            current_time=self.state.current_time,
-            debug=self.debug,
-            worm_age_rate_generator=self.state.derived_params.worm_age_rate_generator,
-            worm_sex_ratio_generator=self.state.derived_params.worm_sex_ratio_generator,
-            worm_lambda_zero_generator=self.state.derived_params.worm_lambda_zero_generator,
-            worm_omega_generator=self.state.derived_params.worm_omega_generator,
-        )
-
-        if (
-            self._immutable_params.treatment is not None
-            and self.state.current_time >= self._immutable_params.treatment.start_time
-        ):
-            self.state.people.time_of_last_treatment = last_time_of_last_treatment
-
-        # inputs for delay in L1
-
-        old_mf: Array.Person.Float = np.sum(self.state.people.mf, axis=0)
-        self.state.people.mf += calculate_microfil_delta(
-            current_microfil=self.state.people.mf,
-            delta_time=self._immutable_params.delta_time,
-            microfil_params=self._immutable_params.microfil,
-            treatment_params=self._immutable_params.treatment,
-            microfillarie_mortality_rate=self.state.derived_params.microfillarie_mortality_rate,
-            fecundity_rates_worms=self.state.derived_params.fecundity_rates_worms,
-            time_of_last_treatment=self.state.people.time_of_last_treatment,
-            current_time=self.state.current_time,
-            current_fertile_female_worms=old_worms.fertile,
-            current_male_worms=old_worms.male,
-            debug=self.debug,
-        )
-        old_blackfly_L1 = self.state.people.blackfly.L1
-
-        if self.state.people.delay_arrays.exposure_delay is None:
-            exposure_delay: Array.Person.Float = total_exposure
-        else:
-            exposure_delay: Array.Person.Float = (
-                self.state.people.delay_arrays.exposure_delay
-            )
-
-        if self.state.people.delay_arrays.mf_delay is None:
-            mf_delay: Array.Person.Float = old_mf
-        else:
-            mf_delay: Array.Person.Float = self.state.people.delay_arrays.mf_delay
-
-        self.state.people.blackfly.L1 = calc_l1(
-            self._immutable_params.blackfly,
-            old_mf,
-            mf_delay,
-            total_exposure,
-            exposure_delay,
-            self._immutable_params.year_length_days,
-        )
-
-        old_blackfly_L2 = self.state.people.blackfly.L2
-        self.state.people.blackfly.L2 = calc_l2(
-            self._immutable_params.blackfly,
-            old_blackfly_L1,
-            mf_delay,
-            exposure_delay,
-            self._immutable_params.year_length_days,
-        )
-        self.state.people.blackfly.L3 = calc_l3(
-            self._immutable_params.blackfly, old_blackfly_L2
-        )
-        # TODO: Resolve new_mf=old_mf
-        self.state.people.delay_arrays.lag_all_arrays(
-            new_worms=new_worms, total_exposure=total_exposure, new_mf=old_mf
-        )
-        people_to_die: Array.Person.Bool = np.logical_or(
-            self.state.derived_params.people_to_die_generator.binomial(
-                np.repeat(1, self.state.n_people)
-            )
-            == 1,
-            self.state.people.ages >= self._immutable_params.humans.max_human_age,
-        )
-        self.state.people.process_deaths(
-            people_to_die, self._immutable_params.humans.gender_ratio
-        )
-
-        self.state.current_time += self._immutable_params.delta_time
 
     def save(self, output: FileType) -> None:
         """Save the simulation to a file/stream.
@@ -331,14 +190,14 @@ class Simulation:
             is_on_sampling_interval = (
                 sampling_interval is not None
                 and self.state.current_time % sampling_interval
-                < self._immutable_params.delta_time
+                < self._delta_time
             )
 
             is_on_sampling_year = (
                 sampling_years
                 and sampling_years_idx < len(sampling_years)
                 and abs(self.state.current_time - sampling_years[sampling_years_idx])
-                < self._immutable_params.delta_time
+                < self._delta_time
             )
 
             if is_on_sampling_interval or is_on_sampling_year:
@@ -346,7 +205,7 @@ class Simulation:
                 if is_on_sampling_year:
                     sampling_years_idx += 1
 
-            self._advance()
+            advance_state(self.state)
 
     def run(self, *, end_time: float) -> None:
         """Run simulation from current state till `end_time`
@@ -361,9 +220,9 @@ class Simulation:
         with tqdm.tqdm(
             total=end_time
             - self.state.current_time
-            + self._immutable_params.delta_time,
+            + self._delta_time,
             disable=not self.verbose,
         ) as progress_bar:
             while self.state.current_time <= end_time:
-                progress_bar.update(self._immutable_params.delta_time)
-                self._advance()
+                progress_bar.update(self._delta_time)
+                advance_state(self.state)
