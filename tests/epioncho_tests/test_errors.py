@@ -10,11 +10,10 @@ class TestGeneral:
         with pytest.raises(ValueError, match="End time after start"):
             simulation.run(end_time=0)
 
-    async def test_start_before_end_output_stats(self):
+    async def test_start_before_end_iter_run(self):
         simulation = Simulation(start_time=10, params=Params(), n_people=10)
         with pytest.raises(ValueError, match="End time after start"):
-            for _ in simulation.iter_run(end_time=0, sampling_interval=1):
-                pass
+            next(simulation.iter_run(end_time=0, sampling_interval=1))
 
     async def test_set_n_people(self):
         simulation = Simulation(start_time=10, params=Params(), n_people=10)
@@ -57,4 +56,4 @@ class TestDerivedParams:
             params = Params(
                 treatment=TreatmentParams(start_time=0, stop_time=10, interval_years=3)
             )
-            _ = Simulation(start_time=0, params=params, n_people=10)
+            Simulation(start_time=0, params=params, n_people=10)

@@ -5,7 +5,7 @@ from tqdm.contrib.concurrent import process_map
 
 from epioncho_ibm import Params, Simulation, TreatmentParams
 
-benchmark_iters = 40
+benchmark_iters = 400
 
 
 def run_sim(i):

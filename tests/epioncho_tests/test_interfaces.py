@@ -10,7 +10,7 @@ class TestGeneral:
         simulation = Simulation(start_time=0, params=params, n_people=10)
         simulation.state.microfilariae_per_skin_snip()
 
-    async def test_output_stats(self):
+    async def test_iter_run(self):
         simulation = Simulation(start_time=0, params=Params(), n_people=10)
         output = [
             (s.current_time, s.stats())

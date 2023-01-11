@@ -40,10 +40,10 @@ class Simulation:
         """Create a new simulation, given the parameters.
 
         Args:
-            start_time (float): start time of the simulation
-            params (Params): simulation's parameters
-            n_people (int): number of people in the simulation
-            gamma_distribution (float, optional): Gamma distribution. Defaults to 0.3.
+            start_time (float): Start time of the simulation
+            params (Params): A set of fixed parameters for controlling the model.
+            n_people (int): Number of people in the simulation
+            gamma_distribution (float, optional): Individual level exposure heterogeneity. Defaults to 0.3.
             verbose (bool, optional): Verbose?. Defaults to False.
             debug (bool, optional): Debug?. Defaults to False.
         """
@@ -280,7 +280,7 @@ class Simulation:
 
         Examples:
             >>> simulation = Simulation(start_time=0, params=Params(), n_people=400)
-            >>> list(simulation.iter_run(end_time=3, sampling_interval=1.0))
+            >>> [sample.mf_prevalence_in_population() for sample in simulation.iter_run(end_time=3, sampling_interval=1.0)]
             [0.99, 0.6, 0.2]
 
         Args:
