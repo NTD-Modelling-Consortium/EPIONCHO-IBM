@@ -4,6 +4,7 @@ import numpy as np
 
 from epioncho_ibm.state import Array, MicrofilParams, TreatmentParams
 
+
 def _construct_derive_microfil(
     fertile_worms: Array.WormCat.Person.Int,
     microfil: Array.MFCat.Person.Float,

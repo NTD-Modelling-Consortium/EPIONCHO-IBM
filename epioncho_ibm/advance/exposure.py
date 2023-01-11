@@ -2,6 +2,7 @@ import numpy as np
 
 from epioncho_ibm.state import Array, ExposureParams
 
+
 def calculate_total_exposure(
     exposure_params: ExposureParams,
     ages: Array.Person.Float,

@@ -4,7 +4,7 @@ import tqdm
 from hdf5_dataclass import FileType
 
 from epioncho_ibm.advance import advance_state
-from epioncho_ibm.state import State, Params
+from epioncho_ibm.state import Params, State
 
 
 class Simulation:
@@ -188,8 +188,7 @@ class Simulation:
         while self.state.current_time <= end_time:
             is_on_sampling_interval = (
                 sampling_interval is not None
-                and self.state.current_time % sampling_interval
-                < self._delta_time
+                and self.state.current_time % sampling_interval < self._delta_time
             )
 
             is_on_sampling_year = (
@@ -217,9 +216,7 @@ class Simulation:
 
         # total progress bar must be a bit over so that the loop doesn't exceed total
         with tqdm.tqdm(
-            total=end_time
-            - self.state.current_time
-            + self._delta_time,
+            total=end_time - self.state.current_time + self._delta_time,
             disable=not self.verbose,
         ) as progress_bar:
             while self.state.current_time <= end_time:
