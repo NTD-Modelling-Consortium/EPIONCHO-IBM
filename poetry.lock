@@ -316,7 +316,7 @@ pydantic = "^1.10.2"
 type = "git"
 url = "git@github.com:dreamingspires/hdf5-dataclass.git"
 reference = "master"
-resolved_reference = "cdc55eab206dabd14e24ab1c3fba1ebdd0691d08"
+resolved_reference = "761c1efef0c4a7247900bb806bf3b7a176988430"
 
 [[package]]
 name = "identify"
@@ -1152,7 +1152,7 @@ python-versions = ">=3.7"
 
 [[package]]
 name = "urllib3"
-version = "1.26.13"
+version = "1.26.14"
 description = "HTTP library with thread-safe connection pooling, file post, and more."
 category = "main"
 optional = false
