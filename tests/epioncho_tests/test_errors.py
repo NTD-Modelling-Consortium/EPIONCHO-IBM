@@ -31,14 +31,16 @@ class TestGeneral:
     async def test_set_sub_params(self):
         simulation = Simulation(start_time=0, params=Params(), n_people=10)
         with pytest.raises(
-            TypeError, match="\"ImmutableParams\" is immutable and does not support item assignment"
+            TypeError,
+            match='"ImmutableParams" is immutable and does not support item assignment',
         ):
             simulation.immutable_params.delta_time = 0.1
 
     async def test_set_sub_sub_params(self):
         simulation = Simulation(start_time=0, params=Params(), n_people=10)
         with pytest.raises(
-            TypeError, match="\"ImmutableHumanParams\" is immutable and does not support item assignment"
+            TypeError,
+            match='"ImmutableHumanParams" is immutable and does not support item assignment',
         ):
             simulation.immutable_params.humans.max_human_age = 80
 

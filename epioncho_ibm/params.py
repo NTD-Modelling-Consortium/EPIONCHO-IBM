@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Optional
 
 from pydantic import BaseModel
 
@@ -6,6 +6,7 @@ from pydantic import BaseModel
 class BaseImmutatableParams(BaseModel):
     class Config:
         allow_mutation = False
+
 
 class TreatmentParams(BaseModel):
     interval_years: float = 1  # treatment interval (years, 0.5 gives biannual)
@@ -118,10 +119,12 @@ class HumanParams(BaseModel):
     gender_ratio: float = 0.5
     noncompliant_percentage: float = 0.05
 
+
 class BaseParams(BaseModel):
     delta_time: float = 1 / 365  # DT
     year_length_days: float = 365
     month_length_days: float = 28
+
 
 class Params(BaseParams):
     treatment: Optional[TreatmentParams] = TreatmentParams()
@@ -135,20 +138,26 @@ class Params(BaseParams):
 class ImmutableTreatmentParams(TreatmentParams, BaseImmutatableParams):
     pass
 
+
 class ImmutableWormParams(WormParams, BaseImmutatableParams):
     pass
+
 
 class ImmutableBlackflyParams(BlackflyParams, BaseImmutatableParams):
     pass
 
+
 class ImmutableMicrofilParams(MicrofilParams, BaseImmutatableParams):
     pass
+
 
 class ImmutableExposureParams(ExposureParams, BaseImmutatableParams):
     pass
 
+
 class ImmutableHumanParams(HumanParams, BaseImmutatableParams):
     pass
+
 
 class ImmutableParams(BaseParams, BaseImmutatableParams):
     treatment: Optional[ImmutableTreatmentParams] = ImmutableTreatmentParams()
@@ -158,8 +167,10 @@ class ImmutableParams(BaseParams, BaseImmutatableParams):
     exposure: ImmutableExposureParams = ImmutableExposureParams()
     humans: ImmutableHumanParams = ImmutableHumanParams()
 
+
 def immutable_to_mutable(immutable_params: ImmutableParams) -> Params:
     return Params.parse_obj(immutable_params.dict())
+
 
 def mutable_to_immutable(params: Params) -> ImmutableParams:
     return ImmutableParams.parse_obj(params.dict())
