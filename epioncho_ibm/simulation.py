@@ -4,8 +4,7 @@ import tqdm
 from hdf5_dataclass import FileType
 
 from epioncho_ibm.advance import advance_state
-from epioncho_ibm.params import Params
-from epioncho_ibm.state import State
+from epioncho_ibm.state import State, Params
 
 
 class Simulation:

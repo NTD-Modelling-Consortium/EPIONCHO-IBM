@@ -3,10 +3,7 @@ from typing import Optional
 
 import numpy as np
 
-from epioncho_ibm.types import Array
-
-from .params import HumanParams, TreatmentParams
-from .types import Array
+from epioncho_ibm.state import Array, HumanParams, TreatmentParams
 
 
 def _calc_coverage(

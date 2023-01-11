@@ -3,8 +3,9 @@ from hdf5_dataclass import HDF5Dataclass
 
 from .params import Params
 from .types import Array
-from .utils import array_fully_equal
-from .worms import WormGroup
+from epioncho_ibm.utils import array_fully_equal
+
+
 
 
 def truncated_geometric(N: int, prob: float, maximum: float) -> Array.Person.Float:
@@ -140,6 +141,40 @@ class DelayArrays(HDF5Dataclass):
             self._mf_delay_current = (
                 1 + self._mf_delay_current
             ) % self._mf_delay.shape[0]
+
+class WormGroup(HDF5Dataclass):
+    """
+    A group of worms, separated by sex and fertility
+    """
+
+    male: Array.WormCat.Person.Int
+    infertile: Array.WormCat.Person.Int
+    fertile: Array.WormCat.Person.Int
+
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, WormGroup):
+            return (
+                np.array_equal(self.male, other.male)
+                and np.array_equal(self.infertile, other.infertile)
+                and np.array_equal(self.fertile, other.fertile)
+            )
+        else:
+            return False
+
+    @classmethod
+    def from_population(cls, population: int):
+        return cls(
+            male=np.zeros(population, dtype=int),
+            infertile=np.zeros(population, dtype=int),
+            fertile=np.zeros(population, dtype=int),
+        )
+
+    def copy(self):
+        return WormGroup(
+            male=self.male.copy(),
+            infertile=self.infertile.copy(),
+            fertile=self.fertile.copy(),
+        )
 
 
 class People(HDF5Dataclass):

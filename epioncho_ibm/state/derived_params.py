@@ -4,7 +4,7 @@ from typing import Optional
 import numpy as np
 from fast_binomial import SFC64, Generator
 
-from epioncho_ibm.types import Array
+from .types import Array
 
 from .params import Params
 
