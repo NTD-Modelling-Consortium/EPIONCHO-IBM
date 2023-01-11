@@ -1,3 +1,4 @@
+from dataclasses import field
 from pathlib import Path
 from typing import IO
 
@@ -5,6 +6,7 @@ import numpy as np
 from hdf5_dataclass import HDF5Dataclass
 from pydantic import BaseModel
 
+from .derived_params import DerivedParams
 from .params import ImmutableParams, Params, immutable_to_mutable, mutable_to_immutable
 from .people import People
 from .types import Array
@@ -63,6 +65,7 @@ class State(HDF5Dataclass):
     people: People
     _params: ImmutableParams
     current_time: float = 0.0
+    derived_params: DerivedParams = field(init=False, repr=False)
 
     @property
     def n_people(self):
@@ -73,6 +76,19 @@ class State(HDF5Dataclass):
 
     def get_params(self) -> Params:
         return immutable_to_mutable(self._params)
+
+    def reset_params(self, params: Params):
+        """Reset the parameters
+
+        Args:
+            params (Params): New set of parameters
+        """
+        self._params = mutable_to_immutable(params)
+        self._derive_params()
+
+    def _derive_params(self) -> None:
+        assert self._params
+        self.derived_params = DerivedParams(immutable_to_mutable(self._params))
 
     @classmethod
     def from_params(

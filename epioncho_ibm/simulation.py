@@ -10,10 +10,9 @@ from epioncho_ibm.blackfly import (
     calc_l3,
     calc_new_worms_from_blackfly,
 )
-from epioncho_ibm.derived_params import DerivedParams
 from epioncho_ibm.exposure import calculate_total_exposure
 from epioncho_ibm.microfil import calculate_microfil_delta
-from epioncho_ibm.params import Params, immutable_to_mutable, mutable_to_immutable
+from epioncho_ibm.params import Params
 from epioncho_ibm.state import State
 from epioncho_ibm.treatment import get_treatment
 from epioncho_ibm.types import Array
@@ -22,7 +21,6 @@ from epioncho_ibm.worms import calculate_new_worms
 
 class Simulation:
     state: State
-    _derived_params: DerivedParams
     verbose: bool
     debug: bool
 
@@ -92,7 +90,7 @@ class Simulation:
             # input
             self.state = State.from_hdf5(input)
 
-        self._derive_params()
+        self.state._derive_params()
         self.verbose = verbose
         self.debug = debug
 
@@ -100,28 +98,16 @@ class Simulation:
     def _immutable_params(self):
         return self.state._params
 
-    def _derive_params(self) -> None:
-        assert self._immutable_params
-        self._derived_params = DerivedParams(
-            immutable_to_mutable(self._immutable_params)
-        )
-
     def get_current_params(self) -> Params:
         return self.state.get_params()
 
-    @property
-    def derived_params(self) -> DerivedParams:
-        assert self._derived_params
-        return self._derived_params
-
-    def reset_parameters(self, params: Params):
+    def reset_current_params(self, params: Params):
         """Reset the parameters
 
         Args:
             params (Params): New set of parameters
         """
-        self.state._params = mutable_to_immutable(params)
-        self._derive_params()
+        self.state.reset_params(params)
 
     def _advance(self):
         """Advance the state forward one time step from t to t + dt"""
@@ -131,7 +117,7 @@ class Simulation:
             self._immutable_params.humans,
             self._immutable_params.delta_time,
             self.state.current_time,
-            self._derived_params.treatment_times,
+            self.state.derived_params.treatment_times,
             self.state.people.ages,
             self.state.people.compliance,
         )
@@ -170,14 +156,14 @@ class Simulation:
             time_of_last_treatment=self.state.people.time_of_last_treatment,
             delta_time=self._immutable_params.delta_time,
             worm_delay_array=worm_delay,
-            mortalities=self._derived_params.worm_mortality_rate,
-            mortalities_generator=self._derived_params.worm_mortality_generator,
+            mortalities=self.state.derived_params.worm_mortality_rate,
+            mortalities_generator=self.state.derived_params.worm_mortality_generator,
             current_time=self.state.current_time,
             debug=self.debug,
-            worm_age_rate_generator=self._derived_params.worm_age_rate_generator,
-            worm_sex_ratio_generator=self._derived_params.worm_sex_ratio_generator,
-            worm_lambda_zero_generator=self._derived_params.worm_lambda_zero_generator,
-            worm_omega_generator=self._derived_params.worm_omega_generator,
+            worm_age_rate_generator=self.state.derived_params.worm_age_rate_generator,
+            worm_sex_ratio_generator=self.state.derived_params.worm_sex_ratio_generator,
+            worm_lambda_zero_generator=self.state.derived_params.worm_lambda_zero_generator,
+            worm_omega_generator=self.state.derived_params.worm_omega_generator,
         )
 
         if (
@@ -194,8 +180,8 @@ class Simulation:
             delta_time=self._immutable_params.delta_time,
             microfil_params=self._immutable_params.microfil,
             treatment_params=self._immutable_params.treatment,
-            microfillarie_mortality_rate=self._derived_params.microfillarie_mortality_rate,
-            fecundity_rates_worms=self._derived_params.fecundity_rates_worms,
+            microfillarie_mortality_rate=self.state.derived_params.microfillarie_mortality_rate,
+            fecundity_rates_worms=self.state.derived_params.fecundity_rates_worms,
             time_of_last_treatment=self.state.people.time_of_last_treatment,
             current_time=self.state.current_time,
             current_fertile_female_worms=old_worms.fertile,
@@ -241,7 +227,7 @@ class Simulation:
             new_worms=new_worms, total_exposure=total_exposure, new_mf=old_mf
         )
         people_to_die: Array.Person.Bool = np.logical_or(
-            self._derived_params.people_to_die_generator.binomial(
+            self.state.derived_params.people_to_die_generator.binomial(
                 np.repeat(1, self.state.n_people)
             )
             == 1,
