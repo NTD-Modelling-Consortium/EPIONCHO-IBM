@@ -1,49 +1,12 @@
 import numpy as np
 from fast_binomial import Generator
-from hdf5_dataclass import HDF5Dataclass
 
 import epioncho_ibm.utils as utils
-from epioncho_ibm.treatment import TreatmentGroup
-from epioncho_ibm.types import Array
 
-from .params import WormParams
+from epioncho_ibm.state import Array, WormGroup, WormParams
+from .treatment import TreatmentGroup
 
-__all__ = ["WormGroup", "calculate_new_worms"]
-
-
-class WormGroup(HDF5Dataclass):
-    """
-    A group of worms, separated by sex and fertility
-    """
-
-    male: Array.WormCat.Person.Int
-    infertile: Array.WormCat.Person.Int
-    fertile: Array.WormCat.Person.Int
-
-    def __eq__(self, other: object) -> bool:
-        if isinstance(other, WormGroup):
-            return (
-                np.array_equal(self.male, other.male)
-                and np.array_equal(self.infertile, other.infertile)
-                and np.array_equal(self.fertile, other.fertile)
-            )
-        else:
-            return False
-
-    @classmethod
-    def from_population(cls, population: int):
-        return cls(
-            male=np.zeros(population, dtype=int),
-            infertile=np.zeros(population, dtype=int),
-            fertile=np.zeros(population, dtype=int),
-        )
-
-    def copy(self):
-        return WormGroup(
-            male=self.male.copy(),
-            infertile=self.infertile.copy(),
-            fertile=self.fertile.copy(),
-        )
+__all__ = ["calculate_new_worms"]
 
 
 def _calc_dead_worms(

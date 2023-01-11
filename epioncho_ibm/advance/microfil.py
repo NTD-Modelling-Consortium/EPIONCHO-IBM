@@ -2,9 +2,7 @@ from typing import Callable
 
 import numpy as np
 
-from .params import MicrofilParams, TreatmentParams
-from .types import Array
-
+from epioncho_ibm.state import Array, MicrofilParams, TreatmentParams
 
 def _construct_derive_microfil(
     fertile_worms: Array.WormCat.Person.Int,

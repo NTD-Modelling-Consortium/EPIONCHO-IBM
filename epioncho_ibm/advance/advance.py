@@ -1,18 +1,17 @@
 import numpy as np
 
-from epioncho_ibm.blackfly import (
+from .blackfly import (
     calc_l1,
     calc_l2,
     calc_l3,
     calc_new_worms_from_blackfly,
 )
-from epioncho_ibm.exposure import calculate_total_exposure
-from epioncho_ibm.microfil import calculate_microfil_delta
-from epioncho_ibm.state import State
-from epioncho_ibm.treatment import get_treatment
-from epioncho_ibm.types import Array
-from epioncho_ibm.worms import calculate_new_worms
+from .exposure import calculate_total_exposure
+from .microfil import calculate_microfil_delta
+from epioncho_ibm.state import State, Array
+from .treatment import get_treatment
 
+from .worms import calculate_new_worms
 
 def advance_state(state: State, debug: bool = False) -> None:
     """Advance the state forward one time step from t to t + dt"""
