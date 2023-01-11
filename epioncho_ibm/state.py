@@ -5,7 +5,7 @@ import numpy as np
 from hdf5_dataclass import HDF5Dataclass
 from pydantic import BaseModel
 
-from .params import Params
+from .params import ImmutableParams, Params, immutable_to_mutable, mutable_to_immutable
 from .people import People
 from .types import Array
 
@@ -61,7 +61,7 @@ def negative_binomial_alt_interface(
 
 class State(HDF5Dataclass):
     people: People
-    params: Params
+    _params: ImmutableParams
     current_time: float = 0.0
 
     @property
@@ -70,6 +70,9 @@ class State(HDF5Dataclass):
         The number of people simulated.
         """
         return len(self.people)
+
+    def get_params(self) -> Params:
+        return immutable_to_mutable(self._params)
 
     @classmethod
     def from_params(
@@ -92,7 +95,7 @@ class State(HDF5Dataclass):
         """
         return cls(
             people=People.from_params(params, n_people, gamma_distribution),
-            params=params,
+            _params=mutable_to_immutable(params),
             current_time=current_time,
         )
 
@@ -100,7 +103,7 @@ class State(HDF5Dataclass):
         return (
             isinstance(other, State)
             and self.people == other.people
-            and self.params == other.params
+            and self._params == other._params
             and self.current_time == other.current_time
         )
 
@@ -135,30 +138,30 @@ class State(HDF5Dataclass):
             tuple[float, Array.Person.Float]: Mean mf, mf by person.
         """
         kmf = (
-            self.params.microfil.slope_kmf
+            self._params.microfil.slope_kmf
             * np.sum(
                 self.people.worms.fertile + self.people.worms.infertile,
                 axis=0,
             )
-            + self.params.microfil.initial_kmf
+            + self._params.microfil.initial_kmf
         )
 
-        mu = self.params.humans.skin_snip_weight * np.sum(self.people.mf, axis=0)
-        if self.params.humans.skin_snip_number > 1:
+        mu = self._params.humans.skin_snip_weight * np.sum(self.people.mf, axis=0)
+        if self._params.humans.skin_snip_number > 1:
             total_skin_snip_mf = np.zeros(
                 (
                     self.n_people,
-                    self.params.humans.skin_snip_number,
+                    self._params.humans.skin_snip_number,
                 )
             )
-            for i in range(self.params.humans.skin_snip_number):
+            for i in range(self._params.humans.skin_snip_number):
                 total_skin_snip_mf[:, i] = negative_binomial_alt_interface(n=kmf, mu=mu)
             mfobs: Array.Person.Int = np.sum(total_skin_snip_mf, axis=1)
         else:
             mfobs: Array.Person.Int = negative_binomial_alt_interface(n=kmf, mu=mu)
 
         mfobs_percent: Array.Person.Float = mfobs / (
-            self.params.humans.skin_snip_number * self.params.humans.skin_snip_weight
+            self._params.humans.skin_snip_number * self._params.humans.skin_snip_weight
         )
         return float(np.mean(mfobs_percent)), mfobs_percent
 
@@ -169,7 +172,7 @@ class State(HDF5Dataclass):
         Returns:
             float: mf_prevalence
         """
-        pop_over_min_age_array = self.people.ages >= self.params.humans.min_skinsnip_age
+        pop_over_min_age_array = self.people.ages >= self._params.humans.min_skinsnip_age
         _, mf_skin_snip = self.microfilariae_per_skin_snip()
         infected_over_min_age = float(np.sum(mf_skin_snip[pop_over_min_age_array] > 0))
         total_over_min_age = float(np.sum(pop_over_min_age_array))

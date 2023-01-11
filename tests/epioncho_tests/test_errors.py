@@ -29,22 +29,19 @@ class TestGeneral:
         simulation = Simulation(start_time=0, params=Params(), n_people=10)
         simulation.reset_parameters(Params())
 
-        # alternative interface
-        simulation.params = Params()
-
     async def test_set_sub_params(self):
         simulation = Simulation(start_time=0, params=Params(), n_people=10)
         with pytest.raises(
-            ValueError, match="Cannot alter inner values of params in-place"
+            TypeError, match="\"ImmutableParams\" is immutable and does not support item assignment"
         ):
-            simulation.params.delta_time = 0.1
+            simulation.immutable_params.delta_time = 0.1
 
     async def test_set_sub_sub_params(self):
         simulation = Simulation(start_time=0, params=Params(), n_people=10)
         with pytest.raises(
-            ValueError, match="Cannot alter inner values of params in-place"
+            TypeError, match="\"ImmutableHumanParams\" is immutable and does not support item assignment"
         ):
-            simulation.params.humans.max_human_age = 80
+            simulation.immutable_params.humans.max_human_age = 80
 
 
 @pytest.mark.asyncio

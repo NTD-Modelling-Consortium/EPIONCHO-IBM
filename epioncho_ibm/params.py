@@ -3,34 +3,11 @@ from typing import Any, Optional
 from pydantic import BaseModel
 
 
-class BaseParams(BaseModel):
+class BaseImmutatableParams(BaseModel):
     class Config:
         allow_mutation = False
 
-
-class BaseSubParams(BaseParams):
-    def __setattr__(self, name: str, value: Any):
-        try:
-            return super().__setattr__(name, value)
-        except TypeError:
-            raise ValueError(
-                "Cannot alter inner values of params in-place, please replace entire params as e.g.:\n"
-                + f"state.params = Params(attr_name={self.__class__.__name__}({name}={value}))"
-            )
-
-
-class BaseParentParams(BaseParams):
-    def __setattr__(self, name: str, value: Any):
-        try:
-            return super().__setattr__(name, value)
-        except TypeError:
-            raise ValueError(
-                "Cannot alter inner values of params in-place, please replace entire params as e.g.:\n"
-                + f"state.params = {self.__class__.__name__}({name}={value})"
-            )
-
-
-class TreatmentParams(BaseSubParams):
+class TreatmentParams(BaseModel):
     interval_years: float = 1  # treatment interval (years, 0.5 gives biannual)
     probability: float = 0.65  # The probability that a 'treatable' person is actually treated in an iteration
 
@@ -38,7 +15,7 @@ class TreatmentParams(BaseSubParams):
     stop_time: float = 130  # the iteration upon which treatment stops
 
 
-class WormParams(BaseSubParams):
+class WormParams(BaseModel):
     mu_worms1: float = (
         0.09953  # parameters controlling age-dependent mortality in adult worms
     )
@@ -64,7 +41,7 @@ class WormParams(BaseSubParams):
     mf_production_per_worm = 1.158305  # Per capita rate of production of mf per mg of skin snip per fertile female adult worm at age 0
 
 
-class BlackflyParams(BaseSubParams):
+class BlackflyParams(BaseModel):
     delta_h_zero: float = 0.1864987  # Proportion of L3 larvae developing to the adult stage within the human host, per bite when 𝐴𝑇𝑃(𝑡) → 0
     delta_h_inf: float = 0.002772749  # Proportion of L3 larvae developing to the adult stage within the human host, per bite when 𝐴𝑇𝑃(𝑡) → ∞
     blackfly_mort_per_fly_per_year: float = (
@@ -104,7 +81,7 @@ class BlackflyParams(BaseSubParams):
     with_immunity: bool = False
 
 
-class MicrofilParams(BaseSubParams):
+class MicrofilParams(BaseModel):
     microfil_aging: float = 0.125  # 'time.each.comp.mf'
     microfil_move_rate: float = 8.13333  # 'mf.move.rate' #for aging in parasites
     microfil_age_stages = 21
@@ -122,7 +99,7 @@ class MicrofilParams(BaseSubParams):
     initial_kmf = 0.313  # "int.kMf"
 
 
-class ExposureParams(BaseSubParams):
+class ExposureParams(BaseModel):
     # age-dependent exposure to fly bites
     male_exposure: float = 1.08  # "m.exp"
     female_exposure: float = 0.9  # "f.exp"
@@ -130,7 +107,7 @@ class ExposureParams(BaseSubParams):
     female_exposure_exponent: float = -0.023  # "age.exp.f"
 
 
-class HumanParams(BaseSubParams):
+class HumanParams(BaseModel):
     min_skinsnip_age: int = 5
     total_population_coverage: float = 0.65  # "treat.prob"
     max_human_age: int = 80  # 'real.max.age'
@@ -141,14 +118,48 @@ class HumanParams(BaseSubParams):
     gender_ratio: float = 0.5
     noncompliant_percentage: float = 0.05
 
-
-class Params(BaseParentParams):
+class BaseParams(BaseModel):
     delta_time: float = 1 / 365  # DT
     year_length_days: float = 365
     month_length_days: float = 28
+
+class Params(BaseParams):
     treatment: Optional[TreatmentParams] = TreatmentParams()
     worms: WormParams = WormParams()
     blackfly: BlackflyParams = BlackflyParams()
     microfil: MicrofilParams = MicrofilParams()
     exposure: ExposureParams = ExposureParams()
     humans: HumanParams = HumanParams()
+
+
+class ImmutableTreatmentParams(TreatmentParams, BaseImmutatableParams):
+    pass
+
+class ImmutableWormParams(WormParams, BaseImmutatableParams):
+    pass
+
+class ImmutableBlackflyParams(BlackflyParams, BaseImmutatableParams):
+    pass
+
+class ImmutableMicrofilParams(MicrofilParams, BaseImmutatableParams):
+    pass
+
+class ImmutableExposureParams(ExposureParams, BaseImmutatableParams):
+    pass
+
+class ImmutableHumanParams(HumanParams, BaseImmutatableParams):
+    pass
+
+class ImmutableParams(BaseParams, BaseImmutatableParams):
+    treatment: Optional[ImmutableTreatmentParams] = ImmutableTreatmentParams()
+    worms: ImmutableWormParams = ImmutableWormParams()
+    blackfly: ImmutableBlackflyParams = ImmutableBlackflyParams()
+    microfil: ImmutableMicrofilParams = ImmutableMicrofilParams()
+    exposure: ImmutableExposureParams = ImmutableExposureParams()
+    humans: ImmutableHumanParams = ImmutableHumanParams()
+
+def immutable_to_mutable(immutable_params: ImmutableParams) -> Params:
+    return Params.parse_obj(immutable_params.dict())
+
+def mutable_to_immutable(params: Params) -> ImmutableParams:
+    return ImmutableParams.parse_obj(params.dict())
