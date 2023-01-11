@@ -26,7 +26,7 @@ class TestGeneral:
 
     async def test_set_params(self):
         simulation = Simulation(start_time=0, params=Params(), n_people=10)
-        simulation.reset_parameters(Params())
+        simulation.reset_current_params(Params())
 
     async def test_set_sub_params(self):
         simulation = Simulation(start_time=0, params=Params(), n_people=10)
