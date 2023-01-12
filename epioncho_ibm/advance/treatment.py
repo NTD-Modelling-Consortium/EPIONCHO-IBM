@@ -122,8 +122,8 @@ def get_treatment(
             coverage_in = _calc_coverage(
                 ages,
                 compliance,
-                human_params.total_population_coverage,
-                human_params.min_skinsnip_age,
+                treatment_params.total_population_coverage,
+                treatment_params.min_skinsnip_age,
             )
             return TreatmentGroup(
                 treatment_params, coverage_in, treatment_times, treatment_occurred
