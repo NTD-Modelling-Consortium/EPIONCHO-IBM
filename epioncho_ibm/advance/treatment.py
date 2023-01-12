@@ -123,7 +123,7 @@ def get_treatment(
                 ages,
                 compliance,
                 treatment_params.total_population_coverage,
-                treatment_params.min_skinsnip_age,
+                human_params.min_skinsnip_age,
             )
             return TreatmentGroup(
                 treatment_params, coverage_in, treatment_times, treatment_occurred

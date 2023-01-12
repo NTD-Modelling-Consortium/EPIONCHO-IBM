@@ -26,7 +26,6 @@ class TreatmentParams(BaseModel):
     shape_parameter_ivermectin: float = 1.25  # effects of ivermectin
 
     # Affecting humans
-    min_skinsnip_age: int = 5
     total_population_coverage: float = 0.65  # The probability that a 'treatable' person is actually treated in an iteration - "treat.prob"
 
 
@@ -120,6 +119,7 @@ class HumanParams(BaseModel):
     max_human_age: int = 80  # 'real.max.age'
     mean_human_age: int = 50  # years 'mean.age'
 
+    min_skinsnip_age: int = 5
     skin_snip_weight: int = 2  # "ss.wt" the weight of the skin snip
     skin_snip_number: int = 2  # "num.ss"
     gender_ratio: float = 0.5
