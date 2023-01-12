@@ -10,7 +10,6 @@ class BaseImmutableParams(BaseModel):
 
 class TreatmentParams(BaseModel):
     interval_years: float = 1  # treatment interval (years, 0.5 gives biannual)
-    probability: float = 0.65  # The probability that a 'treatable' person is actually treated in an iteration
 
     start_time: float = 100  # The iteration upon which treatment commences
     stop_time: float = 130  # the iteration upon which treatment stops
@@ -83,7 +82,6 @@ class BlackflyParams(BaseModel):
 
 
 class MicrofilParams(BaseModel):
-    microfil_aging: float = 0.125  # 'time.each.comp.mf'
     microfil_move_rate: float = 8.13333  # 'mf.move.rate' #for aging in parasites
     microfil_age_stages = 21
     max_microfil_age = 2.5
@@ -110,7 +108,7 @@ class ExposureParams(BaseModel):
 
 class HumanParams(BaseModel):
     min_skinsnip_age: int = 5
-    total_population_coverage: float = 0.65  # "treat.prob"
+    total_population_coverage: float = 0.65  # The probability that a 'treatable' person is actually treated in an iteration - "treat.prob"
     max_human_age: int = 80  # 'real.max.age'
     mean_human_age: int = 50  # years 'mean.age'
 
