@@ -341,17 +341,20 @@ def calculate_new_worms(
     female_mortalities: None | Array.WormCat.Person.Float = None
     fertile_to_non_fertile_rate = None
     if treatment is not None:
+        treatment_params = treatment.treatment_params
         if treatment.treatment_occurred:
             female_mortalities = _calc_female_mortalities(
-                mortalities, worm_params.permanent_infertility, treatment.coverage_in
+                mortalities,
+                treatment_params.permanent_infertility,
+                treatment.coverage_in,
             )
             time_of_last_treatment = time_of_last_treatment.copy()
             time_of_last_treatment[treatment.coverage_in] = current_time
 
         fertile_to_non_fertile_rate = _calc_fertile_to_non_fertile_rate(
             current_time=current_time,
-            lam_m=worm_params.lam_m,
-            phi=worm_params.phi,
+            lam_m=treatment_params.lam_m,
+            phi=treatment_params.phi,
             time_of_last_treatment=time_of_last_treatment,
             delta_time=delta_time,
         )
