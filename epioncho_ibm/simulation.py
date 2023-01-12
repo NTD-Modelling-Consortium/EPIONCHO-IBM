@@ -185,25 +185,32 @@ class Simulation:
             sampling_years = sorted(sampling_years)
 
         sampling_years_idx = 0
-        while self.state.current_time <= end_time:
-            is_on_sampling_interval = (
-                sampling_interval is not None
-                and self.state.current_time % sampling_interval < self._delta_time
-            )
+        with tqdm.tqdm(
+            total=end_time - self.state.current_time + self._delta_time,
+            disable=not self.verbose,
+        ) as progress_bar:
+            while self.state.current_time <= end_time:
+                is_on_sampling_interval = (
+                    sampling_interval is not None
+                    and self.state.current_time % sampling_interval < self._delta_time
+                )
 
-            is_on_sampling_year = (
-                sampling_years
-                and sampling_years_idx < len(sampling_years)
-                and abs(self.state.current_time - sampling_years[sampling_years_idx])
-                < self._delta_time
-            )
+                is_on_sampling_year = (
+                    sampling_years
+                    and sampling_years_idx < len(sampling_years)
+                    and abs(
+                        self.state.current_time - sampling_years[sampling_years_idx]
+                    )
+                    < self._delta_time
+                )
 
-            if is_on_sampling_interval or is_on_sampling_year:
-                yield self.state
-                if is_on_sampling_year:
-                    sampling_years_idx += 1
+                if is_on_sampling_interval or is_on_sampling_year:
+                    yield self.state
+                    if is_on_sampling_year:
+                        sampling_years_idx += 1
 
-            advance_state(self.state)
+                progress_bar.update(self._delta_time)
+                advance_state(self.state)
 
     def run(self, *, end_time: float) -> None:
         """Run simulation from current state till `end_time`
