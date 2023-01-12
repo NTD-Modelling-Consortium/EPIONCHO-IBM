@@ -1,6 +1,5 @@
-from epioncho_ibm import Params, TreatmentParams, make_state_from_params
+from epioncho_ibm import Params, Simulation, TreatmentParams
 
 params = Params(treatment=TreatmentParams(start_time=3))
-
-state = make_state_from_params(params=params, n_people=400)
-state.run_simulation(start_time=0, end_time=100)
+simulation = Simulation(start_time=0, params=params, n_people=400)
+simulation.run(end_time=100)

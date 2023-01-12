@@ -1,7 +1,6 @@
 import numpy as np
 
-from .params import ExposureParams
-from .types import Array
+from epioncho_ibm.state import Array, ExposureParams
 
 
 def calculate_total_exposure(

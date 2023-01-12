@@ -1,9 +1,6 @@
 import numpy as np
 
-from epioncho_ibm.types import Array
-
-from .params import BlackflyParams
-from .worms import WormGroup
+from epioncho_ibm.state import Array, BlackflyParams, WormGroup
 
 """
 L1, L2, L3 (parasite life stages) dynamics in the fly population
