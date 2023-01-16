@@ -350,7 +350,7 @@ def calculate_new_worms(
 
         fertile_to_non_fertile_rate = _calc_fertile_to_non_fertile_rate(
             current_time=current_time,
-            lam_m=worm_params.lam_m,
+            lam_m=worm_params.lam_max,
             phi=worm_params.phi,
             time_of_last_treatment=time_of_last_treatment,
             delta_time=delta_time,
