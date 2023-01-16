@@ -34,8 +34,8 @@ class WormParams(BaseModel):
         0.59  # Per capita rate of progression from non-fertile to fertile adult female
     )
     lambda_zero: float = 0.33  # Per capita rate of reversion from fertile to non-fertile adult female worms
-    lam_m = 32.4  # effects of ivermectin
-    phi = 19.6  # effects of ivermectin
+    lam_max = 32.4  # effects of ivermectin, the maximum rate of treatment-induced sterility  
+    phi = 19.6  # effects of ivermectin, φ is the rate of decay of this effect with time after treatment
     permanent_infertility = 0.345  # permenent infertility in worms due to ivermectin
     sex_ratio = 0.5
     mf_production_per_worm = 1.158305  # Per capita rate of production of mf per mg of skin snip per fertile female adult worm at age 0
