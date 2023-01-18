@@ -1,5 +1,6 @@
 from typing import Optional
 
+from endgame_simulations import BaseInitialParams
 from pydantic import BaseModel
 
 
@@ -34,7 +35,9 @@ class WormParams(BaseModel):
         0.59  # Per capita rate of progression from non-fertile to fertile adult female
     )
     lambda_zero: float = 0.33  # Per capita rate of reversion from fertile to non-fertile adult female worms
-    lam_max = 32.4  # effects of ivermectin, the maximum rate of treatment-induced sterility  
+    lam_max = (
+        32.4  # effects of ivermectin, the maximum rate of treatment-induced sterility
+    )
     phi = 19.6  # effects of ivermectin, φ is the rate of decay of this effect with time after treatment
     permanent_infertility = 0.345  # permenent infertility in worms due to ivermectin
     sex_ratio = 0.5
@@ -119,12 +122,16 @@ class HumanParams(BaseModel):
 
 
 class BaseParams(BaseModel):
+    # TODO: Should these two be here? Also: make them read only
+    n_people: int  # number of people in the simulation
+    gamma_distribution: float = 0.3  # Individual level exposure heterogeneity
+
     delta_time: float = 1 / 365  # DT
     year_length_days: float = 365
     month_length_days: float = 28
 
 
-class Params(BaseParams):
+class Params(BaseParams, BaseInitialParams):
     treatment: Optional[TreatmentParams] = TreatmentParams()
     worms: WormParams = WormParams()
     blackfly: BlackflyParams = BlackflyParams()

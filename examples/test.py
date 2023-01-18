@@ -1,7 +1,7 @@
 from epioncho_ibm import Params, Simulation, TreatmentParams
 
-params = Params(treatment=TreatmentParams(start_time=0))
-simulation = Simulation(start_time=0, params=params, n_people=440, verbose=True)
+params = Params(treatment=TreatmentParams(start_time=0), n_people=440)
+simulation = Simulation(start_time=0, params=params, verbose=True)
 
 for i in range(12):
     simulation.run(end_time=(i + 1) * 10)
