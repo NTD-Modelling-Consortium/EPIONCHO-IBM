@@ -65,7 +65,7 @@ class DerivedParams:
             treatment_number = (
                 params.treatment.stop_time - params.treatment.start_time
             ) / params.treatment.interval_years
-            if round(treatment_number) != treatment_number:
+            if round(treatment_number) != round(treatment_number, 10):
                 raise ValueError(
                     f"Treatment times could not be found for start: {params.treatment.start_time}, stop: {params.treatment.stop_time}, interval: {params.treatment.interval_years}"
                 )
