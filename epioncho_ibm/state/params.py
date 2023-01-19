@@ -1,6 +1,6 @@
 from typing import Optional
 
-from endgame_simulations import BaseInitialParams
+from endgame_simulations import BaseInitialParams, BaseProgramParams
 from pydantic import BaseModel
 
 
@@ -128,14 +128,21 @@ class BaseParams(BaseModel):
     year_length_days: float = 365
     month_length_days: float = 28
 
-
-class Params(BaseParams, BaseInitialParams):
-    treatment: Optional[TreatmentParams] = TreatmentParams()
+class BaseMutableParams(BaseParams):
     worms: WormParams = WormParams()
     blackfly: BlackflyParams = BlackflyParams()
     microfil: MicrofilParams = MicrofilParams()
     exposure: ExposureParams = ExposureParams()
     humans: HumanParams = HumanParams()
+
+class Params(BaseMutableParams, BaseInitialParams):
+    treatment: Optional[TreatmentParams] = TreatmentParams()
+
+class EndgameParams(BaseMutableParams, BaseInitialParams):
+    pass
+
+class EndgameProgramParams(BaseProgramParams):
+    pass
 
 
 class ImmutableTreatmentParams(TreatmentParams, BaseImmutableParams):
