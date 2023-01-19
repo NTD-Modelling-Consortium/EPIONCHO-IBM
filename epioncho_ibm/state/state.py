@@ -94,6 +94,13 @@ class State(HDF5Dataclass, BaseState[Params]):
         assert self._params
         self.derived_params = DerivedParams(immutable_to_mutable(self._params))
 
+    def get_state_for_age_group(self, age_start: float, age_end: float) -> "State":
+        return State(
+            people = self.people.get_people_for_age_group(age_start, age_end),
+            _params = self._params,
+            current_time = self.current_time
+        )
+
     @classmethod
     def from_params(
         cls,
@@ -194,7 +201,10 @@ class State(HDF5Dataclass, BaseState[Params]):
         _, mf_skin_snip = self.microfilariae_per_skin_snip()
         infected_over_min_age = float(np.sum(mf_skin_snip[pop_over_min_age_array] > 0))
         total_over_min_age = float(np.sum(pop_over_min_age_array))
-        return infected_over_min_age / total_over_min_age
+        try:
+            return infected_over_min_age / total_over_min_age
+        except ZeroDivisionError:
+            return 0.0
 
 
 def make_state_from_params(params: Params):
