@@ -86,9 +86,7 @@ class DelayArrays(HDF5Dataclass):
         self._mf_delay[self._mf_delay_current] = value
 
     @classmethod
-    def from_params(
-        cls, params: Params, n_people: int, individual_exposure: Array.Person.Float
-    ):
+    def from_params(cls, params: Params, individual_exposure: Array.Person.Float):
         number_of_l3_delay_cols: int = round(
             params.blackfly.l3_delay
             * params.month_length_days
@@ -99,12 +97,12 @@ class DelayArrays(HDF5Dataclass):
         )
 
         return cls(
-            _worm_delay=np.zeros((number_of_l3_delay_cols, n_people), dtype=int),
+            _worm_delay=np.zeros((number_of_l3_delay_cols, params.n_people), dtype=int),
             _exposure_delay=np.tile(
                 individual_exposure, (number_of_l1_delay_columns, 1)
             ),
             _mf_delay=(
-                np.ones((number_of_l1_delay_columns, n_people), dtype=int)
+                np.ones((number_of_l1_delay_columns, params.n_people), dtype=int)
                 * params.microfil.initial_mf
             ),
         )
@@ -208,9 +206,9 @@ class People(HDF5Dataclass):
         return len(self.compliance)
 
     @classmethod
-    def from_params(
-        cls, params: Params, n_people: int, gamma_distribution: float = 0.3
-    ):
+    def from_params(cls, params: Params):
+        n_people = params.n_people
+
         sex_array = (
             np.random.uniform(low=0, high=1, size=n_people) < params.humans.gender_ratio
         )
@@ -223,8 +221,8 @@ class People(HDF5Dataclass):
 
         # individual exposure to fly bites
         individual_exposure = np.random.gamma(
-            shape=gamma_distribution,
-            scale=gamma_distribution,
+            shape=params.gamma_distribution,
+            scale=params.gamma_distribution,
             size=n_people,
         )
         new_individual_exposure = individual_exposure / np.mean(individual_exposure)
@@ -255,9 +253,7 @@ class People(HDF5Dataclass):
                 * params.worms.initial_worms,
             ),
             time_of_last_treatment=time_of_last_treatment,
-            delay_arrays=DelayArrays.from_params(
-                params, n_people, new_individual_exposure
-            ),
+            delay_arrays=DelayArrays.from_params(params, new_individual_exposure),
             individual_exposure=new_individual_exposure,
         )
 

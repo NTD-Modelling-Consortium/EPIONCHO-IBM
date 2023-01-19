@@ -1,5 +1,6 @@
 from typing import Optional
 
+from endgame_simulations import BaseInitialParams
 from pydantic import BaseModel
 
 
@@ -119,12 +120,16 @@ class HumanParams(BaseModel):
 
 
 class BaseParams(BaseModel):
+    # TODO: Should these two be here? Also: make them read only
+    n_people: int  # number of people in the simulation
+    gamma_distribution: float = 0.3  # Individual level exposure heterogeneity
+
     delta_time: float = 1 / 365  # DT
     year_length_days: float = 365
     month_length_days: float = 28
 
 
-class Params(BaseParams):
+class Params(BaseParams, BaseInitialParams):
     treatment: Optional[TreatmentParams] = TreatmentParams()
     worms: WormParams = WormParams()
     blackfly: BlackflyParams = BlackflyParams()

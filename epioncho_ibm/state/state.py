@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import IO
 
 import numpy as np
+from endgame_simulations.simulations import BaseState
 from hdf5_dataclass import HDF5Dataclass
 from pydantic import BaseModel
 
@@ -61,11 +62,14 @@ def negative_binomial_alt_interface(
     return output
 
 
-class State(HDF5Dataclass):
+class State(HDF5Dataclass, BaseState[Params]):
     people: People
     _params: ImmutableParams
     current_time: float = 0.0
     derived_params: DerivedParams = field(init=False, repr=False)
+
+    def __post_init__(self):
+        self._derive_params()
 
     @property
     def n_people(self):
@@ -94,23 +98,19 @@ class State(HDF5Dataclass):
     def from_params(
         cls,
         params: Params,
-        n_people: int,
-        gamma_distribution: float = 0.3,
         current_time: float = 0.0,
     ) -> "State":
         """Generate the initial state of the model, based on parameters.
 
         Args:
             params (Params): A set of fixed parameters for controlling the model.
-            n_people (int): The number of people to be simulated
-            gamma_distribution (float): Individual level exposure heterogeneity. Defaults to 0.3.
             current_time (float): Current time of the simulation's state. Defaults to 0
 
         Returns:
             State: The state of the model
         """
         return cls(
-            people=People.from_params(params, n_people, gamma_distribution),
+            people=People.from_params(params),
             _params=mutable_to_immutable(params),
             current_time=current_time,
         )
@@ -197,10 +197,8 @@ class State(HDF5Dataclass):
         return infected_over_min_age / total_over_min_age
 
 
-def make_state_from_params(
-    params: Params, n_people: int, gamma_distribution: float = 0.3
-):
-    return State.from_params(params, n_people, gamma_distribution=gamma_distribution)
+def make_state_from_params(params: Params):
+    return State.from_params(params)
 
 
 def make_state_from_hdf5(input_file: str | Path | IO[bytes]):

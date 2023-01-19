@@ -130,5 +130,3 @@ def advance_state(state: State, debug: bool = False) -> None:
         state.people.ages >= state._params.humans.max_human_age,
     )
     state.people.process_deaths(people_to_die, state._params.humans.gender_ratio)
-
-    state.current_time += state._params.delta_time

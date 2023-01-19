@@ -11,8 +11,8 @@ pytest_config = TrustRandomConfig(
 
 @benchmark_test(pytest_config)
 def no_treatment(end_time: float, population: int) -> StateStats:
-    params = Params(treatment=None)
-    simulation = Simulation(start_time=0, params=params, n_people=population)
+    params = Params(treatment=None, n_people=population)
+    simulation = Simulation(start_time=0, params=params)
     simulation.run(end_time=end_time)
     return simulation.state.stats()
 
@@ -21,8 +21,9 @@ def no_treatment(end_time: float, population: int) -> StateStats:
 def treatment(end_time: float, population: int) -> StateStats:
     params = Params(
         treatment=TreatmentParams(start_time=0, interval_years=0.01),
+        n_people=population,
     )
-    simulation = Simulation(start_time=0, params=params, n_people=population)
+    simulation = Simulation(start_time=0, params=params)
     simulation.run(end_time=end_time)
     return simulation.state.stats()
 
