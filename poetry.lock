@@ -201,7 +201,7 @@ tqdm = "^4.64.1"
 type = "git"
 url = "git@github.com:dreamingspires/endgame-simulations.git"
 reference = "master"
-resolved_reference = "d0338e78f2463d1dd53dd3cfce2f380e5a250ba9"
+resolved_reference = "f04740cef95c0c5160d1d6b9013a6ff32895f984"
 
 [[package]]
 name = "entrypoints"
