@@ -184,6 +184,26 @@ optional = false
 python-versions = "*"
 
 [[package]]
+name = "endgame-simulations"
+version = "0.1.0"
+description = ""
+category = "main"
+optional = false
+python-versions = ">=3.10, <4.0"
+develop = false
+
+[package.dependencies]
+hdf5-dataclass = {git = "git@github.com:dreamingspires/hdf5-dataclass.git", branch = "master"}
+pydantic = ">=1.10, <2.0"
+tqdm = "^4.64.1"
+
+[package.source]
+type = "git"
+url = "git@github.com:dreamingspires/endgame-simulations.git"
+reference = "master"
+resolved_reference = "d0338e78f2463d1dd53dd3cfce2f380e5a250ba9"
+
+[[package]]
 name = "entrypoints"
 version = "0.4"
 description = "Discover and load entry points from installed packages."
@@ -509,7 +529,7 @@ testing = ["coverage", "pyyaml"]
 
 [[package]]
 name = "markupsafe"
-version = "2.1.1"
+version = "2.1.2"
 description = "Safely add untrusted strings to HTML/XML markup."
 category = "main"
 optional = false
@@ -1198,7 +1218,7 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.10, <4.0"
-content-hash = "a70794eba2d9b06592889ef4081afefe54bd4408206e941a8efa1a01de980019"
+content-hash = "8e0a5af4b09b5e3a95a8c8213c361397beaf3c44b51230a3184cb0294d0f5428"
 
 [metadata.files]
 appnope = []
@@ -1218,6 +1238,7 @@ coverage = []
 debugpy = []
 decorator = []
 distlib = []
+endgame-simulations = []
 entrypoints = []
 exceptiongroup = []
 execnet = []

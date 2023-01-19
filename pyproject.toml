@@ -12,6 +12,7 @@ tqdm = "^4.64.1"
 fast-binomial = {git = "git@github.com:dreamingspires/fast-binomial.git"}
 pytest-trust-random = {git = "git@github.com:dreamingspires/pytest-trust-random.git"}
 hdf5-dataclass = {git = "git@github.com:dreamingspires/hdf5-dataclass.git"}
+endgame-simulations = {git = "git@github.com:dreamingspires/endgame-simulations.git"}
 
 [tool.poetry.dev-dependencies]
 black = "^22.3.0"
