@@ -1,6 +1,7 @@
 from typing import Optional
 
 from endgame_simulations import BaseInitialParams, BaseProgramParams
+from endgame_simulations.models import EndgameModel, create_update_model
 from pydantic import BaseModel
 
 
@@ -12,8 +13,10 @@ class BaseImmutableParams(BaseModel):
 class TreatmentParams(BaseModel):
     interval_years: float = 1  # treatment interval (years, 0.5 gives biannual)
 
-    start_time: float = 100  # The iteration upon which treatment commences
-    stop_time: float = 130  # the iteration upon which treatment stops
+    # TODO: the defaults don't make sense and should be removed. To be reviewed whether stop_time
+    # +inf can stay here.
+    start_time: float  # The iteration upon which treatment commences
+    stop_time: float = float("inf")  # the iteration upon which treatment stops
 
 
 class WormParams(BaseModel):
@@ -35,7 +38,9 @@ class WormParams(BaseModel):
         0.59  # Per capita rate of progression from non-fertile to fertile adult female
     )
     lambda_zero: float = 0.33  # Per capita rate of reversion from fertile to non-fertile adult female worms
-    lam_max = 32.4  # effects of ivermectin, the maximum rate of treatment-induced sterility  
+    lam_max = (
+        32.4  # effects of ivermectin, the maximum rate of treatment-induced sterility
+    )
     phi = 19.6  # effects of ivermectin, φ is the rate of decay of this effect with time after treatment
     permanent_infertility = 0.345  # permenent infertility in worms due to ivermectin
     sex_ratio = 0.5
@@ -128,6 +133,7 @@ class BaseParams(BaseModel):
     year_length_days: float = 365
     month_length_days: float = 28
 
+
 class BaseMutableParams(BaseParams):
     worms: WormParams = WormParams()
     blackfly: BlackflyParams = BlackflyParams()
@@ -135,14 +141,23 @@ class BaseMutableParams(BaseParams):
     exposure: ExposureParams = ExposureParams()
     humans: HumanParams = HumanParams()
 
+
 class Params(BaseMutableParams, BaseInitialParams):
-    treatment: Optional[TreatmentParams] = TreatmentParams()
+    treatment: Optional[TreatmentParams]
+
 
 class EndgameParams(BaseMutableParams, BaseInitialParams):
     pass
 
+
 class EndgameProgramParams(BaseProgramParams):
     pass
+
+
+EpionchoEndgameModel = EndgameModel[
+    EndgameParams, create_update_model(EndgameParams), EndgameProgramParams
+]
+EpionchoEndgameModel.__name__ = "EpionchoEndgameModel"
 
 
 class ImmutableTreatmentParams(TreatmentParams, BaseImmutableParams):
@@ -170,7 +185,7 @@ class ImmutableHumanParams(HumanParams, BaseImmutableParams):
 
 
 class ImmutableParams(BaseParams, BaseImmutableParams):
-    treatment: Optional[ImmutableTreatmentParams] = ImmutableTreatmentParams()
+    treatment: Optional[ImmutableTreatmentParams]
     worms: ImmutableWormParams = ImmutableWormParams()
     blackfly: ImmutableBlackflyParams = ImmutableBlackflyParams()
     microfil: ImmutableMicrofilParams = ImmutableMicrofilParams()

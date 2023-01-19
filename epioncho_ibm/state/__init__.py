@@ -1,5 +1,7 @@
 from .params import (
     BlackflyParams,
+    EndgameParams,
+    EpionchoEndgameModel,
     ExposureParams,
     HumanParams,
     MicrofilParams,

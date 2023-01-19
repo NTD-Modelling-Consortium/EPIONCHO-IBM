@@ -1,16 +1,18 @@
 from dataclasses import dataclass
-from enum import Enum
+from enum import IntEnum
 from typing import Iterator
 
 from endgame_simulations import apply_incremental_param_changes
-from endgame_simulations.models import EndgameModel, create_update_model
+from endgame_simulations.endgame_simulation import GenericEndgame
 
-from epioncho_ibm.state import Params
-from epioncho_ibm.state.params import EndgameParams, EndgameProgramParams, TreatmentParams
+from epioncho_ibm.simulation import Simulation
+from epioncho_ibm.state import Params, State
+from epioncho_ibm.state.params import (
+    EndgameParams,
+    EpionchoEndgameModel,
+    TreatmentParams,
+)
 
-
-EpionchoEndgameModel = EndgameModel[EndgameParams, create_update_model(EndgameParams), EndgameProgramParams]
-EpionchoEndgameModel.__name__ = 'EpionchoEndgameModel'
 
 @dataclass
 class ParamsAtTime:
@@ -19,11 +21,13 @@ class ParamsAtTime:
     params: Params
 
 
+# TODO: bug, or rather not really what we need. (2020, 1) should be 2020 (that's fine).
+# But (2020, 12) should be... 2021 I guess? Not sure. It's awkward
 def _time_from_year_and_month(year: int, month: int) -> float:
     return year + (month - 1) / 12
 
 
-class ReasonForChange(Enum):
+class ReasonForChange(IntEnum):
     # NOTE: the ordering is very important
     PARAMS_CHANGE = 1
     TREATMENT_ENDS = 2
@@ -31,7 +35,7 @@ class ReasonForChange(Enum):
 
 
 def _times_of_change(
-    model: EpionchoEndgameModel,
+    endgame: EpionchoEndgameModel,
 ) -> list[tuple[float, ReasonForChange]]:
     """Generates times of changes with the event (either due to params or program change).
 
@@ -41,7 +45,7 @@ def _times_of_change(
         (0.0, ReasonForChange.PARAMS_CHANGE)
     ]
 
-    for change in model.parameters.changes:
+    for change in endgame.parameters.changes:
         changes.append(
             (
                 _time_from_year_and_month(change.year, change.month),
@@ -49,7 +53,7 @@ def _times_of_change(
             )
         )
 
-    for program in model.programs:
+    for program in endgame.programs:
         start = _time_from_year_and_month(program.first_year, program.first_month)
         changes.append((start, ReasonForChange.TREATMENT_STARTS))
         if program.last_year:
@@ -59,10 +63,16 @@ def _times_of_change(
             changes.append((end, ReasonForChange.TREATMENT_ENDS))
 
     changes.sort()
+
+    # TODO: If you don't like having potentiallyt the same time for PARAMS_CHANGE and TREATMENT_STARTS
+    # and relying on the ordering of these in the loop below, PARAMS_CHANGE and TREATMENT_STARTS could be
+    # squashed together after sorting into PARAMS_CHANGE_WITH_TREATMENT or (not squashed)
+    # PARAMS_CHANGE_WITHOUT_TREATMENT.
+
     return changes
 
 
-def endgame_to_params(model: EpionchoEndgameModel) -> list[ParamsAtTime]:
+def endgame_to_params(endgame: EpionchoEndgameModel) -> list[tuple[float, Params]]:
     def _params_over_time(model: EpionchoEndgameModel) -> Iterator[EndgameParams]:
         current = model.parameters.initial
         yield current
@@ -71,15 +81,18 @@ def endgame_to_params(model: EpionchoEndgameModel) -> list[ParamsAtTime]:
             current = apply_incremental_param_changes(current, [change])
             yield current
 
-    params_over_time = _params_over_time(model)
-    programs = iter(model.programs or [])
+    params_over_time = _params_over_time(endgame)
+    programs = iter(endgame.programs or [])
 
     params: list[ParamsAtTime] = []
 
-    for time_of_change, reason in _times_of_change(model):
+    for time_of_change, reason in _times_of_change(endgame):
         if reason == ReasonForChange.PARAMS_CHANGE:
             params.append(
-                ParamsAtTime(time=time_of_change, params=Params.parse_obj(next(params_over_time).dict()) )
+                ParamsAtTime(
+                    time=time_of_change,
+                    params=Params.parse_obj(next(params_over_time).dict()),
+                )
             )
         elif reason == ReasonForChange.TREATMENT_ENDS:
             # for Epioncho, we have to keep params.treatment in order to model
@@ -91,8 +104,7 @@ def endgame_to_params(model: EpionchoEndgameModel) -> list[ParamsAtTime]:
             current_params = params[-1]
             current_treatment = current_params.params.treatment
             assert (
-                not current_treatment
-                or current_treatment.stop_time < time_of_change
+                not current_treatment or current_treatment.stop_time < time_of_change
             ), "Overlapping treatment found!"
 
             program = next(programs)
@@ -124,4 +136,12 @@ def endgame_to_params(model: EpionchoEndgameModel) -> list[ParamsAtTime]:
         else:
             raise ValueError("Unsupported reason")
 
-    return params
+    return [(p.time, p.params) for p in params]
+
+
+class EndgameSimulation(
+    GenericEndgame[EpionchoEndgameModel, Simulation, State, Params],
+    simulation_class=Simulation,
+    convert_endgame=endgame_to_params,
+):
+    pass
