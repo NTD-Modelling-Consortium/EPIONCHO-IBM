@@ -15,14 +15,14 @@ endgame = """
                 "year": 3,
                 "month": 1,
                 "params": {
-                    "delta_time": 1
+                    "delta_time": 0.003
                 }
             },
             {
                 "year": 8,
                 "month": 1,
                 "params": {
-                    "delta_time": 2
+                    "delta_time": 0.004
                 }
             }
         ]
@@ -41,6 +41,7 @@ endgame = """
             "first_year": 5,
             "first_month": 2,
             "last_year": 10,
+            "last_month": 8,
             "interventions": {
                 "treatment_interval": 0.5
             }
@@ -50,5 +51,5 @@ endgame = """
 """
 
 params = EpionchoEndgameModel.parse_raw(endgame)
-simulation = EndgameSimulation(start_time=0, endgame=params, verbose=True)
+simulation = EndgameSimulation(start_time=0, endgame=params, verbose=True, debug = True)
 simulation.run(end_time=10)
