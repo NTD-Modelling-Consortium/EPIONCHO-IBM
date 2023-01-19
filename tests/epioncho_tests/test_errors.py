@@ -7,12 +7,12 @@ from epioncho_ibm import Params, Simulation, TreatmentParams
 class TestGeneral:
     async def test_start_before_end(self):
         simulation = Simulation(start_time=10, params=Params(n_people=10))
-        with pytest.raises(ValueError, match="End time after start"):
+        with pytest.raises(ValueError, match="End time before start"):
             simulation.run(end_time=0)
 
     async def test_start_before_end_iter_run(self):
         simulation = Simulation(start_time=10, params=Params(n_people=10))
-        with pytest.raises(ValueError, match="End time after start"):
+        with pytest.raises(ValueError, match="End time before start"):
             next(simulation.iter_run(end_time=0, sampling_interval=1))
 
     async def test_set_n_people(self):

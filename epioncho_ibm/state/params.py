@@ -16,7 +16,7 @@ class TreatmentParams(BaseModel):
     # TODO: the defaults don't make sense and should be removed. To be reviewed whether stop_time
     # +inf can stay here.
     start_time: float  # The iteration upon which treatment commences
-    stop_time: float = float("inf")  # the iteration upon which treatment stops
+    stop_time: float = 130  # the iteration upon which treatment stops
 
 
 class WormParams(BaseModel):
@@ -143,7 +143,7 @@ class BaseMutableParams(BaseParams):
 
 
 class Params(BaseMutableParams, BaseInitialParams):
-    treatment: Optional[TreatmentParams]
+    treatment: Optional[TreatmentParams] = None
 
 
 class EndgameParams(BaseMutableParams, BaseInitialParams):
