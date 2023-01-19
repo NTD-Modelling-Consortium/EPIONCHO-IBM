@@ -64,7 +64,7 @@ def _times_of_change(
 
     changes.sort()
 
-    # TODO: If you don't like having potentiallyt the same time for PARAMS_CHANGE and TREATMENT_STARTS
+    # TODO: If you don't like having potentially the same time for PARAMS_CHANGE and TREATMENT_STARTS
     # and relying on the ordering of these in the loop below, PARAMS_CHANGE and TREATMENT_STARTS could be
     # squashed together after sorting into PARAMS_CHANGE_WITH_TREATMENT or (not squashed)
     # PARAMS_CHANGE_WITHOUT_TREATMENT.
@@ -85,20 +85,20 @@ def endgame_to_params(endgame: EpionchoEndgameModel) -> list[tuple[float, Params
     programs = iter(endgame.programs or [])
 
     params: list[ParamsAtTime] = []
-
     for time_of_change, reason in _times_of_change(endgame):
         if reason == ReasonForChange.PARAMS_CHANGE:
+            if params:
+                current_params = params[-1]
+                new_params = Params.parse_obj(next(params_over_time).dict())
+                new_params.treatment = current_params.params.treatment
+            else:
+                new_params = Params.parse_obj(next(params_over_time).dict())
             params.append(
                 ParamsAtTime(
                     time=time_of_change,
-                    params=Params.parse_obj(next(params_over_time).dict()),
+                    params=new_params,
                 )
             )
-        elif reason == ReasonForChange.TREATMENT_ENDS:
-            # for Epioncho, we have to keep params.treatment in order to model
-            # the effects of the old treatment. From this reason, we don't do
-            # anything here, just assert that treatment is set already
-            assert params and params[-1].params.treatment
         elif reason == ReasonForChange.TREATMENT_STARTS:
             assert params
             current_params = params[-1]
@@ -119,10 +119,7 @@ def endgame_to_params(endgame: EpionchoEndgameModel) -> list[tuple[float, Params
                 ),
             )
 
-            if current_params.time == time_of_change:
-                # treatment starts at the same time as params
-                params_to_modify = current_params
-            else:
+            if current_params.time != time_of_change:
                 assert time_of_change > current_params.time
                 # we need to create new Params
                 params.append(
@@ -130,9 +127,12 @@ def endgame_to_params(endgame: EpionchoEndgameModel) -> list[tuple[float, Params
                         time=time_of_change, params=current_params.params.copy()
                     )
                 )
-                params_to_modify = params[-1]
-
-            params_to_modify.params.treatment = treatment
+            params[-1].params.treatment = treatment
+        elif reason == ReasonForChange.TREATMENT_ENDS:
+            # for Epioncho, we have to keep params.treatment in order to model
+            # the effects of the old treatment. From this reason, we don't do
+            # anything here, just assert that treatment is set already
+            assert params and params[-1].params.treatment
         else:
             raise ValueError("Unsupported reason")
 
