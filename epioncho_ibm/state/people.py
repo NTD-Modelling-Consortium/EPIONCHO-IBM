@@ -272,7 +272,7 @@ class People(HDF5Dataclass):
         self.delay_arrays.process_deaths(people_to_die)
 
     def get_people_for_age_group(self, age_start: float, age_end: float) -> "People":
-        rel_ages = np.logical_and(self.ages >= age_start, self.ages < age_end)
+        rel_ages = (self.ages >= age_start) & (self.ages < age_end)
         return People(
             compliance=self.compliance[rel_ages],
             sex_is_male=self.sex_is_male[rel_ages],
