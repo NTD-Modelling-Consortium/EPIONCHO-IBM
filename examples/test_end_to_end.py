@@ -18,14 +18,14 @@ endgame = """
                 "year": 2022,
                 "month": 1,
                 "params": {
-                    "delta_time": 0.0016
+                    "delta_time_days": 1
                 }
             },
             {
                 "year": 2028,
                 "month": 1,
                 "params": {
-                    "delta_time": 0.003
+                    "delta_time_days": 0.5
                 }
             }
         ]
