@@ -12,10 +12,8 @@ class BaseImmutableParams(BaseModel):
 
 class TreatmentParams(BaseModel):
     interval_years: float = 1  # treatment interval (years, 0.5 gives biannual)
-
-    # TODO: the defaults don't make sense and should be removed.
     start_time: float  # The iteration upon which treatment commences
-    stop_time: float = 130  # the iteration upon which treatment stops
+    stop_time: float  # the iteration upon which treatment stops
 
 
 class WormParams(BaseModel):

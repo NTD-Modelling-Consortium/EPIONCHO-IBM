@@ -10,7 +10,8 @@ benchmark_iters = 400
 
 def run_sim(i):
     params = Params(
-        treatment=TreatmentParams(start_time=0.1, interval_years=0.1), n_people=400
+        treatment=TreatmentParams(start_time=0.1, interval_years=0.1, stop_time=130),
+        n_people=400,
     )
     simulation = Simulation(start_time=0, params=params)
     simulation.run(end_time=1)

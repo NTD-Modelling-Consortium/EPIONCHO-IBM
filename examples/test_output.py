@@ -3,7 +3,7 @@ import csv
 from epioncho_ibm import HumanParams, Params, State, TreatmentParams
 from epioncho_ibm.state import make_state_from_params
 
-params = Params(treatment=TreatmentParams(start_time=100), n_people=440)
+params = Params(treatment=TreatmentParams(start_time=100, stop_time=130), n_people=440)
 state = make_state_from_params(params)
 
 
