@@ -272,30 +272,30 @@ class People(HDF5Dataclass):
         self.delay_arrays.process_deaths(people_to_die)
 
     def get_people_for_age_group(self, age_start: float, age_end: float) -> "People":
-        rel_ages = np.logical_and(self.ages>=age_start, self.ages<age_end)
+        rel_ages = np.logical_and(self.ages >= age_start, self.ages < age_end)
         return People(
             compliance=self.compliance[rel_ages],
             sex_is_male=self.sex_is_male[rel_ages],
-            blackfly = BlackflyLarvae(
-                L1 = self.blackfly.L1[rel_ages],
-                L2 = self.blackfly.L2[rel_ages],
-                L3 = self.blackfly.L3[rel_ages]
+            blackfly=BlackflyLarvae(
+                L1=self.blackfly.L1[rel_ages],
+                L2=self.blackfly.L2[rel_ages],
+                L3=self.blackfly.L3[rel_ages],
             ),
-            ages = self.ages[rel_ages],
-            mf = self.mf[:, rel_ages],
-            worms = WormGroup(
-                male = self.worms.male[:, rel_ages],
-                fertile = self.worms.fertile[:, rel_ages],
-                infertile = self.worms.infertile[:, rel_ages]
+            ages=self.ages[rel_ages],
+            mf=self.mf[:, rel_ages],
+            worms=WormGroup(
+                male=self.worms.male[:, rel_ages],
+                fertile=self.worms.fertile[:, rel_ages],
+                infertile=self.worms.infertile[:, rel_ages],
             ),
-            time_of_last_treatment = self.time_of_last_treatment[rel_ages],
+            time_of_last_treatment=self.time_of_last_treatment[rel_ages],
             delay_arrays=DelayArrays(
-                _worm_delay = self.delay_arrays._worm_delay[:, rel_ages],
-                _exposure_delay = self.delay_arrays._exposure_delay[:, rel_ages],
-                _mf_delay = self.delay_arrays._mf_delay[:, rel_ages],
-                _worm_delay_current = self.delay_arrays._worm_delay_current,
-                _exposure_delay_current = self.delay_arrays._exposure_delay_current,
-                _mf_delay_current = self.delay_arrays._mf_delay_current
+                _worm_delay=self.delay_arrays._worm_delay[:, rel_ages],
+                _exposure_delay=self.delay_arrays._exposure_delay[:, rel_ages],
+                _mf_delay=self.delay_arrays._mf_delay[:, rel_ages],
+                _worm_delay_current=self.delay_arrays._worm_delay_current,
+                _exposure_delay_current=self.delay_arrays._exposure_delay_current,
+                _mf_delay_current=self.delay_arrays._mf_delay_current,
             ),
-            individual_exposure= self.individual_exposure[rel_ages]
+            individual_exposure=self.individual_exposure[rel_ages],
         )

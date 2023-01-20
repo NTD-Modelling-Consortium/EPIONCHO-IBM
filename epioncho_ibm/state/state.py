@@ -96,9 +96,9 @@ class State(HDF5Dataclass, BaseState[Params]):
 
     def get_state_for_age_group(self, age_start: float, age_end: float) -> "State":
         return State(
-            people = self.people.get_people_for_age_group(age_start, age_end),
-            _params = self._params,
-            current_time = self.current_time
+            people=self.people.get_people_for_age_group(age_start, age_end),
+            _params=self._params,
+            current_time=self.current_time,
         )
 
     @classmethod
