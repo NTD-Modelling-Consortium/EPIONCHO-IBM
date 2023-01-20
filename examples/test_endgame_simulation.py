@@ -12,17 +12,17 @@ endgame = """
         },
         "changes": [
             {
-                "year": 3,
+                "year": 2,
                 "month": 1,
                 "params": {
-                    "delta_time": 0.003
+                    "delta_time": 0.001
                 }
             },
             {
                 "year": 8,
                 "month": 1,
                 "params": {
-                    "delta_time": 0.004
+                    "delta_time": 0.003
                 }
             }
         ]
