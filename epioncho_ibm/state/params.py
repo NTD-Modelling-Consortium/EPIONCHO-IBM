@@ -126,12 +126,20 @@ class BaseParams(BaseModel):
     n_people: int  # number of people in the simulation
     gamma_distribution: float = 0.3  # Individual level exposure heterogeneity
 
-    delta_time: float = 1 / 365  # DT
+    delta_time_days: float = 1  # DT
     year_length_days: float = 365
     month_length_days: float = 28
 
 
 class BaseMutableParams(BaseParams):
+    @property
+    def delta_time(self):
+        return self.delta_time_days / self.year_length_days
+
+    @delta_time.setter
+    def delta_time(self, value):
+        self.delta_time_days = value * self.year_length_days
+
     worms: WormParams = WormParams()
     blackfly: BlackflyParams = BlackflyParams()
     microfil: MicrofilParams = MicrofilParams()
@@ -182,6 +190,10 @@ class ImmutableHumanParams(HumanParams, BaseImmutableParams):
 
 
 class ImmutableParams(BaseParams, BaseImmutableParams):
+    @property
+    def delta_time(self):
+        return self.delta_time_days / self.year_length_days
+
     treatment: Optional[ImmutableTreatmentParams]
     worms: ImmutableWormParams = ImmutableWormParams()
     blackfly: ImmutableBlackflyParams = ImmutableBlackflyParams()

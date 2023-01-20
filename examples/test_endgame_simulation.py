@@ -15,14 +15,14 @@ endgame = """
                 "year": 2,
                 "month": 1,
                 "params": {
-                    "delta_time": 0.001
+                    "delta_time_days": 1
                 }
             },
             {
                 "year": 8,
                 "month": 1,
                 "params": {
-                    "delta_time": 0.003
+                    "delta_time_days": 0.5
                 }
             }
         ]

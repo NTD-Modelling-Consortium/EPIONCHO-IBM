@@ -34,7 +34,7 @@ class TestGeneral:
             TypeError,
             match='"ImmutableParams" is immutable and does not support item assignment',
         ):
-            simulation.state._params.delta_time = 0.1
+            simulation.state._params.delta_time_days = 0.1
 
     async def test_set_sub_sub_params(self):
         simulation = Simulation(start_time=0, params=Params(n_people=10))
