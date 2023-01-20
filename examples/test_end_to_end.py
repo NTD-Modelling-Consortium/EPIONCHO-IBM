@@ -1,7 +1,8 @@
 import csv
-import tempfile
+from multiprocessing import cpu_count
 
 import numpy as np
+from tqdm.contrib.concurrent import process_map
 
 from epioncho_ibm import EndgameSimulation, EpionchoEndgameModel, Simulation
 
@@ -57,7 +58,12 @@ AgeStart = float
 Prevalence = float
 
 
-def run_sim(sim) -> dict[Year, dict[AgeStart, Prevalence]]:
+save_file = "./test.hdf5"
+simulation.save(save_file)
+
+
+def run_sim(i) -> dict[Year, dict[AgeStart, Prevalence]]:
+    sim = Simulation.restore(save_file)
     run_data: dict[Year, dict[AgeStart, Prevalence]] = {}
     for state in sim.iter_run(end_time=2030, sampling_interval=1):
         print(state.current_time)
@@ -71,10 +77,11 @@ def run_sim(sim) -> dict[Year, dict[AgeStart, Prevalence]]:
 
 
 run_iters = 5
-with tempfile.TemporaryFile() as f:
-    simulation.save(f)
-    data = [run_sim(Simulation.restore(f)) for _ in range(run_iters)]
 
+
+data: list[dict[Year, dict[AgeStart, Prevalence]]] = process_map(
+    run_sim, range(run_iters), max_workers=cpu_count()
+)
 
 data_by_year: dict[Year, dict[AgeStart, list[Prevalence]]] = {}
 for i, run in enumerate(data):
