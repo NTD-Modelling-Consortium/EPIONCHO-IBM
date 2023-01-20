@@ -23,8 +23,11 @@ class ParamsAtTime:
 
 # TODO: bug, or rather not really what we need. (2020, 1) should be 2020 (that's fine).
 # But (2020, 12) should be... 2021 I guess? Not sure. It's awkward
-def _time_from_year_and_month(year: int, month: int) -> float:
-    return year + (month - 1) / 12
+def _time_from_year_and_month(year: int, month: int, is_last: bool) -> float:
+    if is_last:
+        return year + (month) / 12
+    else:
+        return year + (month - 1) / 12
 
 
 class ReasonForChange(IntEnum):
@@ -48,17 +51,21 @@ def _times_of_change(
     for change in endgame.parameters.changes:
         changes.append(
             (
-                _time_from_year_and_month(change.year, change.month),
+                _time_from_year_and_month(change.year, change.month, is_last=False),
                 ReasonForChange.PARAMS_CHANGE,
             )
         )
 
     for program in endgame.programs:
-        start = _time_from_year_and_month(program.first_year, program.first_month)
+        start = _time_from_year_and_month(
+            program.first_year, program.first_month, is_last=False
+        )
         changes.append((start, ReasonForChange.TREATMENT_STARTS))
         if program.last_year:
             assert program.last_month
-            end = _time_from_year_and_month(program.last_year, program.last_month)
+            end = _time_from_year_and_month(
+                program.last_year, program.last_month, is_last=True
+            )
             assert start < end
             changes.append((end, ReasonForChange.TREATMENT_ENDS))
 
@@ -115,7 +122,7 @@ def endgame_to_params(endgame: EpionchoEndgameModel) -> list[tuple[float, Params
                 interval_years=program.interventions.treatment_interval,
                 start_time=time_of_change,
                 stop_time=_time_from_year_and_month(
-                    program.last_year, program.last_month
+                    program.last_year, program.last_month, is_last=True
                 ),
             )
 
