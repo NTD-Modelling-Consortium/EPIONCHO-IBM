@@ -7,7 +7,7 @@ from epioncho_ibm import Params, Simulation, TreatmentParams
 
 np.random.seed(0)
 
-params = Params(treatment=TreatmentParams(start_time=5), n_people=300)
+params = Params(treatment=TreatmentParams(start_time=5, stop_time=130), n_people=300)
 
 simulation = Simulation(start_time=2020, params=params, verbose=True)
 print("First years without treatment:")

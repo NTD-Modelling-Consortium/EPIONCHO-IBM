@@ -1,6 +1,6 @@
 from epioncho_ibm import Params, Simulation, TreatmentParams
 
-params = Params(treatment=TreatmentParams(start_time=0), n_people=440)
+params = Params(treatment=TreatmentParams(start_time=0, stop_time=130), n_people=440)
 simulation = Simulation(start_time=0, params=params, verbose=True)
 
 for i in range(12):

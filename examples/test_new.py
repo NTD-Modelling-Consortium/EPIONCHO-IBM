@@ -6,7 +6,7 @@ from epioncho_ibm import Params, Simulation, TreatmentParams, make_state_from_hd
 
 np.random.seed(0)
 
-params = Params(treatment=TreatmentParams(start_time=5), n_people=400)
+params = Params(treatment=TreatmentParams(start_time=5, stop_time=130), n_people=400)
 
 simulation = Simulation(start_time=0, params=params, verbose=True)
 print("First years without treatment:")

@@ -20,7 +20,7 @@ def no_treatment(end_time: float, population: int) -> StateStats:
 @benchmark_test(pytest_config)
 def treatment(end_time: float, population: int) -> StateStats:
     params = Params(
-        treatment=TreatmentParams(start_time=0, interval_years=0.01),
+        treatment=TreatmentParams(start_time=0, interval_years=0.01, stop_time=130),
         n_people=population,
     )
     simulation = Simulation(start_time=0, params=params)
