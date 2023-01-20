@@ -13,8 +13,7 @@ class BaseImmutableParams(BaseModel):
 class TreatmentParams(BaseModel):
     interval_years: float = 1  # treatment interval (years, 0.5 gives biannual)
 
-    # TODO: the defaults don't make sense and should be removed. To be reviewed whether stop_time
-    # +inf can stay here.
+    # TODO: the defaults don't make sense and should be removed.
     start_time: float  # The iteration upon which treatment commences
     stop_time: float = 130  # the iteration upon which treatment stops
 

@@ -15,14 +15,11 @@ from epioncho_ibm.state.params import (
 
 
 @dataclass
-class ParamsAtTime:
-    # TODO: rubbish name, maybe just stick to a tuple[float, params]...
+class ParamChange:
     time: float
     params: Params
 
 
-# TODO: bug, or rather not really what we need. (2020, 1) should be 2020 (that's fine).
-# But (2020, 12) should be... 2021 I guess? Not sure. It's awkward
 def _time_from_year_and_month(year: int, month: int, is_last: bool) -> float:
     if is_last:
         return year + (month) / 12
@@ -84,14 +81,13 @@ def endgame_to_params(endgame: EpionchoEndgameModel) -> list[tuple[float, Params
         current = model.parameters.initial
         yield current
         for change in model.parameters.changes:
-            # TODO: apply_incr.... should maybe take a union of list and single one?
-            current = apply_incremental_param_changes(current, [change])
+            current = apply_incremental_param_changes(current, change)
             yield current
 
     params_over_time = _params_over_time(endgame)
     programs = iter(endgame.programs or [])
 
-    params: list[ParamsAtTime] = []
+    params: list[ParamChange] = []
     for time_of_change, reason in _times_of_change(endgame):
         if reason == ReasonForChange.PARAMS_CHANGE:
             if params:
@@ -101,7 +97,7 @@ def endgame_to_params(endgame: EpionchoEndgameModel) -> list[tuple[float, Params
             else:
                 new_params = Params.parse_obj(next(params_over_time).dict())
             params.append(
-                ParamsAtTime(
+                ParamChange(
                     time=time_of_change,
                     params=new_params,
                 )
@@ -116,7 +112,6 @@ def endgame_to_params(endgame: EpionchoEndgameModel) -> list[tuple[float, Params
 
             program = next(programs)
 
-            # TODO: what about changing other parameters? It was decided that they can't change I suppose...
             assert not isinstance(program.interventions, list)
             treatment = TreatmentParams(
                 interval_years=program.interventions.treatment_interval,
@@ -130,7 +125,7 @@ def endgame_to_params(endgame: EpionchoEndgameModel) -> list[tuple[float, Params
                 assert time_of_change > current_params.time
                 # we need to create new Params
                 params.append(
-                    ParamsAtTime(
+                    ParamChange(
                         time=time_of_change, params=current_params.params.copy()
                     )
                 )
