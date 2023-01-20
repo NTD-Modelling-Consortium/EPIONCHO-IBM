@@ -90,12 +90,9 @@ def endgame_to_params(endgame: EpionchoEndgameModel) -> list[tuple[float, Params
     params: list[ParamChange] = []
     for time_of_change, reason in _times_of_change(endgame):
         if reason == ReasonForChange.PARAMS_CHANGE:
+            new_params = Params.parse_obj(next(params_over_time).dict())
             if params:
-                current_params = params[-1]
-                new_params = Params.parse_obj(next(params_over_time).dict())
-                new_params.treatment = current_params.params.treatment
-            else:
-                new_params = Params.parse_obj(next(params_over_time).dict())
+                new_params.treatment = params[-1].params.treatment
             params.append(
                 ParamChange(
                     time=time_of_change,
