@@ -201,7 +201,7 @@ tqdm = "^4.64.1"
 type = "git"
 url = "git@github.com:dreamingspires/endgame-simulations.git"
 reference = "master"
-resolved_reference = "9a972d173779bab8e5f671cedc1f2b7585276e60"
+resolved_reference = "b99b586eec1d3b456884461796a18f7a0261b529"
 
 [[package]]
 name = "entrypoints"
@@ -292,7 +292,7 @@ dev = ["twine", "markdown", "flake8", "wheel"]
 
 [[package]]
 name = "griffe"
-version = "0.25.3"
+version = "0.25.4"
 description = "Signatures for entire Python programs. Extract the structure, the frame, the skeleton of your project, to generate API documentation or find breaking changes in your API."
 category = "main"
 optional = false
