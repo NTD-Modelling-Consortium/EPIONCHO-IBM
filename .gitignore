@@ -3,3 +3,4 @@ __pycache__
 *.csv
 *.prof
 *.hdf5
+*.png
