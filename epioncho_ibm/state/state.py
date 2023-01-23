@@ -188,7 +188,7 @@ class State(HDF5Dataclass, BaseState[Params]):
         )
         return float(np.mean(mfobs_percent)), mfobs_percent
 
-    def mf_prevalence_in_population(self) -> float:
+    def mf_prevalence_in_population(self, return_nan: bool = False) -> float:
         """
         Calculates mf prevalence in population.
 
@@ -199,12 +199,15 @@ class State(HDF5Dataclass, BaseState[Params]):
             self.people.ages >= self._params.humans.min_skinsnip_age
         )
         _, mf_skin_snip = self.microfilariae_per_skin_snip()
-        infected_over_min_age = float(np.sum(mf_skin_snip[pop_over_min_age_array] > 0))
-        total_over_min_age = float(np.sum(pop_over_min_age_array))
+        infected_over_min_age = int(np.sum(mf_skin_snip[pop_over_min_age_array] > 0))
+        total_over_min_age = int(np.sum(pop_over_min_age_array))
         try:
             return infected_over_min_age / total_over_min_age
         except ZeroDivisionError:
-            return 0.0
+            if return_nan:
+                return np.nan
+            else:
+                return 0.0
 
 
 def make_state_from_params(params: Params):
