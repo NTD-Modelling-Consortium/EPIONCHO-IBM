@@ -65,6 +65,8 @@ def negative_binomial_alt_interface(
 class State(HDF5Dataclass, BaseState[Params]):
     people: People
     _params: ImmutableParams
+    treated_ages: Array.General.Float = np.array([], dtype=int)
+    derived_params: DerivedParams = field(init=False, repr=False)
     current_time: float = 0.0
     derived_params: DerivedParams = field(init=False, repr=False)
 
@@ -129,6 +131,14 @@ class State(HDF5Dataclass, BaseState[Params]):
             and self._params == other._params
             and self.current_time == other.current_time
         )
+
+    def reset_treatment_counter(self):
+        self.treated_ages = np.array([], dtype=int)
+
+    def get_treatment_count_for_age_group(
+        self, age_start: float, age_end: float
+    ) -> int:
+        return sum((self.treated_ages >= age_start) & (self.treated_ages < age_end))
 
     def stats(self) -> StateStats:
         return StateStats(

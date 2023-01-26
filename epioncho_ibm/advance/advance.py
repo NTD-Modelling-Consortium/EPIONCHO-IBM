@@ -21,6 +21,11 @@ def advance_state(state: State, debug: bool = False) -> None:
         state.people.ages,
         state.people.compliance,
     )
+    if treatment is not None and treatment.treatment_occurred:
+        state.treated_ages = np.append(
+            state.treated_ages, state.people.ages[treatment.coverage_in]
+        )
+        # TODO: Untested as need to fix other bug
 
     total_exposure = calculate_total_exposure(
         state._params.exposure,
