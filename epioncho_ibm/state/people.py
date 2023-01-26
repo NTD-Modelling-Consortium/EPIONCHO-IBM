@@ -227,6 +227,7 @@ class People(HDF5Dataclass):
         )
         new_individual_exposure = individual_exposure / np.mean(individual_exposure)
         new_individual_exposure.setflags(write=False)
+
         return cls(
             compliance=compliance_array,
             ages=truncated_geometric(

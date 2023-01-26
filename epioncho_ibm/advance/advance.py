@@ -25,7 +25,6 @@ def advance_state(state: State, debug: bool = False) -> None:
         state.treated_ages = np.append(
             state.treated_ages, state.people.ages[treatment.coverage_in]
         )
-        # TODO: Untested as need to fix other bug
 
     total_exposure = calculate_total_exposure(
         state._params.exposure,

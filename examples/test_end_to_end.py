@@ -90,12 +90,24 @@ def run_sim(i) -> dict[tuple[Year, AgeStart, AgeEnd, Measurement], float | int]:
             ] = n_treatments
             if age_state.n_people == 0:
                 run_data[
-                    (round(state.current_time), age_start, age_start + 5, "achieved_coverage")
+                    (
+                        round(state.current_time),
+                        age_start,
+                        age_start + 5,
+                        "achieved_coverage",
+                    )
                 ] = 0
             else:
                 run_data[
-                    (round(state.current_time), age_start, age_start + 5, "achieved_coverage")
-                ] = (n_treatments / age_state.n_people)
+                    (
+                        round(state.current_time),
+                        age_start,
+                        age_start + 5,
+                        "achieved_coverage",
+                    )
+                ] = (
+                    n_treatments / age_state.n_people
+                )
         state.reset_treatment_counter()
     return run_data
 
