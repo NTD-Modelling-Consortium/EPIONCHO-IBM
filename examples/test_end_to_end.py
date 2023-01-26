@@ -1,12 +1,11 @@
 import csv
 from collections import defaultdict
-from dataclasses import dataclass
 from multiprocessing import cpu_count
 
 import numpy as np
 from tqdm.contrib.concurrent import process_map
 
-from epioncho_ibm import EndgameSimulation, EpionchoEndgameModel, Simulation
+from epioncho_ibm import EndgameSimulation, EpionchoEndgameModel
 
 np.random.seed(0)
 
@@ -38,7 +37,7 @@ endgame = """
             "first_year": 2025,
             "first_month": 2,
             "last_year": 2030,
-            "last_month": 8,
+            "last_month": 7,
             "interventions": {
                 "treatment_interval": 0.5
             }
@@ -61,30 +60,22 @@ AgeEnd = float
 Measurement = str
 
 
-@dataclass
-class Outputs:
-    number: int
-    prevalence: float
-    n_treatments: int
-
-
 save_file = "./test.hdf5"
 simulation.save(save_file)
 
 
 def run_sim(i) -> dict[tuple[Year, AgeStart, AgeEnd, Measurement], float | int]:
-    sim = Simulation.restore(save_file)
+    sim = EndgameSimulation.restore(save_file)
     run_data: dict[tuple[Year, AgeStart, AgeEnd, Measurement], float | int] = {}
     for state in sim.iter_run(end_time=2030, sampling_interval=1):
-        print(state.current_time)
         for age_start in range(6, 100):
             age_state = state.get_state_for_age_group(age_start, age_start + 1)
             prev = age_state.mf_prevalence_in_population()
             run_data[
-                (state.current_time, age_start, age_start + 1, "prevalence")
+                (round(state.current_time), age_start, age_start + 1, "prevalence")
             ] = prev
             run_data[
-                (state.current_time, age_start, age_start + 1, "number")
+                (round(state.current_time), age_start, age_start + 1, "number")
             ] = age_state.n_people
 
         for age_start in range(6, 100, 5):
@@ -95,15 +86,15 @@ def run_sim(i) -> dict[tuple[Year, AgeStart, AgeEnd, Measurement], float | int]:
             # Note: This is an approximation as it assumes the number of people in each category has not
             # changed since treatment
             run_data[
-                (state.current_time, age_start, age_start + 1, "n_treatments")
+                (round(state.current_time), age_start, age_start + 1, "n_treatments")
             ] = n_treatments
             if age_state.n_people == 0:
                 run_data[
-                    (state.current_time, age_start, age_start + 5, "achieved_coverage")
+                    (round(state.current_time), age_start, age_start + 5, "achieved_coverage")
                 ] = 0
             else:
                 run_data[
-                    (state.current_time, age_start, age_start + 5, "achieved_coverage")
+                    (round(state.current_time), age_start, age_start + 5, "achieved_coverage")
                 ] = (n_treatments / age_state.n_people)
         state.reset_treatment_counter()
     return run_data

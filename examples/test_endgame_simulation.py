@@ -53,3 +53,5 @@ endgame = """
 params = EpionchoEndgameModel.parse_raw(endgame)
 simulation = EndgameSimulation(start_time=0, endgame=params, verbose=True, debug=True)
 simulation.run(end_time=10)
+simulation.save("test2.hdf5")
+simulation.restore("test2.hdf5")
