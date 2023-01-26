@@ -68,7 +68,6 @@ class State(HDF5Dataclass, BaseState[Params]):
     treated_ages: Array.General.Float = np.array([], dtype=int)
     derived_params: DerivedParams = field(init=False, repr=False)
     current_time: float = 0.0
-    derived_params: DerivedParams = field(init=False, repr=False)
 
     def __post_init__(self):
         self._derive_params()

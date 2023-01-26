@@ -140,6 +140,7 @@ def endgame_to_params(endgame: EpionchoEndgameModel) -> list[tuple[float, Params
 
 class EndgameSimulation(
     GenericEndgame[EpionchoEndgameModel, Simulation, State, Params],
+    combined_params_model=Params,
     simulation_class=Simulation,
     convert_endgame=endgame_to_params,
 ):
