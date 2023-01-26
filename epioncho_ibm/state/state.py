@@ -65,9 +65,9 @@ def negative_binomial_alt_interface(
 class State(HDF5Dataclass, BaseState[Params]):
     people: People
     _params: ImmutableParams
+    current_time: float = 0.0
     treated_ages: Array.General.Float = np.array([], dtype=int)
     derived_params: DerivedParams = field(init=False, repr=False)
-    current_time: float = 0.0
 
     def __post_init__(self):
         self._derive_params()
