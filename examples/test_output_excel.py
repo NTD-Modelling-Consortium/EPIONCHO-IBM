@@ -20,6 +20,7 @@ AgeStart = float
 Prevalence = float
 
 save_file = "./test.hdf5"
+run_iters = 5
 
 
 def run_sim(i) -> dict[Year, dict[AgeStart, Prevalence]]:
@@ -36,47 +37,49 @@ def run_sim(i) -> dict[Year, dict[AgeStart, Prevalence]]:
     return run_data
 
 
-run_iters = 5
+def main():
+    simulation.save(save_file)
 
-simulation.save(save_file)
+    data: list[dict[Year, dict[AgeStart, Prevalence]]] = process_map(
+        run_sim, range(run_iters), max_workers=cpu_count()
+    )
 
-data: list[dict[Year, dict[AgeStart, Prevalence]]] = process_map(
-    run_sim, range(run_iters), max_workers=cpu_count()
-)
+    data_by_year: dict[Year, dict[AgeStart, list[Prevalence]]] = {}
+    for i, run in enumerate(data):
+        for year, year_data in run.items():
+            if year not in data_by_year:
+                data_by_year[year] = {
+                    age_start: [prev] for age_start, prev in year_data.items()
+                }
+            else:
+                rel_year = data_by_year[year]
+                for age_start, prev in year_data.items():
+                    if age_start not in rel_year:
+                        rel_year[age_start] = [prev]
+                    else:
+                        rel_year[age_start] = rel_year[age_start] + [prev]
+                data_by_year[year] = rel_year
+
+    f = open("test.csv", "w")
+
+    # create the csv writer
+    writer = csv.writer(f)
+    first_elem: list[str] = ["year_id", "age_start", "age_end", "measure"] + [
+        f"draw_{i}" for i in range(run_iters)
+    ]
+    excel_data: list[list[str | float] | list[str] | list[float]] = [first_elem]
+    writer.writerow(first_elem)
+    for year, year_data in data_by_year.items():
+        for age_start, prevalences in year_data.items():
+            row = [year, age_start, age_start + 1, "prevalence"] + prevalences
+            excel_data.append(row)
+            writer.writerow(row)
+    f.close()
+
+    # write a row to the csv file
+
+    print(excel_data)
 
 
-data_by_year: dict[Year, dict[AgeStart, list[Prevalence]]] = {}
-for i, run in enumerate(data):
-    for year, year_data in run.items():
-        if year not in data_by_year:
-            data_by_year[year] = {
-                age_start: [prev] for age_start, prev in year_data.items()
-            }
-        else:
-            rel_year = data_by_year[year]
-            for age_start, prev in year_data.items():
-                if age_start not in rel_year:
-                    rel_year[age_start] = [prev]
-                else:
-                    rel_year[age_start] = rel_year[age_start] + [prev]
-            data_by_year[year] = rel_year
-
-f = open("test.csv", "w")
-
-# create the csv writer
-writer = csv.writer(f)
-first_elem: list[str] = ["year_id", "age_start", "age_end", "measure"] + [
-    f"draw_{i}" for i in range(run_iters)
-]
-excel_data: list[list[str | float] | list[str] | list[float]] = [first_elem]
-writer.writerow(first_elem)
-for year, year_data in data_by_year.items():
-    for age_start, prevalences in year_data.items():
-        row = [year, age_start, age_start + 1, "prevalence"] + prevalences
-        excel_data.append(row)
-        writer.writerow(row)
-f.close()
-
-# write a row to the csv file
-
-print(excel_data)
+if __name__ == "__main__":
+    main()

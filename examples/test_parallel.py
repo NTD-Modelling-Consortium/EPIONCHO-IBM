@@ -18,9 +18,10 @@ def run_sim(i):
     return simulation.state.mf_prevalence_in_population()
 
 
-list_of_stats: list[float] = process_map(
-    run_sim, range(benchmark_iters), max_workers=cpu_count()
-)
+if __name__ == "__main__":
+    list_of_stats: list[float] = process_map(
+        run_sim, range(benchmark_iters), max_workers=cpu_count()
+    )
 
-print(np.mean(list_of_stats))
-print(np.std(list_of_stats))
+    print(np.mean(list_of_stats))
+    print(np.std(list_of_stats))

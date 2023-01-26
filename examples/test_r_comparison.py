@@ -28,25 +28,30 @@ def run_sim(i):
     return x, y
 
 
-params = Params(
-    delta_time_days=1,
-    year_length_days=366,
-    treatment=TreatmentParams(start_time=80, stop_time=105),
-    n_people=400,
-    blackfly=BlackflyParams(bite_rate_per_person_per_year=290),
-)
-simulation = Simulation(start_time=0, params=params, verbose=True)
-simulation.run(end_time=75)
-simulation.save(save_file)
+def main():
+    params = Params(
+        delta_time_days=1,
+        year_length_days=366,
+        treatment=TreatmentParams(start_time=80, stop_time=105),
+        n_people=400,
+        blackfly=BlackflyParams(bite_rate_per_person_per_year=290),
+    )
+    simulation = Simulation(start_time=0, params=params, verbose=True)
+    simulation.run(end_time=75)
+    simulation.save(save_file)
 
-list_of_stats: list[float] = process_map(
-    run_sim, range(benchmark_iters), max_workers=cpu_count()
-)
+    list_of_stats: list[tuple[list[float], list[float]]] = process_map(
+        run_sim, range(benchmark_iters), max_workers=cpu_count()
+    )
 
-# print(np.mean(list_of_stats))
-# print(np.std(list_of_stats))
-fig = plt.figure()
-ax = fig.add_subplot(111)
-print(list(list_of_stats))
-ax.plot(list_of_stats[0][0], list_of_stats[0][1])
-fig.savefig("temp.png")
+    # print(np.mean(list_of_stats))
+    # print(np.std(list_of_stats))
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    print(list(list_of_stats))
+    ax.plot(list_of_stats[0][0], list_of_stats[0][1])
+    fig.savefig("temp.png")
+
+
+if __name__ == "__main__":
+    main()
