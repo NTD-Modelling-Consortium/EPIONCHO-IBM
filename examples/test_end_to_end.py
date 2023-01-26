@@ -1,4 +1,6 @@
 import csv
+from collections import defaultdict
+from dataclasses import dataclass
 from multiprocessing import cpu_count
 
 import numpy as np
@@ -55,50 +57,76 @@ simulation.run(end_time=2025.0)
 
 Year = float
 AgeStart = float
-Prevalence = float
+AgeEnd = float
+Measurement = str
+
+
+@dataclass
+class Outputs:
+    number: int
+    prevalence: float
+    n_treatments: int
 
 
 save_file = "./test.hdf5"
 simulation.save(save_file)
 
 
-def run_sim(i) -> dict[Year, dict[AgeStart, Prevalence]]:
+def run_sim(i) -> dict[tuple[Year, AgeStart, AgeEnd, Measurement], float | int]:
     sim = Simulation.restore(save_file)
-    run_data: dict[Year, dict[AgeStart, Prevalence]] = {}
+    run_data: dict[tuple[Year, AgeStart, AgeEnd, Measurement], float | int] = {}
     for state in sim.iter_run(end_time=2030, sampling_interval=1):
         print(state.current_time)
-        state_data = {}
         for age_start in range(6, 100):
             age_state = state.get_state_for_age_group(age_start, age_start + 1)
             prev = age_state.mf_prevalence_in_population()
-            state_data[age_start] = prev
-        run_data[state.current_time] = state_data
+            run_data[
+                (state.current_time, age_start, age_start + 1, "prevalence")
+            ] = prev
+            run_data[
+                (state.current_time, age_start, age_start + 1, "number")
+            ] = age_state.n_people
+
+        for age_start in range(6, 100, 5):
+            n_treatments = state.get_treatment_count_for_age_group(
+                age_start, (age_start + 5)
+            )
+            age_state = state.get_state_for_age_group(age_start, age_start + 5)
+            # Note: This is an approximation as it assumes the number of people in each category has not
+            # changed since treatment
+            run_data[
+                (state.current_time, age_start, age_start + 1, "n_treatments")
+            ] = n_treatments
+            if age_state.n_people == 0:
+                run_data[
+                    (state.current_time, age_start, age_start + 5, "achieved_coverage")
+                ] = 0
+            else:
+                run_data[
+                    (state.current_time, age_start, age_start + 5, "achieved_coverage")
+                ] = (n_treatments / age_state.n_people)
+        state.reset_treatment_counter()
     return run_data
 
 
 run_iters = 5
 
 
-data: list[dict[Year, dict[AgeStart, Prevalence]]] = process_map(
+data: list[dict[tuple[Year, AgeStart, AgeEnd, Measurement], float | int]] = process_map(
     run_sim, range(run_iters), max_workers=cpu_count()
 )
 
-data_by_year: dict[Year, dict[AgeStart, list[Prevalence]]] = {}
-for i, run in enumerate(data):
-    for year, year_data in run.items():
-        if year not in data_by_year:
-            data_by_year[year] = {
-                age_start: [prev] for age_start, prev in year_data.items()
-            }
-        else:
-            rel_year = data_by_year[year]
-            for age_start, prev in year_data.items():
-                if age_start not in rel_year:
-                    rel_year[age_start] = [prev]
-                else:
-                    rel_year[age_start] = rel_year[age_start] + [prev]
-            data_by_year[year] = rel_year
+data_combined_runs: dict[
+    tuple[Year, AgeStart, AgeEnd, Measurement], list[float | int]
+] = defaultdict(list)
+for run in data:
+    for k, v in run.items():
+        data_combined_runs[k].append(v)
 
+rows = sorted(
+    (k + tuple(v) for k, v in data_combined_runs.items()),
+    key=lambda r: (r[0], r[3], r[1]),
+)
 f = open("test.csv", "w")
 
 # create the csv writer
@@ -106,13 +134,11 @@ writer = csv.writer(f)
 first_elem: list[str] = ["year_id", "age_start", "age_end", "measure"] + [
     f"draw_{i}" for i in range(run_iters)
 ]
-excel_data: list[list[str | float] | list[str] | list[float]] = [first_elem]
+excel_data: list[tuple[str | float]] = [tuple(first_elem)]
 writer.writerow(first_elem)
-for year, year_data in data_by_year.items():
-    for age_start, prevalences in year_data.items():
-        row = [year, age_start, age_start + 1, "prevalence"] + prevalences
-        excel_data.append(row)
-        writer.writerow(row)
+for row in rows:
+    excel_data.append(row)
+    writer.writerow(row)
 f.close()
 
 # write a row to the csv file
