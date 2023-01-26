@@ -114,36 +114,36 @@ def run_sim(i) -> dict[tuple[Year, AgeStart, AgeEnd, Measurement], float | int]:
 
 run_iters = 5
 
+if __name__ == "__main__":
+    data: list[
+        dict[tuple[Year, AgeStart, AgeEnd, Measurement], float | int]
+    ] = process_map(run_sim, range(run_iters), max_workers=cpu_count())
 
-data: list[dict[tuple[Year, AgeStart, AgeEnd, Measurement], float | int]] = process_map(
-    run_sim, range(run_iters), max_workers=cpu_count()
-)
+    data_combined_runs: dict[
+        tuple[Year, AgeStart, AgeEnd, Measurement], list[float | int]
+    ] = defaultdict(list)
+    for run in data:
+        for k, v in run.items():
+            data_combined_runs[k].append(v)
 
-data_combined_runs: dict[
-    tuple[Year, AgeStart, AgeEnd, Measurement], list[float | int]
-] = defaultdict(list)
-for run in data:
-    for k, v in run.items():
-        data_combined_runs[k].append(v)
+    rows = sorted(
+        (k + tuple(v) for k, v in data_combined_runs.items()),
+        key=lambda r: (r[0], r[3], r[1]),
+    )
+    f = open("test.csv", "w")
 
-rows = sorted(
-    (k + tuple(v) for k, v in data_combined_runs.items()),
-    key=lambda r: (r[0], r[3], r[1]),
-)
-f = open("test.csv", "w")
+    # create the csv writer
+    writer = csv.writer(f)
+    first_elem: list[str] = ["year_id", "age_start", "age_end", "measure"] + [
+        f"draw_{i}" for i in range(run_iters)
+    ]
+    excel_data: list[tuple[str | float]] = [tuple(first_elem)]
+    writer.writerow(first_elem)
+    for row in rows:
+        excel_data.append(row)
+        writer.writerow(row)
+    f.close()
 
-# create the csv writer
-writer = csv.writer(f)
-first_elem: list[str] = ["year_id", "age_start", "age_end", "measure"] + [
-    f"draw_{i}" for i in range(run_iters)
-]
-excel_data: list[tuple[str | float]] = [tuple(first_elem)]
-writer.writerow(first_elem)
-for row in rows:
-    excel_data.append(row)
-    writer.writerow(row)
-f.close()
+    # write a row to the csv file
 
-# write a row to the csv file
-
-print(excel_data)
+    print(excel_data)
