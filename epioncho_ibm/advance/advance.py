@@ -22,9 +22,11 @@ def advance_state(state: State, debug: bool = False) -> None:
         state.people.compliance,
     )
     if treatment is not None and treatment.treatment_occurred:
-        state.treated_ages = np.append(
-            state.treated_ages, state.people.ages[treatment.coverage_in]
+        n_treatments_by_age, _ = np.histogram(
+            state.people.ages[treatment.coverage_in], 
+            bins=round(state._params.humans.max_human_age/state._params.n_treatments_bin_size)
         )
+        state.n_treatments += n_treatments_by_age
 
     total_exposure = calculate_total_exposure(
         state._params.exposure,
