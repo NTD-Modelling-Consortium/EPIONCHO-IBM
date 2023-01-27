@@ -71,12 +71,9 @@ def run_sim(i) -> dict[tuple[Year, AgeStart, AgeEnd, Measurement], float | int]:
         for age_start in range(6, 100):
             age_state = state.get_state_for_age_group(age_start, age_start + 1)
             prev = age_state.mf_prevalence_in_population()
-            run_data[
-                (round(state.current_time), age_start, age_start + 1, "prevalence")
-            ] = prev
-            run_data[
-                (round(state.current_time), age_start, age_start + 1, "number")
-            ] = age_state.n_people
+            partial_key = (round(state.current_time), age_start, age_start + 1)
+            run_data[(*partial_key, "prevalence")] = prev
+            run_data[(*partial_key, "number")] = age_state.n_people
 
         for age_start in range(6, 100, 5):
             n_treatments = state.get_treatment_count_for_age_group(
@@ -85,27 +82,12 @@ def run_sim(i) -> dict[tuple[Year, AgeStart, AgeEnd, Measurement], float | int]:
             age_state = state.get_state_for_age_group(age_start, age_start + 5)
             # Note: This is an approximation as it assumes the number of people in each category has not
             # changed since treatment
-            run_data[
-                (round(state.current_time), age_start, age_start + 1, "n_treatments")
-            ] = n_treatments
+            partial_key = (round(state.current_time), age_start, age_start + 5)
+            run_data[(*partial_key, "n_treatments")] = n_treatments
             if age_state.n_people == 0:
-                run_data[
-                    (
-                        round(state.current_time),
-                        age_start,
-                        age_start + 5,
-                        "achieved_coverage",
-                    )
-                ] = 0
+                run_data[(*partial_key, "achieved_coverage")] = 0
             else:
-                run_data[
-                    (
-                        round(state.current_time),
-                        age_start,
-                        age_start + 5,
-                        "achieved_coverage",
-                    )
-                ] = (
+                run_data[(*partial_key, "achieved_coverage")] = (
                     n_treatments / age_state.n_people
                 )
         state.reset_treatment_counter()
@@ -130,20 +112,17 @@ if __name__ == "__main__":
         (k + tuple(v) for k, v in data_combined_runs.items()),
         key=lambda r: (r[0], r[3], r[1]),
     )
-    f = open("test.csv", "w")
-
-    # create the csv writer
-    writer = csv.writer(f)
-    first_elem: list[str] = ["year_id", "age_start", "age_end", "measure"] + [
-        f"draw_{i}" for i in range(run_iters)
-    ]
-    excel_data: list[tuple[str | float]] = [tuple(first_elem)]
-    writer.writerow(first_elem)
-    for row in rows:
-        excel_data.append(row)
-        writer.writerow(row)
-    f.close()
-
+    with open("test.csv", "w") as f:
+        # create the csv writer
+        writer = csv.writer(f)
+        first_elem: list[str] = ["year_id", "age_start", "age_end", "measure"] + [
+            f"draw_{i}" for i in range(run_iters)
+        ]
+        excel_data: list[tuple[str | float]] = [tuple(first_elem)]
+        writer.writerow(first_elem)
+        for row in rows:
+            excel_data.append(row)
+            writer.writerow(row)
     # write a row to the csv file
 
     print(excel_data)
