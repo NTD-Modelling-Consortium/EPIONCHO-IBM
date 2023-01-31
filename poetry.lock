@@ -227,7 +227,7 @@ tqdm = "^4.64.1"
 type = "git"
 url = "git@github.com:dreamingspires/endgame-simulations.git"
 reference = "master"
-resolved_reference = "a43a8b5ed9658663a5e36ea000afee0930be5f53"
+resolved_reference = "7044aad667adbbccf91e760f60f2ecaf8528aa8c"
 
 [[package]]
 name = "exceptiongroup"
@@ -273,14 +273,14 @@ develop = false
 
 [package.dependencies]
 numpy = "^1.23.5"
-pybind11 = "^2.10.1"
+pybind11 = "^2.6.1"
 requests = "^2.28.1"
 
 [package.source]
 type = "git"
 url = "git@github.com:dreamingspires/fast-binomial.git"
 reference = "master"
-resolved_reference = "ada337cb98177c988d7488346412a60e4b20dc2d"
+resolved_reference = "e46ad1b1a928e6001d69283d8d86d03f141c18c9"
 
 [[package]]
 name = "filelock"
@@ -373,11 +373,11 @@ pydantic = "^1.10.2"
 type = "git"
 url = "git@github.com:dreamingspires/hdf5-dataclass.git"
 reference = "master"
-resolved_reference = "761c1efef0c4a7247900bb806bf3b7a176988430"
+resolved_reference = "b4fe10eff82aa921380327595ec7eafa499266f7"
 
 [[package]]
 name = "identify"
-version = "2.5.15"
+version = "2.5.17"
 description = "File identification library for Python"
 category = "dev"
 optional = false
@@ -404,7 +404,7 @@ python-versions = ">=3.7"
 
 [[package]]
 name = "ipykernel"
-version = "6.20.2"
+version = "6.21.0"
 description = "IPython Kernel for Jupyter"
 category = "dev"
 optional = false
@@ -413,11 +413,11 @@ python-versions = ">=3.8"
 [package.dependencies]
 appnope = {version = "*", markers = "platform_system == \"Darwin\""}
 comm = ">=0.1.1"
-debugpy = ">=1.0"
+debugpy = ">=1.6.5"
 ipython = ">=7.23.1"
 jupyter-client = ">=6.1.12"
+jupyter-core = ">=4.12,<5.0.0 || >=5.1.0"
 matplotlib-inline = ">=0.1"
-nest-asyncio = "*"
 packaging = "*"
 psutil = "*"
 pyzmq = ">=17"
@@ -468,16 +468,16 @@ test_extra = ["pytest (<7.1)", "pytest-asyncio", "testpath", "curio", "matplotli
 
 [[package]]
 name = "isort"
-version = "5.11.4"
+version = "5.12.0"
 description = "A Python utility / library to sort Python imports."
 category = "dev"
 optional = false
-python-versions = ">=3.7.0"
+python-versions = ">=3.8.0"
 
 [package.extras]
-colors = ["colorama (>=0.4.3,<0.5.0)"]
+colors = ["colorama (>=0.4.3)"]
 requirements-deprecated-finder = ["pip-api", "pipreqs"]
-pipfile-deprecated-finder = ["pipreqs", "requirementslib"]
+pipfile-deprecated-finder = ["pip-shims (>=0.5.2)", "pipreqs", "requirementslib"]
 plugins = ["setuptools"]
 
 [[package]]
@@ -520,7 +520,7 @@ python-versions = ">=3.7"
 
 [[package]]
 name = "jupyter-client"
-version = "8.0.1"
+version = "8.0.2"
 description = "Jupyter protocol implementation and client libraries"
 category = "dev"
 optional = false
@@ -539,7 +539,7 @@ test = ["codecov", "coverage", "ipykernel (>=6.14)", "mypy", "paramiko", "pre-co
 
 [[package]]
 name = "jupyter-core"
-version = "5.1.5"
+version = "5.2.0"
 description = "Jupyter core package. A base package on which Jupyter projects rely."
 category = "dev"
 optional = false
@@ -722,14 +722,6 @@ description = "Experimental type system extensions for programs checked with the
 category = "dev"
 optional = false
 python-versions = "*"
-
-[[package]]
-name = "nest-asyncio"
-version = "1.5.6"
-description = "Patch asyncio to allow nested event loops"
-category = "dev"
-optional = false
-python-versions = ">=3.5"
 
 [[package]]
 name = "nodeenv"
@@ -1254,7 +1246,7 @@ telegram = ["requests"]
 
 [[package]]
 name = "traitlets"
-version = "5.8.1"
+version = "5.9.0"
 description = "Traitlets Python configuration system"
 category = "dev"
 optional = false
@@ -1381,7 +1373,6 @@ mkdocs-material-extensions = []
 mkdocstrings = []
 mkdocstrings-python = []
 mypy-extensions = []
-nest-asyncio = []
 nodeenv = []
 numpy = []
 packaging = []
