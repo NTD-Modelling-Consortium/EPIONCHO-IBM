@@ -53,7 +53,7 @@ class BlackflyParams(BaseModel):
     blackfly_mort_from_mf_per_fly_per_year: float = (
         0.39  # Per capita microfilaria-induced mortality of blackfly vectors
     )
-    mu_L3: int = 52  # Per capita mortality of L3 Larvae
+    mu_L3: float = 52  # Per capita mortality of L3 Larvae
     a_H: float = 0.8  # Proportion of infected larvae shed per bite a.H
     l1_l2_per_larva_per_year: float = (
         201.6189  # Per capita development rate of larvae from stage L1 to L2 'nuone'

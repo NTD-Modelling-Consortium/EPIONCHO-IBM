@@ -25,7 +25,7 @@ class DerivedParams:
     worm_lambda_zero_generator: Generator
     worm_omega_generator: Generator
 
-    def __init__(self, params: Params) -> None:
+    def __init__(self, params: Params, seed: Optional[int]) -> None:
         worm_age_categories: Array.WormCat.Float = np.arange(
             start=0,
             stop=params.worms.max_worm_age,
@@ -79,17 +79,21 @@ class DerivedParams:
             self.treatment_times = None
 
         self.people_to_die_generator = Generator(
-            SFC64(), params.delta_time / params.humans.mean_human_age
+            SFC64(seed=seed), params.delta_time / params.humans.mean_human_age
         )
         self.worm_age_rate_generator = Generator(
-            SFC64(), params.delta_time / params.worms.worms_aging
+            SFC64(seed=seed), params.delta_time / params.worms.worms_aging
         )
-        self.worm_sex_ratio_generator = Generator(SFC64(), params.worms.sex_ratio)
+        self.worm_sex_ratio_generator = Generator(
+            SFC64(seed=seed), params.worms.sex_ratio
+        )
         self.worm_lambda_zero_generator = Generator(
-            SFC64(), params.worms.lambda_zero * params.delta_time
+            SFC64(seed=seed), params.worms.lambda_zero * params.delta_time
         )
         self.worm_omega_generator = Generator(
-            SFC64(), params.worms.omega * params.delta_time
+            SFC64(seed=seed), params.worms.omega * params.delta_time
         )
 
-        self.worm_mortality_generator = Generator(SFC64(), self.worm_mortality_rate)
+        self.worm_mortality_generator = Generator(
+            SFC64(seed=seed), self.worm_mortality_rate
+        )

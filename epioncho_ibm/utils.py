@@ -1,5 +1,5 @@
 from functools import cache
-from typing import TypeVar
+from typing import Optional, TypeVar
 
 import numpy as np
 from numpy.random import SFC64, Generator
@@ -28,11 +28,11 @@ def array_fully_equal(a1: NDArray[DType], a2: NDArray[DType]):
 
 
 @cache
-def random_generator():
-    return Generator(SFC64())
+def random_generator(seed: Optional[int]):
+    return Generator(SFC64(seed=seed))
 
 
 def fast_binomial(
-    n: NDArray[np.int_], p: NDArray[np.float_] | float
+    n: NDArray[np.int_], p: NDArray[np.float_] | float, seed: Optional[int]
 ) -> NDArray[np.int_]:
-    return random_generator().binomial(n, p)
+    return random_generator(seed=seed).binomial(n, p)
