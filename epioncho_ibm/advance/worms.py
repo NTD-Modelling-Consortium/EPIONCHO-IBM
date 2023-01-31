@@ -1,3 +1,5 @@
+from typing import Optional
+
 import numpy as np
 from fast_binomial import Generator
 
@@ -13,6 +15,7 @@ def _calc_dead_worms(
     current_worms: WormGroup,
     female_mortalities_override: Array.WormCat.Person.Float | None,
     mortalities_generator: Generator,
+    seed: Optional[int],
 ) -> WormGroup:
     """
     Calculates the number of worms dying in each compartment
@@ -35,7 +38,9 @@ def _calc_dead_worms(
     ) -> Array.WormCat.Person.Int:
         assert current_worms.ndim == 2
         if mortalities_override is not None:
-            return utils.fast_binomial(n=current_worms, p=mortalities_override)
+            return utils.fast_binomial(
+                n=current_worms, p=mortalities_override, seed=seed
+            )
         else:
             return mortalities_generator.binomial(n=current_worms.T).T
 
@@ -140,6 +145,7 @@ def _calc_delta_fertility(
     delta_time: float,
     worm_lambda_zero_generator: Generator,
     worm_omega_generator: Generator,
+    seed: Optional[int],
 ) -> Array.WormCat.Person.Int:
     """
     Calculates how many worms go from infertile to fertile.
@@ -165,6 +171,7 @@ def _calc_delta_fertility(
         outbound_worms: Array.WormCat.Person.Int,
         prob: None | Array.Person.Float,
         worm_generator: Generator,
+        seed: Optional[int],
     ) -> Array.WormCat.Person.Int:
 
         remaining_female_worms = current_worms - dead_worms - outbound_worms
@@ -174,7 +181,7 @@ def _calc_delta_fertility(
             if prob is None:
                 return worm_generator.binomial(n=remaining_female_worms)
             else:
-                return utils.fast_binomial(n=remaining_female_worms, p=prob)
+                return utils.fast_binomial(n=remaining_female_worms, p=prob, seed=seed)
         else:
             return np.zeros_like(current_worms)
 
@@ -192,6 +199,7 @@ def _calc_delta_fertility(
         outbound_worms=outbound_worms.fertile,
         prob=lambda_zero_in,
         worm_generator=worm_lambda_zero_generator,
+        seed=seed,
     )
 
     # approach assumes individuals which are moved from fertile to non
@@ -202,6 +210,7 @@ def _calc_delta_fertility(
         outbound_worms=outbound_worms.infertile,
         prob=None,
         worm_generator=worm_omega_generator,
+        seed=seed,
     )
     return new_fertile_from_inside - new_infertile_from_inside
 
@@ -313,6 +322,7 @@ def calculate_new_worms(
     worm_lambda_zero_generator: Generator,
     worm_omega_generator: Generator,
     mortalities_generator: Generator,
+    seed: Optional[int],
 ) -> tuple[WormGroup, Array.Person.Float]:
     """
     Calculates the new total worms in the model for one time step.
@@ -360,6 +370,7 @@ def calculate_new_worms(
         current_worms=current_worms,
         female_mortalities_override=female_mortalities,
         mortalities_generator=mortalities_generator,
+        seed=seed,
     )
 
     outbound = _calc_outbound_worms(
@@ -383,6 +394,7 @@ def calculate_new_worms(
         delta_time,
         worm_lambda_zero_generator,
         worm_omega_generator,
+        seed=seed,
     )
     return (
         _calc_new_worms(inbound, outbound, dead, current_worms, delta_fertility, debug),
