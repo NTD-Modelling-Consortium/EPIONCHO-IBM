@@ -25,6 +25,7 @@ def _calc_dead_worms(
             mortality for female worms, by person in the case of treatment.
         mortalities_generator (Generator): Generates the rate of mortality,
             assumed to be the same in each compartment
+        numpy_bit_gen: (NumpyGenerator): The random number generator for numpy
 
     Returns:
         WormGroup: The number of worms dying in each compartment
@@ -157,6 +158,7 @@ def _calc_delta_fertility(
         delta_time (float): dt - The amount of time advance in one time step
         worm_lambda_zero_generator (Generator): Generates infertile worms at a pre-defined rate
         worm_omega_generator (Generator): Generates fertile worms at a pre-defined rate
+        numpy_bit_gen: (NumpyGenerator): The random number generator for numpy
 
     Returns:
         Array.WormCat.Person.Int: The number of worms going from infertile to fertile in each compartment
@@ -337,6 +339,7 @@ def calculate_new_worms(
         worm_lambda_zero_generator (Generator): Generates infertile worms at a pre-defined rate
         worm_omega_generator (Generator): Generates fertile worms at a pre-defined rate
         mortalities_generator (Generator): Generates dead worms at a pre-defined rate
+        numpy_bit_gen: (NumpyGenerator): The random number generator for numpy
 
     Returns:
         tuple[WormGroup, Array.Person.Float]: Returns new total worms, last time people were treated, respectively

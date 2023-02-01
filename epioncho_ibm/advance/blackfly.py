@@ -230,6 +230,7 @@ def calc_new_worms_from_blackfly(
         n_people (int): The total number of people
         current_worms (WormGroup): The current number of worms
         debug (bool): Runs in debug mode
+        numpy_bit_gen: (Generator): The random number generator for numpy
 
     Returns:
         Array.Person.Int: The number of new worms produced by L3 larvae
