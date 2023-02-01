@@ -6,6 +6,7 @@ from typing import IO, Optional
 import numpy as np
 from endgame_simulations.simulations import BaseState
 from hdf5_dataclass import HDF5Dataclass
+from numpy.random import SFC64, Generator
 from pydantic import BaseModel
 
 from .derived_params import DerivedParams
@@ -41,7 +42,7 @@ class StateStats(BaseModel):
 
 
 def negative_binomial_alt_interface(
-    n: Array.General.Float, mu: Array.General.Float
+    n: Array.General.Float, mu: Array.General.Float, numpy_bit_gen: Generator
 ) -> Array.General.Int:
     """
     Provides an alternate interface for random negative binomial.
@@ -55,7 +56,7 @@ def negative_binomial_alt_interface(
     """
     non_zero_n = n[n > 0]
     rel_prob = non_zero_n / (non_zero_n + mu[n > 0])
-    temp_output = np.random.negative_binomial(
+    temp_output = numpy_bit_gen.negative_binomial(
         n=non_zero_n, p=rel_prob, size=len(non_zero_n)
     )
     output = np.zeros(len(n), dtype=int)
@@ -69,9 +70,11 @@ class State(HDF5Dataclass, BaseState[Params]):
     n_treatments: Optional[Array.General.Int]
     current_time: float = 0.0
     derived_params: DerivedParams = field(init=False, repr=False)
+    numpy_bit_generator: Generator = field(init=False, repr=False)
 
     def __post_init__(self):
         self._derive_params()
+        self.numpy_bit_generator = Generator(SFC64(self._params.seed))
 
     @property
     def n_people(self):
@@ -204,10 +207,14 @@ class State(HDF5Dataclass, BaseState[Params]):
                 )
             )
             for i in range(self._params.humans.skin_snip_number):
-                total_skin_snip_mf[:, i] = negative_binomial_alt_interface(n=kmf, mu=mu)
+                total_skin_snip_mf[:, i] = negative_binomial_alt_interface(
+                    n=kmf, mu=mu, numpy_bit_gen=self.numpy_bit_generator
+                )
             mfobs: Array.Person.Int = np.sum(total_skin_snip_mf, axis=1)
         else:
-            mfobs: Array.Person.Int = negative_binomial_alt_interface(n=kmf, mu=mu)
+            mfobs: Array.Person.Int = negative_binomial_alt_interface(
+                n=kmf, mu=mu, numpy_bit_gen=self.numpy_bit_generator
+            )
 
         mfobs_percent: Array.Person.Float = mfobs / (
             self._params.humans.skin_snip_number * self._params.humans.skin_snip_weight

@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import Optional
 
 import numpy as np
+from numpy.random import Generator
 
 from epioncho_ibm.state import Array, HumanParams, TreatmentParams
 
@@ -11,6 +12,7 @@ def _calc_coverage(
     compliance: Array.Person.Bool,
     measured_coverage: float,
     age_of_compliance: float,
+    numpy_bit_gen: Generator,
 ) -> Array.Person.Bool:
     """
     Calculates whether each person in the model is covered by a treatment.
@@ -29,7 +31,7 @@ def _calc_coverage(
     coverage = measured_coverage / compliant_percentage
     out_coverage = np.repeat(coverage, len(ages))
     out_coverage[non_compliant_people] = 0
-    rand_nums = np.random.uniform(low=0, high=1, size=len(ages))
+    rand_nums = numpy_bit_gen.uniform(low=0, high=1, size=len(ages))
     return rand_nums < out_coverage
 
 
@@ -92,6 +94,7 @@ def get_treatment(
     treatment_times: Optional[Array.Treatments.Float],
     ages: Array.Person.Float,
     compliance: Array.Person.Bool,
+    numpy_bit_gen: Generator,
 ) -> Optional[TreatmentGroup]:
     """
     Generates a treatment group, and calculates coverage, based on the current time
@@ -123,6 +126,7 @@ def get_treatment(
                 compliance,
                 human_params.total_population_coverage,
                 human_params.min_skinsnip_age,
+                numpy_bit_gen,
             )
             return TreatmentGroup(
                 treatment_params, coverage_in, treatment_times, treatment_occurred

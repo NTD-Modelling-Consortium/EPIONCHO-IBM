@@ -1,5 +1,6 @@
 import numpy as np
 from hdf5_dataclass import HDF5Dataclass
+from numpy.random import SFC64, Generator
 
 from epioncho_ibm.utils import array_fully_equal
 
@@ -7,10 +8,12 @@ from .params import Params
 from .types import Array
 
 
-def truncated_geometric(N: int, prob: float, maximum: float) -> Array.Person.Float:
+def truncated_geometric(
+    N: int, prob: float, maximum: float, people_generator: Generator
+) -> Array.Person.Float:
     output = np.repeat(maximum + 1, N)
     while np.any(output > maximum):
-        output[output > maximum] = np.random.geometric(
+        output[output > maximum] = people_generator.geometric(
             p=prob, size=len(output[output > maximum])
         )
     return output
@@ -208,19 +211,24 @@ class People(HDF5Dataclass):
     @classmethod
     def from_params(cls, params: Params):
         n_people = params.n_people
+        if params.seed is not None:
+            people_generator = Generator(SFC64(params.seed + 100))
+        else:
+            people_generator = Generator(SFC64())
 
         sex_array = (
-            np.random.uniform(low=0, high=1, size=n_people) < params.humans.gender_ratio
+            people_generator.uniform(low=0, high=1, size=n_people)
+            < params.humans.gender_ratio
         )
         compliance_array = (
-            np.random.uniform(low=0, high=1, size=n_people)
+            people_generator.uniform(low=0, high=1, size=n_people)
             > params.humans.noncompliant_percentage
         )
         time_of_last_treatment = np.empty(n_people)
         time_of_last_treatment[:] = np.nan
 
         # individual exposure to fly bites
-        individual_exposure = np.random.gamma(
+        individual_exposure = people_generator.gamma(
             shape=params.gamma_distribution,
             scale=params.gamma_distribution,
             size=n_people,
@@ -234,6 +242,7 @@ class People(HDF5Dataclass):
                 N=n_people,
                 prob=params.delta_time / params.humans.mean_human_age,
                 maximum=params.humans.max_human_age / params.delta_time,
+                people_generator=people_generator,
             )
             * params.delta_time,
             sex_is_male=sex_array,
@@ -257,10 +266,15 @@ class People(HDF5Dataclass):
             individual_exposure=new_individual_exposure,
         )
 
-    def process_deaths(self, people_to_die: Array.Person.Bool, gender_ratio: float):
+    def process_deaths(
+        self,
+        people_to_die: Array.Person.Bool,
+        gender_ratio: float,
+        numpy_bit_gen: Generator,
+    ):
         if (total_people_to_die := int(np.sum(people_to_die))) > 0:
             self.sex_is_male[people_to_die] = (
-                np.random.uniform(low=0, high=1, size=total_people_to_die)
+                numpy_bit_gen.uniform(low=0, high=1, size=total_people_to_die)
                 < gender_ratio
             )
             self.ages[people_to_die] = 0
