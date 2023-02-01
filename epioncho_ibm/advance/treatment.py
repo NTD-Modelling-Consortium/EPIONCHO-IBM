@@ -22,6 +22,7 @@ def _calc_coverage(
         compliance (Array.Person.Bool): Whether each person in the model is compliant
         measured_coverage (float): A measured value of coverage assuming all people are compliant.
         age_of_compliance (float): How old a person must be to be compliant
+        numpy_bit_gen: (Generator): The random number generator for numpy
 
     Returns:
         Array.Person.Bool: An array stating if each person in the model is treated
@@ -107,6 +108,7 @@ def get_treatment(
         treatment_times (Optional[Array.Treatments.Float]): The times for treatment across the model.
         ages (Array.Person.Float): The ages of the people
         compliance (Array.Person.Bool): The compliance of the people
+        numpy_bit_gen: (Generator): The random number generator for numpy
 
     Returns:
         Optional[TreatmentGroup]: A treatment group containing information for later treatment

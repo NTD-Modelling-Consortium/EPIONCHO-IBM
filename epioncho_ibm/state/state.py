@@ -50,6 +50,7 @@ def negative_binomial_alt_interface(
     Args:
         n (Array.General.Float): Number of successes
         mu (Array.General.Float): Mean of the distribution
+        numpy_bit_gen: (Generator): The random number generator for numpy
 
     Returns:
         Array.General.Int: Samples from a negative binomial distribution
