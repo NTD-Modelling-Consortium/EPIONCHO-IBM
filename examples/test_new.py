@@ -22,7 +22,7 @@ print(simulation.state.mf_prevalence_in_population())
 # print(simulation.state.people)
 
 print("Starting treatment:")
-for state in simulation.iter_run(end_time=10, sampling_interval=0.1):
+for state in simulation.iter_run(end_time=12, sampling_interval=0.1):
     print(
         f"Time: {state.current_time:.2f}. Prevalence: {state.mf_prevalence_in_population() * 100:.2f}%"
     )
