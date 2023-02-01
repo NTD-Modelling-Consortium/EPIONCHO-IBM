@@ -73,7 +73,7 @@ def advance_state(state: State, debug: bool = False) -> None:
         worm_sex_ratio_generator=state.derived_params.worm_sex_ratio_generator,
         worm_lambda_zero_generator=state.derived_params.worm_lambda_zero_generator,
         worm_omega_generator=state.derived_params.worm_omega_generator,
-        seed=state._params.seed,
+        numpy_bit_gen=state.numpy_bit_generator,
     )
 
     if (
