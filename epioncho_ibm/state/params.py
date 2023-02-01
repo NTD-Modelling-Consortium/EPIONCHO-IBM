@@ -122,7 +122,8 @@ class HumanParams(BaseModel):
 
 
 class BaseParams(BaseModel):
-    # TODO: Should these two be here? Also: make them read only
+    seed: Optional[int] = None
+    # TODO: Make these two read only
     n_people: int  # number of people in the simulation
     gamma_distribution: float = 0.3  # Individual level exposure heterogeneity
     n_treatments_bin_size: float = 1  # The bin size that n_treatments is recorded in

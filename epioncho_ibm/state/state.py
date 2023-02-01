@@ -68,7 +68,6 @@ class State(HDF5Dataclass, BaseState[Params]):
     _params: ImmutableParams
     n_treatments: Optional[Array.General.Int]
     current_time: float = 0.0
-    seed: Optional[int] = None
     derived_params: DerivedParams = field(init=False, repr=False)
 
     def __post_init__(self):
@@ -96,7 +95,7 @@ class State(HDF5Dataclass, BaseState[Params]):
     def _derive_params(self) -> None:
         assert self._params
         self.derived_params = DerivedParams(
-            immutable_to_mutable(self._params), seed=self.seed
+            immutable_to_mutable(self._params), seed=self._params.seed
         )
 
     def get_state_for_age_group(self, age_start: float, age_end: float) -> "State":
