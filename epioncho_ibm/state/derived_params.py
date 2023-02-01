@@ -1,5 +1,5 @@
 import math
-from typing import Optional
+from typing import Iterator, Optional
 
 import numpy as np
 from fast_binomial import SFC64, Generator
@@ -78,22 +78,31 @@ class DerivedParams:
         else:
             self.treatment_times = None
 
+        def seed_generator(master_seed: int | None) -> Iterator[int | None]:
+            while True:
+                if master_seed is None:
+                    yield None
+                else:
+                    yield master_seed
+                    master_seed += 1
+
+        seed_gen = seed_generator(seed)
+        next(seed_gen)
         self.people_to_die_generator = Generator(
-            SFC64(seed=seed), params.delta_time / params.humans.mean_human_age
+            SFC64(seed=next(seed_gen)), params.delta_time / params.humans.mean_human_age
         )
         self.worm_age_rate_generator = Generator(
-            SFC64(seed=seed), params.delta_time / params.worms.worms_aging
+            SFC64(seed=next(seed_gen)), params.delta_time / params.worms.worms_aging
         )
         self.worm_sex_ratio_generator = Generator(
-            SFC64(seed=seed), params.worms.sex_ratio
+            SFC64(seed=next(seed_gen)), params.worms.sex_ratio
         )
         self.worm_lambda_zero_generator = Generator(
-            SFC64(seed=seed), params.worms.lambda_zero * params.delta_time
+            SFC64(seed=next(seed_gen)), params.worms.lambda_zero * params.delta_time
         )
         self.worm_omega_generator = Generator(
-            SFC64(seed=seed), params.worms.omega * params.delta_time
+            SFC64(seed=next(seed_gen)), params.worms.omega * params.delta_time
         )
-
         self.worm_mortality_generator = Generator(
-            SFC64(seed=seed), self.worm_mortality_rate
+            SFC64(seed=next(seed_gen)), self.worm_mortality_rate
         )
