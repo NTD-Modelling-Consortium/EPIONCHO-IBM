@@ -1,5 +1,4 @@
-from functools import cache
-from typing import Optional, TypeVar
+from typing import TypeVar
 
 import numpy as np
 from numpy.random import SFC64, Generator
@@ -25,14 +24,3 @@ def lag_array(fill: NDArray[DType], arr: NDArray[DType], n: int = 1) -> NDArray[
 
 def array_fully_equal(a1: NDArray[DType], a2: NDArray[DType]):
     return np.array_equal(a1, a2, equal_nan=True)
-
-
-@cache
-def random_generator(seed: Optional[int]):
-    return Generator(SFC64(seed=seed))
-
-
-def fast_binomial(
-    n: NDArray[np.int_], p: NDArray[np.float_] | float, seed: Optional[int]
-) -> NDArray[np.int_]:
-    return random_generator(seed=seed).binomial(n, p)
