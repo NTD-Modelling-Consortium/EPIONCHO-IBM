@@ -39,5 +39,3 @@ if __name__ == "__main__":
         max_workers=cpu_count(),
     )
     write_data_to_csv(data, "test.csv")
-
-    # write a row to the csv file
