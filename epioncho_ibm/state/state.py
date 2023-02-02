@@ -95,6 +95,7 @@ class State(HDF5Dataclass, BaseState[Params]):
         """
         self._params = mutable_to_immutable(params)
         self._derive_params()
+        self.numpy_bit_generator = Generator(SFC64(self._params.seed))
 
     def _derive_params(self) -> None:
         assert self._params
