@@ -14,27 +14,36 @@ endgame = """
         },
         "changes": [
             {
-                "year": 2022,
+                "year": 2018,
                 "month": 1,
                 "params": {
-                    "delta_time_days": 1
+                    "humans":{
+                        "min_skinsnip_age": 5
+                    }
                 }
             },
             {
-                "year": 2028,
+                "year": 2026,
                 "month": 1,
                 "params": {
-                    "delta_time_days": 0.5
+                    "humans":{
+                        "min_skinsnip_age": 2
+                    }
                 }
             }
         ]
     },
     "programs": [
         {
-            "first_year": 2025,
-            "first_month": 2,
+            "first_year": 2018,
+            "last_year": 2025,
+            "interventions": {
+                "treatment_interval": 1
+            }
+        },
+        {
+            "first_year": 2027,
             "last_year": 2030,
-            "last_month": 7,
             "interventions": {
                 "treatment_interval": 0.5
             }
@@ -42,6 +51,8 @@ endgame = """
     ]
 }
 """
+
+save_file = "./test.hdf5"
 
 
 def run_sim(i) -> Data:
@@ -54,13 +65,13 @@ def run_sim(i) -> Data:
 
 params = EpionchoEndgameModel.parse_raw(endgame)
 simulation = EndgameSimulation(
-    start_time=2020, endgame=params, verbose=True, debug=True
+    start_time=2015, endgame=params, verbose=True, debug=True
 )
 
 print("First years without treatment:")
-simulation.run(end_time=2025.0)
+simulation.run(end_time=2018.0)
 
-save_file = "./test.hdf5"
+
 simulation.save(save_file)
 
 run_iters = 5
@@ -72,5 +83,3 @@ if __name__ == "__main__":
         max_workers=cpu_count(),
     )
     write_data_to_csv(data, "test.csv")
-
-    # write a row to the csv file
