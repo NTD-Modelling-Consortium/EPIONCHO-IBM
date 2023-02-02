@@ -9,7 +9,7 @@ endgame = """
 {
     "parameters": {
         "initial": {
-            "n_people": 100
+            "n_people": 400
         },
         "changes": [
             {
