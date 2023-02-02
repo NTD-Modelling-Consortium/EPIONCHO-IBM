@@ -1,6 +1,5 @@
 from multiprocessing import cpu_count
 
-import numpy as np
 from tqdm.contrib.concurrent import process_map
 
 from epioncho_ibm import EndgameSimulation, EpionchoEndgameModel
@@ -42,7 +41,7 @@ endgame = """
             }
         },
         {
-            "first_year": 2027,
+            "first_year": 2026,
             "last_year": 2030,
             "interventions": {
                 "treatment_interval": 0.5
