@@ -104,8 +104,8 @@ def endgame_to_params(endgame: EpionchoEndgameModel) -> list[tuple[float, Params
             current_params = params[-1]
             current_treatment = current_params.params.treatment
             assert (
-                not current_treatment or current_treatment.stop_time < time_of_change
-            ), "Overlapping treatment found!"
+                not current_treatment or current_treatment.stop_time <= time_of_change
+            ), f"Overlapping treatment found! \nCurrent_treatment: {current_treatment} \nStop time: {current_treatment.stop_time} \ntime_of_change: {time_of_change}"
 
             program = next(programs)
 
