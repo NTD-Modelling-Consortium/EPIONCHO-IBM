@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import Optional
 
 import numpy as np
+from numpy.random import Generator
 
 from epioncho_ibm.state import Array, HumanParams, TreatmentParams
 
@@ -11,6 +12,7 @@ def _calc_coverage(
     compliance: Array.Person.Bool,
     measured_coverage: float,
     age_of_compliance: float,
+    numpy_bit_gen: Generator,
 ) -> Array.Person.Bool:
     """
     Calculates whether each person in the model is covered by a treatment.
@@ -20,6 +22,7 @@ def _calc_coverage(
         compliance (Array.Person.Bool): Whether each person in the model is compliant
         measured_coverage (float): A measured value of coverage assuming all people are compliant.
         age_of_compliance (float): How old a person must be to be compliant
+        numpy_bit_gen: (Generator): The random number generator for numpy
 
     Returns:
         Array.Person.Bool: An array stating if each person in the model is treated
@@ -29,7 +32,7 @@ def _calc_coverage(
     coverage = measured_coverage / compliant_percentage
     out_coverage = np.repeat(coverage, len(ages))
     out_coverage[non_compliant_people] = 0
-    rand_nums = np.random.uniform(low=0, high=1, size=len(ages))
+    rand_nums = numpy_bit_gen.uniform(low=0, high=1, size=len(ages))
     return rand_nums < out_coverage
 
 
@@ -92,6 +95,7 @@ def get_treatment(
     treatment_times: Optional[Array.Treatments.Float],
     ages: Array.Person.Float,
     compliance: Array.Person.Bool,
+    numpy_bit_gen: Generator,
 ) -> Optional[TreatmentGroup]:
     """
     Generates a treatment group, and calculates coverage, based on the current time
@@ -104,6 +108,7 @@ def get_treatment(
         treatment_times (Optional[Array.Treatments.Float]): The times for treatment across the model.
         ages (Array.Person.Float): The ages of the people
         compliance (Array.Person.Bool): The compliance of the people
+        numpy_bit_gen: (Generator): The random number generator for numpy
 
     Returns:
         Optional[TreatmentGroup]: A treatment group containing information for later treatment
@@ -123,6 +128,7 @@ def get_treatment(
                 compliance,
                 human_params.total_population_coverage,
                 human_params.min_skinsnip_age,
+                numpy_bit_gen,
             )
             return TreatmentGroup(
                 treatment_params, coverage_in, treatment_times, treatment_occurred

@@ -20,6 +20,7 @@ def advance_state(state: State, debug: bool = False) -> None:
         state.derived_params.treatment_times,
         state.people.ages,
         state.people.compliance,
+        state.numpy_bit_generator,
     )
     if treatment is not None and treatment.treatment_occurred:
         assert state.n_treatments is not None
@@ -49,6 +50,7 @@ def advance_state(state: State, debug: bool = False) -> None:
         state.n_people,
         old_worms,
         debug,
+        state.numpy_bit_generator,
     )
 
     if state.people.delay_arrays.worm_delay is None:
@@ -71,6 +73,7 @@ def advance_state(state: State, debug: bool = False) -> None:
         worm_sex_ratio_generator=state.derived_params.worm_sex_ratio_generator,
         worm_lambda_zero_generator=state.derived_params.worm_lambda_zero_generator,
         worm_omega_generator=state.derived_params.worm_omega_generator,
+        numpy_bit_gen=state.numpy_bit_generator,
     )
 
     if (
@@ -136,4 +139,6 @@ def advance_state(state: State, debug: bool = False) -> None:
         == 1,
         state.people.ages >= state._params.humans.max_human_age,
     )
-    state.people.process_deaths(people_to_die, state._params.humans.gender_ratio)
+    state.people.process_deaths(
+        people_to_die, state._params.humans.gender_ratio, state.numpy_bit_generator
+    )

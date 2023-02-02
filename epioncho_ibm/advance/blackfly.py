@@ -1,4 +1,5 @@
 import numpy as np
+from numpy.random import Generator
 
 from epioncho_ibm.state import Array, BlackflyParams, WormGroup
 
@@ -216,6 +217,7 @@ def calc_new_worms_from_blackfly(
     n_people: int,
     current_worms: WormGroup,
     debug: bool,
+    numpy_bit_gen: Generator,
 ) -> Array.Person.Int:
     """
     Calculates the number of new worms produced based on the number of L3 larvae
@@ -228,6 +230,7 @@ def calc_new_worms_from_blackfly(
         n_people (int): The total number of people
         current_worms (WormGroup): The current number of worms
         debug (bool): Runs in debug mode
+        numpy_bit_gen: (Generator): The random number generator for numpy
 
     Returns:
         Array.Person.Int: The number of new worms produced by L3 larvae
@@ -237,5 +240,5 @@ def calc_new_worms_from_blackfly(
     )
     if debug:
         assert not np.any(new_rate > 10**10)
-    new_worms = np.random.poisson(lam=new_rate, size=n_people)
+    new_worms = numpy_bit_gen.poisson(lam=new_rate, size=n_people)
     return new_worms

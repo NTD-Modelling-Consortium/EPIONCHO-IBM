@@ -78,18 +78,24 @@ class DerivedParams:
         else:
             self.treatment_times = None
 
+        seeds = [
+            params.seed + i + 1 if params.seed is not None else None for i in range(6)
+        ]
         self.people_to_die_generator = Generator(
-            SFC64(), params.delta_time / params.humans.mean_human_age
+            SFC64(seeds[0]), params.delta_time / params.humans.mean_human_age
         )
         self.worm_age_rate_generator = Generator(
-            SFC64(), params.delta_time / params.worms.worms_aging
+            SFC64(seeds[1]), params.delta_time / params.worms.worms_aging
         )
-        self.worm_sex_ratio_generator = Generator(SFC64(), params.worms.sex_ratio)
+        self.worm_sex_ratio_generator = Generator(
+            SFC64(seeds[2]), params.worms.sex_ratio
+        )
         self.worm_lambda_zero_generator = Generator(
-            SFC64(), params.worms.lambda_zero * params.delta_time
+            SFC64(seeds[3]), params.worms.lambda_zero * params.delta_time
         )
         self.worm_omega_generator = Generator(
-            SFC64(), params.worms.omega * params.delta_time
+            SFC64(seeds[4]), params.worms.omega * params.delta_time
         )
-
-        self.worm_mortality_generator = Generator(SFC64(), self.worm_mortality_rate)
+        self.worm_mortality_generator = Generator(
+            SFC64(seeds[5]), self.worm_mortality_rate
+        )

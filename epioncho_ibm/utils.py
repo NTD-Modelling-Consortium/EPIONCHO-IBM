@@ -1,8 +1,6 @@
-from functools import cache
 from typing import TypeVar
 
 import numpy as np
-from numpy.random import SFC64, Generator
 from numpy.typing import NDArray
 
 DType = TypeVar("DType", bound=np.generic)
@@ -25,14 +23,3 @@ def lag_array(fill: NDArray[DType], arr: NDArray[DType], n: int = 1) -> NDArray[
 
 def array_fully_equal(a1: NDArray[DType], a2: NDArray[DType]):
     return np.array_equal(a1, a2, equal_nan=True)
-
-
-@cache
-def random_generator():
-    return Generator(SFC64())
-
-
-def fast_binomial(
-    n: NDArray[np.int_], p: NDArray[np.float_] | float
-) -> NDArray[np.int_]:
-    return random_generator().binomial(n, p)

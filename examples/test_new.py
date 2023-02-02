@@ -4,18 +4,25 @@ import numpy as np
 
 from epioncho_ibm import Params, Simulation, TreatmentParams, make_state_from_hdf5
 
-np.random.seed(0)
-
-params = Params(treatment=TreatmentParams(start_time=5, stop_time=130), n_people=400)
+params = Params(
+    delta_time_days=2,
+    treatment=TreatmentParams(start_time=5, stop_time=130),
+    n_people=400,
+    seed=0,
+)
 
 simulation = Simulation(start_time=0, params=params, verbose=True)
 print("First years without treatment:")
-simulation.run(end_time=5.0)
+simulation.run(end_time=10.0)
 # print(simulation.state.people)
 print(simulation.state.mf_prevalence_in_population())
+# params.seed = None
+# simulation.reset_current_params(params)
+# simulation.run(end_time=12.0)
+# print(simulation.state.people)
 
 print("Starting treatment:")
-for state in simulation.iter_run(end_time=10, sampling_interval=0.1):
+for state in simulation.iter_run(end_time=12, sampling_interval=0.1):
     print(
         f"Time: {state.current_time:.2f}. Prevalence: {state.mf_prevalence_in_population() * 100:.2f}%"
     )

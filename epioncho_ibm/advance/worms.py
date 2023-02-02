@@ -1,5 +1,6 @@
 import numpy as np
 from fast_binomial import Generator
+from numpy.random import Generator as NumpyGenerator
 
 import epioncho_ibm.utils as utils
 from epioncho_ibm.state import Array, WormGroup, WormParams
@@ -13,6 +14,7 @@ def _calc_dead_worms(
     current_worms: WormGroup,
     female_mortalities_override: Array.WormCat.Person.Float | None,
     mortalities_generator: Generator,
+    numpy_bit_gen: NumpyGenerator,
 ) -> WormGroup:
     """
     Calculates the number of worms dying in each compartment
@@ -23,6 +25,7 @@ def _calc_dead_worms(
             mortality for female worms, by person in the case of treatment.
         mortalities_generator (Generator): Generates the rate of mortality,
             assumed to be the same in each compartment
+        numpy_bit_gen: (NumpyGenerator): The random number generator for numpy
 
     Returns:
         WormGroup: The number of worms dying in each compartment
@@ -35,7 +38,7 @@ def _calc_dead_worms(
     ) -> Array.WormCat.Person.Int:
         assert current_worms.ndim == 2
         if mortalities_override is not None:
-            return utils.fast_binomial(n=current_worms, p=mortalities_override)
+            return numpy_bit_gen.binomial(n=current_worms, p=mortalities_override)
         else:
             return mortalities_generator.binomial(n=current_worms.T).T
 
@@ -140,6 +143,7 @@ def _calc_delta_fertility(
     delta_time: float,
     worm_lambda_zero_generator: Generator,
     worm_omega_generator: Generator,
+    numpy_bit_gen: NumpyGenerator,
 ) -> Array.WormCat.Person.Int:
     """
     Calculates how many worms go from infertile to fertile.
@@ -154,6 +158,7 @@ def _calc_delta_fertility(
         delta_time (float): dt - The amount of time advance in one time step
         worm_lambda_zero_generator (Generator): Generates infertile worms at a pre-defined rate
         worm_omega_generator (Generator): Generates fertile worms at a pre-defined rate
+        numpy_bit_gen: (NumpyGenerator): The random number generator for numpy
 
     Returns:
         Array.WormCat.Person.Int: The number of worms going from infertile to fertile in each compartment
@@ -174,7 +179,7 @@ def _calc_delta_fertility(
             if prob is None:
                 return worm_generator.binomial(n=remaining_female_worms)
             else:
-                return utils.fast_binomial(n=remaining_female_worms, p=prob)
+                return numpy_bit_gen.binomial(n=remaining_female_worms, p=prob)
         else:
             return np.zeros_like(current_worms)
 
@@ -313,6 +318,7 @@ def calculate_new_worms(
     worm_lambda_zero_generator: Generator,
     worm_omega_generator: Generator,
     mortalities_generator: Generator,
+    numpy_bit_gen: NumpyGenerator,
 ) -> tuple[WormGroup, Array.Person.Float]:
     """
     Calculates the new total worms in the model for one time step.
@@ -333,6 +339,7 @@ def calculate_new_worms(
         worm_lambda_zero_generator (Generator): Generates infertile worms at a pre-defined rate
         worm_omega_generator (Generator): Generates fertile worms at a pre-defined rate
         mortalities_generator (Generator): Generates dead worms at a pre-defined rate
+        numpy_bit_gen: (NumpyGenerator): The random number generator for numpy
 
     Returns:
         tuple[WormGroup, Array.Person.Float]: Returns new total worms, last time people were treated, respectively
@@ -360,6 +367,7 @@ def calculate_new_worms(
         current_worms=current_worms,
         female_mortalities_override=female_mortalities,
         mortalities_generator=mortalities_generator,
+        numpy_bit_gen=numpy_bit_gen,
     )
 
     outbound = _calc_outbound_worms(
@@ -383,6 +391,7 @@ def calculate_new_worms(
         delta_time,
         worm_lambda_zero_generator,
         worm_omega_generator,
+        numpy_bit_gen=numpy_bit_gen,
     )
     return (
         _calc_new_worms(inbound, outbound, dead, current_worms, delta_fertility, debug),

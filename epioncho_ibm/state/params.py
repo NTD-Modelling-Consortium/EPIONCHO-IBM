@@ -53,7 +53,7 @@ class BlackflyParams(BaseModel):
     blackfly_mort_from_mf_per_fly_per_year: float = (
         0.39  # Per capita microfilaria-induced mortality of blackfly vectors
     )
-    mu_L3: int = 52  # Per capita mortality of L3 Larvae
+    mu_L3: float = 52  # Per capita mortality of L3 Larvae
     a_H: float = 0.8  # Proportion of infected larvae shed per bite a.H
     l1_l2_per_larva_per_year: float = (
         201.6189  # Per capita development rate of larvae from stage L1 to L2 'nuone'
@@ -122,7 +122,8 @@ class HumanParams(BaseModel):
 
 
 class BaseParams(BaseModel):
-    # TODO: Should these two be here? Also: make them read only
+    seed: Optional[int] = None
+    # TODO: Make these two read only
     n_people: int  # number of people in the simulation
     gamma_distribution: float = 0.3  # Individual level exposure heterogeneity
     n_treatments_bin_size: float = 1  # The bin size that n_treatments is recorded in
