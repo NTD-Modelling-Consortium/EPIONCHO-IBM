@@ -16,29 +16,38 @@ def add_state_to_run_data(
     run_data: Data,
     prevalence: bool = True,
     number: bool = True,
+    mean_worm_burden: bool = True,
     n_treatments: bool = True,
     achieved_coverage: bool = True,
     with_age_groups: bool = True,
 ) -> None:
     age_min = 6
     age_max = 100
-    if prevalence or number:
+    if prevalence or number or mean_worm_burden:
         if with_age_groups:
             for age_start in range(age_min, age_max):
                 age_state = state.get_state_for_age_group(age_start, age_start + 1)
                 partial_key = (round(state.current_time), age_start, age_start + 1)
                 if prevalence:
-                    prev = age_state.mf_prevalence_in_population()
-                    run_data[(*partial_key, "prevalence")] = prev
+                    run_data[
+                        (*partial_key, "prevalence")
+                    ] = age_state.mf_prevalence_in_population()
                 if number:
                     run_data[(*partial_key, "number")] = age_state.n_people
+                if mean_worm_burden:
+                    run_data[
+                        (*partial_key, "mean_worm_burden")
+                    ] = age_state.mean_worm_burden()
         else:
             partial_key = (round(state.current_time), age_min, age_max)
             if prevalence:
-                prev = state.mf_prevalence_in_population()
-                run_data[(*partial_key, "prevalence")] = prev
+                run_data[
+                    (*partial_key, "prevalence")
+                ] = state.mf_prevalence_in_population()
             if number:
                 run_data[(*partial_key, "number")] = state.n_people
+            if mean_worm_burden:
+                run_data[(*partial_key, "mean_worm_burden")] = state.mean_worm_burden()
     if n_treatments or achieved_coverage:
         if with_age_groups:
             for age_start in range(age_min, age_max, 5):
