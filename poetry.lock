@@ -748,6 +748,22 @@ optional = false
 python-versions = ">=3.7"
 
 [[package]]
+name = "pandas"
+version = "1.5.3"
+description = "Powerful data structures for data analysis, time series, and statistics"
+category = "main"
+optional = false
+python-versions = ">=3.8"
+
+[package.dependencies]
+numpy = {version = ">=1.21.0", markers = "python_version >= \"3.10\""}
+python-dateutil = ">=2.8.1"
+pytz = ">=2020.1"
+
+[package.extras]
+test = ["hypothesis (>=5.5.3)", "pytest (>=6.0)", "pytest-xdist (>=1.31)"]
+
+[[package]]
 name = "parso"
 version = "0.8.3"
 description = "A Python Parser"
@@ -1088,6 +1104,14 @@ python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,>=2.7"
 six = ">=1.5"
 
 [[package]]
+name = "pytz"
+version = "2022.7.1"
+description = "World timezone definitions, modern and historical"
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "pywin32"
 version = "305"
 description = "Python for Window Extensions"
@@ -1316,7 +1340,7 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.10, <3.11"
-content-hash = "f3b989dc762fc230b3870ea40ff8c4d1073a6e5cdd8da1b03e74789418fffbf8"
+content-hash = "97319d81734df6a7dfae96af594c4375e1d7b618765a8c9546b4b424b872eeee"
 
 [metadata.files]
 appnope = []
@@ -1376,6 +1400,7 @@ mypy-extensions = []
 nodeenv = []
 numpy = []
 packaging = []
+pandas = []
 parso = []
 pathspec = []
 pexpect = []
@@ -1404,6 +1429,7 @@ pytest-rerunfailures = []
 pytest-trust-random = []
 pytest-xdist = []
 python-dateutil = []
+pytz = []
 pywin32 = []
 pyyaml = []
 pyyaml-env-tag = []
