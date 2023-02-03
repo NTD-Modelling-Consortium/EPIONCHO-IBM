@@ -242,6 +242,16 @@ class State(HDF5Dataclass, BaseState[Params]):
             else:
                 return 0.0
 
+    def worm_burden_per_person(self) -> Array.Person.Int:
+        return (
+            self.people.worms.male.sum(0)
+            + self.people.worms.fertile.sum(0)
+            + self.people.worms.infertile.sum(0)
+        )
+
+    def mean_worm_burden(self) -> float:
+        return float(np.mean(self.worm_burden_per_person()))
+
 
 def make_state_from_params(params: Params):
     return State.from_params(params)
