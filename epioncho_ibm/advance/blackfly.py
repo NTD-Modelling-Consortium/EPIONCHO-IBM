@@ -147,30 +147,20 @@ def _delta_h(
     Returns:
         Array.Person.Float: The proportion of L3 larvae developing into adult worms for each person
     """
-    if blackfly_params.with_immunity:
-        total_worms_by_age: Array.WormCat.Person.Int = (
-            current_worms.male + current_worms.fertile + current_worms.infertile
-        )
-        total_worms: Array.Person.Int = np.sum(total_worms_by_age, axis=0)
-        return (
-            np.exp(-blackfly_params.immunity * total_worms)
-            * blackfly_params.delta_h_zero
-        )
-    else:
-        annual_transm_potential = (
-            blackfly_params.bite_rate_per_person_per_year
-            / blackfly_params.bite_rate_per_fly_on_human
-        )
-        multiplier: Array.Person.Float = (
-            blackfly_params.c_h
-            * annual_transm_potential
-            * blackfly_params.bite_rate_per_fly_on_human
-            * L3
-            * total_exposure
-        )
-        return (
-            blackfly_params.delta_h_zero + (blackfly_params.delta_h_inf * multiplier)
-        ) / (1 + multiplier)
+    annual_transm_potential = (
+        blackfly_params.bite_rate_per_person_per_year
+        / blackfly_params.bite_rate_per_fly_on_human
+    )
+    multiplier: Array.Person.Float = (
+        blackfly_params.c_h
+        * annual_transm_potential
+        * blackfly_params.bite_rate_per_fly_on_human
+        * L3
+        * total_exposure
+    )
+    return (
+        blackfly_params.delta_h_zero + (blackfly_params.delta_h_inf * multiplier)
+    ) / (1 + multiplier)
 
 
 def _calc_rate_of_l3_to_worms(
