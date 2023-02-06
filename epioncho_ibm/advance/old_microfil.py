@@ -26,7 +26,6 @@ def construct_derive_microfil_one(
     new_microfil = np.einsum(
         "ij, i -> j", fertile_worms, fecundity_rates_worms
     )  # TODO: Check?
-
     def derive_microfil_one(k: Union[float, NDArray[np.float_]]) -> NDArray[np.float_]:
         mortality_temp = mortality * (microfil + k)
         assert np.sum(mortality_temp < 0) == 0
@@ -55,11 +54,13 @@ def construct_derive_microfil_rest(
     movement_last = microfil_compartment_minus_one * microfil_move_rate
 
     def derive_microfil_rest(k: Union[float, NDArray[np.float_]]) -> NDArray[np.float_]:
+
         mortality_temp = mortality * (microfil + k)
         assert np.sum(mortality_temp < 0) == 0
         move_rate_temp = microfil_move_rate * (microfil + k)
         assert np.sum(move_rate_temp < 0) == 0
         mortality_temp[mortality_temp < 0] = 0
+        
         move_rate_temp[move_rate_temp < 0] = 0
         return movement_last - mortality_temp - move_rate_temp
 

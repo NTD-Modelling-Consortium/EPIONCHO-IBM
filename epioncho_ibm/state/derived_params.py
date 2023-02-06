@@ -48,19 +48,17 @@ class DerivedParams:
             )
         )
 
-        microfillarie_age_categories = np.arange(
+        microfillarie_age_categories = np.linspace(
             start=0,
             stop=params.microfil.max_microfil_age,
-            step=params.microfil.max_microfil_age / params.microfil.microfil_age_stages,
+            num=params.microfil.microfil_age_stages,
         )
-
         self.microfillarie_mortality_rate = _weibull_mortality(
-            params.delta_time,
+            params.delta_time_days,
             params.microfil.mu_microfillarie1,
             params.microfil.mu_microfillarie2,
             microfillarie_age_categories,
         )
-
         if params.treatment is not None:
             treatment_number = (
                 params.treatment.stop_time - params.treatment.start_time

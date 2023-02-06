@@ -98,7 +98,7 @@ def advance_state(state: State, debug: bool = False) -> None:
     #     current_male_worms=old_worms.male,
     #     debug=debug,
     # )
-
+    old_mf_mat = state.people.mf.copy()
     for compartment in range(state._params.microfil.microfil_age_stages):
         if compartment == 0:
             state.people.mf[compartment] = change_in_microfil(
@@ -112,7 +112,7 @@ def advance_state(state: State, debug: bool = False) -> None:
                 fecundity_rates_worms=state.derived_params.fecundity_rates_worms,
                 time_of_last_treatment=state.people.time_of_last_treatment,
                 current_time=state.current_time,
-                current_microfil=state.people.mf[compartment],
+                current_microfil=old_mf_mat[compartment],
                 previous_microfil=None,
                 current_fertile_female_worms=state.people.worms.fertile,
                 current_male_worms=state.people.worms.male,
@@ -129,8 +129,8 @@ def advance_state(state: State, debug: bool = False) -> None:
                 fecundity_rates_worms=state.derived_params.fecundity_rates_worms,
                 time_of_last_treatment=state.people.time_of_last_treatment,
                 current_time=state.current_time,
-                current_microfil=state.people.mf[compartment],
-                previous_microfil=state.people.mf[compartment - 1],
+                current_microfil=old_mf_mat[compartment],
+                previous_microfil=old_mf_mat[compartment - 1],
                 current_fertile_female_worms=state.people.worms.fertile,
                 current_male_worms=state.people.worms.male,
             )
