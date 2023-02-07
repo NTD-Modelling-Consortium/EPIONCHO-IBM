@@ -88,18 +88,18 @@ def get_state_from_R(
 
 
 state = get_state_from_R(
-    "allmatstemp_t-1.csv",
-    "exvec_t-1.csv",
-    "mfdelay_t-1.csv",
-    "exposuredelay_t-1.csv",
-    "lextras_t-1.csv",
+    "R_data_files/allmatstemp_t-1.csv",
+    "R_data_files/exvec_t-1.csv",
+    "R_data_files/mfdelay_t-1.csv",
+    "R_data_files/exposuredelay_t-1.csv",
+    "R_data_files/lextras_t-1.csv",
 )
 state2 = get_state_from_R(
-    "allmatstemp_t.csv",
-    "exvec_t.csv",
-    "mfdelay_t.csv",
-    "exposuredelay_t.csv",
-    "lextras_t.csv",
+    "R_data_files/allmatstemp_t.csv",
+    "R_data_files/exvec_t.csv",
+    "R_data_files/mfdelay_t.csv",
+    "R_data_files/exposuredelay_t.csv",
+    "R_data_files/lextras_t.csv",
 )
 
 advance_state(state)
