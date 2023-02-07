@@ -83,7 +83,7 @@ def advance_state(state: State, debug: bool = False) -> None:
         state.people.time_of_last_treatment = last_time_of_last_treatment
 
     # inputs for delay in L1
-
+    old_mf: Array.Person.Float = np.sum(state.people.mf, axis=0)
     state.people.mf += calculate_microfil_delta(
         current_microfil=state.people.mf,
         delta_time=state._params.delta_time,
@@ -98,7 +98,6 @@ def advance_state(state: State, debug: bool = False) -> None:
         debug=debug,
     )
 
-    old_mf: Array.Person.Float = np.sum(state.people.mf, axis=0)
     old_blackfly_L1 = state.people.blackfly.L1
 
     if state.people.delay_arrays.exposure_delay is None:
