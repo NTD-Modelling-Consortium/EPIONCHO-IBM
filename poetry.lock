@@ -227,7 +227,7 @@ tqdm = "^4.64.1"
 type = "git"
 url = "git@github.com:dreamingspires/endgame-simulations.git"
 reference = "master"
-resolved_reference = "7044aad667adbbccf91e760f60f2ecaf8528aa8c"
+resolved_reference = "acdd8e1a451b6b0b14128ca0403e0ff13852d1bc"
 
 [[package]]
 name = "exceptiongroup"
