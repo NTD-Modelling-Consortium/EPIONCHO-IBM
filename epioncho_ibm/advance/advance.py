@@ -48,7 +48,6 @@ def advance_state(state: State, debug: bool = False) -> None:
         state._params.delta_time,
         total_exposure,
         state.n_people,
-        old_worms,
         debug,
         state.numpy_bit_generator,
     )

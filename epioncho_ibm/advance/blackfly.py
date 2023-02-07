@@ -131,7 +131,6 @@ def _delta_h(
     blackfly_params: BlackflyParams,
     L3: float,
     total_exposure: Array.Person.Float,
-    current_worms: WormGroup,
 ) -> Array.Person.Float:
     """
     Calculates the proportion of L3 larvae (final life stage in the fly population)
@@ -142,7 +141,6 @@ def _delta_h(
             Parameters delta.hz, delta.hinf, c.h control the density dependent establishment of parasites
         L3 (float): The average amount of L3 larvae
         total_exposure (Array.Person.Float): The overall exposure of each person to infection
-        current_worms (WormGroup): The current number of worms
 
     Returns:
         Array.Person.Float: The proportion of L3 larvae developing into adult worms for each person
@@ -168,7 +166,6 @@ def _calc_rate_of_l3_to_worms(
     delta_time: float,
     L3: float,
     total_exposure: Array.Person.Float,
-    current_worms: WormGroup,
 ) -> Array.Person.Float:
     """
     Calculates the rate at which L3 Larvae become worms in the human host
@@ -179,12 +176,11 @@ def _calc_rate_of_l3_to_worms(
         delta_time (float): dt - one unit of time
         L3 (float): The average amount of L3 larvae
         total_exposure (Array.Person.Float): The overall exposure of each person to infection
-        current_worms (WormGroup): The current number of worms
 
     Returns:
         Array.Person.Float: The rate at which L3 larvae become worms in each person
     """
-    dh = _delta_h(blackfly_params, L3, total_exposure, current_worms=current_worms)
+    dh = _delta_h(blackfly_params, L3, total_exposure)
     annual_transm_potential = (
         blackfly_params.bite_rate_per_person_per_year
         / blackfly_params.bite_rate_per_fly_on_human
@@ -205,7 +201,6 @@ def calc_new_worms_from_blackfly(
     delta_time: float,
     total_exposure: Array.Person.Float,
     n_people: int,
-    current_worms: WormGroup,
     debug: bool,
     numpy_bit_gen: Generator,
 ) -> Array.Person.Int:
@@ -218,7 +213,6 @@ def calc_new_worms_from_blackfly(
         delta_time (float): dt - one unit of time
         total_exposure (Array.Person.Float): The overall exposure of each person to infection
         n_people (int): The total number of people
-        current_worms (WormGroup): The current number of worms
         debug (bool): Runs in debug mode
         numpy_bit_gen: (Generator): The random number generator for numpy
 
@@ -226,7 +220,7 @@ def calc_new_worms_from_blackfly(
         Array.Person.Int: The number of new worms produced by L3 larvae
     """
     new_rate = _calc_rate_of_l3_to_worms(
-        blackfly_params, delta_time, float(np.mean(L3)), total_exposure, current_worms
+        blackfly_params, delta_time, float(np.mean(L3)), total_exposure
     )
     if debug:
         assert not np.any(new_rate > 10**10)
