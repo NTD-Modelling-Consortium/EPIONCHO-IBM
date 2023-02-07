@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from epioncho_ibm import Simulation, State
+from epioncho_ibm import State
 from epioncho_ibm.advance.advance import advance_state
 from epioncho_ibm.state.params import BlackflyParams, Params, mutable_to_immutable
 from epioncho_ibm.state.people import BlackflyLarvae, DelayArrays, People, WormGroup
@@ -76,9 +76,10 @@ def get_state_from_R(
                     delta_h_inf=0.003,
                     c_h=0.005,
                     bite_rate_per_person_per_year=294,
-                    gonotrophic_cycle_length=0.0096
+                    gonotrophic_cycle_length=0.0096,
                 ),
-                year_length_days=366
+                # microfil=MicrofilParams(microfil_move_rate=8.13333),
+                year_length_days=366,
             )
         ),
         n_treatments=None,
@@ -87,16 +88,22 @@ def get_state_from_R(
 
 
 state = get_state_from_R(
-    "allmatstemp_t-1.csv", "exvec_t-1.csv", "mfdelay_t-1.csv", "exposuredelay_t-1.csv", "lextras_t-1.csv"
+    "allmatstemp_t-1.csv",
+    "exvec_t-1.csv",
+    "mfdelay_t-1.csv",
+    "exposuredelay_t-1.csv",
+    "lextras_t-1.csv",
 )
 state2 = get_state_from_R(
-    "allmatstemp_t.csv", "exvec_t.csv", "mfdelay_t.csv", "exposuredelay_t.csv", "lextras_t.csv"
+    "allmatstemp_t.csv",
+    "exvec_t.csv",
+    "mfdelay_t.csv",
+    "exposuredelay_t.csv",
+    "lextras_t.csv",
 )
 
 advance_state(state)
-# advance_state(state2)
 print(f"state after: ", state == state2)
-state.people.ages
 
 print(
     f"compliance: ",
@@ -106,25 +113,64 @@ print(
     f"sex: ",
     array_fully_equal(state.people.sex_is_male[12], state2.people.sex_is_male[12]),
 )
-print(f"blackflyL1: ", array_fully_equal(np.round(state.people.blackfly.L1,10) , np.round(state2.people.blackfly.L1,10)))
-print(f"blackflyL2: ", array_fully_equal(np.round(state.people.blackfly.L2,10) , np.round(state2.people.blackfly.L2,10)))
-print(f"blackflyL3: ", array_fully_equal(np.round(state.people.blackfly.L3,10) , np.round(state2.people.blackfly.L3,10)))
+print(
+    f"blackflyL1: ",
+    array_fully_equal(
+        np.round(state.people.blackfly.L1, 10), np.round(state2.people.blackfly.L1, 10)
+    ),
+)
+
+print(
+    f"blackflyL2: ",
+    array_fully_equal(
+        np.round(state.people.blackfly.L2, 10), np.round(state2.people.blackfly.L2, 10)
+    ),
+)
+print(
+    f"blackflyL3: ",
+    array_fully_equal(
+        np.round(state.people.blackfly.L3, 10), np.round(state2.people.blackfly.L3, 10)
+    ),
+)
 
 
-print(f"agesfull: ", array_fully_equal(np.round(state.people.ages,10), np.round(state2.people.ages,10)))
-print(np.round(state.people.ages[12],10))
-print(np.round(state2.people.ages[12],10))
-print(f"ages1: ", np.round(state.people.ages[12],10) ==  np.round(state2.people.ages[12],10))
-print(f"mf: ", array_fully_equal(np.round(state.people.mf[1][0],8), np.round(state2.people.mf[1][0],8)))
-print(np.round(state.people.mf[1][0],10))
-print(np.round(state2.people.mf[1][0],10))
-print(f"mf_delay: ", array_fully_equal(np.round(state.people.delay_arrays._mf_delay[:, 5],5), np.round(state2.people.delay_arrays._mf_delay[:, 5],5)))
-print(np.round(state.people.delay_arrays._mf_delay[:, 1],5))
-print(np.round(state2.people.delay_arrays._mf_delay[:, 1],5))
-print(f"exposure_delay: ", array_fully_equal(np.round(state.people.delay_arrays._exposure_delay,5), np.round(state2.people.delay_arrays._exposure_delay,5)))
-print(f"_worm_delay: ", array_fully_equal(np.round(state.people.delay_arrays._worm_delay,5), np.round(state2.people.delay_arrays._worm_delay,5)))
-print(np.round(state.people.mf,3))
-print(np.round(state2.people.mf,3))
+print(
+    f"agesfull: ",
+    array_fully_equal(
+        np.round(state.people.ages, 10), np.round(state2.people.ages, 10)
+    ),
+)
+print(
+    f"ages1: ",
+    np.round(state.people.ages[12], 10) == np.round(state2.people.ages[12], 10),
+)
+print(
+    f"mf: ",
+    array_fully_equal(
+        np.round(state.people.mf[1][0], 8), np.round(state2.people.mf[1][0], 8)
+    ),
+)
+print(
+    f"mf_delay: ",
+    array_fully_equal(
+        np.round(state.people.delay_arrays._mf_delay[:, 5], 10),
+        np.roll(np.round(state2.people.delay_arrays._mf_delay[:, 5], 10), -1),
+    ),
+)
+print(
+    f"exposure_delay: ",
+    array_fully_equal(
+        np.round(state.people.delay_arrays._exposure_delay, 5),
+        np.round(state2.people.delay_arrays._exposure_delay, 5),
+    ),
+)
+print(
+    f"_worm_delay: ",
+    array_fully_equal(
+        np.round(state.people.delay_arrays._worm_delay, 5),
+        np.round(state2.people.delay_arrays._worm_delay, 5),
+    ),
+)
 print(
     f"time_of_last_treatment: ",
     array_fully_equal(
@@ -135,19 +181,7 @@ print(
 print(
     f"individual_ex: ",
     array_fully_equal(
-        np.round(state.people.individual_exposure,10), np.round(state2.people.individual_exposure,10)
+        np.round(state.people.individual_exposure, 10),
+        np.round(state2.people.individual_exposure, 10),
     ),
 )
-
-# sim = Simulation(input="state.hdf5", verbose=True, debug=True)
-# print(sim.state.mf_prevalence_in_population())
-# sim.run(end_time=40)
-# print(sim.state.mf_prevalence_in_population())
-# print(state.people.worms == state2.people.worms)
-# print(array_fully_equal(state.people.worms.male, state2.people.worms.male))
-# print(array_fully_equal(state.people.worms.infertile, state2.people.worms.infertile))
-# print(array_fully_equal(state.people.worms.fertile, state2.people.worms.fertile))
-# print(state.people.delay_arrays == state2.people.delay_arrays)
-# delta.hz <- 0.186
-# delta.hinf <- 0.003
-# c.h <-  0.005
