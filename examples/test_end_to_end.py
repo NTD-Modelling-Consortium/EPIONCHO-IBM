@@ -52,33 +52,27 @@ endgame = """
 """
 
 save_file = "./test.hdf5"
-
-lock = Lock()
-
+run_iters = 5
 
 def run_sim(i) -> Data:
-    with lock:
-        sim = EndgameSimulation.restore(save_file)
+    sim = EndgameSimulation.restore(save_file)
     run_data: Data = {}
     for state in sim.iter_run(end_time=2030, sampling_interval=1):
         add_state_to_run_data(state, run_data=run_data)
     return run_data
 
 
-params = EpionchoEndgameModel.parse_raw(endgame)
-simulation = EndgameSimulation(
-    start_time=2015, endgame=params, verbose=True, debug=True
-)
-
-print("First years without treatment:")
-simulation.run(end_time=2018.0)
-
-
-simulation.save(save_file)
-
-run_iters = 5
-
 if __name__ == "__main__":
+    params = EpionchoEndgameModel.parse_raw(endgame)
+    simulation = EndgameSimulation(
+        start_time=2015, endgame=params, verbose=True, debug=True
+    )
+
+    print("First years without treatment:")
+    simulation.run(end_time=2018.0)
+
+    simulation.save(save_file)
+
     data: list[Data] = process_map(
         run_sim,
         range(run_iters),
