@@ -37,7 +37,7 @@ def main():
         blackfly=BlackflyParams(bite_rate_per_person_per_year=290),
     )
     simulation = Simulation(start_time=0, params=params, verbose=True)
-    simulation.run(end_time=75)
+    simulation.run(end_time=25)
     simulation.save(save_file)
 
     list_of_stats: list[tuple[list[float], list[float]]] = process_map(
