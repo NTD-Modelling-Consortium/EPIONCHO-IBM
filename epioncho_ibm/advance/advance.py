@@ -8,6 +8,7 @@ from .microfil import calculate_microfil_delta
 from .treatment import get_treatment
 from .worms import calculate_new_worms
 
+
 def advance_state(state: State, debug: bool = False) -> None:
     """Advance the state forward one time step from t to t + dt"""
 
