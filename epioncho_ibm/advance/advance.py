@@ -7,7 +7,6 @@ from .exposure import calculate_total_exposure
 from .microfil import calculate_microfil_delta
 from .treatment import get_treatment
 from .worms import calculate_new_worms
-from .old_microfil import change_in_microfil
 
 def advance_state(state: State, debug: bool = False) -> None:
     """Advance the state forward one time step from t to t + dt"""
@@ -84,56 +83,20 @@ def advance_state(state: State, debug: bool = False) -> None:
 
     # inputs for delay in L1
 
+    state.people.mf += calculate_microfil_delta(
+        current_microfil=state.people.mf,
+        delta_time=state._params.delta_time,
+        microfil_params=state._params.microfil,
+        treatment_params=state._params.treatment,
+        microfillarie_mortality_rate=state.derived_params.microfillarie_mortality_rate,
+        fecundity_rates_worms=state.derived_params.fecundity_rates_worms,
+        time_of_last_treatment=state.people.time_of_last_treatment,
+        current_time=state.current_time,
+        current_fertile_female_worms=old_worms.fertile,
+        current_male_worms=old_worms.male,
+        debug=debug,
+    )
 
-    # state.people.mf += calculate_microfil_delta(
-    #     current_microfil=state.people.mf,
-    #     delta_time=state._params.delta_time,
-    #     microfil_params=state._params.microfil,
-    #     treatment_params=state._params.treatment,
-    #     microfillarie_mortality_rate=state.derived_params.microfillarie_mortality_rate,
-    #     fecundity_rates_worms=state.derived_params.fecundity_rates_worms,
-    #     time_of_last_treatment=state.people.time_of_last_treatment,
-    #     current_time=state.current_time,
-    #     current_fertile_female_worms=old_worms.fertile,
-    #     current_male_worms=old_worms.male,
-    #     debug=debug,
-    # )
-    old_mf_mat = state.people.mf.copy()
-    for compartment in range(state._params.microfil.microfil_age_stages):
-        if compartment == 0:
-            state.people.mf[compartment] = change_in_microfil(
-                n_people=state.n_people,
-                delta_time=state._params.delta_time,
-                microfil_params=state._params.microfil,
-                treatment_params=state._params.treatment,
-                microfillarie_mortality_rate=state.derived_params.microfillarie_mortality_rate[
-                    compartment
-                ],
-                fecundity_rates_worms=state.derived_params.fecundity_rates_worms,
-                time_of_last_treatment=state.people.time_of_last_treatment,
-                current_time=state.current_time,
-                current_microfil=old_mf_mat[compartment],
-                previous_microfil=None,
-                current_fertile_female_worms=state.people.worms.fertile,
-                current_male_worms=state.people.worms.male,
-            )
-        else:
-            state.people.mf[compartment] = change_in_microfil(
-                n_people=state.n_people,
-                delta_time=state._params.delta_time,
-                microfil_params=state._params.microfil,
-                treatment_params=state._params.treatment,
-                microfillarie_mortality_rate=state.derived_params.microfillarie_mortality_rate[
-                    compartment
-                ],
-                fecundity_rates_worms=state.derived_params.fecundity_rates_worms,
-                time_of_last_treatment=state.people.time_of_last_treatment,
-                current_time=state.current_time,
-                current_microfil=old_mf_mat[compartment],
-                previous_microfil=old_mf_mat[compartment - 1],
-                current_fertile_female_worms=state.people.worms.fertile,
-                current_male_worms=state.people.worms.male,
-            )
     old_mf: Array.Person.Float = np.sum(state.people.mf, axis=0)
     old_blackfly_L1 = state.people.blackfly.L1
 

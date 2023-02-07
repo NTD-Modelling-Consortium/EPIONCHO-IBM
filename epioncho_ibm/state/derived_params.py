@@ -9,9 +9,9 @@ from .types import Array
 
 
 def _weibull_mortality(
-    delta_time: float, mu1: float, mu2: float, age_categories: Array.General.Float
+    mu1: float, mu2: float, age_categories: Array.General.Float
 ) -> Array.General.Float:
-    return delta_time * (mu1**mu2) * mu2 * (age_categories ** (mu2 - 1))
+    return (mu1**mu2) * mu2 * (age_categories ** (mu2 - 1))
 
 
 class DerivedParams:
@@ -31,8 +31,7 @@ class DerivedParams:
             stop=params.worms.max_worm_age,
             step=params.worms.max_worm_age / params.worms.worm_age_stages,
         )
-        self.worm_mortality_rate = _weibull_mortality(
-            params.delta_time,
+        self.worm_mortality_rate = params.delta_time * _weibull_mortality(
             params.worms.mu_worms1,
             params.worms.mu_worms2,
             worm_age_categories,
@@ -54,7 +53,6 @@ class DerivedParams:
             num=params.microfil.microfil_age_stages,
         )
         self.microfillarie_mortality_rate = _weibull_mortality(
-            params.delta_time_days,
             params.microfil.mu_microfillarie1,
             params.microfil.mu_microfillarie2,
             microfillarie_age_categories,
