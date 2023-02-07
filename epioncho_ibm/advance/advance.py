@@ -8,7 +8,6 @@ from .microfil import calculate_microfil_delta
 from .treatment import get_treatment
 from .worms import calculate_new_worms
 
-
 def advance_state(state: State, debug: bool = False) -> None:
     """Advance the state forward one time step from t to t + dt"""
 
@@ -84,7 +83,6 @@ def advance_state(state: State, debug: bool = False) -> None:
 
     # inputs for delay in L1
 
-
     state.people.mf += calculate_microfil_delta(
         current_microfil=state.people.mf,
         delta_time=state._params.delta_time,
@@ -98,6 +96,7 @@ def advance_state(state: State, debug: bool = False) -> None:
         current_male_worms=old_worms.male,
         debug=debug,
     )
+
     old_mf: Array.Person.Float = np.sum(state.people.mf, axis=0)
     old_blackfly_L1 = state.people.blackfly.L1
 
