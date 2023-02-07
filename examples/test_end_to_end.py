@@ -1,4 +1,4 @@
-from multiprocessing import Lock, cpu_count
+from multiprocessing import cpu_count
 
 from tqdm.contrib.concurrent import process_map
 
@@ -53,6 +53,7 @@ endgame = """
 
 save_file = "./test.hdf5"
 run_iters = 5
+
 
 def run_sim(i) -> Data:
     sim = EndgameSimulation.restore(save_file)
