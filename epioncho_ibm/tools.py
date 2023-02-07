@@ -39,7 +39,7 @@ def add_state_to_run_data(
                         (*partial_key, "mean_worm_burden")
                     ] = age_state.mean_worm_burden()
         else:
-            partial_key = (round(state.current_time), age_min, age_max)
+            partial_key = (round(state.current_time, 2), age_min, age_max)
             if prevalence:
                 run_data[
                     (*partial_key, "prevalence")
@@ -54,7 +54,7 @@ def add_state_to_run_data(
                 age_state = state.get_state_for_age_group(age_start, age_start + 5)
                 # Note: This is an approximation as it assumes the number of people in each category has not
                 # changed since treatment
-                partial_key = (round(state.current_time), age_start, age_start + 5)
+                partial_key = (round(state.current_time, 2), age_start, age_start + 5)
                 n_treatments_val = state.get_treatment_count_for_age_group(
                     age_start, (age_start + 5)
                 )
@@ -67,7 +67,7 @@ def add_state_to_run_data(
                         else 0
                     )
         else:
-            partial_key = (round(state.current_time), age_min, age_max)
+            partial_key = (round(state.current_time, 2), age_min, age_max)
             n_treatments_val = state.get_treatment_count_for_age_group(age_min, age_max)
             if n_treatments:
                 run_data[(*partial_key, "n_treatments")] = n_treatments_val
