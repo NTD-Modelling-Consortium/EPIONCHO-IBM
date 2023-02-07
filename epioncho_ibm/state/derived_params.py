@@ -9,9 +9,9 @@ from .types import Array
 
 
 def _weibull_mortality(
-    delta_time: float, mu1: float, mu2: float, age_categories: Array.General.Float
+    mu1: float, mu2: float, age_categories: Array.General.Float
 ) -> Array.General.Float:
-    return delta_time * (mu1**mu2) * mu2 * (age_categories ** (mu2 - 1))
+    return (mu1**mu2) * mu2 * (age_categories ** (mu2 - 1))
 
 
 class DerivedParams:
@@ -31,8 +31,7 @@ class DerivedParams:
             stop=params.worms.max_worm_age,
             step=params.worms.max_worm_age / params.worms.worm_age_stages,
         )
-        self.worm_mortality_rate = _weibull_mortality(
-            params.delta_time,
+        self.worm_mortality_rate = params.delta_time * _weibull_mortality(
             params.worms.mu_worms1,
             params.worms.mu_worms2,
             worm_age_categories,
@@ -48,19 +47,16 @@ class DerivedParams:
             )
         )
 
-        microfillarie_age_categories = np.arange(
+        microfillarie_age_categories = np.linspace(
             start=0,
             stop=params.microfil.max_microfil_age,
-            step=params.microfil.max_microfil_age / params.microfil.microfil_age_stages,
+            num=params.microfil.microfil_age_stages,
         )
-
         self.microfillarie_mortality_rate = _weibull_mortality(
-            params.delta_time,
             params.microfil.mu_microfillarie1,
             params.microfil.mu_microfillarie2,
             microfillarie_age_categories,
         )
-
         if params.treatment is not None:
             treatment_number = (
                 params.treatment.stop_time - params.treatment.start_time
