@@ -219,7 +219,10 @@ class State(HDF5Dataclass, BaseState[Params]):
         mfobs_percent: Array.Person.Float = mfobs / (
             self._params.humans.skin_snip_number * self._params.humans.skin_snip_weight
         )
-        return float(np.mean(mfobs_percent)), mfobs_percent
+        if mfobs_percent.size == 0:
+            return 0.0, mfobs_percent
+        else:
+            return float(np.mean(mfobs_percent)), mfobs_percent
 
     def mf_prevalence_in_population(self, return_nan: bool = False) -> float:
         """
@@ -250,7 +253,11 @@ class State(HDF5Dataclass, BaseState[Params]):
         )
 
     def mean_worm_burden(self) -> float:
-        return float(np.mean(self.worm_burden_per_person()))
+        worm_burden = self.worm_burden_per_person()
+        if worm_burden.size == 0:
+            return 0.0
+        else:
+            return float(np.mean(worm_burden))
 
 
 def make_state_from_params(params: Params):
