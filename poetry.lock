@@ -227,7 +227,7 @@ tqdm = "^4.64.1"
 type = "git"
 url = "git@github.com:dreamingspires/endgame-simulations.git"
 reference = "master"
-resolved_reference = "acdd8e1a451b6b0b14128ca0403e0ff13852d1bc"
+resolved_reference = "b2ef71cab2ce4402af2e05c65e6577a56bbc373c"
 
 [[package]]
 name = "exceptiongroup"
@@ -825,15 +825,15 @@ tests = ["check-manifest", "coverage", "defusedxml", "markdown2", "olefile", "pa
 
 [[package]]
 name = "platformdirs"
-version = "2.6.2"
+version = "3.0.0"
 description = "A small Python package for determining appropriate platform-specific dirs, e.g. a \"user data dir\"."
 category = "dev"
 optional = false
 python-versions = ">=3.7"
 
 [package.extras]
-docs = ["furo (>=2022.12.7)", "proselint (>=0.13)", "sphinx-autodoc-typehints (>=1.19.5)", "sphinx (>=5.3)"]
-test = ["appdirs (==1.4.4)", "covdefaults (>=2.2.2)", "pytest-cov (>=4)", "pytest-mock (>=3.10)", "pytest (>=7.2)"]
+docs = ["furo (>=2022.12.7)", "proselint (>=0.13)", "sphinx-autodoc-typehints (>=1.22,!=1.23.4)", "sphinx (>=6.1.3)"]
+test = ["appdirs (==1.4.4)", "covdefaults (>=2.2.2)", "pytest-cov (>=4)", "pytest-mock (>=3.10)", "pytest (>=7.2.1)"]
 
 [[package]]
 name = "pluggy"
@@ -1312,7 +1312,7 @@ socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 
 [[package]]
 name = "virtualenv"
-version = "20.18.0"
+version = "20.19.0"
 description = "Virtual Python Environment builder"
 category = "dev"
 optional = false
@@ -1321,7 +1321,7 @@ python-versions = ">=3.7"
 [package.dependencies]
 distlib = ">=0.3.6,<1"
 filelock = ">=3.4.1,<4"
-platformdirs = ">=2.4,<3"
+platformdirs = ">=2.4,<4"
 
 [package.extras]
 docs = ["furo (>=2022.12.7)", "proselint (>=0.13)", "sphinx-argparse (>=0.4)", "sphinx (>=6.1.3)", "sphinxcontrib-towncrier (>=0.2.1a0)", "towncrier (>=22.12)"]
