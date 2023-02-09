@@ -268,7 +268,7 @@ version = "0.1.0"
 description = ""
 category = "main"
 optional = false
-python-versions = ">=3.10, <4.0"
+python-versions = ">=3.10, <3.11"
 develop = false
 
 [package.dependencies]
@@ -280,7 +280,7 @@ requests = "^2.28.1"
 type = "git"
 url = "git@github.com:dreamingspires/fast-binomial.git"
 reference = "master"
-resolved_reference = "21b17993d044167230d43632f9bc1386a3967f3c"
+resolved_reference = "53ca9b6df0873a109ed3fc717cd7bd1c5a917df5"
 
 [[package]]
 name = "filelock"
