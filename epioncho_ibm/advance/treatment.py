@@ -55,14 +55,14 @@ def _is_during_treatment(
         tuple[bool, bool]: bool describing if treatment started,
             bool describing if treatment occurred, respectively
     """
-    treatment_started = current_time > treatment.start_time
+    treatment_started = current_time >= treatment.start_time
     if treatment_started:
         assert treatment_times is not None
         treatment_occurred: bool = (
             bool(
                 np.any(
-                    (current_time <= treatment_times)
-                    & (treatment_times < current_time + delta_time)
+                    (treatment_times <= current_time)
+                    & (treatment_times > current_time - delta_time)
                 )
             )
             and current_time <= treatment.stop_time
