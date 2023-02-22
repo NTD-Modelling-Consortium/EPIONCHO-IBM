@@ -16,6 +16,7 @@ class TreatmentParams(BaseModel):
     stop_time: float  # the iteration upon which treatment stops
     total_population_coverage: float = 0.65  # The probability that a 'treatable' person is actually treated in an iteration - "treat.prob"
 
+
 class WormParams(BaseModel):
     mu_worms1: float = (
         0.09953  # parameters controlling age-dependent mortality in adult worms

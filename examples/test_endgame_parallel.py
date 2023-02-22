@@ -4,6 +4,7 @@ import numpy as np
 from tqdm.contrib.concurrent import process_map
 
 from epioncho_ibm import EndgameSimulation, EpionchoEndgameModel
+
 benchmark_iters = 400
 
 endgame = """
@@ -51,9 +52,13 @@ endgame = """
     ]
 }
 """
+
+
 def run_sim(i):
     params = EpionchoEndgameModel.parse_raw(endgame)
-    endgame_sim = EndgameSimulation(start_time=0, endgame=params, verbose=False, debug=True)
+    endgame_sim = EndgameSimulation(
+        start_time=0, endgame=params, verbose=False, debug=True
+    )
     endgame_sim.run(end_time=1)
     return endgame_sim.simulation.state.mf_prevalence_in_population()
 
