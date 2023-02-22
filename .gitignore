@@ -1,3 +1,6 @@
 __pycache__
 .coverage
 *.csv
+*.prof
+*.hdf5
+*.png

@@ -1,10 +1,10 @@
-from epioncho_ibm import HumanParams, Params, State, TreatmentParams
+from epioncho_ibm import Params, Simulation, TreatmentParams
 
-params = Params(treatment=TreatmentParams(start_time=0))
-state = State(params=params, n_people=440)
+params = Params(treatment=TreatmentParams(start_time=0, stop_time=130), n_people=440)
+simulation = Simulation(start_time=0, params=params, verbose=True)
 
 for i in range(12):
-    state.run_simulation(start_time=i * 10, end_time=(i + 1) * 10, verbose=True)
+    simulation.run(end_time=(i + 1) * 10)
     print("run", str(i))
-    print(state.microfilariae_per_skin_snip())
-    print(state.mf_prevalence_in_population())
+    print(simulation.state.microfilariae_per_skin_snip())
+    print(simulation.state.mf_prevalence_in_population())

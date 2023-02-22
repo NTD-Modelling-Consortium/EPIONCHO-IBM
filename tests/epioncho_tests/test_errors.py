@@ -1,62 +1,48 @@
-import numpy as np
 import pytest
-from attr import s
 
-from epioncho_ibm import Params, State
-from epioncho_ibm.params import TreatmentParams
-from epioncho_ibm.worms import WormGroup, check_no_worms_are_negative
+from epioncho_ibm import Params, Simulation, TreatmentParams
 
 
 @pytest.mark.asyncio
 class TestGeneral:
     async def test_start_before_end(self):
-        state = State(params=Params(), n_people=10)
-        with pytest.raises(ValueError, match="End time after start"):
-            state.run_simulation(start_time=10, end_time=0)
+        simulation = Simulation(start_time=10, params=Params(n_people=10))
+        with pytest.raises(ValueError, match="End time 0 before start 10"):
+            simulation.run(end_time=0)
 
-    async def test_start_before_end_output_stats(self):
-        state = State(params=Params(), n_people=10)
-        with pytest.raises(ValueError, match="End time after start"):
-            state.run_simulation_output_stats(
-                sampling_interval=1, start_time=10, end_time=0
-            )
+    async def test_start_before_end_iter_run(self):
+        simulation = Simulation(start_time=10, params=Params(n_people=10))
+        with pytest.raises(ValueError, match="End time 0 before start 10"):
+            next(simulation.iter_run(end_time=0, sampling_interval=1))
 
     async def test_set_n_people(self):
-        state = State(params=Params(), n_people=10)
+        simulation = Simulation(start_time=10, params=Params(n_people=10))
 
         with pytest.raises(
-            ValueError,
-            match="Setting n_people in state not allowed. Please re-initialise state.",
+            AttributeError,
+            match="can't set attribute 'n_people'",
         ):
-            state.n_people = 4
+            simulation.state.n_people = 4
 
     async def test_set_params(self):
-        state = State(params=Params(), n_people=10)
-        state.params = Params()
+        simulation = Simulation(start_time=0, params=Params(n_people=10))
+        simulation.reset_current_params(Params(n_people=10))
 
     async def test_set_sub_params(self):
-        state = State(params=Params(), n_people=10)
+        simulation = Simulation(start_time=0, params=Params(n_people=10))
         with pytest.raises(
-            ValueError, match="Cannot alter inner values of params in-place"
+            TypeError,
+            match='"ImmutableParams" is immutable and does not support item assignment',
         ):
-            state.params.delta_time = 0.1
+            simulation.state._params.delta_time_days = 0.1
 
     async def test_set_sub_sub_params(self):
-        state = State(params=Params(), n_people=10)
+        simulation = Simulation(start_time=0, params=Params(n_people=10))
         with pytest.raises(
-            ValueError, match="Cannot alter inner values of params in-place"
+            TypeError,
+            match='"ImmutableHumanParams" is immutable and does not support item assignment',
         ):
-            state.params.humans.max_human_age = 80
-
-    async def test_negative_worms(self):
-        with pytest.raises(RuntimeError, match="Worms became negative"):
-            check_no_worms_are_negative(
-                WormGroup(
-                    male=np.zeros(3, dtype=int) - 1,
-                    infertile=np.zeros(3, dtype=int),
-                    fertile=np.zeros(3, dtype=int),
-                )
-            )
+            simulation.state._params.humans.max_human_age = 80
 
 
 @pytest.mark.asyncio
@@ -66,11 +52,8 @@ class TestDerivedParams:
             ValueError,
             match="Treatment times could not be found for start: 0.0, stop: 10.0, interval: 3.0",
         ):
-            State(
-                params=Params(
-                    treatment=TreatmentParams(
-                        start_time=0, stop_time=10, interval_years=3
-                    )
-                ),
+            params = Params(
+                treatment=TreatmentParams(start_time=0, stop_time=10, interval_years=3),
                 n_people=10,
             )
+            Simulation(start_time=0, params=params)
