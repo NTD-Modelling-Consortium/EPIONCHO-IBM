@@ -89,7 +89,6 @@ class TreatmentGroup:
 
 def get_treatment(
     treatment_params: Optional[TreatmentParams],
-    human_params: HumanParams,
     delta_time: float,
     current_time: float,
     treatment_times: Optional[Array.Treatments.Float],
@@ -102,7 +101,6 @@ def get_treatment(
 
     Args:
         treatment_params (TreatmentParams | None): The fixed parameters relating to treatment
-        human_params (HumanParams): The fixed parameters relating to humans
         delta_time (float): dt - The amount of time advance in one time step
         current_time (float): The current time, t, in the model
         treatment_times (Optional[Array.Treatments.Float]): The times for treatment across the model.
@@ -127,7 +125,7 @@ def get_treatment(
                 ages,
                 compliance,
                 treatment_params.total_population_coverage,
-                human_params.min_skinsnip_age,
+                treatment_params.min_age_of_treatment,
                 numpy_bit_gen,
             )
             return TreatmentGroup(

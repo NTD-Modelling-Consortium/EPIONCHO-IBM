@@ -24,7 +24,7 @@ class TreatmentParams(BaseModel):
     permanent_infertility: float = (
         0.345  # permenent infertility in worms due to ivermectin
     )
-
+    min_age_of_treatment: int = 5
 
 class WormParams(BaseModel):
     mu_worms1: float = (
