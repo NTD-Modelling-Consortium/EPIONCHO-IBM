@@ -14,7 +14,6 @@ def advance_state(state: State, debug: bool = False) -> None:
 
     treatment = get_treatment(
         state._params.treatment,
-        state._params.humans,
         state._params.delta_time,
         state.current_time,
         state.derived_params.treatment_times,
