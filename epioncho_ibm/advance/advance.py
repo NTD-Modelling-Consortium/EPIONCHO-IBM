@@ -57,11 +57,11 @@ def advance_state(state: State, debug: bool = False) -> None:
     else:
         worm_delay: Array.Person.Int = state.people.delay_arrays.worm_delay
 
-    state.people.worms, last_time_of_last_treatment = calculate_new_worms(
+    state.people.worms, last_last_treatment = calculate_new_worms(
         current_worms=state.people.worms,
         worm_params=state._params.worms,
         treatment=treatment,
-        time_of_last_treatment=state.people.time_of_last_treatment,
+        last_treatment=state.people.last_treatment,
         delta_time=state._params.delta_time,
         worm_delay_array=worm_delay,
         mortalities=state.derived_params.worm_mortality_rate,
@@ -79,7 +79,7 @@ def advance_state(state: State, debug: bool = False) -> None:
         state._params.treatment is not None
         and state.current_time >= state._params.treatment.start_time
     ):
-        state.people.time_of_last_treatment = last_time_of_last_treatment
+        state.people.last_treatment = last_last_treatment
 
     # inputs for delay in L1
     old_mf: Array.Person.Float = np.sum(state.people.mf, axis=0)
@@ -90,7 +90,7 @@ def advance_state(state: State, debug: bool = False) -> None:
         treatment_params=state._params.treatment,
         microfillarie_mortality_rate=state.derived_params.microfillarie_mortality_rate,
         fecundity_rates_worms=state.derived_params.fecundity_rates_worms,
-        time_of_last_treatment=state.people.time_of_last_treatment,
+        last_treatment=state.people.last_treatment,
         current_time=state.current_time,
         current_fertile_female_worms=old_worms.fertile,
         current_male_worms=old_worms.male,

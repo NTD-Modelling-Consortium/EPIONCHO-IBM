@@ -4,6 +4,7 @@ from numpy.random import Generator as NumpyGenerator
 
 import epioncho_ibm.utils as utils
 from epioncho_ibm.state import Array, WormGroup, WormParams
+from epioncho_ibm.state.people import LastTreatment
 
 from .treatment import TreatmentGroup
 
@@ -254,9 +255,7 @@ def _calc_new_worms(
 
 def _calc_fertile_to_non_fertile_rate(
     current_time: float,
-    lam_m: float,
-    phi: float,
-    time_of_last_treatment: Array.Person.Float,
+    last_treatment: LastTreatment,
     delta_time: float,
 ) -> Array.Person.Float:
     """
@@ -274,14 +273,16 @@ def _calc_fertile_to_non_fertile_rate(
         based on treatment
     """
     # individuals which have been treated get additional infertility rate
-    lam_m_temp = np.where(np.isnan(time_of_last_treatment), 0, lam_m)
-    time_since_treatment = current_time - time_of_last_treatment
-    return np.nan_to_num(delta_time * lam_m_temp * np.exp(-phi * time_since_treatment))
+    lam_m_temp = np.nan_to_num(last_treatment.lam_max)
+    time_since_treatment = current_time - last_treatment.time
+    return np.nan_to_num(
+        delta_time * lam_m_temp * np.exp(-last_treatment.phi * time_since_treatment)
+    )
 
 
 def _calc_female_mortalities(
     mortalities: Array.WormCat.Float,
-    permanent_infertility: float,
+    permanent_infertility: Array.Person.Float,
     coverage_in: Array.Person.Bool,
 ) -> Array.WormCat.Person.Float:
     """
@@ -299,7 +300,8 @@ def _calc_female_mortalities(
             and compartment
     """
     female_mortalities = np.tile(mortalities, (len(coverage_in), 1))
-    female_mortalities[coverage_in] += permanent_infertility
+    tiled_infertilities = np.tile(permanent_infertility, (len(mortalities), 1)).T
+    female_mortalities[coverage_in] += tiled_infertilities
     return female_mortalities.T
 
 
@@ -307,7 +309,7 @@ def calculate_new_worms(
     current_worms: WormGroup,
     worm_params: WormParams,
     treatment: TreatmentGroup | None,
-    time_of_last_treatment: Array.Person.Float,
+    last_treatment: LastTreatment,
     delta_time: float,
     worm_delay_array: Array.Person.Int,
     mortalities: Array.WormCat.Float,
@@ -319,7 +321,7 @@ def calculate_new_worms(
     worm_omega_generator: Generator,
     mortalities_generator: Generator,
     numpy_bit_gen: NumpyGenerator,
-) -> tuple[WormGroup, Array.Person.Float]:
+) -> tuple[WormGroup, LastTreatment]:
     """
     Calculates the new total worms in the model for one time step.
 
@@ -349,17 +351,28 @@ def calculate_new_worms(
     fertile_to_non_fertile_rate = None
     if treatment is not None:
         if treatment.treatment_occurred:
+            last_treatment = last_treatment.copy()
+            last_treatment.time[treatment.coverage_in] = current_time
+            last_treatment.u_ivermectin[
+                treatment.coverage_in
+            ] = treatment.treatment_params.u_ivermectin
+            last_treatment.shape_parameter_ivermectin[
+                treatment.coverage_in
+            ] = treatment.treatment_params.shape_parameter_ivermectin
+            last_treatment.lam_max[
+                treatment.coverage_in
+            ] = treatment.treatment_params.lam_max
+            last_treatment.phi[treatment.coverage_in] = treatment.treatment_params.phi
+            last_treatment.permanent_infertility[
+                treatment.coverage_in
+            ] = treatment.treatment_params.permanent_infertility
             female_mortalities = _calc_female_mortalities(
-                mortalities, worm_params.permanent_infertility, treatment.coverage_in
+                mortalities, last_treatment.permanent_infertility, treatment.coverage_in
             )
-            time_of_last_treatment = time_of_last_treatment.copy()
-            time_of_last_treatment[treatment.coverage_in] = current_time
 
         fertile_to_non_fertile_rate = _calc_fertile_to_non_fertile_rate(
             current_time=current_time,
-            lam_m=worm_params.lam_max,
-            phi=worm_params.phi,
-            time_of_last_treatment=time_of_last_treatment,
+            last_treatment=last_treatment,
             delta_time=delta_time,
         )
 
@@ -395,5 +408,5 @@ def calculate_new_worms(
     )
     return (
         _calc_new_worms(inbound, outbound, dead, current_worms, delta_fertility, debug),
-        time_of_last_treatment,
+        last_treatment,
     )

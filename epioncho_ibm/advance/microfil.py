@@ -3,6 +3,7 @@ from typing import Callable
 import numpy as np
 
 from epioncho_ibm.state import Array, MicrofilParams, TreatmentParams
+from epioncho_ibm.state.people import LastTreatment
 
 
 def _construct_derive_microfil(
@@ -67,7 +68,7 @@ def calculate_microfil_delta(
     treatment_params: TreatmentParams | None,
     microfillarie_mortality_rate: Array.MFCat.Float,
     fecundity_rates_worms: Array.WormCat.Float,
-    time_of_last_treatment: Array.Person.Float | None,
+    last_treatment: LastTreatment | None,
     current_time: float,
     current_fertile_female_worms: Array.WormCat.Person.Int,
     current_male_worms: Array.WormCat.Person.Int,
@@ -97,12 +98,12 @@ def calculate_microfil_delta(
     ).T
     # increases microfilarial mortality if treatment has started
     if treatment_params is not None and current_time >= treatment_params.start_time:
-        assert time_of_last_treatment is not None
+        assert last_treatment is not None
         # additional mortality due to ivermectin treatment
-        time_since_last_treatment = current_time - time_of_last_treatment
+        time_since_last_treatment = current_time - last_treatment.time
         mortality_prime: Array.Person.Float = (
-            time_since_last_treatment + microfil_params.u_ivermectin
-        ) ** -microfil_params.shape_parameter_ivermectin
+            time_since_last_treatment + last_treatment.u_ivermectin
+        ) ** -last_treatment.shape_parameter_ivermectin
 
         mortality += np.nan_to_num(mortality_prime)
 
