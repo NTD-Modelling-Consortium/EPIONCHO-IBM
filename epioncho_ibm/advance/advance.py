@@ -57,7 +57,7 @@ def advance_state(state: State, debug: bool = False) -> None:
     else:
         worm_delay: Array.Person.Int = state.people.delay_arrays.worm_delay
 
-    state.people.worms, last_last_treatment = calculate_new_worms(
+    state.people.worms, state.people.last_treatment = calculate_new_worms(
         current_worms=state.people.worms,
         worm_params=state._params.worms,
         treatment=treatment,
@@ -74,12 +74,6 @@ def advance_state(state: State, debug: bool = False) -> None:
         worm_omega_generator=state.derived_params.worm_omega_generator,
         numpy_bit_gen=state.numpy_bit_generator,
     )
-
-    if (
-        state._params.treatment is not None
-        and state.current_time >= state._params.treatment.start_time
-    ):
-        state.people.last_treatment = last_last_treatment
 
     # inputs for delay in L1
     old_mf: Array.Person.Float = np.sum(state.people.mf, axis=0)
