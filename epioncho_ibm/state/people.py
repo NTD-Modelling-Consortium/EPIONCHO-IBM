@@ -178,6 +178,40 @@ class WormGroup(HDF5Dataclass):
         )
 
 
+class LastTreatment(HDF5Dataclass):
+    time: Array.Person.Float
+    u_ivermectin: Array.Person.Float
+    shape_parameter_ivermectin: Array.Person.Float
+    lam_max: Array.Person.Float
+    phi: Array.Person.Float
+    permanent_infertility: Array.Person.Float
+
+    def __eq__(self, other: object) -> bool:
+        return (
+            isinstance(other, LastTreatment)
+            and array_fully_equal(self.time, other.time)
+            and array_fully_equal(self.u_ivermectin, other.u_ivermectin)
+            and array_fully_equal(
+                self.shape_parameter_ivermectin, other.shape_parameter_ivermectin
+            )
+            and array_fully_equal(self.lam_max, other.lam_max)
+            and array_fully_equal(self.phi, other.phi)
+            and array_fully_equal(
+                self.permanent_infertility, other.permanent_infertility
+            )
+        )
+
+    def copy(self):
+        return LastTreatment(
+            time=self.time.copy(),
+            u_ivermectin=self.u_ivermectin.copy(),
+            shape_parameter_ivermectin=self.shape_parameter_ivermectin.copy(),
+            lam_max=self.lam_max.copy(),
+            phi=self.phi.copy(),
+            permanent_infertility=self.permanent_infertility.copy(),
+        )
+
+
 class People(HDF5Dataclass):
     compliance: Array.Person.Bool
     sex_is_male: Array.Person.Bool
@@ -185,7 +219,7 @@ class People(HDF5Dataclass):
     ages: Array.Person.Float
     mf: Array.MFCat.Person.Float
     worms: WormGroup
-    time_of_last_treatment: Array.Person.Float
+    last_treatment: LastTreatment
     delay_arrays: DelayArrays
     individual_exposure: Array.Person.Float
 
@@ -198,9 +232,7 @@ class People(HDF5Dataclass):
             and array_fully_equal(self.ages, other.ages)
             and array_fully_equal(self.mf, other.mf)
             and self.worms == other.worms
-            and array_fully_equal(
-                self.time_of_last_treatment, other.time_of_last_treatment
-            )
+            and self.last_treatment == other.last_treatment
             and self.delay_arrays == other.delay_arrays
             and array_fully_equal(self.individual_exposure, other.individual_exposure)
         )
@@ -224,9 +256,16 @@ class People(HDF5Dataclass):
             people_generator.uniform(low=0, high=1, size=n_people)
             > params.humans.noncompliant_percentage
         )
-        time_of_last_treatment = np.empty(n_people)
-        time_of_last_treatment[:] = np.nan
-
+        last_treatment = np.empty(n_people)
+        last_treatment[:] = np.nan
+        last_treatment_full = LastTreatment(
+            time=last_treatment.copy(),
+            u_ivermectin=last_treatment.copy(),
+            shape_parameter_ivermectin=last_treatment.copy(),
+            lam_max=last_treatment.copy(),
+            phi=last_treatment.copy(),
+            permanent_infertility=last_treatment.copy(),
+        )
         # individual exposure to fly bites
         individual_exposure = people_generator.gamma(
             shape=params.gamma_distribution,
@@ -261,7 +300,7 @@ class People(HDF5Dataclass):
                 fertile=np.ones((params.worms.worm_age_stages, n_people), dtype=int)
                 * params.worms.initial_worms,
             ),
-            time_of_last_treatment=time_of_last_treatment,
+            last_treatment=last_treatment_full,
             delay_arrays=DelayArrays.from_params(params, new_individual_exposure),
             individual_exposure=new_individual_exposure,
         )
@@ -302,7 +341,14 @@ class People(HDF5Dataclass):
                 fertile=self.worms.fertile[:, rel_ages],
                 infertile=self.worms.infertile[:, rel_ages],
             ),
-            time_of_last_treatment=self.time_of_last_treatment[rel_ages],
+            last_treatment=LastTreatment(
+                time=self.last_treatment.time[rel_ages],
+                u_ivermectin=self.last_treatment.u_ivermectin[rel_ages],
+                shape_parameter_ivermectin=self.last_treatment.u_ivermectin[rel_ages],
+                lam_max=self.last_treatment.u_ivermectin[rel_ages],
+                phi=self.last_treatment.u_ivermectin[rel_ages],
+                permanent_infertility=self.last_treatment.u_ivermectin[rel_ages],
+            ),
             delay_arrays=DelayArrays(
                 _worm_delay=self.delay_arrays._worm_delay[:, rel_ages],
                 _exposure_delay=self.delay_arrays._exposure_delay[:, rel_ages],
