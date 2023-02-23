@@ -102,8 +102,8 @@ def calculate_microfil_delta(
         # additional mortality due to ivermectin treatment
         time_since_last_treatment = current_time - last_treatment.time
         mortality_prime: Array.Person.Float = (
-            time_since_last_treatment + last_treatment.u_ivermectin
-        ) ** -last_treatment.shape_parameter_ivermectin
+            time_since_last_treatment + last_treatment.microfilaricidal_nu
+        ) ** -last_treatment.microfilaricidal_omega
 
         mortality += np.nan_to_num(mortality_prime)
 

@@ -271,10 +271,12 @@ def _calc_fertile_to_non_fertile_rate(
         based on treatment
     """
     # individuals which have been treated get additional infertility rate
-    lam_m_temp = np.nan_to_num(last_treatment.lam_max)
+    lam_m_temp = np.nan_to_num(last_treatment.embryostatic_lambda_max)
     time_since_treatment = current_time - last_treatment.time
     return np.nan_to_num(
-        delta_time * lam_m_temp * np.exp(-last_treatment.phi * time_since_treatment)
+        delta_time
+        * lam_m_temp
+        * np.exp(-last_treatment.embryostatic_phi * time_since_treatment)
     )
 
 
@@ -351,16 +353,18 @@ def calculate_new_worms(
         if treatment.treatment_occurred:
             last_treatment = last_treatment.copy()
             last_treatment.time[treatment.coverage_in] = current_time
-            last_treatment.u_ivermectin[
+            last_treatment.microfilaricidal_nu[
                 treatment.coverage_in
-            ] = treatment.treatment_params.u_ivermectin
-            last_treatment.shape_parameter_ivermectin[
+            ] = treatment.treatment_params.microfilaricidal_nu
+            last_treatment.microfilaricidal_omega[
                 treatment.coverage_in
-            ] = treatment.treatment_params.shape_parameter_ivermectin
-            last_treatment.lam_max[
+            ] = treatment.treatment_params.microfilaricidal_omega
+            last_treatment.embryostatic_lambda_max[
                 treatment.coverage_in
-            ] = treatment.treatment_params.lam_max
-            last_treatment.phi[treatment.coverage_in] = treatment.treatment_params.phi
+            ] = treatment.treatment_params.embryostatic_lambda_max
+            last_treatment.embryostatic_phi[
+                treatment.coverage_in
+            ] = treatment.treatment_params.embryostatic_phi
             last_treatment.permanent_infertility[
                 treatment.coverage_in
             ] = treatment.treatment_params.permanent_infertility

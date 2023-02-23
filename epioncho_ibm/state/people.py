@@ -180,22 +180,24 @@ class WormGroup(HDF5Dataclass):
 
 class LastTreatment(HDF5Dataclass):
     time: Array.Person.Float
-    u_ivermectin: Array.Person.Float
-    shape_parameter_ivermectin: Array.Person.Float
-    lam_max: Array.Person.Float
-    phi: Array.Person.Float
+    microfilaricidal_nu: Array.Person.Float
+    microfilaricidal_omega: Array.Person.Float
+    embryostatic_lambda_max: Array.Person.Float
+    embryostatic_phi: Array.Person.Float
     permanent_infertility: Array.Person.Float
 
     def __eq__(self, other: object) -> bool:
         return (
             isinstance(other, LastTreatment)
             and array_fully_equal(self.time, other.time)
-            and array_fully_equal(self.u_ivermectin, other.u_ivermectin)
+            and array_fully_equal(self.microfilaricidal_nu, other.microfilaricidal_nu)
             and array_fully_equal(
-                self.shape_parameter_ivermectin, other.shape_parameter_ivermectin
+                self.microfilaricidal_omega, other.microfilaricidal_omega
             )
-            and array_fully_equal(self.lam_max, other.lam_max)
-            and array_fully_equal(self.phi, other.phi)
+            and array_fully_equal(
+                self.embryostatic_lambda_max, other.embryostatic_lambda_max
+            )
+            and array_fully_equal(self.embryostatic_phi, other.embryostatic_phi)
             and array_fully_equal(
                 self.permanent_infertility, other.permanent_infertility
             )
@@ -204,10 +206,10 @@ class LastTreatment(HDF5Dataclass):
     def copy(self):
         return LastTreatment(
             time=self.time.copy(),
-            u_ivermectin=self.u_ivermectin.copy(),
-            shape_parameter_ivermectin=self.shape_parameter_ivermectin.copy(),
-            lam_max=self.lam_max.copy(),
-            phi=self.phi.copy(),
+            microfilaricidal_nu=self.microfilaricidal_nu.copy(),
+            microfilaricidal_omega=self.microfilaricidal_omega.copy(),
+            embryostatic_lambda_max=self.embryostatic_lambda_max.copy(),
+            embryostatic_phi=self.embryostatic_phi.copy(),
             permanent_infertility=self.permanent_infertility.copy(),
         )
 
@@ -260,10 +262,10 @@ class People(HDF5Dataclass):
         last_treatment[:] = np.nan
         last_treatment_full = LastTreatment(
             time=last_treatment.copy(),
-            u_ivermectin=last_treatment.copy(),
-            shape_parameter_ivermectin=last_treatment.copy(),
-            lam_max=last_treatment.copy(),
-            phi=last_treatment.copy(),
+            microfilaricidal_nu=last_treatment.copy(),
+            microfilaricidal_omega=last_treatment.copy(),
+            embryostatic_lambda_max=last_treatment.copy(),
+            embryostatic_phi=last_treatment.copy(),
             permanent_infertility=last_treatment.copy(),
         )
         # individual exposure to fly bites
@@ -343,11 +345,15 @@ class People(HDF5Dataclass):
             ),
             last_treatment=LastTreatment(
                 time=self.last_treatment.time[rel_ages],
-                u_ivermectin=self.last_treatment.u_ivermectin[rel_ages],
-                shape_parameter_ivermectin=self.last_treatment.u_ivermectin[rel_ages],
-                lam_max=self.last_treatment.u_ivermectin[rel_ages],
-                phi=self.last_treatment.u_ivermectin[rel_ages],
-                permanent_infertility=self.last_treatment.u_ivermectin[rel_ages],
+                microfilaricidal_nu=self.last_treatment.microfilaricidal_nu[rel_ages],
+                microfilaricidal_omega=self.last_treatment.microfilaricidal_nu[
+                    rel_ages
+                ],
+                embryostatic_lambda_max=self.last_treatment.microfilaricidal_nu[
+                    rel_ages
+                ],
+                embryostatic_phi=self.last_treatment.microfilaricidal_nu[rel_ages],
+                permanent_infertility=self.last_treatment.microfilaricidal_nu[rel_ages],
             ),
             delay_arrays=DelayArrays(
                 _worm_delay=self.delay_arrays._worm_delay[:, rel_ages],

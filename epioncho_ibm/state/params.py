@@ -15,12 +15,12 @@ class TreatmentParams(BaseModel):
     start_time: float  # The iteration upon which treatment commences
     stop_time: float  # the iteration upon which treatment stops
     total_population_coverage: float = 0.65  # The probability that a 'treatable' person is actually treated in an iteration - "treat.prob"
-    u_ivermectin: float = 0.0096  # effects of ivermectin
-    shape_parameter_ivermectin: float = 1.25  # effects of ivermectin
-    lam_max: float = (
+    microfilaricidal_nu: float = 0.0096  # effects of ivermectin
+    microfilaricidal_omega: float = 1.25  # effects of ivermectin
+    embryostatic_lambda_max: float = (
         32.4  # effects of ivermectin, the maximum rate of treatment-induced sterility
     )
-    phi: float = 19.6  # effects of ivermectin, φ is the rate of decay of this effect with time after treatment
+    embryostatic_phi: float = 19.6  # effects of ivermectin, φ is the rate of decay of this effect with time after treatment
     permanent_infertility: float = (
         0.345  # permenent infertility in worms due to ivermectin
     )
