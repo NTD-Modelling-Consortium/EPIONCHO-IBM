@@ -26,6 +26,7 @@ class TreatmentParams(BaseModel):
     )
     min_age_of_treatment: int = 5
 
+
 class WormParams(BaseModel):
     mu_worms1: float = (
         0.09953  # parameters controlling age-dependent mortality in adult worms

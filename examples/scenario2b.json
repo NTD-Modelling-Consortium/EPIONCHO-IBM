@@ -1,0 +1,24 @@
+{
+    "parameters": {
+        "initial": {
+            "n_people": 400
+        },
+        "changes": []
+    },
+    "programs": [
+        {
+            "first_year": 2022,
+            "last_year": 2025,
+            "interventions": {
+                "treatment_interval": 1
+            }
+        },
+        {
+            "first_year": 2026,
+            "last_year": 2040,
+            "interventions": {
+                "treatment_interval": 0.25
+            }
+        }
+    ]
+}
