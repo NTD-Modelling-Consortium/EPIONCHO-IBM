@@ -301,7 +301,7 @@ def _calc_female_mortalities(
     """
     female_mortalities = np.tile(mortalities, (len(coverage_in), 1))
     tiled_infertilities = np.tile(permanent_infertility, (len(mortalities), 1)).T
-    female_mortalities[coverage_in] += tiled_infertilities
+    female_mortalities[coverage_in] += tiled_infertilities[coverage_in]
     return female_mortalities.T
 
 
