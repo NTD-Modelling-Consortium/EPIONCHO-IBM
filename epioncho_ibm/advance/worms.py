@@ -263,9 +263,7 @@ def _calc_fertile_to_non_fertile_rate(
 
     Args:
         current_time (float): The current time, t, in the model
-        lam_m (float): From the effects of ivermectin
-        phi (float): From the effects of ivermectin
-        time_of_last_treatment (Array.Person.Float): The last time each individual was treated
+        last_treatment (LastTreatment): Data from the last time each person was treated
         delta_time (float): dt - The amount of time advance in one time step
 
     Returns:
@@ -292,7 +290,7 @@ def _calc_female_mortalities(
 
     Args:
         mortalities (Array.WormCat.Float): The default worm mortality rate
-        permanent_infertility (float): Permenent infertility in worms due to ivermectin
+        permanent_infertility (Array.Person.Float): Permenent infertility in worms due to ivermectin
         coverage_in (Array.Person.Bool): An array stating if each person in the model is treated
 
     Returns:
@@ -329,7 +327,7 @@ def calculate_new_worms(
         current_worms (WormGroup): The current worms in the model
         worm_params (WormParams): The fixed parameters relating to worms
         treatment_params (TreatmentParams | None): The fixed parameters relating to treatment
-        time_of_last_treatment (Array.Person.Float): The last time a particular person was
+        last_treatment (LastTreatment): Data from the last time each person was
             treated (None if treatment has not started).
         delta_time (float): dt - The amount of time advance in one time step
         worm_delay_array (Array.Person.Int): The array for the worms being delayed
