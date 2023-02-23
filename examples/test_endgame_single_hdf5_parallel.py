@@ -9,10 +9,7 @@ from epioncho_ibm import EndgameSimulation, EpionchoEndgameModel
 
 def get_endgame(seed, cov):
     return {
-        "parameters": {
-            "initial": {"n_people": 100, "seed": seed},
-            "changes": []
-        },
+        "parameters": {"initial": {"n_people": 100, "seed": seed}, "changes": []},
         "programs": [
             {
                 "first_year": 3,
