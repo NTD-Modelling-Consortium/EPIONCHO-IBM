@@ -84,7 +84,7 @@ def calculate_microfil_delta(
         treatment_params (TreatmentParams | None): The fixed parameters relating to treatment
         microfillarie_mortality_rate (Array.MFCat.Float): The death rate for microfilariae
         fecundity_rates_worms (Array.WormCat.Float): The rate at which worms reproduce
-        time_of_last_treatment (Array.Person.Float | None): The last time each person was treated
+        last_treatment (LastTreatment | None): Data from the last time each person was treated
         current_time (float): The current time t in the model
         current_fertile_female_worms (Array.WormCat.Person.Int): The current number of fertile worms
         current_male_worms (Array.WormCat.Person.Int): The current number of male worms
