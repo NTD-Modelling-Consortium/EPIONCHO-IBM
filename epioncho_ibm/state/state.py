@@ -65,6 +65,32 @@ def negative_binomial_alt_interface(
     return output
 
 
+def recalculate_compliance(
+    compliant_pop: Array.Person.Bool,
+    prev_compliance_rate: float,
+    new_compliance_rate: float,
+    people_generator: Generator,
+):
+    if prev_compliance_rate == new_compliance_rate:
+        return compliant_pop
+    elif prev_compliance_rate > new_compliance_rate:
+        new_draw_rate = new_compliance_rate / prev_compliance_rate
+        non_comps = len(compliant_pop) - sum(compliant_pop)
+        new_compliant = (
+            people_generator.uniform(low=0, high=1, size=non_comps) < new_draw_rate
+        )
+        compliant_pop[compliant_pop] = new_compliant
+        return compliant_pop
+    else:
+        new_draw_from_pop = new_compliance_rate - prev_compliance_rate
+        comps = sum(compliant_pop)
+        new_compliant = (
+            people_generator.uniform(low=0, high=1, size=comps) < new_draw_from_pop
+        )
+        compliant_pop[~compliant_pop] = new_compliant
+        return compliant_pop
+
+
 class State(HDF5Dataclass, BaseState[Params]):
     people: People
     _params: ImmutableParams
@@ -93,9 +119,19 @@ class State(HDF5Dataclass, BaseState[Params]):
         Args:
             params (Params): New set of parameters
         """
+        self.numpy_bit_generator = Generator(SFC64(params.seed))
+        if (
+            self._params.humans.noncompliant_percentage
+            != params.humans.noncompliant_percentage
+        ):
+            self.people.compliance = recalculate_compliance(
+                self.people.compliance,
+                self._params.humans.noncompliant_percentage,
+                params.humans.noncompliant_percentage,
+                self.numpy_bit_generator,
+            )
         self._params = mutable_to_immutable(params)
         self._derive_params()
-        self.numpy_bit_generator = Generator(SFC64(self._params.seed))
 
     def _derive_params(self) -> None:
         assert self._params
