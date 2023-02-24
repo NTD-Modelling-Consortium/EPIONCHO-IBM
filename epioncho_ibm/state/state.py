@@ -66,29 +66,31 @@ def negative_binomial_alt_interface(
 
 
 def recalculate_compliance(
-    compliant_pop: Array.Person.Bool,
-    prev_compliance_rate: float,
-    new_compliance_rate: float,
+    is_compliant: Array.Person.Bool,
+    prev_noncompliance_rate: float,
+    new_noncompliance_rate: float,
     people_generator: Generator,
 ):
-    if prev_compliance_rate == new_compliance_rate:
-        return compliant_pop
-    elif prev_compliance_rate > new_compliance_rate:
-        new_draw_rate = new_compliance_rate / prev_compliance_rate
-        non_comps = len(compliant_pop) - sum(compliant_pop)
-        new_compliant = (
-            people_generator.uniform(low=0, high=1, size=non_comps) < new_draw_rate
+    if prev_noncompliance_rate == new_noncompliance_rate:
+        return is_compliant
+    elif prev_noncompliance_rate > new_noncompliance_rate:
+        new_draw_rate = new_noncompliance_rate / prev_noncompliance_rate
+        non_comps = len(is_compliant) - sum(is_compliant)
+        new_compliant = people_generator.uniform(low=0, high=1, size=non_comps) < (
+            1 - new_draw_rate
         )
-        compliant_pop[compliant_pop] = new_compliant
-        return compliant_pop
+        is_compliant[~is_compliant] = new_compliant
+        return is_compliant
     else:
-        new_draw_from_pop = new_compliance_rate - prev_compliance_rate
-        comps = sum(compliant_pop)
-        new_compliant = (
-            people_generator.uniform(low=0, high=1, size=comps) < new_draw_from_pop
+        new_draw_from_pop = (new_noncompliance_rate - prev_noncompliance_rate) / (
+            1 - prev_noncompliance_rate
         )
-        compliant_pop[~compliant_pop] = new_compliant
-        return compliant_pop
+        comps = sum(is_compliant)
+        new_compliant = people_generator.uniform(low=0, high=1, size=comps) < (
+            1 - new_draw_from_pop
+        )
+        is_compliant[is_compliant] = new_compliant
+        return is_compliant
 
 
 class State(HDF5Dataclass, BaseState[Params]):
