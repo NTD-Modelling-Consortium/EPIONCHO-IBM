@@ -93,7 +93,7 @@ def get_treatment(
     current_time: float,
     treatment_times: Optional[Array.Treatments.Float],
     ages: Array.Person.Float,
-    compliance: Array.Person.Bool,
+    compliance: Optional[Array.Person.Bool],
     numpy_bit_gen: Generator,
 ) -> Optional[TreatmentGroup]:
     """
@@ -113,6 +113,7 @@ def get_treatment(
             calculation
     """
     if treatment_params is not None:
+        assert compliance is not None
         assert treatment_times is not None
         treatment_started, treatment_occurred = _is_during_treatment(
             treatment_params,
