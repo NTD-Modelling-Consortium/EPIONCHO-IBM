@@ -72,7 +72,7 @@ def recalculate_compliance(
     people_generator: Generator,
 ):
     if prev_noncompliance_rate == new_noncompliance_rate:
-        return is_compliant
+        return None
     elif prev_noncompliance_rate > new_noncompliance_rate:
         new_draw_rate = new_noncompliance_rate / prev_noncompliance_rate
         non_comps = len(is_compliant) - sum(is_compliant)
@@ -80,7 +80,7 @@ def recalculate_compliance(
             1 - new_draw_rate
         )
         is_compliant[~is_compliant] = new_compliant
-        return is_compliant
+        return None
     else:
         new_draw_from_pop = (new_noncompliance_rate - prev_noncompliance_rate) / (
             1 - prev_noncompliance_rate
@@ -90,7 +90,7 @@ def recalculate_compliance(
             1 - new_draw_from_pop
         )
         is_compliant[is_compliant] = new_compliant
-        return is_compliant
+        return None
 
 
 class State(HDF5Dataclass, BaseState[Params]):
@@ -129,7 +129,7 @@ class State(HDF5Dataclass, BaseState[Params]):
                     != params.treatment.noncompliant_percentage
                 ):
                     assert self.people.compliance is not None
-                    self.people.compliance = recalculate_compliance(
+                    recalculate_compliance(
                         self.people.compliance,
                         self._params.treatment.noncompliant_percentage,
                         params.treatment.noncompliant_percentage,
