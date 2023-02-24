@@ -232,7 +232,9 @@ class People(HDF5Dataclass):
             if self.compliance is not None and other.compliance is not None:
                 compliance_equal = array_fully_equal(self.compliance, other.compliance)
             else:
-                compliance_equal = (self.compliance is None) == (other.compliance is None)
+                compliance_equal = (self.compliance is None) == (
+                    other.compliance is None
+                )
         else:
             compliance_equal = False
         return (
@@ -340,7 +342,9 @@ class People(HDF5Dataclass):
 
     def get_people_for_age_group(self, age_start: float, age_end: float) -> "People":
         rel_ages = (self.ages >= age_start) & (self.ages < age_end)
-        new_compliance = self.compliance[rel_ages] if self.compliance is not None else None
+        new_compliance = (
+            self.compliance[rel_ages] if self.compliance is not None else None
+        )
         return People(
             compliance=new_compliance,
             sex_is_male=self.sex_is_male[rel_ages],
