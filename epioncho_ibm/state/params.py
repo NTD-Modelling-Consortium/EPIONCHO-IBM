@@ -25,7 +25,7 @@ class TreatmentParams(BaseModel):
         0.345  # permenent infertility in worms due to ivermectin
     )
     min_age_of_treatment: int = 5
-
+    noncompliant_percentage: float = 0.05
 
 class WormParams(BaseModel):
     mu_worms1: float = (
@@ -119,7 +119,7 @@ class HumanParams(BaseModel):
     skin_snip_weight: int = 2  # "ss.wt" the weight of the skin snip
     skin_snip_number: int = 2  # "num.ss"
     gender_ratio: float = 0.5
-    noncompliant_percentage: float = 0.05
+
 
 
 class BaseParams(BaseModel):

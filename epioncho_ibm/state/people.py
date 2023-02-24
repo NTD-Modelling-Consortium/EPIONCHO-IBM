@@ -1,3 +1,4 @@
+from typing import Optional
 import numpy as np
 from hdf5_dataclass import HDF5Dataclass
 from numpy.random import SFC64, Generator
@@ -215,7 +216,7 @@ class LastTreatment(HDF5Dataclass):
 
 
 class People(HDF5Dataclass):
-    compliance: Array.Person.Bool
+    compliance: Optional[Array.Person.Bool]
     sex_is_male: Array.Person.Bool
     blackfly: BlackflyLarvae
     ages: Array.Person.Float
@@ -226,9 +227,20 @@ class People(HDF5Dataclass):
     individual_exposure: Array.Person.Float
 
     def __eq__(self, other: object) -> bool:
+        if isinstance(other, People):
+            if self.compliance is not None and other.compliance is not None:
+                compliance_equal = array_fully_equal(self.compliance, other.compliance)
+            elif self.compliance is None and other.compliance is not None:
+                compliance_equal = False
+            elif self.compliance is not None and other.compliance is None:
+                compliance_equal = False
+            else:
+                compliance_equal = True
+        else:
+            compliance_equal = False
         return (
             isinstance(other, People)
-            and array_fully_equal(self.compliance, other.compliance)
+            and compliance_equal
             and array_fully_equal(self.sex_is_male, other.sex_is_male)
             and self.blackfly == other.blackfly
             and array_fully_equal(self.ages, other.ages)
@@ -240,7 +252,7 @@ class People(HDF5Dataclass):
         )
 
     def __len__(self):
-        return len(self.compliance)
+        return len(self.sex_is_male)
 
     @classmethod
     def from_params(cls, params: Params):
@@ -254,10 +266,13 @@ class People(HDF5Dataclass):
             people_generator.uniform(low=0, high=1, size=n_people)
             < params.humans.gender_ratio
         )
-        compliance_array = (
-            people_generator.uniform(low=0, high=1, size=n_people)
-            > params.humans.noncompliant_percentage
-        )
+        if params.treatment is None:
+            compliance_array = None
+        else:
+            compliance_array = (
+                people_generator.uniform(low=0, high=1, size=n_people)
+                > params.treatment.noncompliant_percentage
+            )
         last_treatment = np.empty(n_people)
         last_treatment[:] = np.nan
         last_treatment_full = LastTreatment(
@@ -328,8 +343,12 @@ class People(HDF5Dataclass):
 
     def get_people_for_age_group(self, age_start: float, age_end: float) -> "People":
         rel_ages = (self.ages >= age_start) & (self.ages < age_end)
+        if self.compliance is None:
+            new_compliance = None
+        else:
+            new_compliance = self.compliance[rel_ages]
         return People(
-            compliance=self.compliance[rel_ages],
+            compliance=new_compliance,
             sex_is_male=self.sex_is_male[rel_ages],
             blackfly=BlackflyLarvae(
                 L1=self.blackfly.L1[rel_ages],

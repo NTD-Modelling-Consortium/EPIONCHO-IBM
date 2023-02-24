@@ -122,16 +122,29 @@ class State(HDF5Dataclass, BaseState[Params]):
             params (Params): New set of parameters
         """
         self.numpy_bit_generator = Generator(SFC64(params.seed))
-        if (
-            self._params.humans.noncompliant_percentage
-            != params.humans.noncompliant_percentage
-        ):
-            self.people.compliance = recalculate_compliance(
-                self.people.compliance,
-                self._params.humans.noncompliant_percentage,
-                params.humans.noncompliant_percentage,
-                self.numpy_bit_generator,
-            )
+        if params.treatment is not None:
+            if self._params.treatment is not None:
+                if (
+                    self._params.treatment.noncompliant_percentage
+                    != params.treatment.noncompliant_percentage
+                ):
+                    assert self.people.compliance is not None
+                    self.people.compliance = recalculate_compliance(
+                        self.people.compliance,
+                        self._params.treatment.noncompliant_percentage,
+                        params.treatment.noncompliant_percentage,
+                        self.numpy_bit_generator,
+                    )
+                else:
+                    pass
+            else:
+                self.people.compliance = (
+                    self.numpy_bit_generator.uniform(low=0, high=1, size=self.n_people)
+                    > params.treatment.noncompliant_percentage
+                )
+        else:
+            self.people.compliance = None
+        
         self._params = mutable_to_immutable(params)
         self._derive_params()
 
@@ -198,11 +211,14 @@ class State(HDF5Dataclass, BaseState[Params]):
         return self.n_treatments[start_idx:end_idx].sum()
 
     def stats(self) -> StateStats:
+        if self.people.compliance is not None:
+            mean_comp = float(np.sum(self.people.compliance))/ len(self.people.compliance)
+        else:
+            mean_comp = 0
         return StateStats(
-            percent_compliant=float(np.sum(self.people.compliance))
-            / len(self.people.compliance),
+            percent_compliant=mean_comp,
             percent_male=float(np.sum(self.people.sex_is_male))
-            / len(self.people.compliance),
+            / len(self.people.sex_is_male),
             L1=NumericArrayStat.from_array(self.people.blackfly.L1),
             L2=NumericArrayStat.from_array(self.people.blackfly.L2),
             L3=NumericArrayStat.from_array(self.people.blackfly.L3),
