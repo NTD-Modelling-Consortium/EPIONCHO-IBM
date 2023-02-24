@@ -144,7 +144,7 @@ class State(HDF5Dataclass, BaseState[Params]):
                 )
         else:
             self.people.compliance = None
-        
+
         self._params = mutable_to_immutable(params)
         self._derive_params()
 
@@ -212,7 +212,9 @@ class State(HDF5Dataclass, BaseState[Params]):
 
     def stats(self) -> StateStats:
         if self.people.compliance is not None:
-            mean_comp = float(np.sum(self.people.compliance))/ len(self.people.compliance)
+            mean_comp = float(np.sum(self.people.compliance)) / len(
+                self.people.compliance
+            )
         else:
             mean_comp = 0
         return StateStats(

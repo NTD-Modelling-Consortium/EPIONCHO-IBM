@@ -27,6 +27,7 @@ class TreatmentParams(BaseModel):
     min_age_of_treatment: int = 5
     noncompliant_percentage: float = 0.05
 
+
 class WormParams(BaseModel):
     mu_worms1: float = (
         0.09953  # parameters controlling age-dependent mortality in adult worms
@@ -119,7 +120,6 @@ class HumanParams(BaseModel):
     skin_snip_weight: int = 2  # "ss.wt" the weight of the skin snip
     skin_snip_number: int = 2  # "num.ss"
     gender_ratio: float = 0.5
-
 
 
 class BaseParams(BaseModel):

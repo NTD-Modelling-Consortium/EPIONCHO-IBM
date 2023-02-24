@@ -1,4 +1,5 @@
 from typing import Optional
+
 import numpy as np
 from hdf5_dataclass import HDF5Dataclass
 from numpy.random import SFC64, Generator
