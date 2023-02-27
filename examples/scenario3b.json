@@ -3,7 +3,14 @@
         "initial": {
             "n_people": 400
         },
-        "changes": []
+        "changes": [
+            {
+                "year": 2026,
+                "params": {
+                    "delta_time_days": 0.5
+                }
+            }
+        ]
     },
     "programs": [
         {
