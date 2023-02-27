@@ -235,7 +235,9 @@ class State(HDF5Dataclass, BaseState[Params]):
             population_prevalence=self.mf_prevalence_in_population(),
         )
 
-    def microfilariae_per_skin_snip(self) -> tuple[float, Array.Person.Float]:
+    def microfilariae_per_skin_snip(
+        self, return_nan: bool = False
+    ) -> tuple[float, Array.Person.Float]:
         """
         Calculates number of mf in skin snip for all people.
 
@@ -276,7 +278,10 @@ class State(HDF5Dataclass, BaseState[Params]):
             self._params.humans.skin_snip_number * self._params.humans.skin_snip_weight
         )
         if mfobs_percent.size == 0:
-            return 0.0, mfobs_percent
+            if return_nan:
+                return np.nan, mfobs_percent
+            else:
+                return 0.0, mfobs_percent
         else:
             return float(np.mean(mfobs_percent)), mfobs_percent
 
