@@ -110,8 +110,12 @@ def endgame_to_params(endgame: EpionchoEndgameModel) -> list[tuple[float, Params
             program = next(programs)
 
             assert not isinstance(program.interventions, list)
+
+            treatment_dict = program.interventions.dict()
+            interval_years = treatment_dict.pop("treatment_interval")
             treatment = TreatmentParams(
-                interval_years=program.interventions.treatment_interval,
+                **treatment_dict,
+                interval_years=interval_years,
                 start_time=time_of_change,
                 stop_time=_time_from_year_and_month(
                     program.last_year, program.last_month, is_last=True
