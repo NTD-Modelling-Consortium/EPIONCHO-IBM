@@ -15,6 +15,7 @@ def add_state_to_run_data(
     state: State,
     run_data: Data,
     prevalence: bool = True,
+    intensity: bool = True,
     number: bool = True,
     mean_worm_burden: bool = True,
     n_treatments: bool = True,
@@ -23,7 +24,7 @@ def add_state_to_run_data(
 ) -> None:
     age_min = 6
     age_max = 100
-    if prevalence or number or mean_worm_burden:
+    if prevalence or number or mean_worm_burden or intensity:
         if with_age_groups:
             for age_start in range(age_min, age_max):
                 age_state = state.get_state_for_age_group(age_start, age_start + 1)
@@ -31,23 +32,33 @@ def add_state_to_run_data(
                 if prevalence:
                     run_data[
                         (*partial_key, "prevalence")
-                    ] = age_state.mf_prevalence_in_population()
+                    ] = age_state.mf_prevalence_in_population(return_nan=True)
                 if number:
                     run_data[(*partial_key, "number")] = age_state.n_people
                 if mean_worm_burden:
                     run_data[
                         (*partial_key, "mean_worm_burden")
                     ] = age_state.mean_worm_burden()
+                if intensity:
+                    (
+                        run_data[(*partial_key, "intensity")],
+                        _,
+                    ) = age_state.microfilariae_per_skin_snip(return_nan=True)
         else:
             partial_key = (round(state.current_time, 2), age_min, age_max)
             if prevalence:
                 run_data[
                     (*partial_key, "prevalence")
-                ] = state.mf_prevalence_in_population()
+                ] = state.mf_prevalence_in_population(return_nan=True)
             if number:
                 run_data[(*partial_key, "number")] = state.n_people
             if mean_worm_burden:
                 run_data[(*partial_key, "mean_worm_burden")] = state.mean_worm_burden()
+            if intensity:
+                (
+                    run_data[(*partial_key, "intensity")],
+                    _,
+                ) = state.microfilariae_per_skin_snip(return_nan=True)
     if n_treatments or achieved_coverage:
         if with_age_groups:
             for age_start in range(age_min, age_max, 5):

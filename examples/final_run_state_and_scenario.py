@@ -46,6 +46,7 @@ for group_name in group_names:
             with_age_groups=True,
             prevalence=True,
             mean_worm_burden=False,
+            intensity=True,
         )
     output_data.append(run_data)
 
