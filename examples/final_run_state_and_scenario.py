@@ -4,9 +4,11 @@ from epioncho_ibm.endgame_simulation import EndgameSimulation
 from epioncho_ibm.state.params import EpionchoEndgameModel
 from epioncho_ibm.tools import Data, add_state_to_run_data, write_data_to_csv
 
-hdf5_file = "test_one.hdf5"
-scenario_file = "scenario2a.json"
+hdf5_file = "OutputVals_SDN53283.hdf5"
+scenario_file = "scenario1.json"
 n_sims = 3
+output_file = "scenario1.csv"
+
 
 group_names = [f"draw_{i}" for i in range(n_sims)]
 
@@ -47,4 +49,4 @@ for group_name in group_names:
         )
     output_data.append(run_data)
 
-write_data_to_csv(output_data, "test.csv")
+write_data_to_csv(output_data, output_file)
