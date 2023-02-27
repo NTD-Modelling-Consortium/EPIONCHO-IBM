@@ -10,10 +10,7 @@ class BaseImmutableParams(BaseModel):
         allow_mutation = False
 
 
-class TreatmentParams(BaseModel):
-    interval_years: float = 1  # treatment interval (years, 0.5 gives biannual)
-    start_time: float  # The iteration upon which treatment commences
-    stop_time: float  # the iteration upon which treatment stops
+class SpecificTreatmentParams(BaseModel):
     total_population_coverage: float = 0.65  # The probability that a 'treatable' person is actually treated in an iteration - "treat.prob"
     microfilaricidal_nu: float = 0.0096  # effects of ivermectin
     microfilaricidal_omega: float = 1.25  # effects of ivermectin
@@ -26,6 +23,12 @@ class TreatmentParams(BaseModel):
     )
     min_age_of_treatment: int = 5
     noncompliant_percentage: float = 0.05
+
+
+class TreatmentParams(SpecificTreatmentParams):
+    interval_years: float = 1  # treatment interval (years, 0.5 gives biannual)
+    start_time: float  # The iteration upon which treatment commences
+    stop_time: float  # the iteration upon which treatment stops
 
 
 class WormParams(BaseModel):
@@ -157,7 +160,7 @@ class EndgameParams(BaseMutableParams, BaseInitialParams):
     pass
 
 
-class EndgameProgramParams(BaseProgramParams):
+class EndgameProgramParams(SpecificTreatmentParams, BaseProgramParams):
     pass
 
 
