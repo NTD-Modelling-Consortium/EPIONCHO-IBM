@@ -1,0 +1,9 @@
+{
+    "parameters": {
+        "initial": {
+            "n_people": 400
+        },
+        "changes": []
+    },
+    "programs": []
+}
