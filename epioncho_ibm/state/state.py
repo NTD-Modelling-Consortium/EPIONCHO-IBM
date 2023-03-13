@@ -98,6 +98,7 @@ class State(HDF5Dataclass, BaseState[Params]):
     _params: ImmutableParams
     n_treatments: Optional[Array.General.Int]
     current_time: float = 0.0
+    _previous_delta_time: Optional[float] = None
     derived_params: DerivedParams = field(init=False, repr=False)
     numpy_bit_generator: Generator = field(init=False, repr=False)
 
@@ -157,6 +158,7 @@ class State(HDF5Dataclass, BaseState[Params]):
             people=self.people.get_people_for_age_group(age_start, age_end),
             _params=self._params,
             current_time=self.current_time,
+            _previous_delta_time=self._previous_delta_time,
             n_treatments=None,
         )
 
@@ -179,6 +181,7 @@ class State(HDF5Dataclass, BaseState[Params]):
             people=People.from_params(params),
             _params=mutable_to_immutable(params),
             current_time=current_time,
+            _previous_delta_time=None,
             n_treatments=np.zeros(
                 round(params.humans.max_human_age / params.n_treatments_bin_size),
                 dtype=int,
@@ -191,6 +194,7 @@ class State(HDF5Dataclass, BaseState[Params]):
             and self.people == other.people
             and self._params == other._params
             and self.current_time == other.current_time
+            and self._previous_delta_time == other._previous_delta_time
         )
 
     def reset_treatment_counter(self):

@@ -36,7 +36,9 @@ for group_name in group_names:
     sim.simulation.reset_current_params(new_params)
 
     run_data: Data = {}
-    for state in sim.iter_run(end_time=2040, sampling_interval=1):
+    for state in sim.iter_run(
+        end_time=2040 + new_params.delta_time, sampling_interval=1
+    ):
         add_state_to_run_data(
             state,
             run_data=run_data,
