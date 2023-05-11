@@ -1,13 +1,14 @@
 from dataclasses import field
 from math import ceil
 from pathlib import Path
-from typing import IO, Optional
+from typing import IO, Callable, Optional, overload
 
 import numpy as np
 from endgame_simulations.simulations import BaseState
 from hdf5_dataclass import HDF5Dataclass
 from numpy.random import SFC64, Generator
 from pydantic import BaseModel
+from scipy.optimize import curve_fit
 
 from .derived_params import DerivedParams
 from .params import ImmutableParams, Params, immutable_to_mutable, mutable_to_immutable
@@ -93,6 +94,37 @@ def recalculate_compliance(
         return None
 
 
+@overload
+def _mf_fit_func(x: float, a: float, b: float) -> float:
+    ...
+
+
+@overload
+def _mf_fit_func(x: Array.Person.Int, a: float, b: float) -> Array.Person.Float:
+    ...
+
+
+def _mf_fit_func(
+    x: float | Array.Person.Int, a: float, b: float
+) -> float | Array.Person.Float:
+    return a * (1 + x) ** b
+
+
+def get_OAE_mf_count_func(mf: list[int], prob: list[float], val_for_0: float):
+    # Use scipy's curve_fit to fit the function to the data
+    p_optimal, _ = curve_fit(_mf_fit_func, mf, prob, p0=[0.02, 0.4])
+    a = p_optimal[0]
+    b = p_optimal[1]
+
+    def new_mf_fit(mf: Array.Person.Int) -> Array.Person.Float:
+        if mf == 0:
+            return np.ones_like(mf) * val_for_0
+        else:
+            return _mf_fit_func(x=mf, a=a, b=b)
+
+    return new_mf_fit
+
+
 class State(HDF5Dataclass, BaseState[Params]):
     people: People
     _params: ImmutableParams
@@ -101,10 +133,20 @@ class State(HDF5Dataclass, BaseState[Params]):
     _previous_delta_time: Optional[float] = None
     derived_params: DerivedParams = field(init=False, repr=False)
     numpy_bit_generator: Generator = field(init=False, repr=False)
+    fit_func_OAE: Callable[[Array.Person.Int], Array.Person.Float] = field(
+        init=False, repr=False
+    )
 
     def __post_init__(self):
         self._derive_params()
         self.numpy_bit_generator = Generator(SFC64(self._params.seed))
+        MF_COUNTS = [3, 13, 36, 76, 151, 200]
+
+        PROB = [0.0439, 0.072, 0.0849, 0.1341, 0.1538, 0.2]
+
+        MF_0_VAL = 0.0061
+
+        self.fit_func_OAE = get_OAE_mf_count_func(MF_COUNTS, PROB, MF_0_VAL)
 
     @property
     def n_people(self):
@@ -323,6 +365,16 @@ class State(HDF5Dataclass, BaseState[Params]):
             return 0.0
         else:
             return float(np.mean(worm_burden))
+
+    def update_for_epilepsy(self):
+        current_test_for_OAE = self.people.get_current_tested_for_OAE()
+        if current_test_for_OAE.sum() > 0:
+            self.people.tested_for_OAE |= current_test_for_OAE
+            _, measured_mf = self.microfilariae_per_skin_snip()
+            rounded_mf: Array.Person.Int = np.round(measured_mf[current_test_for_OAE])
+            epilepsy_prob = self.fit_func_OAE(rounded_mf)
+            out = np.equal(self.numpy_bit_generator.binomial(1, epilepsy_prob), 1)
+            self.people.has_OAE |= out
 
 
 def make_state_from_params(params: Params):

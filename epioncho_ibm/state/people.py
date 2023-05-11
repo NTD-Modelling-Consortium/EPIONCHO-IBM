@@ -227,6 +227,8 @@ class People(HDF5Dataclass):
     delay_arrays: DelayArrays
     individual_exposure: Array.Person.Float
     was_infected: Array.Person.Bool
+    tested_for_OAE: Array.Person.Bool
+    has_OAE: Array.Person.Bool
 
     def __eq__(self, other: object) -> bool:
         if isinstance(other, People):
@@ -324,6 +326,8 @@ class People(HDF5Dataclass):
             delay_arrays=DelayArrays.from_params(params, new_individual_exposure),
             individual_exposure=new_individual_exposure,
             was_infected=was_infected,
+            tested_for_OAE=was_infected.copy(),
+            has_OAE=was_infected.copy(),
         )
 
     def process_deaths(
@@ -389,14 +393,20 @@ class People(HDF5Dataclass):
             ),
             individual_exposure=self.individual_exposure[rel_ages],
             was_infected=self.was_infected[rel_ages],
+            tested_for_OAE=self.tested_for_OAE[rel_ages],
+            has_OAE=self.has_OAE[rel_ages],
         )
 
     def get_infected(self) -> Array.Person.Bool:
-        total_mf = self.mf.sum(axis=0)
         total_male_worms = self.worms.male.sum(axis=0)
-        total_fertile_worms = self.worms.fertile.sum(axis=0)
-        total_infertile_worms = self.worms.infertile.sum(axis=0)
-        total_mf_and_worms = (
-            total_mf + total_male_worms + total_fertile_worms + total_infertile_worms
+        total_female_worms = self.worms.fertile.sum(axis=0) + self.worms.infertile.sum(
+            axis=0
         )
-        return total_mf_and_worms != 0
+        return (total_male_worms > 0) & (total_female_worms > 0)
+
+    def get_current_tested_for_OAE(self) -> Array.Person.Bool:
+        in_age_range = (5 <= self.ages) & (self.ages <= 15)
+        # TODO: How can an individual have OAE but not be tested for OAE?
+        return (
+            in_age_range & self.was_infected & np.logical_not(self.tested_for_OAE)
+        )  # & np.logical_not(self.has_OAE)
