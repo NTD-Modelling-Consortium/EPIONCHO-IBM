@@ -75,7 +75,7 @@ def advance_state(state: State, debug: bool = False) -> None:
     )
 
     # inputs for delay in L1
-    old_mf: Array.Person.Float = np.sum(state.people.mf, axis=0)
+    total_mf: Array.Person.Float = np.sum(state.people.mf, axis=0)
     state.people.mf += calculate_microfil_delta(
         current_microfil=state.people.mf,
         delta_time=state._params.delta_time,
@@ -98,15 +98,17 @@ def advance_state(state: State, debug: bool = False) -> None:
         exposure_delay: Array.Person.Float = state.people.delay_arrays.exposure_delay
 
     if state.people.delay_arrays.mf_delay is None:
-        mf_delay: Array.Person.Float = old_mf.copy()
+        mf_delay: Array.Person.Float = total_mf.copy()
     else:
         mf_delay: Array.Person.Float = state.people.delay_arrays.mf_delay
 
     state.people.was_infected |= state.people.get_infected()
 
+    state.update_for_epilepsy()
+
     state.people.blackfly.L1 = calc_l1(
         state._params.blackfly,
-        old_mf,
+        total_mf,
         mf_delay,
         total_exposure,
         exposure_delay,
@@ -124,7 +126,7 @@ def advance_state(state: State, debug: bool = False) -> None:
     state.people.blackfly.L3 = calc_l3(state._params.blackfly, old_blackfly_L2)
     # TODO: Resolve new_mf=old_mf
     state.people.delay_arrays.lag_all_arrays(
-        new_worms=new_worms, total_exposure=total_exposure, new_mf=old_mf
+        new_worms=new_worms, total_exposure=total_exposure, new_mf=total_mf
     )
     people_to_die: Array.Person.Bool = np.logical_or(
         state.derived_params.people_to_die_generator.binomial(
