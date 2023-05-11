@@ -102,6 +102,8 @@ def advance_state(state: State, debug: bool = False) -> None:
     else:
         mf_delay: Array.Person.Float = state.people.delay_arrays.mf_delay
 
+    state.people.was_infected |= state.people.get_infected()
+
     state.people.blackfly.L1 = calc_l1(
         state._params.blackfly,
         old_mf,

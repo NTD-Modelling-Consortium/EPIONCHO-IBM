@@ -226,6 +226,7 @@ class People(HDF5Dataclass):
     last_treatment: LastTreatment
     delay_arrays: DelayArrays
     individual_exposure: Array.Person.Float
+    was_infected: Array.Person.Bool
 
     def __eq__(self, other: object) -> bool:
         if isinstance(other, People):
@@ -290,7 +291,10 @@ class People(HDF5Dataclass):
         )
         new_individual_exposure = individual_exposure / np.mean(individual_exposure)
         new_individual_exposure.setflags(write=False)
-
+        if params.microfil.initial_mf > 0 or params.worms.initial_worms > 0:
+            was_infected = np.ones(n_people, dtype=bool)
+        else:
+            was_infected = np.zeros(n_people, dtype=bool)
         return cls(
             compliance=compliance_array,
             ages=truncated_geometric(
@@ -319,6 +323,7 @@ class People(HDF5Dataclass):
             last_treatment=last_treatment_full,
             delay_arrays=DelayArrays.from_params(params, new_individual_exposure),
             individual_exposure=new_individual_exposure,
+            was_infected=was_infected,
         )
 
     def process_deaths(
@@ -338,6 +343,8 @@ class People(HDF5Dataclass):
             self.worms.male[:, people_to_die] = 0
             self.worms.fertile[:, people_to_die] = 0
             self.worms.infertile[:, people_to_die] = 0
+            self.was_infected[people_to_die] = False
+
         self.delay_arrays.process_deaths(people_to_die)
 
     def get_people_for_age_group(self, age_start: float, age_end: float) -> "People":
@@ -381,4 +388,15 @@ class People(HDF5Dataclass):
                 _mf_delay_current=self.delay_arrays._mf_delay_current,
             ),
             individual_exposure=self.individual_exposure[rel_ages],
+            was_infected=self.was_infected[rel_ages],
         )
+
+    def get_infected(self) -> Array.Person.Bool:
+        total_mf = self.mf.sum(axis=0)
+        total_male_worms = self.worms.male.sum(axis=0)
+        total_fertile_worms = self.worms.fertile.sum(axis=0)
+        total_infertile_worms = self.worms.infertile.sum(axis=0)
+        total_mf_and_worms = (
+            total_mf + total_male_worms + total_fertile_worms + total_infertile_worms
+        )
+        return total_mf_and_worms != 0
