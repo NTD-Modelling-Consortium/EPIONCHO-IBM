@@ -100,12 +100,14 @@ def _mf_fit_func(x: float, a: float, b: float) -> float:
 
 
 @overload
-def _mf_fit_func(x: Array.Person.Int, a: float, b: float) -> Array.Person.Float:
+def _mf_fit_func(
+    x: Array.Person.Int | Array.Person.Float, a: float, b: float
+) -> Array.Person.Float:
     ...
 
 
 def _mf_fit_func(
-    x: float | Array.Person.Int, a: float, b: float
+    x: float | Array.Person.Int | Array.Person.Float, a: float, b: float
 ) -> float | Array.Person.Float:
     return a * (1 + x) ** b
 
@@ -116,7 +118,7 @@ def get_OAE_mf_count_func(mf: list[int], prob: list[float], val_for_0: float):
     a = p_optimal[0]
     b = p_optimal[1]
 
-    def new_mf_fit(mf: Array.Person.Int) -> Array.Person.Float:
+    def new_mf_fit(mf: Array.Person.Int | Array.Person.Float) -> Array.Person.Float:
         if mf == 0:
             return np.ones_like(mf) * val_for_0
         else:
@@ -133,9 +135,9 @@ class State(HDF5Dataclass, BaseState[Params]):
     _previous_delta_time: Optional[float] = None
     derived_params: DerivedParams = field(init=False, repr=False)
     numpy_bit_generator: Generator = field(init=False, repr=False)
-    fit_func_OAE: Callable[[Array.Person.Int], Array.Person.Float] = field(
-        init=False, repr=False
-    )
+    fit_func_OAE: Callable[
+        [Array.Person.Int | Array.Person.Float], Array.Person.Float
+    ] = field(init=False, repr=False)
 
     def __post_init__(self):
         self._derive_params()
@@ -366,7 +368,7 @@ class State(HDF5Dataclass, BaseState[Params]):
         else:
             return float(np.mean(worm_burden))
 
-    def update_for_epilepsy(self):
+    def _update_for_epilepsy(self):
         current_test_for_OAE = self.people.get_current_tested_for_OAE()
         if current_test_for_OAE.sum() > 0:
             self.people.tested_for_OAE |= current_test_for_OAE
@@ -375,6 +377,9 @@ class State(HDF5Dataclass, BaseState[Params]):
             epilepsy_prob = self.fit_func_OAE(rounded_mf)
             out = np.equal(self.numpy_bit_generator.binomial(1, epilepsy_prob), 1)
             self.people.has_OAE |= out
+
+    def count_OAE(self):
+        return self.people.has_OAE.sum()
 
 
 def make_state_from_params(params: Params):

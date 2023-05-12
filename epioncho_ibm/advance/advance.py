@@ -104,7 +104,7 @@ def advance_state(state: State, debug: bool = False) -> None:
 
     state.people.was_infected |= state.people.get_infected()
 
-    state.update_for_epilepsy()
+    state._update_for_epilepsy()
 
     state.people.blackfly.L1 = calc_l1(
         state._params.blackfly,

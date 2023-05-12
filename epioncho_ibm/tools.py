@@ -18,6 +18,7 @@ def add_state_to_run_data(
     intensity: bool = True,
     number: bool = True,
     mean_worm_burden: bool = True,
+    count_OAE: bool = True,
     n_treatments: bool = True,
     achieved_coverage: bool = True,
     with_age_groups: bool = True,
@@ -44,6 +45,8 @@ def add_state_to_run_data(
                         run_data[(*partial_key, "intensity")],
                         _,
                     ) = age_state.microfilariae_per_skin_snip(return_nan=True)
+                if count_OAE:
+                    run_data[(*partial_key, "count_OAE")] = age_state.count_OAE()
         else:
             partial_key = (round(state.current_time, 2), age_min, age_max)
             if prevalence:
@@ -59,6 +62,8 @@ def add_state_to_run_data(
                     run_data[(*partial_key, "intensity")],
                     _,
                 ) = state.microfilariae_per_skin_snip(return_nan=True)
+            if count_OAE:
+                run_data[(*partial_key, "count_OAE")] = state.count_OAE()
     if n_treatments or achieved_coverage:
         if with_age_groups:
             for age_start in range(age_min, age_max, 5):
