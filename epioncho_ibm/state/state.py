@@ -119,10 +119,11 @@ def get_OAE_mf_count_func(mf: list[int], prob: list[float], val_for_0: float):
     b = p_optimal[1]
 
     def new_mf_fit(mf: Array.Person.Int | Array.Person.Float) -> Array.Person.Float:
-        if mf == 0:
-            return np.ones_like(mf) * val_for_0
-        else:
-            return _mf_fit_func(x=mf, a=a, b=b)
+        mf_probs = np.zeros_like(mf, dtype=float)
+        mf_zero_idxs = np.equal(mf, 0)
+        mf_probs[mf_zero_idxs] = np.ones_like(mf_zero_idxs) * val_for_0
+        mf_probs[~mf_zero_idxs] = _mf_fit_func(x=mf[~mf_zero_idxs], a=a, b=b)
+        return mf_probs
 
     return new_mf_fit
 
@@ -376,7 +377,7 @@ class State(HDF5Dataclass, BaseState[Params]):
             rounded_mf: Array.Person.Int = np.round(measured_mf[current_test_for_OAE])
             epilepsy_prob = self.fit_func_OAE(rounded_mf)
             out = np.equal(self.numpy_bit_generator.binomial(1, epilepsy_prob), 1)
-            self.people.has_OAE |= out
+            self.people.has_OAE[current_test_for_OAE] |= out
 
     def count_OAE(self):
         return self.people.has_OAE.sum()
