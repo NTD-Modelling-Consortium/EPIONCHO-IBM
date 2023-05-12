@@ -251,6 +251,9 @@ class People(HDF5Dataclass):
             and self.last_treatment == other.last_treatment
             and self.delay_arrays == other.delay_arrays
             and array_fully_equal(self.individual_exposure, other.individual_exposure)
+            and array_fully_equal(self.was_infected, other.was_infected)
+            and array_fully_equal(self.tested_for_OAE, other.tested_for_OAE)
+            and array_fully_equal(self.has_OAE, other.has_OAE)
         )
 
     def __len__(self):
@@ -326,8 +329,8 @@ class People(HDF5Dataclass):
             delay_arrays=DelayArrays.from_params(params, new_individual_exposure),
             individual_exposure=new_individual_exposure,
             was_infected=was_infected,
-            tested_for_OAE=was_infected.copy(),
-            has_OAE=was_infected.copy(),
+            tested_for_OAE=np.zeros(n_people, dtype=bool),
+            has_OAE=np.zeros(n_people, dtype=bool),
         )
 
     def process_deaths(
