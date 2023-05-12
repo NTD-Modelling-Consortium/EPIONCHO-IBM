@@ -121,7 +121,7 @@ def get_OAE_mf_count_func(mf: list[int], prob: list[float], val_for_0: float):
     def new_mf_fit(mf: Array.Person.Int | Array.Person.Float) -> Array.Person.Float:
         mf_probs = np.zeros_like(mf, dtype=float)
         mf_zero_idxs = np.equal(mf, 0)
-        mf_probs[mf_zero_idxs] = np.ones_like(mf_zero_idxs) * val_for_0
+        mf_probs[mf_zero_idxs] = np.ones_like(mf[mf_zero_idxs], dtype=float) * val_for_0
         mf_probs[~mf_zero_idxs] = _mf_fit_func(x=mf[~mf_zero_idxs], a=a, b=b)
         return mf_probs
 
@@ -379,7 +379,7 @@ class State(HDF5Dataclass, BaseState[Params]):
             out = np.equal(self.numpy_bit_generator.binomial(1, epilepsy_prob), 1)
             self.people.has_OAE[current_test_for_OAE] |= out
 
-    def count_OAE(self):
+    def count_OAE(self) -> int:
         return self.people.has_OAE.sum()
 
 
