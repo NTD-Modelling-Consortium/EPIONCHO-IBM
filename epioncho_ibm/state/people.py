@@ -410,7 +410,7 @@ class People(HDF5Dataclass):
         return (total_male_worms > 0) & (total_female_worms > 0)
 
     def get_current_tested_for_OAE(self) -> Array.Person.Bool:
-        in_age_range = (5 <= self.ages) & (self.ages <= 15)
+        in_age_range = (3 <= self.ages) & (self.ages <= 15)
         # TODO: How can an individual have OAE but not be tested for OAE?
         return (
             in_age_range & self.was_infected & np.logical_not(self.tested_for_OAE)
