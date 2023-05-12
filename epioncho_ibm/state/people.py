@@ -351,6 +351,8 @@ class People(HDF5Dataclass):
             self.worms.fertile[:, people_to_die] = 0
             self.worms.infertile[:, people_to_die] = 0
             self.was_infected[people_to_die] = False
+            self.has_OAE[people_to_die] = False
+            self.tested_for_OAE[people_to_die] = False
 
         self.delay_arrays.process_deaths(people_to_die)
 
