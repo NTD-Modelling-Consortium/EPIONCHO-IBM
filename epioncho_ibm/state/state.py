@@ -13,6 +13,7 @@ from scipy.optimize import curve_fit
 from .derived_params import DerivedParams
 from .params import ImmutableParams, Params, immutable_to_mutable, mutable_to_immutable
 from .people import People
+from .prob_mapping import mf_probs
 from .types import Array
 
 np.seterr(all="ignore")
@@ -112,7 +113,7 @@ def _mf_fit_func(
     return a * (1 + x) ** b
 
 
-def get_OAE_mf_count_func(mf: list[int], prob: list[float], val_for_0: float):
+def get_OAE_mf_count_func2(mf: list[int], prob: list[float], val_for_0: float):
     # Use scipy's curve_fit to fit the function to the data
     p_optimal, _ = curve_fit(_mf_fit_func, mf, prob, p0=[0.02, 0.4])
     a = p_optimal[0]
@@ -124,6 +125,16 @@ def get_OAE_mf_count_func(mf: list[int], prob: list[float], val_for_0: float):
         mf_probs[mf_zero_idxs] = np.ones_like(mf[mf_zero_idxs], dtype=float) * val_for_0
         mf_probs[~mf_zero_idxs] = _mf_fit_func(x=mf[~mf_zero_idxs], a=a, b=b)
         return mf_probs
+
+    return new_mf_fit
+
+
+def get_OAE_mf_count_func(mf: list[int], prob: list[float], val_for_0: float):
+    input_arr = np.array(mf_probs, dtype=float)
+
+    def new_mf_fit(mf: Array.Person.Int | Array.Person.Float) -> Array.Person.Float:
+        int_arr = np.array(np.round(mf), dtype=int)
+        return input_arr[int_arr]
 
     return new_mf_fit
 
