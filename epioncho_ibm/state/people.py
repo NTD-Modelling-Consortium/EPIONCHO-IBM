@@ -229,6 +229,7 @@ class People(HDF5Dataclass):
     was_infected: Array.Person.Bool
     tested_for_OAE: Array.Person.Bool
     has_OAE: Array.Person.Bool
+    age_test_OAE: Array.Person.Float
 
     def __eq__(self, other: object) -> bool:
         if isinstance(other, People):
@@ -254,6 +255,7 @@ class People(HDF5Dataclass):
             and array_fully_equal(self.was_infected, other.was_infected)
             and array_fully_equal(self.tested_for_OAE, other.tested_for_OAE)
             and array_fully_equal(self.has_OAE, other.has_OAE)
+            and array_fully_equal(self.age_test_OAE, other.age_test_OAE)
         )
 
     def __len__(self):
@@ -329,8 +331,9 @@ class People(HDF5Dataclass):
             delay_arrays=DelayArrays.from_params(params, new_individual_exposure),
             individual_exposure=new_individual_exposure,
             was_infected=was_infected,
-            tested_for_OAE=np.zeros(n_people, dtype=bool),
-            has_OAE=np.zeros(n_people, dtype=bool),
+            tested_for_OAE=np.ones(n_people, dtype=bool),
+            has_OAE=np.ones(n_people, dtype=bool),
+            age_test_OAE=people_generator.uniform(3.0, 15.0, size=n_people),
         )
 
     def process_deaths(
@@ -353,6 +356,9 @@ class People(HDF5Dataclass):
             self.was_infected[people_to_die] = False
             self.has_OAE[people_to_die] = False
             self.tested_for_OAE[people_to_die] = False
+            self.age_test_OAE[people_to_die] = numpy_bit_gen.uniform(
+                3.0, 15.0, size=total_people_to_die
+            )
 
         self.delay_arrays.process_deaths(people_to_die)
 
@@ -400,6 +406,7 @@ class People(HDF5Dataclass):
             was_infected=self.was_infected[rel_ages],
             tested_for_OAE=self.tested_for_OAE[rel_ages],
             has_OAE=self.has_OAE[rel_ages],
+            age_test_OAE=self.age_test_OAE[rel_ages],
         )
 
     def get_infected(self) -> Array.Person.Bool:
@@ -407,11 +414,11 @@ class People(HDF5Dataclass):
         total_female_worms = self.worms.fertile.sum(axis=0) + self.worms.infertile.sum(
             axis=0
         )
-        return (total_male_worms > 0) & (total_female_worms > 0)
+        return (total_male_worms > 0) & (total_female_worms > 0) & ~self.was_infected
 
     def get_current_tested_for_OAE(self) -> Array.Person.Bool:
-        in_age_range = (3 <= self.ages) & (self.ages <= 15)
-        # TODO: How can an individual have OAE but not be tested for OAE?
         return (
-            in_age_range & self.was_infected & np.logical_not(self.tested_for_OAE)
+            (self.age_test_OAE <= self.ages)
+            & self.was_infected
+            & np.logical_not(self.tested_for_OAE)
         )  # & np.logical_not(self.has_OAE)
