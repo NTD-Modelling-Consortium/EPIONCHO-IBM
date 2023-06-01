@@ -21,5 +21,4 @@ simulation = Simulation(start_time=0, params=params, verbose=True)
 out_csv = open("epilepsy.csv", "w")
 csv_write = csv.writer(out_csv)
 for state in simulation.iter_run(end_time=100, sampling_interval=0.1):
-    prevalence_OAE = state.count_OAE() / state.n_people
-    csv_write.writerow([prevalence_OAE])
+    csv_write.writerow([state.OAE_prevalence()])

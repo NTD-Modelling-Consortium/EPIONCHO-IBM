@@ -390,8 +390,8 @@ class State(HDF5Dataclass, BaseState[Params]):
             out = np.equal(self.numpy_bit_generator.binomial(1, epilepsy_prob), 1)
             self.people.has_OAE[current_test_for_OAE] |= out
 
-    def count_OAE(self) -> int:
-        return self.people.has_OAE.sum()
+    def OAE_prevalence(self) -> int:
+        return self.people.has_OAE.sum() / self.n_people
 
 
 def make_state_from_params(params: Params):

@@ -26,8 +26,7 @@ def run_sim(i) -> list[float]:
     simulation = Simulation(start_time=0, params=params)
     prev = []
     for state in simulation.iter_run(end_time=100, sampling_interval=0.1):
-        prevalence_OAE = state.count_OAE() / state.n_people
-        prev.append(prevalence_OAE)
+        prev.append(state.OAE_prevalence())
 
     return prev
 
