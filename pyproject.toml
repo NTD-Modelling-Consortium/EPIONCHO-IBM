@@ -13,7 +13,7 @@ fast-binomial = {git = "git@github.com:dreamingspires/fast-binomial.git"}
 pytest-trust-random = {git = "git@github.com:dreamingspires/pytest-trust-random.git"}
 hdf5-dataclass = {git = "git@github.com:dreamingspires/hdf5-dataclass.git"}
 endgame-simulations = {git = "git@github.com:dreamingspires/endgame-simulations.git"}
-
+scipy = "^1.8.1"
 
 [tool.poetry.dev-dependencies]
 black = "^22.3.0"
@@ -25,7 +25,6 @@ pytest-cov = "^3.0.0"
 pytest-xdist = "^2.5.0"
 pytest-asyncio = "^0.18.3"
 pytest-rerunfailures = "^10.2"
-scipy = "^1.8.1"
 joblib = "^1.1.0"
 ipykernel = "^6.17.1"
 snakeviz = "^2.1.1"

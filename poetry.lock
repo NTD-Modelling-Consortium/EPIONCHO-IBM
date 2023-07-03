@@ -2280,7 +2280,7 @@ use-chardet-on-py3 = ["chardet (>=3.0.2,<6)"]
 name = "scipy"
 version = "1.10.1"
 description = "Fundamental algorithms for scientific computing in Python"
-category = "dev"
+category = "main"
 optional = false
 python-versions = "<3.12,>=3.8"
 files = [
@@ -2555,4 +2555,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10, <3.11"
-content-hash = "c6dc87dd7139a03fe44b347f9a2a1b2cd1d20d9e02347c25c58139cc6d7c2a0c"
+content-hash = "b054630bfb1514480673c7577c550e35779d18c601383fc1fa3ed4122f10bcfd"
