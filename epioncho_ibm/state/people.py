@@ -216,6 +216,19 @@ class LastTreatment(HDF5Dataclass):
         )
 
 
+def dict_fully_equal(d1: dict[str, np.ndarray], d2: dict[str, np.ndarray]):
+    if d1.keys() != d2.keys():
+        return False
+    for k, a1 in d1.items():
+        if k not in d2:
+            assert False
+        else:
+            a2 = d2[k]
+            if not array_fully_equal(a1, a2):
+                return False
+    return True
+
+
 class People(HDF5Dataclass):
     compliance: Optional[Array.Person.Bool]
     sex_is_male: Array.Person.Bool
@@ -230,6 +243,8 @@ class People(HDF5Dataclass):
     tested_for_OAE: Array.Person.Bool
     has_OAE: Array.Person.Bool
     age_test_OAE: Array.Person.Float
+    has_sequela: dict[str, Array.Person.Bool]
+    reversible_sequela_time: dict[str, Array.Person.Float]
 
     def __eq__(self, other: object) -> bool:
         if isinstance(other, People):
@@ -256,6 +271,10 @@ class People(HDF5Dataclass):
             and array_fully_equal(self.tested_for_OAE, other.tested_for_OAE)
             and array_fully_equal(self.has_OAE, other.has_OAE)
             and array_fully_equal(self.age_test_OAE, other.age_test_OAE)
+            and dict_fully_equal(self.has_sequela, other.has_sequela)
+            and dict_fully_equal(
+                self.reversible_sequela_time, other.reversible_sequela_time
+            )
         )
 
     def __len__(self):
@@ -302,6 +321,12 @@ class People(HDF5Dataclass):
             was_infected = np.ones(n_people, dtype=bool)
         else:
             was_infected = np.zeros(n_people, dtype=bool)
+        sequela_array = np.zeros(n_people, dtype=bool)
+        has_sequela = {name: sequela_array.copy() for name in params.sequela_active}
+        time_for_sequela = np.zeros(n_people, dtype=float)
+        reversible_sequela_time = {
+            name: time_for_sequela.copy() for name in params.sequela_active
+        }
         return cls(
             compliance=compliance_array,
             ages=truncated_geometric(
@@ -334,6 +359,8 @@ class People(HDF5Dataclass):
             tested_for_OAE=np.ones(n_people, dtype=bool),
             has_OAE=np.ones(n_people, dtype=bool),
             age_test_OAE=people_generator.uniform(3.0, 15.0, size=n_people),
+            has_sequela=has_sequela,
+            reversible_sequela_time=reversible_sequela_time,
         )
 
     def process_deaths(
@@ -407,6 +434,10 @@ class People(HDF5Dataclass):
             tested_for_OAE=self.tested_for_OAE[rel_ages],
             has_OAE=self.has_OAE[rel_ages],
             age_test_OAE=self.age_test_OAE[rel_ages],
+            has_sequela={name: a[rel_ages] for name, a in self.has_sequela.items()},
+            reversible_sequela_time={
+                name: a[rel_ages] for name, a in self.reversible_sequela_time.items()
+            },
         )
 
     def get_infected(self) -> Array.Person.Bool:

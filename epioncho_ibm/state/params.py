@@ -134,6 +134,7 @@ class BaseParams(BaseModel):
     delta_time_days: float = 1  # DT
     year_length_days: float = 365
     month_length_days: float = 28
+    sequela_active: list[str] = []
 
 
 class BaseMutableParams(BaseParams):

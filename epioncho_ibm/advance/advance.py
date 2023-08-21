@@ -1,6 +1,7 @@
 import numpy as np
 
 from epioncho_ibm.state import Array, State
+from epioncho_ibm.state.sequelae import Sequela
 
 from .blackfly import calc_l1, calc_l2, calc_l3, calc_new_worms_from_blackfly
 from .exposure import calculate_total_exposure
@@ -138,3 +139,26 @@ def advance_state(state: State, debug: bool = False) -> None:
     state.people.process_deaths(
         people_to_die, state._params.humans.gender_ratio, state.numpy_bit_generator
     )
+    new_has_sequela = {}
+    for name, arr in state.people.has_sequela.items():
+        seq_class = state.derived_params.sequela_classes[name]
+        if issubclass(seq_class, Sequela):
+            prob = seq_class.timestep_probability(delta_time=state._params.delta_time)
+        else:
+            prob = seq_class.timestep_probability(
+                mf_count=total_mf, delta_time=state._params.delta_time
+            )
+
+        new_condition = np.random.random(state.n_people) < prob
+        new_has_sequela[name] = arr | new_condition
+        if seq_class.days_remains_positive is not None:
+            years_remain_positive = (
+                seq_class.days_remains_positive / state._params.year_length_days
+            )
+            assert name in state.people.reversible_sequela_time
+            rel_seq_time = state.people.reversible_sequela_time[name]
+            rel_seq_time[rel_seq_time > 0] -= state._params.delta_time
+            rel_seq_time[new_condition] = years_remain_positive
+            new_has_sequela[name] = rel_seq_time > 0
+
+    state.people.has_sequela = new_has_sequela
