@@ -46,7 +46,9 @@ def add_state_to_run_data(
                         _,
                     ) = age_state.microfilariae_per_skin_snip(return_nan=True)
                 if prevalence_OAE:
-                    run_data[(*partial_key, "OAE_prevalence")] = age_state.OAE_prevalence()
+                    run_data[
+                        (*partial_key, "OAE_prevalence")
+                    ] = age_state.OAE_prevalence()
         else:
             partial_key = (round(state.current_time, 2), age_min, age_max)
             if prevalence:
