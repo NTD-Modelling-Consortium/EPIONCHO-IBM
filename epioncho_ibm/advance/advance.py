@@ -36,6 +36,7 @@ def advance_state(state: State, debug: bool = False) -> None:
         state.people.sex_is_male,
         state.people.individual_exposure,
     )
+    old_ages = state.people.ages.copy()
     state.people.ages += state._params.delta_time
 
     old_worms = state.people.worms.copy()
@@ -142,23 +143,30 @@ def advance_state(state: State, debug: bool = False) -> None:
     new_has_sequela = {}
     for name, arr in state.people.has_sequela.items():
         seq_class = state.derived_params.sequela_classes[name]
-        if issubclass(seq_class, Sequela):
-            prob = seq_class.timestep_probability(delta_time=state._params.delta_time)
-        else:
-            prob = seq_class.timestep_probability(
-                mf_count=total_mf, delta_time=state._params.delta_time
-            )
+        prob = seq_class.timestep_probability(
+            delta_time=state._params.delta_time, mf_count=total_mf, ages=old_ages
+        )
 
         new_condition = np.random.random(state.n_people) < prob
+
         new_has_sequela[name] = arr | new_condition
-        if seq_class.days_remains_positive is not None:
-            years_remain_positive = (
-                seq_class.days_remains_positive / state._params.year_length_days
-            )
-            assert name in state.people.reversible_sequela_time
-            rel_seq_time = state.people.reversible_sequela_time[name]
-            rel_seq_time[rel_seq_time > 0] -= state._params.delta_time
-            rel_seq_time[new_condition] = years_remain_positive
-            new_has_sequela[name] = rel_seq_time > 0
+        if seq_class.end_countdown_become_positive is not None:
+            assert seq_class.years_countdown is not None
+            assert name in state.people.countdown_sequela
+            rel_seq_countdown = state.people.countdown_sequela[name]
+            # Decrement countdown
+            rel_seq_countdown[rel_seq_countdown > 0] -= state._params.delta_time
+
+            # For now infected, start countdown
+            rel_seq_countdown[new_condition] = seq_class.years_countdown
+
+            countdown_up = rel_seq_countdown <= 0
+            # Reset countdown with countdown up
+            rel_seq_countdown[countdown_up] = np.inf
+
+            # Set those with countdown up to correct state
+            new_has_sequela[name][
+                countdown_up
+            ] = seq_class.end_countdown_become_positive
 
     state.people.has_sequela = new_has_sequela
