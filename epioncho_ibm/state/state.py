@@ -394,10 +394,21 @@ class State(HDF5Dataclass, BaseState[Params]):
         return self.people.has_OAE.sum() / self.n_people
 
     def sequalae_prevalence(self) -> dict[str, float]:
-        return {
-            name: sequela.sum() / self.n_people
-            for name, sequela in self.people.has_sequela.items()
-        }
+        sequelae_prevalence = {}
+        for name, sequela in self.people.has_sequela.items():
+            prev = sequela.sum() / self.n_people
+            if name == "Blindness":
+                # TODO: Confirm logic here
+                visual_prev = prev * 1.78
+                if visual_prev > 1:
+                    new_visual_prev = 1
+                else:
+                    new_visual_prev = visual_prev
+                sequelae_prevalence["Blindness"] = prev
+                sequelae_prevalence["VisualImpairment"] = new_visual_prev
+            else:
+                sequelae_prevalence[name] = prev
+        return sequelae_prevalence
 
 
 def make_state_from_params(params: Params):
