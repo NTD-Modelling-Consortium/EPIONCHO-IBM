@@ -244,7 +244,7 @@ class People(HDF5Dataclass):
     has_OAE: Array.Person.Bool
     age_test_OAE: Array.Person.Float
     has_sequela: dict[str, Array.Person.Bool]
-    reversible_sequela_time: dict[str, Array.Person.Float]
+    countdown_sequela: dict[str, Array.Person.Float]
 
     def __eq__(self, other: object) -> bool:
         if isinstance(other, People):
@@ -272,9 +272,7 @@ class People(HDF5Dataclass):
             and array_fully_equal(self.has_OAE, other.has_OAE)
             and array_fully_equal(self.age_test_OAE, other.age_test_OAE)
             and dict_fully_equal(self.has_sequela, other.has_sequela)
-            and dict_fully_equal(
-                self.reversible_sequela_time, other.reversible_sequela_time
-            )
+            and dict_fully_equal(self.countdown_sequela, other.countdown_sequela)
         )
 
     def __len__(self):
@@ -323,8 +321,9 @@ class People(HDF5Dataclass):
             was_infected = np.zeros(n_people, dtype=bool)
         sequela_array = np.zeros(n_people, dtype=bool)
         has_sequela = {name: sequela_array.copy() for name in params.sequela_active}
-        time_for_sequela = np.zeros(n_people, dtype=float)
-        reversible_sequela_time = {
+        time_for_sequela = np.empty(n_people, dtype=float)
+        time_for_sequela[:] = np.inf
+        countdown_sequela = {
             name: time_for_sequela.copy() for name in params.sequela_active
         }
         return cls(
@@ -360,7 +359,7 @@ class People(HDF5Dataclass):
             has_OAE=np.ones(n_people, dtype=bool),
             age_test_OAE=people_generator.uniform(3.0, 15.0, size=n_people),
             has_sequela=has_sequela,
-            reversible_sequela_time=reversible_sequela_time,
+            countdown_sequela=countdown_sequela,
         )
 
     def process_deaths(
@@ -435,8 +434,8 @@ class People(HDF5Dataclass):
             has_OAE=self.has_OAE[rel_ages],
             age_test_OAE=self.age_test_OAE[rel_ages],
             has_sequela={name: a[rel_ages] for name, a in self.has_sequela.items()},
-            reversible_sequela_time={
-                name: a[rel_ages] for name, a in self.reversible_sequela_time.items()
+            countdown_sequela={
+                name: a[rel_ages] for name, a in self.countdown_sequela.items()
             },
         )
 

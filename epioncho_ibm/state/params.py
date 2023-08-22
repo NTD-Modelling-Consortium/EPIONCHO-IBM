@@ -4,6 +4,8 @@ from endgame_simulations import BaseInitialParams, BaseProgramParams
 from endgame_simulations.models import EndgameModel, create_update_model
 from pydantic import BaseModel
 
+from .sequelae import SequelaType
+
 
 class BaseImmutableParams(BaseModel):
     class Config:
@@ -134,7 +136,7 @@ class BaseParams(BaseModel):
     delta_time_days: float = 1  # DT
     year_length_days: float = 365
     month_length_days: float = 28
-    sequela_active: list[str] = []
+    sequela_active: SequelaType = []
 
 
 class BaseMutableParams(BaseParams):

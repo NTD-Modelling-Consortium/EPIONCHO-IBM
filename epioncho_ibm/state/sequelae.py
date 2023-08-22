@@ -1,4 +1,4 @@
-from typing import ClassVar, Optional, overload
+from typing import ClassVar, Literal, Optional, overload
 
 import numpy as np
 
@@ -25,54 +25,102 @@ def convert_prob(
 
 class Sequela:
     """
-    None for days remains positive means non-reversible
+    None for years countdown means non-reversible, and no lagged effects
+
+    end_countdown_become_positive = True means lagged, when years countdown is active
+    end_countdown_become_positive = False means reversible, when years countdown is active
     """
 
-    probability: ClassVar[float]
     probability_interval_years: ClassVar[float]
-    days_remains_positive: ClassVar[Optional[float]] = None
-
-    @classmethod
-    def timestep_probability(cls, delta_time: float) -> float:
-        scale_factor = delta_time / cls.probability_interval_years
-        return convert_prob(current_prob=cls.probability, scale_factor=scale_factor)
-
-
-class MFDependentSequela:
-    probability_interval_years: ClassVar[float]
-    days_remains_positive: ClassVar[Optional[float]] = None
-
-    @overload
-    @classmethod
-    def _probability(cls, mf_count: float) -> float:
-        ...
-
-    @overload
-    @classmethod
-    def _probability(cls, mf_count: Array.Person.Float) -> Array.Person.Float:
-        ...
+    years_countdown: ClassVar[Optional[float]] = None
+    end_countdown_become_positive: Optional[bool] = None
 
     @classmethod
     def _probability(
-        cls, mf_count: float | Array.Person.Float
+        cls, mf_count: Array.Person.Float, ages: Array.Person.Float
     ) -> float | Array.Person.Float:
         raise NotImplementedError("Must implement prob method for mf dependent sequela")
 
     @classmethod
     def timestep_probability(
-        cls, mf_count: float | Array.Person.Float, delta_time: float
+        cls, delta_time: float, mf_count: Array.Person.Float, ages: Array.Person.Float
     ) -> float | Array.Person.Float:
         scale_factor = delta_time / cls.probability_interval_years
         return convert_prob(
-            current_prob=cls._probability(mf_count), scale_factor=scale_factor
+            current_prob=cls._probability(mf_count=mf_count, ages=ages),
+            scale_factor=scale_factor,
         )
 
 
-class Blindness(MFDependentSequela):
+class _BaseReversible(Sequela):
+    probability_interval_years: float = 1 / 365
+    years_countdown: float = 3 / 365
+    end_countdown_become_positive = False
+    prob: float
+
+    @classmethod
+    def _probability(
+        cls, mf_count: Array.Person.Float, ages: Array.Person.Float
+    ) -> float | Array.Person.Float:
+        new_probs = np.zeros_like(mf_count)
+        mask = mf_count > 0 and ages >= 2
+        new_probs[mask] = cls.prob
+        return new_probs
+
+
+class _BaseNonReversible(Sequela):
     probability_interval_years: float = 1.0
+    prob: float
+
+    @classmethod
+    def _probability(
+        cls, mf_count: Array.Person.Float, ages: Array.Person.Float
+    ) -> float | Array.Person.Float:
+        new_probs = np.zeros_like(mf_count)
+        mask = mf_count > 0
+        new_probs[mask] = cls.prob
+        return new_probs
+
+
+class Blindness(Sequela):
+    probability_interval_years: float = 1.0
+    years_countdown: float = 2.0
+    end_countdown_become_positive = True
     prob_background_blindness: float = 0.003
     gamma1: float = 0.01
 
     @classmethod
-    def _probability(cls, mf_count: float | Array.Person.Float):
+    def _probability(
+        cls, mf_count: Array.Person.Float, ages: Array.Person.Float
+    ) -> float | Array.Person.Float:
         return cls.prob_background_blindness * np.exp(cls.gamma1 * mf_count)
+
+
+class SevereItching(_BaseReversible):
+    prob = 0.1636701
+
+
+class RSD(_BaseReversible):
+    prob = 0.04163095
+
+
+class Atrophy(_BaseNonReversible):
+    prob = 0.002375305
+
+
+class HangingGroin(_BaseNonReversible):
+    prob = 0.0007263018
+
+
+class Depigmentation(_BaseNonReversible):
+    prob = 0.001598305
+
+
+SequelaType = list[
+    Literal["Blindness"]
+    | Literal["SevereItching"]
+    | Literal["RSD"]
+    | Literal["Atrophy"]
+    | Literal["HangingGroin"]
+    | Literal["Depigmentation"]
+]
