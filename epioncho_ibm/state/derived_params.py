@@ -7,7 +7,7 @@ from fast_binomial import SFC64, Generator
 import epioncho_ibm.state.sequelae
 
 from .params import Params
-from .sequelae import MFDependentSequela, Sequela
+from .sequelae import Sequela, SequelaType
 from .types import Array
 
 
@@ -18,16 +18,14 @@ def _weibull_mortality(
 
 
 def get_sequela(
-    sequela: list[str],
-) -> dict[str, type[MFDependentSequela] | type[Sequela]]:
+    sequela: SequelaType,
+) -> dict[str, type[Sequela]]:
     all_sequela_vars = vars(epioncho_ibm.state.sequelae)
-    output_sequela: dict[str, type[MFDependentSequela] | type[Sequela]] = {}
+    output_sequela: dict[str, type[Sequela]] = {}
     for name in sequela:
         if name in all_sequela_vars:
             sequala_obj = all_sequela_vars[name]
-            if issubclass(sequala_obj, (Sequela, MFDependentSequela)) and (
-                sequala_obj != Sequela or sequala_obj != MFDependentSequela
-            ):
+            if issubclass(sequala_obj, Sequela) and sequala_obj != Sequela:
                 output_sequela[name] = sequala_obj
             else:
                 raise ValueError(f"Invalid sequela requested {name}")
@@ -45,7 +43,7 @@ class DerivedParams:
     worm_sex_ratio_generator: Generator
     worm_lambda_zero_generator: Generator
     worm_omega_generator: Generator
-    sequela_classes: dict[str, type[MFDependentSequela] | type[Sequela]]
+    sequela_classes: dict[str, type[Sequela]]
 
     def __init__(self, params: Params) -> None:
         worm_age_categories: Array.WormCat.Float = np.arange(
