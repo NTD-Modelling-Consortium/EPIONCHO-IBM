@@ -161,6 +161,8 @@ SequelaType = list[
     Literal["Blindness"]
     | Literal["SevereItching"]
     | Literal["RSD"]
+    | Literal["APOD"]
+    | Literal["CPOD"]
     | Literal["Atrophy"]
     | Literal["HangingGroin"]
     | Literal["Depigmentation"]
