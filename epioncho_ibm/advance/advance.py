@@ -144,7 +144,10 @@ def advance_state(state: State, debug: bool = False) -> None:
     for name, arr in state.people.has_sequela.items():
         seq_class = state.derived_params.sequela_classes[name]
         prob = seq_class.timestep_probability(
-            delta_time=state._params.delta_time, mf_count=total_mf, ages=old_ages
+            delta_time=state._params.delta_time,
+            mf_count=total_mf,
+            ages=old_ages,
+            existing_sequela=state.people.has_sequela,
         )
 
         new_condition = np.random.random(state.n_people) < prob
