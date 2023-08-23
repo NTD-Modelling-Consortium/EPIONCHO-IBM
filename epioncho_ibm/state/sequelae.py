@@ -37,17 +37,26 @@ class Sequela:
 
     @classmethod
     def _probability(
-        cls, mf_count: Array.Person.Float, ages: Array.Person.Float
+        cls,
+        mf_count: Array.Person.Float,
+        ages: Array.Person.Float,
+        existing_sequela: dict[str, Array.Person.Bool],
     ) -> float | Array.Person.Float:
         raise NotImplementedError("Must implement prob method for mf dependent sequela")
 
     @classmethod
     def timestep_probability(
-        cls, delta_time: float, mf_count: Array.Person.Float, ages: Array.Person.Float
+        cls,
+        delta_time: float,
+        mf_count: Array.Person.Float,
+        ages: Array.Person.Float,
+        existing_sequela: dict[str, Array.Person.Bool],
     ) -> float | Array.Person.Float:
         scale_factor = delta_time / cls.probability_interval_years
         return convert_prob(
-            current_prob=cls._probability(mf_count=mf_count, ages=ages),
+            current_prob=cls._probability(
+                mf_count=mf_count, ages=ages, existing_sequela=existing_sequela
+            ),
             scale_factor=scale_factor,
         )
 
@@ -60,7 +69,10 @@ class _BaseReversible(Sequela):
 
     @classmethod
     def _probability(
-        cls, mf_count: Array.Person.Float, ages: Array.Person.Float
+        cls,
+        mf_count: Array.Person.Float,
+        ages: Array.Person.Float,
+        existing_sequela: dict[str, Array.Person.Bool],
     ) -> float | Array.Person.Float:
         new_probs = np.zeros_like(mf_count)
         mask = mf_count > 0 and ages >= 2
@@ -74,7 +86,10 @@ class _BaseNonReversible(Sequela):
 
     @classmethod
     def _probability(
-        cls, mf_count: Array.Person.Float, ages: Array.Person.Float
+        cls,
+        mf_count: Array.Person.Float,
+        ages: Array.Person.Float,
+        existing_sequela: dict[str, Array.Person.Bool],
     ) -> float | Array.Person.Float:
         new_probs = np.zeros_like(mf_count)
         mask = mf_count > 0
@@ -91,7 +106,10 @@ class Blindness(Sequela):
 
     @classmethod
     def _probability(
-        cls, mf_count: Array.Person.Float, ages: Array.Person.Float
+        cls,
+        mf_count: Array.Person.Float,
+        ages: Array.Person.Float,
+        existing_sequela: dict[str, Array.Person.Bool],
     ) -> float | Array.Person.Float:
         return cls.prob_background_blindness * np.exp(cls.gamma1 * mf_count)
 
@@ -102,6 +120,29 @@ class SevereItching(_BaseReversible):
 
 class RSD(_BaseReversible):
     prob = 0.04163095
+
+
+class APOD(_BaseReversible):
+    prob = 0.04163095  # TODO: Find prob
+
+
+class CPOD(_BaseNonReversible):
+    prob: float = 0.01  # TODO: Find prob
+
+    @classmethod
+    def _probability(
+        cls,
+        mf_count: Array.Person.Float,
+        ages: Array.Person.Float,
+        existing_sequela: dict[str, Array.Person.Bool],
+    ) -> float | Array.Person.Float:
+        if "APOD" not in existing_sequela:
+            raise ValueError("CPOD active, but APOD is not")
+        else:
+            has_apod = existing_sequela["APOD"]
+            new_prob = np.zeros_like(ages)
+            new_prob[has_apod] = cls.prob
+            return new_prob
 
 
 class Atrophy(_BaseNonReversible):
