@@ -385,6 +385,8 @@ class People(HDF5Dataclass):
             self.age_test_OAE[people_to_die] = numpy_bit_gen.uniform(
                 3.0, 15.0, size=total_people_to_die
             )
+            for arr in self.has_sequela.values():
+                arr[people_to_die] = False
 
         self.delay_arrays.process_deaths(people_to_die)
 

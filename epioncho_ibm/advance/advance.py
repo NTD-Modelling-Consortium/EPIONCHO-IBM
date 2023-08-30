@@ -12,7 +12,8 @@ from .worms import calculate_new_worms
 
 def advance_state(state: State, debug: bool = False) -> None:
     """Advance the state forward one time step from t to t + dt"""
-
+    _, measured_mf = state.microfilariae_per_skin_snip()
+    rounded_mf: Array.Person.Float = np.round(measured_mf)
     treatment = get_treatment(
         state._params.treatment,
         state._params.delta_time,
@@ -130,33 +131,24 @@ def advance_state(state: State, debug: bool = False) -> None:
     state.people.delay_arrays.lag_all_arrays(
         new_worms=new_worms, total_exposure=total_exposure, new_mf=total_mf
     )
-    people_to_die: Array.Person.Bool = np.logical_or(
-        state.derived_params.people_to_die_generator.binomial(
-            np.repeat(1, state.n_people)
-        )
-        == 1,
-        state.people.ages >= state._params.humans.max_human_age,
-    )
-    state.people.process_deaths(
-        people_to_die, state._params.humans.gender_ratio, state.numpy_bit_generator
-    )
+
     new_has_sequela = {}
-    for name, arr in state.people.has_sequela.items():
+    for name, old_rel_sequela in state.people.has_sequela.items():
         seq_class = state.derived_params.sequela_classes[name]
         prob = seq_class.timestep_probability(
             delta_time=state._params.delta_time,
-            mf_count=total_mf,
+            mf_count=rounded_mf,
             ages=old_ages,
             existing_sequela=state.people.has_sequela,
         )
 
         new_condition = np.random.random(state.n_people) < prob
 
-        new_has_sequela[name] = arr | new_condition
         if seq_class.end_countdown_become_positive is not None:
             assert seq_class.years_countdown is not None
             assert name in state.people.countdown_sequela
             rel_seq_countdown = state.people.countdown_sequela[name]
+
             # Decrement countdown
             rel_seq_countdown[rel_seq_countdown > 0] -= state._params.delta_time
 
@@ -168,8 +160,27 @@ def advance_state(state: State, debug: bool = False) -> None:
             rel_seq_countdown[countdown_up] = np.inf
 
             # Set those with countdown up to correct state
-            new_has_sequela[name][
-                countdown_up
-            ] = seq_class.end_countdown_become_positive
+
+            if seq_class.end_countdown_become_positive:
+                # Lagged case
+                new_has_sequela[name] = old_rel_sequela
+                new_has_sequela[name][countdown_up] = True
+            else:
+                # Reversible Case
+                new_has_sequela[name] = old_rel_sequela | new_condition
+                new_has_sequela[name][countdown_up] = False
+        else:
+            new_has_sequela[name] = old_rel_sequela | new_condition
 
     state.people.has_sequela = new_has_sequela
+
+    people_to_die: Array.Person.Bool = np.logical_or(
+        state.derived_params.people_to_die_generator.binomial(
+            np.repeat(1, state.n_people)
+        )
+        == 1,
+        state.people.ages >= state._params.humans.max_human_age,
+    )
+    state.people.process_deaths(
+        people_to_die, state._params.humans.gender_ratio, state.numpy_bit_generator
+    )
