@@ -75,7 +75,7 @@ class _BaseReversible(Sequela):
         existing_sequela: dict[str, Array.Person.Bool],
     ) -> float | Array.Person.Float:
         new_probs = np.zeros_like(mf_count)
-        mask = mf_count > 0 and ages >= 2
+        mask = np.logical_and(mf_count > 0, ages >= 2)
         new_probs[mask] = cls.prob
         return new_probs
 
@@ -116,10 +116,12 @@ class Blindness(Sequela):
 
 class SevereItching(_BaseReversible):
     prob = 0.1636701
+    # prob = 0.129
 
 
 class RSD(_BaseReversible):
     prob = 0.04163095
+    # prob = 0.019
 
 
 class APOD(_BaseReversible):

@@ -395,10 +395,16 @@ class State(HDF5Dataclass, BaseState[Params]):
 
     def sequalae_prevalence(self) -> dict[str, float]:
         sequelae_prevalence = {}
+
+        if "APOD" in self.people.has_sequela and "CPOD" in self.people.has_sequela:
+            apod = self.people.has_sequela["APOD"]
+            cpod = self.people.has_sequela["CPOD"]
+            has_rsd = np.logical_or(apod, cpod)
+            sequelae_prevalence["RSDComplex"] = has_rsd.sum() / self.n_people
+
         for name, sequela in self.people.has_sequela.items():
             prev = sequela.sum() / self.n_people
             if name == "Blindness":
-                # TODO: Confirm logic here
                 visual_prev = prev * 1.78
                 if visual_prev > 1:
                     new_visual_prev = 1
@@ -406,6 +412,8 @@ class State(HDF5Dataclass, BaseState[Params]):
                     new_visual_prev = visual_prev
                 sequelae_prevalence["Blindness"] = prev
                 sequelae_prevalence["VisualImpairment"] = new_visual_prev
+            elif name == "RSD":
+                sequelae_prevalence["RSDSimple"] = prev
             else:
                 sequelae_prevalence[name] = prev
         return sequelae_prevalence
