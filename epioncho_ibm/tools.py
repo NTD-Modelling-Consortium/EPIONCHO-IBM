@@ -22,6 +22,7 @@ def add_state_to_run_data(
     n_treatments: bool = True,
     achieved_coverage: bool = True,
     with_age_groups: bool = True,
+    with_sequela: bool = True,
 ) -> None:
     age_min = 6
     age_max = 100
@@ -49,6 +50,10 @@ def add_state_to_run_data(
                     run_data[
                         (*partial_key, "OAE_prevalence")
                     ] = age_state.OAE_prevalence()
+                if with_sequela:
+                    seq = age_state.sequalae_prevalence()
+                    for sequela, prev in seq.items():
+                        run_data[(*partial_key, sequela)] = prev
         else:
             partial_key = (round(state.current_time, 2), age_min, age_max)
             if prevalence:
@@ -66,6 +71,10 @@ def add_state_to_run_data(
                 ) = state.microfilariae_per_skin_snip(return_nan=True)
             if prevalence_OAE:
                 run_data[(*partial_key, "OAE_prevalence")] = state.OAE_prevalence()
+            if with_sequela:
+                seq = state.sequalae_prevalence()
+                for sequela, prev in seq.items():
+                    run_data[(*partial_key, sequela)] = prev
     if n_treatments or achieved_coverage:
         if with_age_groups:
             for age_start in range(age_min, age_max, 5):

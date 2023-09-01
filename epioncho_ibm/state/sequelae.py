@@ -41,6 +41,8 @@ class Sequela:
         mf_count: Array.Person.Float,
         ages: Array.Person.Float,
         existing_sequela: dict[str, Array.Person.Bool],
+        has_this_sequela: Array.Person.Bool,
+        countdown: Array.Person.Float,
     ) -> float | Array.Person.Float:
         raise NotImplementedError("Must implement prob method for mf dependent sequela")
 
@@ -51,11 +53,17 @@ class Sequela:
         mf_count: Array.Person.Float,
         ages: Array.Person.Float,
         existing_sequela: dict[str, Array.Person.Bool],
+        has_this_sequela: Array.Person.Bool,
+        countdown: Array.Person.Float,
     ) -> float | Array.Person.Float:
         scale_factor = delta_time / cls.probability_interval_years
         return convert_prob(
             current_prob=cls._probability(
-                mf_count=mf_count, ages=ages, existing_sequela=existing_sequela
+                mf_count=mf_count,
+                ages=ages,
+                existing_sequela=existing_sequela,
+                has_this_sequela=has_this_sequela,
+                countdown=countdown,
             ),
             scale_factor=scale_factor,
         )
@@ -73,9 +81,11 @@ class _BaseReversible(Sequela):
         mf_count: Array.Person.Float,
         ages: Array.Person.Float,
         existing_sequela: dict[str, Array.Person.Bool],
+        has_this_sequela: Array.Person.Bool,
+        countdown: Array.Person.Float,
     ) -> float | Array.Person.Float:
         new_probs = np.zeros_like(mf_count)
-        mask = np.logical_and(mf_count > 0, ages >= 2)
+        mask = np.logical_and(mf_count > 0, ~has_this_sequela, ages >= 2)
         new_probs[mask] = cls.prob
         return new_probs
 
@@ -90,6 +100,8 @@ class _BaseNonReversible(Sequela):
         mf_count: Array.Person.Float,
         ages: Array.Person.Float,
         existing_sequela: dict[str, Array.Person.Bool],
+        has_this_sequela: Array.Person.Bool,
+        countdown: Array.Person.Float,
     ) -> float | Array.Person.Float:
         new_probs = np.zeros_like(mf_count)
         mask = mf_count > 0
@@ -110,8 +122,15 @@ class Blindness(Sequela):
         mf_count: Array.Person.Float,
         ages: Array.Person.Float,
         existing_sequela: dict[str, Array.Person.Bool],
+        has_this_sequela: Array.Person.Bool,
+        countdown: Array.Person.Float,
     ) -> float | Array.Person.Float:
-        return cls.prob_background_blindness * np.exp(cls.gamma1 * mf_count)
+        not_during_countdown = np.logical_or(countdown <= 0, countdown == np.inf)
+        out = np.zeros_like(mf_count)
+        out[not_during_countdown] = cls.prob_background_blindness * np.exp(
+            cls.gamma1 * mf_count[not_during_countdown]
+        )
+        return out
 
 
 class SevereItching(_BaseReversible):
@@ -137,6 +156,8 @@ class CPOD(_BaseNonReversible):
         mf_count: Array.Person.Float,
         ages: Array.Person.Float,
         existing_sequela: dict[str, Array.Person.Bool],
+        has_this_sequela: Array.Person.Bool,
+        countdown: Array.Person.Float,
     ) -> float | Array.Person.Float:
         if "APOD" not in existing_sequela:
             raise ValueError("CPOD active, but APOD is not")

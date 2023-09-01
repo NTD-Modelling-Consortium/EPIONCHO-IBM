@@ -135,19 +135,21 @@ def advance_state(state: State, debug: bool = False) -> None:
     new_has_sequela = {}
     for name, old_rel_sequela in state.people.has_sequela.items():
         seq_class = state.derived_params.sequela_classes[name]
+        assert name in state.people.countdown_sequela
+        rel_seq_countdown = state.people.countdown_sequela[name]
         prob = seq_class.timestep_probability(
             delta_time=state._params.delta_time,
             mf_count=rounded_mf,
             ages=old_ages,
             existing_sequela=state.people.has_sequela,
+            has_this_sequela=old_rel_sequela,
+            countdown=rel_seq_countdown,
         )
 
         new_condition = np.random.random(state.n_people) < prob
 
         if seq_class.end_countdown_become_positive is not None:
             assert seq_class.years_countdown is not None
-            assert name in state.people.countdown_sequela
-            rel_seq_countdown = state.people.countdown_sequela[name]
 
             # Decrement countdown
             rel_seq_countdown[rel_seq_countdown > 0] -= state._params.delta_time
