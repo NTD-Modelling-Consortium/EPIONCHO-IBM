@@ -387,6 +387,8 @@ class People(HDF5Dataclass):
             )
             for arr in self.has_sequela.values():
                 arr[people_to_die] = False
+            for arr in self.countdown_sequela.values():
+                arr[people_to_die] = np.inf
 
         self.delay_arrays.process_deaths(people_to_die)
 
