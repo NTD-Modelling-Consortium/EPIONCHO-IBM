@@ -157,7 +157,7 @@ def advance_state(state: State, debug: bool = False) -> None:
             # For now infected, start countdown
             rel_seq_countdown[new_condition] = seq_class.years_countdown
 
-            countdown_up = rel_seq_countdown <= 0
+            countdown_up = np.round(rel_seq_countdown, 4) <= 0
             # Reset countdown with countdown up
             rel_seq_countdown[countdown_up] = np.inf
 
