@@ -2,6 +2,7 @@ from typing import ClassVar, Literal, Optional, overload
 
 import numpy as np
 
+from .blindness_prob import blindness_prob
 from .types import Array
 
 
@@ -115,6 +116,7 @@ class Blindness(Sequela):
     end_countdown_become_positive = True
     prob_background_blindness: float = 0.003
     gamma1: float = 0.01
+    prob_mapper = np.array(blindness_prob)
 
     @classmethod
     def _probability(
@@ -126,10 +128,15 @@ class Blindness(Sequela):
         countdown: Array.Person.Float,
     ) -> float | Array.Person.Float:
         not_during_countdown = np.logical_or(countdown <= 0, countdown == np.inf)
-        out = np.zeros_like(mf_count)
-        out[not_during_countdown] = cls.prob_background_blindness * np.exp(
-            cls.gamma1 * mf_count[not_during_countdown]
+        for_sample = np.logical_and(
+            not_during_countdown, np.logical_not(has_this_sequela)
         )
+        out = np.zeros_like(mf_count)
+        # out[for_sample] = cls.prob_background_blindness * np.exp(
+        #     cls.gamma1 * mf_count[for_sample]
+        # )
+        mask = np.round(mf_count[for_sample]).astype(int)
+        out[for_sample] = cls.prob_mapper[mask]  # TODO: Will be an error if mf > 500
         return out
 
 
