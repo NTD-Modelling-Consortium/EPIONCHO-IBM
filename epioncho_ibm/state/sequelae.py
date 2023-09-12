@@ -105,7 +105,7 @@ class _BaseNonReversible(Sequela):
         countdown: Array.Person.Float,
     ) -> float | Array.Person.Float:
         new_probs = np.zeros_like(mf_count)
-        mask = mf_count > 0
+        mask = np.logical_and(mf_count > 0, np.logical_not(has_this_sequela))
         new_probs[mask] = cls.prob
         return new_probs
 
@@ -132,11 +132,14 @@ class Blindness(Sequela):
             not_during_countdown, np.logical_not(has_this_sequela)
         )
         out = np.zeros_like(mf_count)
-        # out[for_sample] = cls.prob_background_blindness * np.exp(
+        # out[for_sample] = np.minimum(cls.prob_background_blindness * np.exp(
         #     cls.gamma1 * mf_count[for_sample]
-        # )
+        # ),1)
         mask = np.round(mf_count[for_sample]).astype(int)
-        out[for_sample] = cls.prob_mapper[mask]  # TODO: Will be an error if mf > 500
+        new_arr = np.ones_like(mask, dtype=float)
+        valid_items = mask < len(cls.prob_mapper)
+        new_arr[valid_items] = cls.prob_mapper[mask[valid_items]]
+        out[for_sample] = new_arr
         return out
 
 
