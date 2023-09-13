@@ -127,7 +127,7 @@ def write_data_to_csv(
         first_elem: list[str] = ["year_id", "age_start", "age_end", "measure"] + [
             f"draw_{i}" for i in range(len(data))
         ]
-        excel_data: list[tuple[str | float]] = [tuple(first_elem)]
+        excel_data: list[tuple[str | float, ...]] = [tuple(first_elem)]
         writer.writerow(first_elem)
         for row in rows:
             excel_data.append(row)
