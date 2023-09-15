@@ -200,3 +200,14 @@ SequelaType = list[
     | Literal["HangingGroin"]
     | Literal["Depigmentation"]
 ]
+
+sequela_mapper = {
+    "Blindness": Blindness,
+    "SevereItching": SevereItching,
+    "RSD": RSD,
+    "APOD": APOD,
+    "CPOD": CPOD,
+    "Atrophy": Atrophy,
+    "HangingGroin": HangingGroin,
+    "Depigmentation": Depigmentation,
+}

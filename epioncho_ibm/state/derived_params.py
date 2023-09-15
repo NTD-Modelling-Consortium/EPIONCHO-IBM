@@ -7,7 +7,7 @@ from fast_binomial import SFC64, Generator
 import epioncho_ibm.state.sequelae
 
 from .params import Params
-from .sequelae import Sequela, SequelaType
+from .sequelae import Sequela, SequelaType, sequela_mapper
 from .types import Array
 
 
@@ -20,17 +20,7 @@ def _weibull_mortality(
 def get_sequela(
     sequela: SequelaType,
 ) -> dict[str, type[Sequela]]:
-    all_sequela_vars = vars(epioncho_ibm.state.sequelae)
-    output_sequela: dict[str, type[Sequela]] = {}
-    for name in sequela:
-        if name in all_sequela_vars:
-            sequala_obj = all_sequela_vars[name]
-            if issubclass(sequala_obj, Sequela) and sequala_obj != Sequela:
-                output_sequela[name] = sequala_obj
-            else:
-                raise ValueError(f"Invalid sequela requested {name}")
-
-    return output_sequela
+    return {name: sequela_mapper[name] for name in sequela if name in sequela_mapper}
 
 
 class DerivedParams:
