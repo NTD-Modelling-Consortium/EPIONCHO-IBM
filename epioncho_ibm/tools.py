@@ -24,8 +24,8 @@ def add_state_to_run_data(
     with_age_groups: bool = True,
     with_sequela: bool = True,
 ) -> None:
-    age_min = 6
-    age_max = 100
+    age_min = 0
+    age_max = 80
     if prevalence or number or mean_worm_burden or intensity:
         if with_age_groups:
             for age_start in range(age_min, age_max):
