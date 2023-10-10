@@ -139,6 +139,7 @@ class Blindness(Sequela):
         new_arr = np.ones_like(mask, dtype=float)
         valid_items = mask < len(cls.prob_mapper)
         new_arr[valid_items] = cls.prob_mapper[mask[valid_items]]
+        new_arr[~valid_items] = cls.prob_mapper[len(cls.prob_mapper)-1]
         out[for_sample] = new_arr
         return out
 
