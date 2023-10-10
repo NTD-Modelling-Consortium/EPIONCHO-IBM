@@ -148,6 +148,10 @@ def advance_state(state: State, debug: bool = False) -> None:
 
         new_condition = np.random.random(state.n_people) < prob
 
+        if name == "Blindness":
+            true_mf_condition = total_mf > 0
+            new_condition = np.logical_and(new_condition, true_mf_condition)
+
         if seq_class.end_countdown_become_positive is not None:
             assert seq_class.years_countdown is not None
 
