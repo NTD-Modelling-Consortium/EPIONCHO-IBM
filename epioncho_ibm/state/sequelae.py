@@ -39,7 +39,8 @@ class Sequela:
     @classmethod
     def _probability(
         cls,
-        mf_count: Array.Person.Float,
+        true_mf_count: Array.Person.Float,
+        measured_mf_count: Array.Person.Float,
         ages: Array.Person.Float,
         existing_sequela: dict[str, Array.Person.Bool],
         has_this_sequela: Array.Person.Bool,
@@ -51,7 +52,8 @@ class Sequela:
     def timestep_probability(
         cls,
         delta_time: float,
-        mf_count: Array.Person.Float,
+        true_mf_count: Array.Person.Float,
+        measured_mf_count: Array.Person.Float,
         ages: Array.Person.Float,
         existing_sequela: dict[str, Array.Person.Bool],
         has_this_sequela: Array.Person.Bool,
@@ -60,7 +62,8 @@ class Sequela:
         scale_factor = delta_time / cls.probability_interval_years
         return convert_prob(
             current_prob=cls._probability(
-                mf_count=mf_count,
+                true_mf_count=true_mf_count,
+                measured_mf_count=measured_mf_count,
                 ages=ages,
                 existing_sequela=existing_sequela,
                 has_this_sequela=has_this_sequela,
@@ -79,14 +82,15 @@ class _BaseReversible(Sequela):
     @classmethod
     def _probability(
         cls,
-        mf_count: Array.Person.Float,
+        true_mf_count: Array.Person.Float,
+        measured_mf_count: Array.Person.Float,
         ages: Array.Person.Float,
         existing_sequela: dict[str, Array.Person.Bool],
         has_this_sequela: Array.Person.Bool,
         countdown: Array.Person.Float,
     ) -> float | Array.Person.Float:
-        new_probs = np.zeros_like(mf_count)
-        mask = np.logical_and(mf_count > 0, ~has_this_sequela, ages >= 2)
+        new_probs = np.zeros_like(measured_mf_count)
+        mask = np.logical_and(measured_mf_count > 0, ~has_this_sequela, ages >= 2)
         new_probs[mask] = cls.prob
         return new_probs
 
@@ -98,14 +102,15 @@ class _BaseNonReversible(Sequela):
     @classmethod
     def _probability(
         cls,
-        mf_count: Array.Person.Float,
+        true_mf_count: Array.Person.Float,
+        measured_mf_count: Array.Person.Float,
         ages: Array.Person.Float,
         existing_sequela: dict[str, Array.Person.Bool],
         has_this_sequela: Array.Person.Bool,
         countdown: Array.Person.Float,
     ) -> float | Array.Person.Float:
-        new_probs = np.zeros_like(mf_count)
-        mask = np.logical_and(mf_count > 0, np.logical_not(has_this_sequela))
+        new_probs = np.zeros_like(measured_mf_count)
+        mask = np.logical_and(measured_mf_count > 0, np.logical_not(has_this_sequela))
         new_probs[mask] = cls.prob
         return new_probs
 
@@ -121,7 +126,8 @@ class Blindness(Sequela):
     @classmethod
     def _probability(
         cls,
-        mf_count: Array.Person.Float,
+        true_mf_count: Array.Person.Float,
+        measured_mf_count: Array.Person.Float,
         ages: Array.Person.Float,
         existing_sequela: dict[str, Array.Person.Bool],
         has_this_sequela: Array.Person.Bool,
@@ -129,17 +135,19 @@ class Blindness(Sequela):
     ) -> float | Array.Person.Float:
         not_during_countdown = np.logical_or(countdown <= 0, countdown == np.inf)
         for_sample = np.logical_and(
-            not_during_countdown, np.logical_not(has_this_sequela)
+            np.logical_and(not_during_countdown, true_mf_count > 0),
+            np.logical_not(has_this_sequela),
         )
-        out = np.zeros_like(mf_count)
-        # out[for_sample] = np.minimum(cls.prob_background_blindness * np.exp(
+        out = np.zeros_like(measured_mf_count)
+        # out[for_sample] = np.minimum(cls.prob_background_blindness * np.exp(,
         #     cls.gamma1 * mf_count[for_sample]
         # ),1)
-        mask = np.round(mf_count[for_sample]).astype(int)
-        new_arr = np.ones_like(mask, dtype=float)
+        mask = np.round(measured_mf_count[for_sample]).astype(int)
+        new_arr = np.full(
+            len(mask), cls.prob_mapper[len(cls.prob_mapper) - 1], dtype=float
+        )
         valid_items = mask < len(cls.prob_mapper)
         new_arr[valid_items] = cls.prob_mapper[mask[valid_items]]
-        new_arr[~valid_items] = cls.prob_mapper[len(cls.prob_mapper)-1]
         out[for_sample] = new_arr
         return out
 
@@ -164,7 +172,8 @@ class CPOD(_BaseNonReversible):
     @classmethod
     def _probability(
         cls,
-        mf_count: Array.Person.Float,
+        true_mf_count: Array.Person.Float,
+        measured_mf_count: Array.Person.Float,
         ages: Array.Person.Float,
         existing_sequela: dict[str, Array.Person.Bool],
         has_this_sequela: Array.Person.Bool,
