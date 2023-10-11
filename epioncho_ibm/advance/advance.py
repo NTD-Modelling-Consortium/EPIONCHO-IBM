@@ -139,7 +139,8 @@ def advance_state(state: State, debug: bool = False) -> None:
         rel_seq_countdown = state.people.countdown_sequela[name]
         prob = seq_class.timestep_probability(
             delta_time=state._params.delta_time,
-            mf_count=rounded_mf,
+            true_mf_count=total_mf,
+            measured_mf_count=rounded_mf,
             ages=old_ages,
             existing_sequela=state.people.has_sequela,
             has_this_sequela=old_rel_sequela,
@@ -147,10 +148,6 @@ def advance_state(state: State, debug: bool = False) -> None:
         )
 
         new_condition = np.random.random(state.n_people) < prob
-
-        if name == "Blindness":
-            true_mf_condition = total_mf > 0
-            new_condition = np.logical_and(new_condition, true_mf_condition)
 
         if seq_class.end_countdown_become_positive is not None:
             assert seq_class.years_countdown is not None
