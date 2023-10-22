@@ -230,7 +230,7 @@ def dict_fully_equal(d1: dict[str, np.ndarray], d2: dict[str, np.ndarray]):
 
 
 class People(HDF5Dataclass):
-    compliance: Optional[Array.Person.Bool]
+    compliance: Optional[Array.Person.Float]
     sex_is_male: Array.Person.Bool
     blackfly: BlackflyLarvae
     ages: Array.Person.Float
