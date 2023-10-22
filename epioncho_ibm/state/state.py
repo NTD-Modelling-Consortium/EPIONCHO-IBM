@@ -66,35 +66,6 @@ def negative_binomial_alt_interface(
     output[n > 0] = temp_output
     return output
 
-
-def recalculate_compliance(
-    is_compliant: Array.Person.Bool,
-    prev_noncompliance_rate: float,
-    new_noncompliance_rate: float,
-    people_generator: Generator,
-):
-    if prev_noncompliance_rate == new_noncompliance_rate:
-        return None
-    elif prev_noncompliance_rate > new_noncompliance_rate:
-        new_draw_rate = new_noncompliance_rate / prev_noncompliance_rate
-        non_comps = len(is_compliant) - sum(is_compliant)
-        new_compliant = people_generator.uniform(low=0, high=1, size=non_comps) < (
-            1 - new_draw_rate
-        )
-        is_compliant[~is_compliant] = new_compliant
-        return None
-    else:
-        new_draw_from_pop = (new_noncompliance_rate - prev_noncompliance_rate) / (
-            1 - prev_noncompliance_rate
-        )
-        comps = sum(is_compliant)
-        new_compliant = people_generator.uniform(low=0, high=1, size=comps) < (
-            1 - new_draw_from_pop
-        )
-        is_compliant[is_compliant] = new_compliant
-        return None
-
-
 @overload
 def _mf_fit_func(x: float, a: float, b: float) -> float:
     ...
@@ -171,39 +142,6 @@ class State(HDF5Dataclass, BaseState[Params]):
 
     def get_params(self) -> Params:
         return immutable_to_mutable(self._params)
-
-    def reset_params(self, params: Params):
-        """Reset the parameters
-
-        Args:
-            params (Params): New set of parameters
-        """
-        self.numpy_bit_generator = Generator(SFC64(params.seed))
-        if params.treatment is not None:
-            if self._params.treatment is not None:
-                if (
-                    self._params.treatment.noncompliant_percentage
-                    != params.treatment.noncompliant_percentage
-                ):
-                    assert self.people.compliance is not None
-                    recalculate_compliance(
-                        self.people.compliance,
-                        self._params.treatment.noncompliant_percentage,
-                        params.treatment.noncompliant_percentage,
-                        self.numpy_bit_generator,
-                    )
-                else:
-                    pass
-            else:
-                self.people.compliance = (
-                    self.numpy_bit_generator.uniform(low=0, high=1, size=self.n_people)
-                    > params.treatment.noncompliant_percentage
-                )
-        else:
-            self.people.compliance = None
-
-        self._params = mutable_to_immutable(params)
-        self._derive_params()
 
     def _derive_params(self) -> None:
         assert self._params
