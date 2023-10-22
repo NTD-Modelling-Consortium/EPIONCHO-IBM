@@ -293,9 +293,11 @@ class People(HDF5Dataclass):
         if params.treatment is None:
             compliance_array = None
         else:
-            compliance_array = (
-                people_generator.uniform(low=0, high=1, size=n_people)
-                > params.treatment.noncompliant_percentage
+            compliance_array = draw_compliance_values(
+                corr=params.treatment.correlation,
+                cov=params.treatment.coverage,
+                size=n_people,
+                random_generator=people_generator,
             )
         last_treatment = np.empty(n_people)
         last_treatment[:] = np.nan
@@ -360,6 +362,14 @@ class People(HDF5Dataclass):
             age_test_OAE=people_generator.uniform(3.0, 15.0, size=n_people),
             has_sequela=has_sequela,
             countdown_sequela=countdown_sequela,
+        )
+
+    @classmethod
+    def draw_compliance_values(corr, cov, size, random_generator):
+        random_generator.beta(
+            a=cov * (1. - corr) / corr,
+            b=(1 - cov) * (1 - corr) / corr,
+            size=size,
         )
 
     def process_deaths(
