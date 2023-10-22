@@ -187,6 +187,8 @@ class LastTreatment(HDF5Dataclass):
     embryostatic_lambda_max: Array.Person.Float
     embryostatic_phi: Array.Person.Float
     permanent_infertility: Array.Person.Float
+    correlation: float
+    coverage: float
 
     def __eq__(self, other: object) -> bool:
         return (
@@ -308,6 +310,8 @@ class People(HDF5Dataclass):
             embryostatic_lambda_max=last_treatment.copy(),
             embryostatic_phi=last_treatment.copy(),
             permanent_infertility=last_treatment.copy(),
+            correlation=params.treatment.correlation,
+            coverage=params.treatment.coverage,
         )
         # individual exposure to fly bites
         individual_exposure = people_generator.gamma(

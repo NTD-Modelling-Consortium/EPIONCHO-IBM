@@ -14,6 +14,21 @@ def advance_state(state: State, debug: bool = False) -> None:
     """Advance the state forward one time step from t to t + dt"""
     _, measured_mf = state.microfilariae_per_skin_snip()
     rounded_mf: Array.Person.Float = np.round(measured_mf)
+    current_treatment_stats = (
+        state._params.treatment.correlation,
+        state._params.treatment.coverage,
+    )
+    last_treatment_stats = (
+        state.people.last_treatment.correlation,
+        state.people.last_treatment.coverage,
+    )
+    if current_treatment_stats != last_treatment_stats:
+        state.people.update_treatment_prob(
+            *current_treatment_stats, state.numpy_bit_generator,
+
+        )
+        state.people.last_treatment.correlation = current_treatment_stats[0]
+        state.people.last_treatment.coverage = current_treatment_stats[1]
     treatment = get_treatment(
         state._params.treatment,
         state._params.delta_time,
