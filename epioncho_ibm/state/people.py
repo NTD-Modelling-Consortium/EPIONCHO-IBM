@@ -366,7 +366,7 @@ class People(HDF5Dataclass):
 
     @classmethod
     def draw_compliance_values(corr, cov, size, random_generator):
-        random_generator.beta(
+        return random_generator.beta(
             a=cov * (1. - corr) / corr,
             b=(1 - cov) * (1 - corr) / corr,
             size=size,
