@@ -372,6 +372,30 @@ class People(HDF5Dataclass):
             size=size,
         )
 
+    def update_treatment_prob(self, corr, cov, numpy_bit_gen):
+        """Draw new values for treatment probabilities.
+
+        New treatment probability values are assigned to individuals
+        ensuring that order in probablity value is kept across the
+        population. In other words, individuals who had the highest
+        probablity values before still do after.
+
+        Args:
+            corr (float): Treatment correlation value
+            cov (float): Treatent coverage value
+            numpy_bit_gen (Generator): A random number generator instance
+                 from numpy.
+
+        Returns:
+            Array.Person.Float
+        """
+        new_probs = draw_compliance_values(
+            corr, cov,
+            size=len(self.ages),
+            random_generator=numpy_bit_gen
+        ).sort()
+        self.compliance[np.argsort(self.compliance)] = new_probs
+
     def process_deaths(
         self,
         people_to_die: Array.Person.Bool,
