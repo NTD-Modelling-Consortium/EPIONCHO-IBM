@@ -368,7 +368,7 @@ class People(HDF5Dataclass):
             countdown_sequela=countdown_sequela,
         )
 
-    @classmethod
+    @staticmethod
     def draw_compliance_values(corr, cov, size, random_generator):
         return random_generator.beta(
             a=cov * (1. - corr) / corr,
@@ -393,7 +393,7 @@ class People(HDF5Dataclass):
         Returns:
             Array.Person.Float
         """
-        new_probs = draw_compliance_values(
+        new_probs = People.draw_compliance_values(
             corr, cov,
             size=len(self.ages),
             random_generator=numpy_bit_gen
