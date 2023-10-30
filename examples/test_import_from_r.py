@@ -54,7 +54,7 @@ def get_state_from_R(
     # Note: Considered delay indexes
 
     people = People(
-        #! FIXME Since 9c287c5 People.compiance contains treatment
+        #! TODO Since 9c287c5 People.compiance contains treatment
         #! probablity instead of deterministic compliance (a boolean
         #! indicating whether of not an individual will be treated.)
         compliance=compliance,
