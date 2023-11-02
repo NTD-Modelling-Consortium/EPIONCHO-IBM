@@ -179,19 +179,18 @@ class State(HDF5Dataclass, BaseState[Params]):
             params (Params): New set of parameters
         """
 
-        def stats_different():
-            current = (
-                self._params.treatment.correlation,
-                self._params.treatment.coverage
-            )
-            new = (params.correlation, params.coverage)
-            return new != current
-
         self.numpy_bit_generator = Generator(SFC64(params.seed))
+
+        stats_different = (
+            params.correlation, params.coverage
+        ) != (
+            self._params.treatment.correlation,
+            self._params.treatment.coverage
+        )
 
         if params.treatment is None:
             self.people.compliance = None
-        elif (self._params.treatment is None) or stats_different():
+        elif (self._params.treatment is None) or stats_different:
             self.people.update_treatment_prob(
                 params.treatment.correlation,
                 params.treatment.coverage,
