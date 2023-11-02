@@ -431,7 +431,7 @@ class People(HDF5Dataclass):
             treatment_correlation,
             treatment_coverage,
             size=total_people_to_die,
-            random_generator=numpy_git_gen,
+            random_generator=numpy_bit_gen,
     )
 
 
