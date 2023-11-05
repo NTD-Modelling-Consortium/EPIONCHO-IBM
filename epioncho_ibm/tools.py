@@ -22,10 +22,11 @@ def add_state_to_run_data(
     n_treatments: bool = True,
     achieved_coverage: bool = True,
     with_age_groups: bool = True,
+    both_prev_types: bool = False,
+    age_min: int = 0,
+    age_max: int = 80,
     with_sequela: bool = True,
 ) -> None:
-    age_min = 0
-    age_max = 80
     if prevalence or number or mean_worm_burden or intensity:
         if with_age_groups:
             for age_start in range(age_min, age_max):
@@ -54,7 +55,7 @@ def add_state_to_run_data(
                     seq = age_state.sequalae_prevalence()
                     for sequela, prev in seq.items():
                         run_data[(*partial_key, sequela)] = prev
-        else:
+        if not (with_age_groups) or both_prev_types:
             partial_key = (round(state.current_time, 2), age_min, age_max)
             if prevalence:
                 run_data[
