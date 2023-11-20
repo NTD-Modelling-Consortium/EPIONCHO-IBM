@@ -6,7 +6,7 @@ from numpy.random import SFC64, Generator
 
 from epioncho_ibm.utils import array_fully_equal
 
-from .params import Params
+from .params import Params, TreatmentParams
 from .types import Array
 
 
@@ -405,9 +405,8 @@ class People(HDF5Dataclass):
         self,
         people_to_die: Array.Person.Bool,
         gender_ratio: float,
-        treatment_correlation: float,
-        treatment_coverage: float,
         numpy_bit_gen: Generator,
+        treatment: Optional[TreatmentParams],
     ):
         if (total_people_to_die := int(np.sum(people_to_die))) > 0:
             self.sex_is_male[people_to_die] = (
@@ -432,12 +431,13 @@ class People(HDF5Dataclass):
                 arr[people_to_die] = np.inf
 
         self.delay_arrays.process_deaths(people_to_die)
-        self.compliance[people_to_die] = draw_compliance_values(
-            treatment_correlation,
-            treatment_coverage,
-            size=total_people_to_die,
-            random_generator=numpy_bit_gen,
-        )
+        if treatment:
+            self.compliance[people_to_die] = draw_compliance_values(
+                treatment.correlation,
+                treatment.coverage,
+                size=total_people_to_die,
+                random_generator=numpy_bit_gen,
+            )
 
     def get_people_for_age_group(self, age_start: float, age_end: float) -> "People":
         rel_ages = (self.ages >= age_start) & (self.ages < age_end)
