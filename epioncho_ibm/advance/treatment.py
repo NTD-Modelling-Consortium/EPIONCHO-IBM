@@ -96,7 +96,7 @@ def get_treatment(
             rand_nums = numpy_bit_gen.uniform(low=0, high=1, size=len(ages))
             too_young = ages < treatment_params.min_age_of_treatment
             return TreatmentGroup(
-                treatment_params=treatment_params
+                treatment_params=treatment_params,
                 coverage_in=(rand_nums < compliance) & ~too_young,
                 treatment_times=treatment_times,
                 treatment_occurred=treatment_occurred,

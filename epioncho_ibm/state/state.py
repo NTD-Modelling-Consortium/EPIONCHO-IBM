@@ -181,11 +181,9 @@ class State(HDF5Dataclass, BaseState[Params]):
 
         self.numpy_bit_generator = Generator(SFC64(params.seed))
 
-        stats_different = (
-            params.correlation, params.coverage
-        ) != (
+        stats_different = (params.correlation, params.coverage) != (
             self._params.treatment.correlation,
-            self._params.treatment.coverage
+            self._params.treatment.coverage,
         )
 
         if params.treatment is None:
