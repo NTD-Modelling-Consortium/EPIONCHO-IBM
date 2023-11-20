@@ -390,9 +390,7 @@ class People(HDF5Dataclass):
             Array.Person.Float
         """
         new_probs = People.draw_compliance_values(
-            corr, cov,
-            size=len(self.ages),
-            random_generator=numpy_bit_gen
+            corr, cov, size=len(self.ages), random_generator=numpy_bit_gen
         ).sort()
         self.compliance[np.argsort(self.compliance)] = new_probs
 
@@ -432,9 +430,7 @@ class People(HDF5Dataclass):
             treatment_coverage,
             size=total_people_to_die,
             random_generator=numpy_bit_gen,
-    )
-
-
+        )
 
     def get_people_for_age_group(self, age_start: float, age_end: float) -> "People":
         rel_ages = (self.ages >= age_start) & (self.ages < age_end)
