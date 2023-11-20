@@ -184,7 +184,10 @@ class State(HDF5Dataclass, BaseState[Params]):
                 self._params.treatment.correlation,
                 self._params.treatment.coverage
             )
-            new = (params.correlation, params.coverage)
+            new = (
+                params.treatment.correlation,
+                params.treatment.coverage,
+            )
             return new != current
 
         if params.treatment is None:
