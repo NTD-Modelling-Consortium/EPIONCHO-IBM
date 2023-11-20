@@ -230,7 +230,7 @@ def dict_fully_equal(d1: dict[str, np.ndarray], d2: dict[str, np.ndarray]):
 
 
 class People(HDF5Dataclass):
-    compliance: Optional[Array.Person.Float]
+    compliance: Array.Person.Float
     sex_is_male: Array.Person.Bool
     blackfly: BlackflyLarvae
     ages: Array.Person.Float
@@ -291,7 +291,7 @@ class People(HDF5Dataclass):
             < params.humans.gender_ratio
         )
         if params.treatment is None:
-            compliance_array = None
+            compliance_array = np.zeros(n_people)
         else:
             compliance_array = People.draw_compliance_values(
                 corr=params.treatment.correlation,
@@ -441,9 +441,7 @@ class People(HDF5Dataclass):
 
     def get_people_for_age_group(self, age_start: float, age_end: float) -> "People":
         rel_ages = (self.ages >= age_start) & (self.ages < age_end)
-        new_compliance = (
-            self.compliance[rel_ages] if self.compliance is not None else None
-        )
+        new_compliance = self.compliance[rel_ages]
         return People(
             compliance=new_compliance,
             sex_is_male=self.sex_is_male[rel_ages],
