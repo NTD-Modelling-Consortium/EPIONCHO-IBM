@@ -293,7 +293,7 @@ class People(HDF5Dataclass):
         if params.treatment is None:
             compliance_array = None
         else:
-            compliance_array = draw_compliance_values(
+            compliance_array = People.draw_compliance_values(
                 corr=params.treatment.correlation,
                 cov=params.treatment.coverage,
                 size=n_people,
@@ -432,7 +432,7 @@ class People(HDF5Dataclass):
 
         self.delay_arrays.process_deaths(people_to_die)
         if treatment:
-            self.compliance[people_to_die] = draw_compliance_values(
+            self.compliance[people_to_die] = People.draw_compliance_values(
                 treatment.correlation,
                 treatment.coverage,
                 size=total_people_to_die,
