@@ -191,7 +191,7 @@ class State(HDF5Dataclass, BaseState[Params]):
             return new != current
 
         if params.treatment is None:
-            self.people.compliance = None
+            self.people.compliance = np.zeros(params.n_people)
         elif (self._params.treatment is None) or stats_different():
             self.people.update_treatment_prob(
                 params.treatment.correlation,
