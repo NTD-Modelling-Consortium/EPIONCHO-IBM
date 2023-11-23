@@ -1,8 +1,0 @@
-1) Weibull mortality - the result of the formala given is greater than one, 
-but this is later used as a probability in a binomial distribution
-2) How is worm gender determined? It seems to be regenerated every time the model is run 
-from a binomial distribution
-3) Related - currently, what does the worm matrix contain? 
-There are references to male, female, fertile, infertile - do these all correspond to different columns, 
-and have associated age stages?
-4) What does the microfilariae matrix contain?
