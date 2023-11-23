@@ -295,7 +295,7 @@ class People(HDF5Dataclass):
         else:
             compliance_array = People.draw_compliance_values(
                 corr=params.treatment.correlation,
-                cov=params.treatment.coverage,
+                cov=params.treatment.total_population_coverage,
                 size=n_people,
                 random_generator=people_generator,
             )
@@ -432,7 +432,7 @@ class People(HDF5Dataclass):
         if treatment:
             self.compliance[people_to_die] = People.draw_compliance_values(
                 treatment.correlation,
-                treatment.coverage,
+                treatment.total_population_coverage,
                 size=total_people_to_die,
                 random_generator=numpy_bit_gen,
             )

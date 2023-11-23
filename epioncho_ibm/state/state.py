@@ -184,11 +184,14 @@ class State(HDF5Dataclass, BaseState[Params]):
         elif (
             (self._params.treatment is None)
             or (self._params.treatment.correlation != params.treatment.correlation)
-            or (self._params.treatment.coverage != params.treatment.coverage)
+            or (
+                self._params.treatment.total_population_coverage
+                != params.treatment.total_population_coverage
+            )
         ):
             self.people.update_treatment_prob(
                 params.treatment.correlation,
-                params.treatment.coverage,
+                params.treatment.total_population_coverage,
                 self.numpy_bit_generator,
             )
 
