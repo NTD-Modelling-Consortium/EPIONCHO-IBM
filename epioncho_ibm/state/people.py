@@ -366,8 +366,10 @@ class People(HDF5Dataclass):
 
     @staticmethod
     def draw_compliance_values(
-            corr: float, cov: float, size: int,
-            random_generator: Generator,
+        corr: float,
+        cov: float,
+        size: int,
+        random_generator: Generator,
     ):
         return random_generator.beta(
             a=cov * (1 - corr) / corr,
@@ -375,11 +377,7 @@ class People(HDF5Dataclass):
             size=size,
         )
 
-    def update_treatment_prob(self,
-                              corr: float,
-                              cov: float,
-                              numpy_bit_gen: Generator
-    ):
+    def update_treatment_prob(self, corr: float, cov: float, numpy_bit_gen: Generator):
         """Draw new values for treatment probabilities.
 
         New treatment probability values are assigned to individuals
