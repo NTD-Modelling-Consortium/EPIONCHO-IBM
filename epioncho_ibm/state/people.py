@@ -396,8 +396,8 @@ class People(HDF5Dataclass):
         """
         new_probs = People.draw_compliance_values(
             corr, cov, size=len(self.ages), random_generator=numpy_bit_gen
-        ).sort()
-        self.compliance[np.argsort(self.compliance)] = new_probs
+        )
+        self.compliance[np.argsort(self.compliance)] = np.sort(new_probs)
 
     def process_deaths(
         self,
