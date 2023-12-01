@@ -16,7 +16,11 @@ from multiprocessing import cpu_count
 from tqdm.contrib.concurrent import process_map
 
 from epioncho_ibm import Params, Simulation
-from epioncho_ibm.state.params import BlackflyParams, TreatmentParams
+from epioncho_ibm.state.params import (
+    BlackflyParams,
+    EpionchoEndgameModel,
+    TreatmentParams,
+)
 from epioncho_ibm.tools import Data, add_state_to_run_data, write_data_to_csv
 
 
@@ -92,7 +96,8 @@ def run_sim(
     all_age_run_data: Data = {}
     for state in simulation.iter_run(
         end_time=simulation_stop,
-        sampling_years=[i for i in range(mda_start, simulation_stop)],
+        sampling_interval=0.5,
+        # sampling_years=[i for i in range(mda_start, simulation_stop)],
     ):
         add_state_to_run_data(
             state,
@@ -147,6 +152,8 @@ def calculate_probability_elimination(
     if mda_start_year:
         yrs_after_mda_start_mask = tmp[:, 0].astype(float) >= mda_start_year
         tmp = tmp[yrs_after_mda_start_mask, :]
+    else:
+        mda_start_year = 0
 
     # Calculating probability of elimination using mf_prev
     mf_prev_mask = tmp[:, 3] == "prevalence"
@@ -163,6 +170,8 @@ def calculate_probability_elimination(
             for i in range(mf_under_1_mask.shape[1])
         ]
     )
+
+    roundsTillUnder1Prev = (yearOfUnder1Prev - mda_start_year) / mda_interval
 
     # Probability of elimination for a given year = the average number of runs that reach 0 mf prev
     prob_elim = np.mean(mf_prev_vals == 0, axis=1)
@@ -207,6 +216,11 @@ def calculate_probability_elimination(
         if np.any(prob_elim >= 0.90)
         else ""
     )
+    roundsTill90Under1Prev = (
+        (float(yearOf90Under1Prev) - mda_start_year) / mda_interval
+        if yearOf90Under1Prev != ""
+        else ""
+    )
 
     # Summarizing all other prevalence outputs (filtering to only mfp)
     other_prevs = tmp[mf_prev_mask, 4:].astype(float)
@@ -232,7 +246,7 @@ def calculate_probability_elimination(
                     "",
                     np.nan,
                     np.nan,
-                    "years_to_90_under_1_mfp",
+                    "years_to_90_prob_elim",
                     yearOf90ProbElim,
                     None,
                     None,
@@ -245,8 +259,21 @@ def calculate_probability_elimination(
                     "",
                     np.nan,
                     np.nan,
-                    "years_to_90_prob_elim",
+                    "years_to_90_under_1_mfp",
                     yearOf90Under1Prev,
+                    None,
+                    None,
+                    None,
+                ]
+            ),
+            # rounds till >=90% under 1% prev
+            np.array(
+                [
+                    "",
+                    np.nan,
+                    np.nan,
+                    "rounds_to_90_under_1_mfp",
+                    roundsTill90Under1Prev,
                     None,
                     None,
                     None,
@@ -259,7 +286,9 @@ def calculate_probability_elimination(
                     np.nan,
                     np.nan,
                     "years_to_1_mfp",
-                    np.nanmean(yearOfUnder1Prev),
+                    np.nanmean(yearOfUnder1Prev)
+                    if not (np.isnan(yearOfUnder1Prev).all())
+                    else None,
                     np.percentile(yearOfUnder1Prev, 2.5),
                     np.percentile(yearOfUnder1Prev, 97.5),
                     np.median(yearOfUnder1Prev),
@@ -273,6 +302,34 @@ def calculate_probability_elimination(
                     np.nan,
                     "years_to_1_mfp_all_runs",
                     ",".join(yearOfUnder1Prev.astype(str)),
+                    None,
+                    None,
+                    None,
+                ]
+            ),
+            # avg rounds till <=1% mf prev
+            np.array(
+                [
+                    "",
+                    np.nan,
+                    np.nan,
+                    "rounds_to_1_mfp",
+                    np.nanmean(roundsTillUnder1Prev)
+                    if not (np.isnan(roundsTillUnder1Prev).all())
+                    else None,
+                    np.percentile(roundsTillUnder1Prev, 2.5),
+                    np.percentile(roundsTillUnder1Prev, 97.5),
+                    np.median(roundsTillUnder1Prev),
+                ]
+            ),
+            # all rounds to <1% mfp
+            np.array(
+                [
+                    "",
+                    np.nan,
+                    np.nan,
+                    "rounds_to_1_mfp_all_runs",
+                    ",".join(roundsTillUnder1Prev.astype(str)),
                     None,
                     None,
                     None,
@@ -361,30 +418,3 @@ if __name__ == "__main__":
             interval,
             "test_outputs/mda-stop-" + str(mda_stop) + "-all_age_data.csv",
         )
-
-    # mda_start = 2000
-    # mda_stop = 2050
-    # interval=1
-    # # ~ 70% MFP
-    # rumSim = partial(
-    #     run_sim,
-    #     start_time=1990,
-    #     mda_start=mda_start,
-    #     mda_stop=mda_stop,
-    #     simulation_stop=2051,
-    #     #abr=abr,
-    #     verbose=False,
-    #     #seed=seed,
-    #     #gamma_distribution=kE,
-    #     mda_interval=interval
-    # )
-    # # Seperating the return data into two data arrays for separate processing
-    # # Look at the run_sim function definition/return value to see that the expected output is a tuple,
-    # # with index [0] containing the age_grouped data, and index [1] containing the all age data
-    # data: list[tuple[Data, Data]] = process_map(rumSim, range(run_iters), max_workers=cpus_to_use)
-    # age_grouped_data: list[Data] = [row[0] for row in data]
-    # all_age_data: list[Data] = [row[1] for row in data]
-
-    # write_data_to_csv(age_grouped_data, "test_outputs/mda-stop-" + str(mda_stop) + "-age_grouped_raw_data.csv")
-    # write_data_to_csv(all_age_data, "test_outputs/mda-stop-" + str(mda_stop) + "-raw_all_age_data.csv")
-    # calculate_probability_elimination(all_age_data, "test", "test-scenario", mda_start, mda_stop, interval, "test_outputs/mda-stop-" + str(mda_stop) + "-all_age_data.csv")
