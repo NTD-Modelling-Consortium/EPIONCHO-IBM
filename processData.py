@@ -16,7 +16,9 @@ def combineAndFilter(
 ):
     rows = []
     columns = []
-    for filename in glob.glob(pathToOutputFiles + specific_files):
+    for filename in glob.glob(
+        pathToOutputFiles + "**/" + specific_files, recursive=True
+    ):
         with open(filename, newline="") as f:
             reader = csv.reader(f)
             if len(columns) == 0:
