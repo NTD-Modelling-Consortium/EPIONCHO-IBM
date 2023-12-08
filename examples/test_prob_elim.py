@@ -171,7 +171,7 @@ def calculate_probability_elimination(
         ]
     )
 
-    roundsTillUnder1Prev = (yearOfUnder1Prev - mda_start_year) / mda_interval
+    roundsTillUnder1Prev = (yearOfUnder1Prev - mda_start_year - 1) / mda_interval
 
     # Probability of elimination for a given year = the average number of runs that reach 0 mf prev
     prob_elim = np.mean(mf_prev_vals == 0, axis=1)
@@ -217,7 +217,7 @@ def calculate_probability_elimination(
         else ""
     )
     roundsTill90Under1Prev = (
-        (float(yearOf90Under1Prev) - mda_start_year) / mda_interval
+        (float(yearOf90Under1Prev) - mda_start_year - 1) / mda_interval
         if yearOf90Under1Prev != ""
         else ""
     )
