@@ -131,7 +131,7 @@ def calculate_probability_elimination(
     scenario: str,
     mda_start_year: int | None,
     mda_stop_year: int,
-    mda_interval: int,
+    mda_interval: float,
     csv_file: str,
 ) -> None:
     # Arranging data into an easy to manipulate format (taken from tools.py)
