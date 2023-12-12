@@ -6,7 +6,7 @@ from numpy.random import SFC64, Generator
 
 from epioncho_ibm.utils import array_fully_equal
 
-from .params import Params
+from .params import Params, TreatmentParams
 from .types import Array
 
 
@@ -230,7 +230,7 @@ def dict_fully_equal(d1: dict[str, np.ndarray], d2: dict[str, np.ndarray]):
 
 
 class People(HDF5Dataclass):
-    compliance: Optional[Array.Person.Bool]
+    compliance: Array.Person.Float
     sex_is_male: Array.Person.Bool
     blackfly: BlackflyLarvae
     ages: Array.Person.Float
@@ -291,11 +291,13 @@ class People(HDF5Dataclass):
             < params.humans.gender_ratio
         )
         if params.treatment is None:
-            compliance_array = None
+            compliance_array = np.zeros(n_people)
         else:
-            compliance_array = (
-                people_generator.uniform(low=0, high=1, size=n_people)
-                > params.treatment.noncompliant_percentage
+            compliance_array = People.draw_compliance_values(
+                corr=params.treatment.correlation,
+                cov=params.treatment.total_population_coverage,
+                size=n_people,
+                random_generator=people_generator,
             )
         last_treatment = np.empty(n_people)
         last_treatment[:] = np.nan
@@ -362,11 +364,47 @@ class People(HDF5Dataclass):
             countdown_sequela=countdown_sequela,
         )
 
+    @staticmethod
+    def draw_compliance_values(
+        corr: float,
+        cov: float,
+        size: int,
+        random_generator: Generator,
+    ):
+        return random_generator.beta(
+            a=cov * (1 - corr) / corr,
+            b=(1 - cov) * (1 - corr) / corr,
+            size=size,
+        )
+
+    def update_treatment_prob(self, corr: float, cov: float, numpy_bit_gen: Generator):
+        """Draw new values for treatment probabilities.
+
+        New treatment probability values are assigned to individuals
+        ensuring that order in probablity value is kept across the
+        population. In other words, individuals who had the highest
+        probablity values before still do after.
+
+        Args:
+            corr (float): Treatment correlation value
+            cov (float): Treatent coverage value
+            numpy_bit_gen (Generator): A random number generator instance
+                 from numpy.
+
+        Returns:
+            Array.Person.Float
+        """
+        new_probs = People.draw_compliance_values(
+            corr, cov, size=len(self.ages), random_generator=numpy_bit_gen
+        )
+        self.compliance[np.argsort(self.compliance)] = np.sort(new_probs)
+
     def process_deaths(
         self,
         people_to_die: Array.Person.Bool,
         gender_ratio: float,
         numpy_bit_gen: Generator,
+        treatment: Optional[TreatmentParams],
     ):
         if (total_people_to_die := int(np.sum(people_to_die))) > 0:
             self.sex_is_male[people_to_die] = (
@@ -391,12 +429,17 @@ class People(HDF5Dataclass):
                 arr[people_to_die] = np.inf
 
         self.delay_arrays.process_deaths(people_to_die)
+        if treatment:
+            self.compliance[people_to_die] = People.draw_compliance_values(
+                treatment.correlation,
+                treatment.total_population_coverage,
+                size=total_people_to_die,
+                random_generator=numpy_bit_gen,
+            )
 
     def get_people_for_age_group(self, age_start: float, age_end: float) -> "People":
         rel_ages = (self.ages >= age_start) & (self.ages < age_end)
-        new_compliance = (
-            self.compliance[rel_ages] if self.compliance is not None else None
-        )
+        new_compliance = self.compliance[rel_ages]
         return People(
             compliance=new_compliance,
             sex_is_male=self.sex_is_male[rel_ages],

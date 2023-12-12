@@ -13,7 +13,6 @@ class BaseImmutableParams(BaseModel):
 
 
 class SpecificTreatmentParams(BaseModel):
-    total_population_coverage: float = 0.65  # The probability that a 'treatable' person is actually treated in an iteration - "treat.prob"
     microfilaricidal_nu: float = 0.0096  # effects of ivermectin
     microfilaricidal_omega: float = 1.25  # effects of ivermectin
     embryostatic_lambda_max: float = (
@@ -24,8 +23,8 @@ class SpecificTreatmentParams(BaseModel):
         0.345  # permenent infertility in worms due to ivermectin
     )
     min_age_of_treatment: int = 5
-    noncompliant_percentage: float = 0.05
-    correlation: float = 0.0
+    correlation: float = 0.5
+    total_population_coverage: float = 0.65  # The probability that a 'treatable' person is actually treated in an iteration - "treat.prob"
 
 
 class TreatmentParams(SpecificTreatmentParams):

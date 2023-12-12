@@ -54,6 +54,9 @@ def get_state_from_R(
     # Note: Considered delay indexes
 
     people = People(
+        #! TODO Since 9c287c5 People.compiance contains treatment
+        #! probablity instead of deterministic compliance (a boolean
+        #! indicating whether of not an individual will be treated.)
         compliance=compliance,
         sex_is_male=sex_is_male,
         blackfly=blackfly_larvae,
