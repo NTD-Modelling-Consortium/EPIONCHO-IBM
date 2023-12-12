@@ -23,6 +23,40 @@ from epioncho_ibm.state.params import (
 )
 from epioncho_ibm.tools import Data, add_state_to_run_data, write_data_to_csv
 
+"""
+{
+    "parameters": {
+        "initial": {
+            "n_people": 400
+        },
+        "changes": []
+    },
+    "programs": [
+        {
+            "first_year": 1990,
+            "last_year": 2025,
+            "interventions": {
+                "treatment_interval": 0.5,
+                "correlation": 0.5,
+            }
+        },
+        {
+            "first_year": 2026,
+            "last_year": 2040,
+            "interventions": {
+                "treatment_interval": 1,
+                "min_age_of_treatment": 4,
+                "correlation": 0.5,
+                "microfilaricidal_nu": 0.04,
+                "microfilaricidal_omega": 1.82,
+                "embryostatic_lambda_max": 462,
+                "embryostatic_phi": 4.83
+            }
+        }
+    ]
+}
+"""
+
 
 def run_sim(
     i,
@@ -44,8 +78,8 @@ def run_sim(
     # print("ABR" +str(abr) + "kE" + str(kE) + "seed" + str(seed))
     params = Params(
         delta_time_days=1,
-        year_length_days=366,
-        n_people=440,
+        year_length_days=365,
+        n_people=400,
         blackfly=BlackflyParams(
             delta_h_zero=0.186,
             delta_h_inf=0.003,
@@ -72,6 +106,7 @@ def run_sim(
         ),
     )
 
+    EpionchoEndgameModel.parse_raw
     simulation = Simulation(start_time=start_time, params=params, verbose=verbose)
 
     # Regression Testing - 70 iters
@@ -376,20 +411,17 @@ if __name__ == "__main__":
 
     # mda_start = 2000
     # mda_stop = 2040
-    loopTimes = [(2000, 2010), (2000, 2020), (2000, 2030), (2000, 2040)]
+    loopTimes = [(1990, 2025)]  # , (2000, 2020), (2000, 2030), (2000, 2040)]
     interval = 1
     for mda_start, mda_stop in loopTimes:
         # ~ 70% MFP
         rumSim = partial(
             run_sim,
-            start_time=1990,
+            start_time=1900,
             mda_start=mda_start,
             mda_stop=mda_stop,
-            simulation_stop=2051,
-            # abr=abr,
+            simulation_stop=2025,
             verbose=False,
-            # seed=seed,
-            # gamma_distribution=kE,
             mda_interval=1,
         )
         # Seperating the return data into two data arrays for separate processing
@@ -398,6 +430,7 @@ if __name__ == "__main__":
         data: list[tuple[Data, Data]] = process_map(
             rumSim, range(run_iters), max_workers=cpus_to_use
         )
+
         age_grouped_data: list[Data] = [row[0] for row in data]
         all_age_data: list[Data] = [row[1] for row in data]
 

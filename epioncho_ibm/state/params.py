@@ -25,6 +25,7 @@ class SpecificTreatmentParams(BaseModel):
     )
     min_age_of_treatment: int = 5
     noncompliant_percentage: float = 0.05
+    correlation: float = 0.0
 
 
 class TreatmentParams(SpecificTreatmentParams):
