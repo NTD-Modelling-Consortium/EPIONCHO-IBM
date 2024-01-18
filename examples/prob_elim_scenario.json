@@ -1,0 +1,18 @@
+{
+    "parameters": {
+        "initial": {
+            "n_people": 400
+        },
+        "changes": []
+    },
+    "programs": [
+        {
+            "first_year": 2000,
+            "last_year": 2030,
+            "interventions": {
+                "treatment_interval": 1,
+                "coverage": 200
+            }
+        }
+    ]
+}
