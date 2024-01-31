@@ -4,7 +4,7 @@ from typing import Optional
 import numpy as np
 from numpy.random import Generator
 
-from epioncho_ibm.state import Array, HumanParams, TreatmentParams, State
+from epioncho_ibm.state import Array, HumanParams, State, TreatmentParams
 
 
 def _is_during_treatment(
@@ -66,7 +66,7 @@ def get_treatment(
     ages: Array.Person.Float,
     compliance: Optional[Array.Person.Float],
     numpy_bit_gen: Generator,
-    state: State
+    state: State,
 ) -> Optional[TreatmentGroup]:
     """
     Generates a treatment group, and calculates coverage, based on the current time
@@ -94,9 +94,11 @@ def get_treatment(
             treatment_times,
         )
         if treatment_started:
-            state.people.update_zero_compliance(treatment_params.correlation, 
-                                                treatment_params.total_population_coverage, 
-                                                state.numpy_bit_generator)
+            state.people.update_zero_compliance(
+                treatment_params.correlation,
+                treatment_params.total_population_coverage,
+                state.numpy_bit_generator,
+            )
             compliance = state.people.compliance
             rand_nums = numpy_bit_gen.uniform(low=0, high=1, size=len(ages))
             too_young = ages < treatment_params.min_age_of_treatment
