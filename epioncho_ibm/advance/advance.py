@@ -22,6 +22,7 @@ def advance_state(state: State, debug: bool = False) -> None:
         state.people.ages,
         state.people.compliance,
         state.numpy_bit_generator,
+        state
     )
     if treatment is not None and treatment.treatment_occurred:
         assert state.n_treatments is not None
@@ -30,6 +31,7 @@ def advance_state(state: State, debug: bool = False) -> None:
             bins=len(state.n_treatments),
         )
         state.n_treatments += n_treatments_by_age
+        state.people.has_been_treated = (state.people.has_been_treated | treatment.coverage_in)
 
     total_exposure = calculate_total_exposure(
         state._params.exposure,
