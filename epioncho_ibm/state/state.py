@@ -189,8 +189,16 @@ class State(HDF5Dataclass, BaseState[Params]):
                 != params.treatment.total_population_coverage
             )
         ):
-            old_corr = self._params.treatment.correlation if self._params.treatment is not None else params.treatment.correlation
-            old_cov = self._params.treatment.total_population_coverage if self._params.treatment is not None else params.treatment.total_population_coverage
+            old_corr = (
+                self._params.treatment.correlation
+                if self._params.treatment is not None
+                else params.treatment.correlation
+            )
+            old_cov = (
+                self._params.treatment.total_population_coverage
+                if self._params.treatment is not None
+                else params.treatment.total_population_coverage
+            )
             self.people.update_zero_compliance(
                 old_corr,
                 old_cov,
@@ -417,9 +425,9 @@ class State(HDF5Dataclass, BaseState[Params]):
             else:
                 sequelae_prevalence[name] = prev
         return sequelae_prevalence
-    
+
     def percent_non_compliant(self) -> float:
-        return (1 - np.mean(self.people.has_been_treated))
+        return 1 - np.mean(self.people.has_been_treated)
 
 
 def make_state_from_params(params: Params):

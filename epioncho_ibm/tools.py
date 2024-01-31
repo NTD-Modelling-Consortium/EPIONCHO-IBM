@@ -56,9 +56,7 @@ def add_state_to_run_data(
                     for sequela, prev in seq.items():
                         run_data[(*partial_key, sequela)] = prev
                 if with_pnc:
-                    run_data[
-                        (*partial_key, "pnc")
-                    ] = age_state.percent_non_compliant()
+                    run_data[(*partial_key, "pnc")] = age_state.percent_non_compliant()
         else:
             partial_key = (round(state.current_time, 2), age_min, age_max)
             if prevalence:

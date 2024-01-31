@@ -1,5 +1,5 @@
-import random
 import os
+import random
 from functools import partial
 
 import numpy as np
@@ -13,6 +13,7 @@ from epioncho_ibm.endgame_simulation import (
 )
 from epioncho_ibm.state.params import EpionchoEndgameModel
 from epioncho_ibm.tools import Data, add_state_to_run_data, write_data_to_csv
+from examples.post_processing_function import post_processing_calculation
 
 
 # Function to add model parameters (seed, exp, abr) and MDA history to endgame object
@@ -21,10 +22,10 @@ def get_endgame(iter, iu_name="GHA0216121382", sample=True):
     changes = []
     inputData = pd.read_csv("test_outputs/inputParams/InputPars_" + iu_name + ".csv")
     index = random.randint(1, inputData.shape[0])
-    seed = (iter + iter*3758) #inputData.loc[index][0]
-    gamma_distribution = 0.31#inputData.loc[index][1]  # 0.3
-    abr = 1641#inputData.loc[index][2]  # 2297
-    if(sample):
+    seed = iter + iter * 3758  # inputData.loc[index][0]
+    gamma_distribution = 0.31  # inputData.loc[index][1]  # 0.3
+    abr = 600  # 1641  # inputData.loc[index][2]  # 2297
+    if sample:
         seed = inputData.loc[index][0]
         gamma_distribution = inputData.loc[index][1]  # 0.3
         abr = inputData.loc[index][2]
@@ -172,13 +173,13 @@ def run_sim(i, iu_name, verbose=False, sample=True):
     endgame_structure = get_endgame(i, iu_name, sample=sample)
     # Read in endgame objects and set up simulation
     endgame = EpionchoEndgameModel.parse_obj(endgame_structure)
-    #print(endgame)
+    # print(endgame)
     endgame_sim = EndgameSimulation(
         start_time=1900, endgame=endgame, verbose=verbose, debug=True
     )
     # Run
     run_data: Data = {}
-    for state in endgame_sim.iter_run(end_time=2041, sampling_interval=1/366):
+    for state in endgame_sim.iter_run(end_time=2041, sampling_interval=1 / 366):
 
         add_state_to_run_data(
             state,
@@ -200,7 +201,7 @@ def run_sim(i, iu_name, verbose=False, sample=True):
 # Wrapper
 def wrapped_parameters(iu_name):
     # Run simulations and save output
-    num_iter = 200
+    num_iter = 10
     max_workers = os.cpu_count() - 4 if num_iter > os.cpu_count() - 4 else num_iter
     # rumSim = partial(run_sim, verbose=False, iu_name=iu_name, sample=False)
     # data = process_map(rumSim, range(num_iter), max_workers=max_workers)
@@ -208,16 +209,29 @@ def wrapped_parameters(iu_name):
     #     data,
     #     "test_outputs/python_model_output/testing_" + iu_name + "-age_grouped_raw_data_set_abr_366days_reset_zeros_pnc_updated_dd_daily_sampling.csv",
     # )
-    rumSim = partial(run_sim, verbose=False, iu_name=iu_name, sample=True)
+    rumSim = partial(run_sim, verbose=False, iu_name=iu_name, sample=False)
     data = process_map(rumSim, range(num_iter), max_workers=max_workers)
     write_data_to_csv(
         data,
-        "test_outputs/python_model_output/testing_" + iu_name + "-age_grouped_raw_data_variable_abr_366days_reset_zeros_pnc_updated_dd_daily_sampling.csv",
+        "test_outputs/python_model_output/testing_"
+        + iu_name
+        + "-age_grouped_raw_data_variable_abr_366days_reset_zeros_pnc_updated_dd_daily_sampling.csv",
+    )
+    post_processing_calculation(
+        data,
+        iuName=iu,
+        scenario="1a",
+        csv_file="test_outputs/python_model_output/testing_"
+        + iu_name
+        + "-processed_data.csv",
+        mda_start_year=2026,
+        mda_stop_year=2041,
+        mda_interval=1,
     )
 
 
 if __name__ == "__main__":
     # Run example
-    # iu = "GHA0216121382"
-    iu = "CIV0162715440"
+    iu = "GHA0216121382"
+    # iu = "CIV0162715440"
     wrapped_parameters(iu)

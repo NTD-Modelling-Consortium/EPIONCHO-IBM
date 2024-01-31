@@ -1,6 +1,5 @@
 import os
 import random
-from collections import defaultdict
 
 import numpy as np
 import pandas as pd
@@ -22,6 +21,7 @@ from epioncho_ibm.state.params import (
     TreatmentParams,
 )
 from epioncho_ibm.tools import Data, add_state_to_run_data, write_data_to_csv
+from examples.post_processing_function import post_processing_calculation
 
 """
 {
@@ -160,250 +160,6 @@ def run_sim(
     return (age_grouped_run_data, all_age_run_data)
 
 
-def calculate_probability_elimination(
-    data: list[Data],
-    iuName: str,
-    scenario: str,
-    mda_start_year: int | None,
-    mda_stop_year: int,
-    mda_interval: float,
-    csv_file: str,
-) -> None:
-    # Arranging data into an easy to manipulate format (taken from tools.py)
-    data_combined_runs: dict[
-        tuple[float, float, float, str], list[float | int]
-    ] = defaultdict(list)
-    for run in data:
-        for k, v in run.items():
-            data_combined_runs[k].append(v)
-
-    rows = sorted(
-        (k + tuple(v) for k, v in data_combined_runs.items()),
-        key=lambda r: (r[0], r[3], r[1]),
-    )
-
-    tmp = np.array(rows)
-    # Data manipulation
-    if mda_start_year:
-        yrs_after_mda_start_mask = tmp[:, 0].astype(float) >= mda_start_year
-        tmp = tmp[yrs_after_mda_start_mask, :]
-    else:
-        mda_start_year = 0
-
-    # Calculating probability of elimination using mf_prev
-    mf_prev_mask = tmp[:, 3] == "prevalence"
-    mf_prev_vals = tmp[mf_prev_mask, 4:].astype(float)
-
-    # Calculating the year where each run has < 1% prev
-    mf_under_1_mask = mf_prev_vals <= 0.01
-    under_1_prev_indices = np.argmax(mf_under_1_mask, axis=0)
-    yearOfUnder1Prev = np.array(
-        [
-            float(tmp[mf_prev_mask][under_1_prev_indices[i], 0])
-            if any(mf_under_1_mask[:, i])
-            else np.nan
-            for i in range(mf_under_1_mask.shape[1])
-        ]
-    )
-
-    roundsTillUnder1Prev = (yearOfUnder1Prev - mda_start_year - 1) / mda_interval
-
-    # Probability of elimination for a given year = the average number of runs that reach 0 mf prev
-    prob_elim = np.mean(mf_prev_vals == 0, axis=1)
-    num_prob_elim = np.sum(mf_prev_mask)
-    none_array = np.full(num_prob_elim, None)
-    # combining results into a matrix format for output
-    prob_elim_output = np.column_stack(
-        (
-            tmp[mf_prev_mask, :3],
-            np.full(num_prob_elim, "prob_elim"),
-            prob_elim,
-            none_array,
-            none_array,
-            none_array,
-        )
-    )
-
-    # Probability of getting < 1% mfp for a given year
-    prob_under_1_mfp = np.mean(mf_under_1_mask, axis=1)
-    under_1_prev_90_index = np.argmax(prob_under_1_mfp >= 0.90, axis=0)
-    over_90_prob_elim_index = np.argmax(prob_elim >= 0.90, axis=0)
-
-    prob_under_1_mfp_output = np.column_stack(
-        (
-            tmp[mf_prev_mask, :3],
-            np.full(num_prob_elim, "prob_under_1_mfp"),
-            prob_under_1_mfp,
-            none_array,
-            none_array,
-            none_array,
-        )
-    )
-
-    # Find the year where 90% of the runs have <1% mfp or have reached elimination completely
-    yearOf90ProbElim = (
-        tmp[mf_prev_mask, 0][under_1_prev_90_index]
-        if np.any(prob_under_1_mfp >= 0.90)
-        else ""
-    )
-    yearOf90Under1Prev = (
-        tmp[mf_prev_mask, 0][over_90_prob_elim_index]
-        if np.any(prob_elim >= 0.90)
-        else ""
-    )
-    roundsTill90Under1Prev = (
-        (float(yearOf90Under1Prev) - mda_start_year - 1) / mda_interval
-        if yearOf90Under1Prev != ""
-        else ""
-    )
-
-    # Summarizing all other prevalence outputs (filtering to only mfp)
-    other_prevs = tmp[mf_prev_mask, 4:].astype(float)
-    other_prevs_output = np.column_stack(
-        (
-            tmp[mf_prev_mask, :4],
-            np.mean(other_prevs, axis=1),
-            np.percentile(other_prevs, 2.5, axis=1),
-            np.percentile(other_prevs, 97.5, axis=1),
-            np.median(other_prevs, axis=1),
-        )
-    )
-    output = np.row_stack(
-        (
-            other_prevs_output,
-            # probability of elim for each year
-            prob_elim_output,
-            # probability of 1% mf_prev for each year
-            prob_under_1_mfp_output,
-            # year of >=90% elim
-            np.array(
-                [
-                    "",
-                    np.nan,
-                    np.nan,
-                    "years_to_90_prob_elim",
-                    yearOf90ProbElim,
-                    None,
-                    None,
-                    None,
-                ]
-            ),
-            # year of >=90% under 1% prev
-            np.array(
-                [
-                    "",
-                    np.nan,
-                    np.nan,
-                    "years_to_90_under_1_mfp",
-                    yearOf90Under1Prev,
-                    None,
-                    None,
-                    None,
-                ]
-            ),
-            # rounds till >=90% under 1% prev
-            np.array(
-                [
-                    "",
-                    np.nan,
-                    np.nan,
-                    "rounds_to_90_under_1_mfp",
-                    roundsTill90Under1Prev,
-                    None,
-                    None,
-                    None,
-                ]
-            ),
-            # avg year of <=1% mf prev
-            np.array(
-                [
-                    "",
-                    np.nan,
-                    np.nan,
-                    "years_to_1_mfp",
-                    np.nanmean(yearOfUnder1Prev)
-                    if not (np.isnan(yearOfUnder1Prev).all())
-                    else None,
-                    np.percentile(yearOfUnder1Prev, 2.5),
-                    np.percentile(yearOfUnder1Prev, 97.5),
-                    np.median(yearOfUnder1Prev),
-                ]
-            ),
-            # all years to <1% mfp
-            np.array(
-                [
-                    "",
-                    np.nan,
-                    np.nan,
-                    "years_to_1_mfp_all_runs",
-                    ",".join(yearOfUnder1Prev.astype(str)),
-                    None,
-                    None,
-                    None,
-                ]
-            ),
-            # avg rounds till <=1% mf prev
-            np.array(
-                [
-                    "",
-                    np.nan,
-                    np.nan,
-                    "rounds_to_1_mfp",
-                    np.nanmean(roundsTillUnder1Prev)
-                    if not (np.isnan(roundsTillUnder1Prev).all())
-                    else None,
-                    np.percentile(roundsTillUnder1Prev, 2.5),
-                    np.percentile(roundsTillUnder1Prev, 97.5),
-                    np.median(roundsTillUnder1Prev),
-                ]
-            ),
-            # all rounds to <1% mfp
-            np.array(
-                [
-                    "",
-                    np.nan,
-                    np.nan,
-                    "rounds_to_1_mfp_all_runs",
-                    ",".join(roundsTillUnder1Prev.astype(str)),
-                    None,
-                    None,
-                    None,
-                ]
-            ),
-        )
-    )
-
-    descriptor_output = np.column_stack(
-        (
-            np.full(output.shape[0], iuName),
-            np.full(output.shape[0], scenario),
-            np.full(output.shape[0], mda_start_year),
-            np.full(output.shape[0], mda_stop_year),
-            np.full(output.shape[0], mda_interval),
-            output,
-        )
-    )
-
-    pd.DataFrame(
-        descriptor_output,
-        columns=[
-            "iu_name",
-            "scenario",
-            "mda_start_year",
-            "mda_stop_year",
-            "mda_interval",
-            "year_id",
-            "age_start",
-            "age_end",
-            "measure",
-            "mean",
-            "lower_bound",
-            "upper_bound",
-            "median",
-        ],
-    ).to_csv(csv_file)
-
-
 run_iters = 10
 
 if __name__ == "__main__":
@@ -442,12 +198,12 @@ if __name__ == "__main__":
             all_age_data,
             "test_outputs/mda-stop-" + str(mda_stop) + "-raw_all_age_data.csv",
         )
-        calculate_probability_elimination(
+        post_processing_calculation(
             all_age_data,
             "test",
             "test-scenario",
+            "test_outputs/mda-stop-" + str(mda_stop) + "-all_age_data.csv",
             mda_start,
             mda_stop,
             interval,
-            "test_outputs/mda-stop-" + str(mda_stop) + "-all_age_data.csv",
         )

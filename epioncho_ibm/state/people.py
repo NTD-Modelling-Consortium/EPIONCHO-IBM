@@ -380,9 +380,9 @@ class People(HDF5Dataclass):
             b=(1 - cov) * (1 - corr) / corr,
             size=size,
         )
-    
+
     def update_zero_compliance(self, corr: float, cov: float, numpy_bit_gen: Generator):
-        """ 
+        """
         Update/redraw any zero values
         Args:
             corr (float): Treatment correlation value
@@ -502,7 +502,7 @@ class People(HDF5Dataclass):
             countdown_sequela={
                 name: a[rel_ages] for name, a in self.countdown_sequela.items()
             },
-            has_been_treated=self.has_been_treated[rel_ages]
+            has_been_treated=self.has_been_treated[rel_ages],
         )
 
     def get_infected(self) -> Array.Person.Bool:
