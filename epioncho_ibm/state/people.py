@@ -245,6 +245,7 @@ class People(HDF5Dataclass):
     age_test_OAE: Array.Person.Float
     has_sequela: dict[str, Array.Person.Bool]
     countdown_sequela: dict[str, Array.Person.Float]
+    has_been_treated: Array.Person.Bool
 
     def __eq__(self, other: object) -> bool:
         if isinstance(other, People):
@@ -273,6 +274,7 @@ class People(HDF5Dataclass):
             and array_fully_equal(self.age_test_OAE, other.age_test_OAE)
             and dict_fully_equal(self.has_sequela, other.has_sequela)
             and dict_fully_equal(self.countdown_sequela, other.countdown_sequela)
+            and array_fully_equal(self.has_been_treated, other.has_been_treated)
         )
 
     def __len__(self):
@@ -309,6 +311,7 @@ class People(HDF5Dataclass):
             embryostatic_phi=last_treatment.copy(),
             permanent_infertility=last_treatment.copy(),
         )
+        has_been_treated = np.full(n_people, False)
         # individual exposure to fly bites
         individual_exposure = people_generator.gamma(
             shape=params.gamma_distribution,
@@ -362,6 +365,7 @@ class People(HDF5Dataclass):
             age_test_OAE=people_generator.uniform(3.0, 15.0, size=n_people),
             has_sequela=has_sequela,
             countdown_sequela=countdown_sequela,
+            has_been_treated=has_been_treated,
         )
 
     @staticmethod
@@ -375,6 +379,19 @@ class People(HDF5Dataclass):
             a=cov * (1 - corr) / corr,
             b=(1 - cov) * (1 - corr) / corr,
             size=size,
+        )
+    
+    def update_zero_compliance(self, corr: float, cov: float, numpy_bit_gen: Generator):
+        """ 
+        Update/redraw any zero values
+        Args:
+            corr (float): Treatment correlation value
+            cov (float): Treatent coverage value
+            numpy_bit_gen (Generator): A random number generator instance
+                 from numpy.
+        """
+        self.compliance[self.compliance == 0] = People.draw_compliance_values(
+            corr, cov, size=np.sum(self.compliance == 0), random_generator=numpy_bit_gen
         )
 
     def update_treatment_prob(self, corr: float, cov: float, numpy_bit_gen: Generator):
@@ -423,6 +440,7 @@ class People(HDF5Dataclass):
             self.age_test_OAE[people_to_die] = numpy_bit_gen.uniform(
                 3.0, 15.0, size=total_people_to_die
             )
+            self.has_been_treated[people_to_die] = False
             for arr in self.has_sequela.values():
                 arr[people_to_die] = False
             for arr in self.countdown_sequela.values():
@@ -484,6 +502,7 @@ class People(HDF5Dataclass):
             countdown_sequela={
                 name: a[rel_ages] for name, a in self.countdown_sequela.items()
             },
+            has_been_treated=self.has_been_treated[rel_ages]
         )
 
     def get_infected(self) -> Array.Person.Bool:

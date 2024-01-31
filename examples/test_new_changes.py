@@ -1,4 +1,5 @@
 import random
+import os
 from functools import partial
 
 import numpy as np
@@ -15,14 +16,18 @@ from epioncho_ibm.tools import Data, add_state_to_run_data, write_data_to_csv
 
 
 # Function to add model parameters (seed, exp, abr) and MDA history to endgame object
-def get_endgame(iu_name="GHA0216121382"):
+def get_endgame(iter, iu_name="GHA0216121382", sample=True):
     treatment_program = []
     changes = []
-    inputData = pd.read_csv("examples/inputParams/InputPars_" + iu_name + ".csv")
+    inputData = pd.read_csv("test_outputs/inputParams/InputPars_" + iu_name + ".csv")
     index = random.randint(1, inputData.shape[0])
-    seed = inputData.loc[index][0]
-    gamma_distribution = inputData.loc[index][1]  # 0.3
-    abr = inputData.loc[index][2]  # 2297
+    seed = (iter + iter*3758) #inputData.loc[index][0]
+    gamma_distribution = 0.31#inputData.loc[index][1]  # 0.3
+    abr = 1641#inputData.loc[index][2]  # 2297
+    if(sample):
+        seed = inputData.loc[index][0]
+        gamma_distribution = inputData.loc[index][1]  # 0.3
+        abr = inputData.loc[index][2]
     if iu_name == "GHA0216121382":
         treatment_program.append(
             {
@@ -136,6 +141,10 @@ def get_endgame(iu_name="GHA0216121382"):
         "parameters": {
             "initial": {
                 "n_people": 400,
+                "year_length_days": 366,
+                "delta_h_zero": 0.186,
+                "c_v": 0.005,
+                "delta_h_inf": 0.003,
                 "seed": seed,
                 "gamma_distribution": gamma_distribution,
                 "delta_time_days": 1,
@@ -159,17 +168,17 @@ def get_endgame(iu_name="GHA0216121382"):
 
 
 # Function to run and save simulations
-def run_sim(i, iu_name, verbose=False):
-    endgame_structure = get_endgame(iu_name)
+def run_sim(i, iu_name, verbose=False, sample=True):
+    endgame_structure = get_endgame(i, iu_name, sample=sample)
     # Read in endgame objects and set up simulation
     endgame = EpionchoEndgameModel.parse_obj(endgame_structure)
-
+    #print(endgame)
     endgame_sim = EndgameSimulation(
         start_time=1900, endgame=endgame, verbose=verbose, debug=True
     )
     # Run
     run_data: Data = {}
-    for state in endgame_sim.iter_run(end_time=2041, sampling_interval=0.25):
+    for state in endgame_sim.iter_run(end_time=2041, sampling_interval=1/366):
 
         add_state_to_run_data(
             state,
@@ -191,20 +200,20 @@ def run_sim(i, iu_name, verbose=False):
 # Wrapper
 def wrapped_parameters(iu_name):
     # Run simulations and save output
-    num_iter = 1  # 200
-    max_workers = 10 if num_iter > 10 else num_iter
-    rumSim = partial(run_sim, verbose=False, iu_name=iu_name)
+    num_iter = 200
+    max_workers = os.cpu_count() - 4 if num_iter > os.cpu_count() - 4 else num_iter
+    # rumSim = partial(run_sim, verbose=False, iu_name=iu_name, sample=False)
+    # data = process_map(rumSim, range(num_iter), max_workers=max_workers)
+    # write_data_to_csv(
+    #     data,
+    #     "test_outputs/python_model_output/testing_" + iu_name + "-age_grouped_raw_data_set_abr_366days_reset_zeros_pnc_updated_dd_daily_sampling.csv",
+    # )
+    rumSim = partial(run_sim, verbose=False, iu_name=iu_name, sample=True)
     data = process_map(rumSim, range(num_iter), max_workers=max_workers)
     write_data_to_csv(
         data,
-        "test_outputs/testing_" + iu_name + "-age_grouped_raw_data2.csv",
+        "test_outputs/python_model_output/testing_" + iu_name + "-age_grouped_raw_data_variable_abr_366days_reset_zeros_pnc_updated_dd_daily_sampling.csv",
     )
-    df = pd.read_csv("test_outputs/testing_" + iu_name + "-age_grouped_raw_data2.csv")
-    df2 = df[
-        ((df["year_id"] >= 2025) & (df["year_id"] <= 2040))
-        & (df["measure"] == "prevalence")
-    ]
-    print(np.mean(np.array(df2.iloc[:, 4:]).astype(float), axis=1))
 
 
 if __name__ == "__main__":
