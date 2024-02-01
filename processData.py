@@ -12,7 +12,7 @@ import pandas as pd
 def combineAndFilter(
     pathToOutputFiles="/",
     specific_files="*.csv",
-    measure_filter=f'measure == "years_to_1_mfp" | measure == "rounds_to_1_mfp" | measure == "rounds_to_90_under_1_mfp" | measure == "years_to_90_under_1_mfp"',
+    measure_filter=f'measure == "years_to_1_mfp" | measure == "rounds_to_1_mfp" | measure == "rounds_to_90_under_1_mfp" | measure == "years_to_90_under_1_mfp" | measure == "year_of_1_mfp_avg"',
 ):
     rows = []
     columns = []
@@ -37,5 +37,5 @@ def combineAndFilter(
 combineAndFilter(
     pathToOutputFiles="C:/Users/adira/Documents/Github Repos/P_EPIONCHO-IBM/test_outputs/",
     specific_files="*-all_age_data.csv",
-    measure_filter=f'measure == "years_to_1_mfp" | measure == "rounds_to_1_mfp" | measure == "rounds_to_90_under_1_mfp" | measure == "years_to_90_under_1_mfp"',
+    measure_filter=f'measure == "years_to_1_mfp" | measure == "rounds_to_1_mfp" | measure == "rounds_to_90_under_1_mfp" | measure == "years_to_90_under_1_mfp" | measure == "year_of_1_mfp_avg"',
 )
