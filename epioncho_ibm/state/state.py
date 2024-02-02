@@ -15,7 +15,6 @@ from .params import (
     ImmutableParams,
     Params,
     SpecificTreatmentParams,
-    TreatmentParams,
     immutable_to_mutable,
     mutable_to_immutable,
 )
