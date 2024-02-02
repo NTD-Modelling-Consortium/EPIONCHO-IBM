@@ -381,19 +381,6 @@ class People(HDF5Dataclass):
             size=size,
         )
 
-    def update_zero_compliance(self, corr: float, cov: float, numpy_bit_gen: Generator):
-        """
-        Update/redraw any zero values
-        Args:
-            corr (float): Treatment correlation value
-            cov (float): Treatent coverage value
-            numpy_bit_gen (Generator): A random number generator instance
-                 from numpy.
-        """
-        self.compliance[self.compliance == 0] = People.draw_compliance_values(
-            corr, cov, size=np.sum(self.compliance == 0), random_generator=numpy_bit_gen
-        )
-
     def update_treatment_prob(self, corr: float, cov: float, numpy_bit_gen: Generator):
         """Draw new values for treatment probabilities.
 

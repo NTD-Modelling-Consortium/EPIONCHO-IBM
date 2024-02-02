@@ -22,7 +22,6 @@ def advance_state(state: State, debug: bool = False) -> None:
         state.people.ages,
         state.people.compliance,
         state.numpy_bit_generator,
-        state,
     )
     if treatment is not None and treatment.treatment_occurred:
         assert state.n_treatments is not None

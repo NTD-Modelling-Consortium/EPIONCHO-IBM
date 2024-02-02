@@ -189,21 +189,6 @@ class State(HDF5Dataclass, BaseState[Params]):
                 != params.treatment.total_population_coverage
             )
         ):
-            old_corr = (
-                self._params.treatment.correlation
-                if self._params.treatment is not None
-                else params.treatment.correlation
-            )
-            old_cov = (
-                self._params.treatment.total_population_coverage
-                if self._params.treatment is not None
-                else params.treatment.total_population_coverage
-            )
-            self.people.update_zero_compliance(
-                old_corr,
-                old_cov,
-                self.numpy_bit_generator,
-            )
             self.people.update_treatment_prob(
                 params.treatment.correlation,
                 params.treatment.total_population_coverage,
