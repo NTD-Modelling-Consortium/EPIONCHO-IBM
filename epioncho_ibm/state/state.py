@@ -11,7 +11,14 @@ from pydantic import BaseModel
 from scipy.optimize import curve_fit
 
 from .derived_params import DerivedParams
-from .params import ImmutableParams, Params, immutable_to_mutable, mutable_to_immutable
+from .params import (
+    ImmutableParams,
+    Params,
+    SpecificTreatmentParams,
+    TreatmentParams,
+    immutable_to_mutable,
+    mutable_to_immutable,
+)
 from .people import People
 from .prob_mapping import mf_probs
 from .types import Array
@@ -412,7 +419,13 @@ class State(HDF5Dataclass, BaseState[Params]):
         return sequelae_prevalence
 
     def percent_non_compliant(self) -> float:
-        return 1 - np.mean(self.people.has_been_treated)
+        min_age = (
+            SpecificTreatmentParams().min_age_of_treatment
+            if (self._params.treatment is None)
+            else self._params.treatment.min_age_of_treatment
+        )
+        eligible_population = self.people.ages >= min_age
+        return 1 - np.mean(self.people.has_been_treated[eligible_population])
 
 
 def make_state_from_params(params: Params):
