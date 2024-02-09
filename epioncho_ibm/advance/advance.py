@@ -30,6 +30,9 @@ def advance_state(state: State, debug: bool = False) -> None:
             bins=len(state.n_treatments),
         )
         state.n_treatments += n_treatments_by_age
+        state.people.has_been_treated = (
+            state.people.has_been_treated | treatment.coverage_in
+        )
 
     total_exposure = calculate_total_exposure(
         state._params.exposure,

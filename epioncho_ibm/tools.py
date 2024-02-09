@@ -23,10 +23,11 @@ def add_state_to_run_data(
     achieved_coverage: bool = True,
     with_age_groups: bool = True,
     with_sequela: bool = True,
+    with_pnc: bool = True,
 ) -> None:
     age_min = 0
     age_max = 80
-    if prevalence or number or mean_worm_burden or intensity:
+    if prevalence or number or mean_worm_burden or intensity or with_pnc:
         if with_age_groups:
             for age_start in range(age_min, age_max):
                 age_state = state.get_state_for_age_group(age_start, age_start + 1)
@@ -54,6 +55,8 @@ def add_state_to_run_data(
                     seq = age_state.sequalae_prevalence()
                     for sequela, prev in seq.items():
                         run_data[(*partial_key, sequela)] = prev
+                if with_pnc:
+                    run_data[(*partial_key, "pnc")] = age_state.percent_non_compliant()
         else:
             partial_key = (round(state.current_time, 2), age_min, age_max)
             if prevalence:
@@ -75,6 +78,8 @@ def add_state_to_run_data(
                 seq = state.sequalae_prevalence()
                 for sequela, prev in seq.items():
                     run_data[(*partial_key, sequela)] = prev
+            if with_pnc:
+                run_data[(*partial_key, "pnc")] = state.percent_non_compliant()
     if n_treatments or achieved_coverage:
         if with_age_groups:
             for age_start in range(age_min, age_max, 5):
