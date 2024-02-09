@@ -1,0 +1,141 @@
+# This workflow will install Python dependencies, run tests and lint with a single version of Python
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
+
+name: Testing Simulations
+
+on:
+  push:
+    branches-ignore:
+      - 'master'
+  pull_request:
+    types: ready_for_review
+    branches: [ "master" ]
+
+permissions:
+  actions: read
+  contents: read
+  pull-requests: write
+  packages: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      artifactId: ${{ steps.artifact-upload-step.outputs.artifact-id }}
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.10"
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip3 install flake8 poetry
+    - name: Setup Env with Poetry
+      run: |
+        poetry lock
+        poetry install
+    - name: Lint with flake8
+      run: |
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+    - name: Run Model
+      run: |
+        poetry run python examples/test_new_changes.py
+    - name: Set up R
+      uses: r-lib/actions/setup-r@v2
+      with:
+        r-version: latest 
+        use-public-rspm: true
+    - name: Install R Dependencies
+      uses: r-lib/actions/setup-r-dependencies@v2
+      with:
+        packages: |
+          any::ggplot2
+          any::dplyr
+          any::patchwork
+          any::stringr
+    - name: Run Visualization Code in R
+      run: Rscript test_outputs/compare_model_to_r.R
+    - name: Upload image as artifact
+      uses: actions/upload-artifact@v4
+      id: artifact-upload-step
+      with:
+        name: model-comparison-image
+        path: test_outputs/comparison_plot.png
+  comment-success:
+    runs-on: ubuntu-latest
+    if: success() && github.event_name == 'pull_request'
+    needs: build
+    steps:
+      - uses: actions/checkout@v3
+      - name: Get Image URL and create comment 
+        uses: actions/github-script@v7
+        env:
+          ARTIFACTID: ${{needs.build.outputs.artifactId}}
+        with:
+          script: |
+            // Function to get artifact ID and add it to a PR if the build script succeeds
+            async function runAsync() {
+              // Getting previously created artifact id, and creating links needed for the comment 
+              const artifactId = process.env.ARTIFACTID
+              const artifact_url = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}/artifacts/${artifactId}`
+              const workflow_url = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`
+              const test_file = `https://github.com/${context.repo.owner}/${context.repo.repo}/blob/master/examples/test_new_changes.py`
+              
+              // Creating the comment, including a markdown table with the links
+              const comment_body = ':white_check_mark: Automated Test has been run successfully.\n' +
+              '**Please look at the Comparison Plot and verify that your changes are valid.**\n' +
+              'Access the workflow information:\n' +
+              '| Type | Link |\n' +
+              '| --- | --- |\n' +
+              `| Workflow | ${workflow_url} |\n`+
+              `| Comparison Plot | ${artifact_url} |` +
+              `To run this test locally, run the code in the [examples/test_new_changes.py](${test_file}) file.`
+
+              // Creating comment
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment_body
+              })
+            }
+
+            // Using a separate function to run asyncronous code within a github action.
+            await runAsync()
+  comment-failure:
+    runs-on: ubuntu-latest
+    if: failure() && github.event_name == 'pull_request'
+    needs: build
+    steps:
+      - uses: actions/checkout@v3
+      - name: Create Failure Comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Upload a comment to the PR if the build script fails
+            async function runAsync() {
+              // Creating urls that will be added to the comment
+              const github_url = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`
+              const test_file = `https://github.com/${context.repo.owner}/${context.repo.repo}/blob/master/examples/test_new_changes.py`
+              
+              // Creating comment with proper styling
+              const comment_body = ':rotating_light: Automated Test failed.\n' +
+              `Please see the [workflow](${github_url}) for more details.` +
+              `To run this test locally, run the code in the [examples/test_new_changes.py](${test_file}) file.`
+              
+              // Adding comment to PR
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment_body
+              })
+            }
+
+            // Using a separate function to run asyncronous code within a github action.
+            await runAsync()
