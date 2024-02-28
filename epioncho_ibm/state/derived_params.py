@@ -33,9 +33,12 @@ class DerivedParams:
     worm_sex_ratio_generator: Generator
     worm_lambda_zero_generator: Generator
     worm_omega_generator: Generator
+    worm_mortality_generator: Generator
     sequela_classes: dict[str, type[Sequela]]
 
-    def __init__(self, params: Params) -> None:
+    def __init__(
+        self, params: Params, oldGenerators: dict[str, Generator] = None
+    ) -> None:
         worm_age_categories: Array.WormCat.Float = np.arange(
             start=0,
             stop=params.worms.max_worm_age,
@@ -84,26 +87,37 @@ class DerivedParams:
         else:
             self.treatment_times = None
 
-        seeds = [
-            params.seed + i + 1 if params.seed is not None else None for i in range(6)
-        ]
-        self.people_to_die_generator = Generator(
-            SFC64(seeds[0]), params.delta_time / params.humans.mean_human_age
-        )
-        self.worm_age_rate_generator = Generator(
-            SFC64(seeds[1]), params.delta_time / params.worms.worms_aging
-        )
-        self.worm_sex_ratio_generator = Generator(
-            SFC64(seeds[2]), params.worms.sex_ratio
-        )
-        self.worm_lambda_zero_generator = Generator(
-            SFC64(seeds[3]), params.worms.lambda_zero * params.delta_time
-        )
-        self.worm_omega_generator = Generator(
-            SFC64(seeds[4]), params.worms.omega * params.delta_time
-        )
-        self.worm_mortality_generator = Generator(
-            SFC64(seeds[5]), self.worm_mortality_rate
-        )
+        if oldGenerators is None:
+            seeds = [
+                params.seed + i + 1 if params.seed is not None else None
+                for i in range(6)
+            ]
+            self.people_to_die_generator = Generator(
+                SFC64(seeds[0]), params.delta_time / params.humans.mean_human_age
+            )
+            self.worm_age_rate_generator = Generator(
+                SFC64(seeds[1]), params.delta_time / params.worms.worms_aging
+            )
+            self.worm_sex_ratio_generator = Generator(
+                SFC64(seeds[2]), params.worms.sex_ratio
+            )
+            self.worm_lambda_zero_generator = Generator(
+                SFC64(seeds[3]), params.worms.lambda_zero * params.delta_time
+            )
+            self.worm_omega_generator = Generator(
+                SFC64(seeds[4]), params.worms.omega * params.delta_time
+            )
+            self.worm_mortality_generator = Generator(
+                SFC64(seeds[5]), self.worm_mortality_rate
+            )
+        else:
+            self.people_to_die_generator = oldGenerators["people_to_die_generator"]
+            self.worm_age_rate_generator = oldGenerators["worm_age_rate_generator"]
+            self.worm_sex_ratio_generator = oldGenerators["worm_sex_ratio_generator"]
+            self.worm_lambda_zero_generator = oldGenerators[
+                "worm_lambda_zero_generator"
+            ]
+            self.worm_omega_generator = oldGenerators["worm_omega_generator"]
+            self.worm_mortality_generator = oldGenerators["worm_mortality_generator"]
 
         self.sequela_classes = get_sequela(params.sequela_active)
