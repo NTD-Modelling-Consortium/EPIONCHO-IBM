@@ -136,14 +136,17 @@ def advance_state(state: State, debug: bool = False) -> None:
     )
 
     new_has_sequela = {}
+    _, new_measured_mf = state.microfilariae_per_skin_snip()
+    new_rounded_mf: Array.Person.Float = np.round(new_measured_mf)
+    new_total_mf: Array.Person.Float = np.sum(state.people.mf, axis=0)
     for name, old_rel_sequela in state.people.has_sequela.items():
         seq_class = state.derived_params.sequela_classes[name]
         assert name in state.people.countdown_sequela
         rel_seq_countdown = state.people.countdown_sequela[name]
         prob = seq_class.timestep_probability(
             delta_time=state._params.delta_time,
-            true_mf_count=total_mf,
-            measured_mf_count=rounded_mf,
+            true_mf_count=new_total_mf,
+            measured_mf_count=new_rounded_mf,
             ages=old_ages,
             existing_sequela=state.people.has_sequela,
             has_this_sequela=old_rel_sequela,
