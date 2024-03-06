@@ -9,10 +9,10 @@ python = ">=3.10, <3.11"
 numpy = "^1.22.3"
 pydantic = "^1.9.0"
 tqdm = "^4.64.1"
-fast-binomial = {git = "git@github.com:dreamingspires/fast-binomial.git"}
-pytest-trust-random = {git = "git@github.com:dreamingspires/pytest-trust-random.git"}
-hdf5-dataclass = {git = "git@github.com:dreamingspires/hdf5-dataclass.git"}
-endgame-simulations = {git = "git@github.com:dreamingspires/endgame-simulations.git"}
+fast-binomial = {git = "https://github.com/NTD-Modelling-Consortium/fast-binomial.git"}
+pytest-trust-random = {git = "https://github.com/NTD-Modelling-Consortium/pytest-trust-random.git"}
+hdf5-dataclass = {git = "https://github.com/NTD-Modelling-Consortium/hdf5-dataclass.git"}
+endgame-simulations = {git = "https://github.com/NTD-Modelling-Consortium/endgame-simulations.git"}
 scipy = "^1.8.1"
 
 [tool.poetry.dev-dependencies]
