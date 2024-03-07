@@ -36,6 +36,7 @@ def advance_state(state: State, debug: bool = False) -> None:
 
     total_exposure = calculate_total_exposure(
         state._params.exposure,
+        state._params.humans.gender_ratio,
         state.people.ages,
         state.people.sex_is_male,
         state.people.individual_exposure,

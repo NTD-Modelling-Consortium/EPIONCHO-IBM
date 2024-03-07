@@ -5,6 +5,7 @@ from epioncho_ibm.state import Array, ExposureParams
 
 def calculate_total_exposure(
     exposure_params: ExposureParams,
+    gender_ratio: float,
     ages: Array.Person.Float,
     sex_is_male: Array.Person.Bool,
     individual_exposure: Array.Person.Float,
@@ -22,31 +23,40 @@ def calculate_total_exposure(
     Returns:
         Array.Person.Float: The overall exposure of each person to infection
     """
-    male_exposure_assumed = exposure_params.male_exposure * np.exp(
-        -exposure_params.male_exposure_exponent * ages
+
+    def calc_exposure(exposure_intercept, exposure_exponent, ages, gender_selector):
+        """
+        Args:
+            exposure_intercept: A derived parameter that controls the intercept of the exposure curve (sex-specific intercept)
+            exposure_exponent: A float that controls the slope of the exposure curve (rate of change of contact rate in human)
+            ages: An array of the ages of the people in the model
+
+        Returns:
+            Array.Person.Float: The sex-age exposure of each person to infection
+        """
+        raw_exposure = np.exp(-exposure_exponent * ages)
+        gamma_s = 1 / (np.mean(raw_exposure[gender_selector]))
+        return exposure_intercept * gamma_s * raw_exposure
+
+    # E.F
+    female_exposure = 1 / ((gender_ratio * (exposure_params.Q - 1)) + 1)
+    # E.M
+    male_exposure = exposure_params.Q * female_exposure
+
+    male_exposure_array = calc_exposure(
+        male_exposure, exposure_params.male_exposure_exponent, ages, sex_is_male
     )
-    male_exposure_assumed_of_males = male_exposure_assumed[sex_is_male]
-    if len(male_exposure_assumed_of_males) == 0:
-        # TODO: Is this correct?
-        mean_male_exposure = 0
-    else:
-        mean_male_exposure: float = float(np.mean(male_exposure_assumed_of_males))
-    female_exposure_assumed = exposure_params.female_exposure * np.exp(
-        -exposure_params.female_exposure_exponent * ages
+    female_exposure_array = calc_exposure(
+        female_exposure,
+        exposure_params.female_exposure_exponent,
+        ages,
+        np.logical_not(sex_is_male),
     )
-    female_exposure_assumed_of_females = female_exposure_assumed[
-        np.logical_not(sex_is_male)
-    ]
-    if len(female_exposure_assumed_of_females) == 0:
-        # TODO: Is this correct?
-        mean_female_exposure = 0
-    else:
-        mean_female_exposure: float = float(np.mean(female_exposure_assumed_of_females))
 
     sex_age_exposure = np.where(
         sex_is_male,
-        male_exposure_assumed / mean_male_exposure,
-        female_exposure_assumed / mean_female_exposure,
+        male_exposure_array,
+        female_exposure_array,
     )
 
     total_exposure = sex_age_exposure * individual_exposure
