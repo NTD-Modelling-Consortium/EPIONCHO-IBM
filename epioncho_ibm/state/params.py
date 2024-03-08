@@ -111,8 +111,7 @@ class MicrofilParams(BaseModel):
 
 class ExposureParams(BaseModel):
     # age-dependent exposure to fly bites
-    male_exposure: float = 1.08  # "m.exp"
-    female_exposure: float = 0.9  # "f.exp"
+    Q: float = 1.2  # "Em/Ef"
     male_exposure_exponent: float = 0.007  # "age.exp.m"
     female_exposure_exponent: float = -0.023  # "age.exp.f"
 
