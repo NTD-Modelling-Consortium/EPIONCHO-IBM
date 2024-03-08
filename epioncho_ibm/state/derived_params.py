@@ -79,7 +79,10 @@ class DerivedParams:
                 stop=params.treatment.stop_time,
                 step=params.treatment.interval_years,
             )
-            self.treatment_index = np.where(self.treatment_times >= current_time)[0][0]
+            possible_indeces = np.where(self.treatment_times >= current_time)[0]
+            self.treatment_index = (
+                possible_indeces[0] if len(possible_indeces) > 0 else 0
+            )
         else:
             self.treatment_times = None
             self.treatment_index = 0
