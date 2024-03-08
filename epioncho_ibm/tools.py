@@ -24,14 +24,16 @@ def add_state_to_run_data(
     with_age_groups: bool = True,
     with_sequela: bool = True,
     with_pnc: bool = True,
+    saving_multiple_states=False,
+    age_range: tuple[int, int] = (0, 80),
 ) -> None:
-    age_min = 0
-    age_max = 80
+    age_min = age_range[0]
+    age_max = age_range[1]
     if prevalence or number or mean_worm_burden or intensity or with_pnc:
         if with_age_groups:
             for age_start in range(age_min, age_max):
                 age_state = state.get_state_for_age_group(age_start, age_start + 1)
-                partial_key = (round(state.current_time), age_start, age_start + 1)
+                partial_key = (round(state.current_time, 2), age_start, age_start + 1)
                 if prevalence:
                     run_data[
                         (*partial_key, "prevalence")
@@ -82,33 +84,75 @@ def add_state_to_run_data(
                 run_data[(*partial_key, "pnc")] = state.percent_non_compliant()
     if n_treatments or achieved_coverage:
         if with_age_groups:
-            for age_start in range(age_min, age_max, 5):
-                age_state = state.get_state_for_age_group(age_start, age_start + 5)
-                # Note: This is an approximation as it assumes the number of people in each category has not
-                # changed since treatment
-                partial_key = (round(state.current_time, 2), age_start, age_start + 5)
+            for age_start in range(age_min, age_max, 1):
+                age_state = state.get_state_for_age_group(age_start, age_start + 1)
+
                 n_treatments_val = state.get_treatment_count_for_age_group(
-                    age_start, (age_start + 5)
-                )
-                if n_treatments:
-                    run_data[(*partial_key, "n_treatments")] = n_treatments_val
-                if achieved_coverage:
-                    run_data[(*partial_key, "achieved_coverage")] = (
-                        n_treatments_val / state.n_people
-                        if age_state.n_people != 0
-                        else 0
-                    )
-        else:
-            partial_key = (round(state.current_time, 2), age_min, age_max)
-            n_treatments_val = state.get_treatment_count_for_age_group(age_min, age_max)
-            if n_treatments:
-                run_data[(*partial_key, "n_treatments")] = n_treatments_val
-            if achieved_coverage:
-                run_data[(*partial_key, "achieved_coverage")] = (
-                    n_treatments_val / state.n_people if state.n_people != 0 else 0
+                    age_start, (age_start + 1)
                 )
 
-    state.reset_treatment_counter()
+                number_of_rounds = {}
+                for key, value in sorted(n_treatments_val.items()):
+                    time_of_intervention = key[0]
+                    intervention_type = key[1]
+                    number_of_rounds[intervention_type] = (
+                        number_of_rounds.get(intervention_type, 0) + 1
+                    )
+
+                    partial_key = (
+                        round(time_of_intervention, 2),
+                        age_start,
+                        age_start + 1,
+                    )
+
+                    if n_treatments:
+                        run_data[
+                            (
+                                *partial_key,
+                                intervention_type
+                                + " "
+                                + str(number_of_rounds[intervention_type]),
+                            )
+                        ] = value
+
+                    # Note: This is an approximation as it assumes the number of people in each category has not
+                    # changed since treatment
+                    if achieved_coverage:
+                        run_data[(*partial_key, "achieved_coverage")] = (
+                            value / age_state.n_people if age_state.n_people != 0 else 0
+                        )
+        else:
+            n_treatments_val = state.get_treatment_count_for_age_group(age_min, age_max)
+
+            number_of_rounds = {}
+            for key, value in sorted(n_treatments_val.items()):
+                time_of_intervention = key[0]
+                intervention_type = key[1]
+
+                number_of_rounds[intervention_type] = (
+                    number_of_rounds.get(intervention_type, 0) + 1
+                )
+
+                partial_key = (round(time_of_intervention, 2), age_min, age_max)
+                if n_treatments:
+                    run_data[
+                        (
+                            *partial_key,
+                            intervention_type
+                            + " "
+                            + str(number_of_rounds[intervention_type]),
+                        )
+                    ] = value
+
+                # Note: This is an approximation as it assumes the number of people in each category has not
+                # changed since treatment
+                if achieved_coverage:
+                    run_data[(*partial_key, "achieved_coverage")] = (
+                        value / state.n_people if state.n_people != 0 else 0
+                    )
+
+    if not saving_multiple_states:
+        state.reset_treatment_counter()
 
 
 def write_data_to_csv(

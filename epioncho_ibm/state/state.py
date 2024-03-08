@@ -1,5 +1,4 @@
 from dataclasses import field
-from math import ceil
 from pathlib import Path
 from typing import IO, Callable, Optional, overload
 
@@ -148,7 +147,7 @@ def get_OAE_mf_count_func(mf: list[int], prob: list[float], val_for_0: float):
 class State(HDF5Dataclass, BaseState[Params]):
     people: People
     _params: ImmutableParams
-    n_treatments: Optional[Array.General.Int]
+    n_treatments: Optional[dict[float, Array.General.Int]]
     current_time: float = 0.0
     _previous_delta_time: Optional[float] = None
     derived_params: DerivedParams = field(init=False, repr=False)
@@ -229,7 +228,10 @@ class State(HDF5Dataclass, BaseState[Params]):
             _params=self._params,
             current_time=self.current_time,
             _previous_delta_time=self._previous_delta_time,
-            n_treatments=None,
+            n_treatments={
+                key: value[age_start:age_end]
+                for key, value in self.n_treatments.items()
+            },
         )
 
     @classmethod
@@ -252,10 +254,7 @@ class State(HDF5Dataclass, BaseState[Params]):
             _params=mutable_to_immutable(params),
             current_time=current_time,
             _previous_delta_time=None,
-            n_treatments=np.zeros(
-                round(params.humans.max_human_age / params.n_treatments_bin_size),
-                dtype=int,
-            ),
+            n_treatments={},
         )
 
     def __eq__(self, other: object) -> bool:
@@ -268,21 +267,20 @@ class State(HDF5Dataclass, BaseState[Params]):
         )
 
     def reset_treatment_counter(self):
-        if self.n_treatments is None:
-            raise ValueError("Cannot reset treatment count for state age sub group")
-        self.n_treatments.fill(0)
+        self.n_treatments = {}
 
     def get_treatment_count_for_age_group(
         self, age_start: float, age_end: float
     ) -> int:
         if age_start > age_end:
             raise ValueError(f"Age start {age_start} > age end {age_end}")
-        start_idx: int = int(age_start // self._params.n_treatments_bin_size)
-        end_idx: int = ceil(age_end / self._params.n_treatments_bin_size)
 
         if self.n_treatments is None:
             raise ValueError("Cannot get treatment count for state age sub group")
-        return self.n_treatments[start_idx:end_idx].sum()
+        return {
+            key: np.nansum(value[age_start:age_end])
+            for key, value in self.n_treatments.items()
+        }
 
     def stats(self) -> StateStats:
         if self.people.compliance is not None:

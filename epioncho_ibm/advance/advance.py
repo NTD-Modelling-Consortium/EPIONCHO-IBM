@@ -29,9 +29,13 @@ def advance_state(state: State, debug: bool = False) -> None:
         assert state.n_treatments is not None
         n_treatments_by_age, _ = np.histogram(
             state.people.ages[treatment.coverage_in],
-            bins=len(state.n_treatments),
+            bins=np.arange(0, state._params.humans.max_human_age + 1),
         )
-        state.n_treatments += n_treatments_by_age
+
+        treatment_name_val = str(state._params.treatment.treatment_name) + " MDA Round"
+        state.n_treatments[
+            (state.current_time, treatment_name_val)
+        ] = n_treatments_by_age
         state.people.has_been_treated = (
             state.people.has_been_treated | treatment.coverage_in
         )
