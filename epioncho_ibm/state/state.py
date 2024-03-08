@@ -220,7 +220,7 @@ class State(HDF5Dataclass, BaseState[Params]):
     def _derive_params(self, oldGenerators) -> None:
         assert self._params
         self.derived_params = DerivedParams(
-            immutable_to_mutable(self._params), oldGenerators
+            immutable_to_mutable(self._params), self.current_time, oldGenerators
         )
 
     def get_state_for_age_group(self, age_start: float, age_end: float) -> "State":

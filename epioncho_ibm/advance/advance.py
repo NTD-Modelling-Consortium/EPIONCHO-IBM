@@ -19,11 +19,13 @@ def advance_state(state: State, debug: bool = False) -> None:
         state._params.delta_time,
         state.current_time,
         state.derived_params.treatment_times,
+        state.derived_params.treatment_index,
         state.people.ages,
         state.people.compliance,
         state.numpy_bit_generator,
     )
     if treatment is not None and treatment.treatment_occurred:
+        state.derived_params.treatment_index += 1
         assert state.n_treatments is not None
         n_treatments_by_age, _ = np.histogram(
             state.people.ages[treatment.coverage_in],
