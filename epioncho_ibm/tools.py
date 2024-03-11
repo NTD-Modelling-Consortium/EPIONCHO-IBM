@@ -1,4 +1,5 @@
 import csv
+import math
 from collections import defaultdict
 
 from epioncho_ibm import State
@@ -100,7 +101,7 @@ def add_state_to_run_data(
                     )
 
                     partial_key = (
-                        round(time_of_intervention, 2),
+                        math.floor(time_of_intervention),
                         age_start,
                         age_start + 1,
                     )
@@ -133,7 +134,7 @@ def add_state_to_run_data(
                     number_of_rounds.get(intervention_type, 0) + 1
                 )
 
-                partial_key = (round(time_of_intervention, 2), age_min, age_max)
+                partial_key = (math.floor(time_of_intervention), age_min, age_max)
                 if n_treatments:
                     run_data[
                         (

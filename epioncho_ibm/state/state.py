@@ -200,6 +200,10 @@ class State(HDF5Dataclass, BaseState[Params]):
                 self.numpy_bit_generator,
             )
 
+        # backwards compatibility check, where n_treatments used to be an array, instead of a dict
+        if not isinstance(self.n_treatments, dict):
+            self.n_treatments = {}
+
         oldGenerators = None
         # brute force - if one generator is initialized, we expect all of them to be initialized
         if (self._params.seed == params.seed) and (
@@ -437,7 +441,9 @@ class State(HDF5Dataclass, BaseState[Params]):
             else self._params.treatment.min_age_of_treatment
         )
         eligible_population = self.people.ages >= min_age
-        return 1 - np.mean(self.people.has_been_treated[eligible_population])
+        if np.sum(eligible_population) > 0:
+            return 1 - np.mean(self.people.has_been_treated[eligible_population])
+        return 1
 
 
 def make_state_from_params(params: Params):
