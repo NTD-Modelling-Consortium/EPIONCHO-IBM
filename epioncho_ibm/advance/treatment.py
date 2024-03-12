@@ -12,6 +12,7 @@ def _is_during_treatment(
     current_time: float,
     delta_time: float,
     treatment_times: Optional[Array.Treatments.Float],
+    treatment_index: Optional[float],
 ) -> tuple[bool, bool]:
     """
     Returns two booleans describing if treatment has started, and if it occurred.
@@ -27,19 +28,12 @@ def _is_during_treatment(
             bool describing if treatment occurred, respectively
     """
     treatment_started = current_time >= treatment.start_time
+    treatment_occurred: bool = False
     if treatment_started:
         assert treatment_times is not None
-        treatment_occurred: bool = (
-            bool(
-                np.any(
-                    (treatment_times <= current_time)
-                    & (treatment_times > current_time - delta_time)
-                )
-            )
-            and current_time <= treatment.stop_time
-        )
-    else:
-        treatment_occurred = False
+        if treatment_index < len(treatment_times):
+            next_treatment_time = treatment_times[treatment_index]
+            treatment_occurred = current_time - next_treatment_time >= 0
     return treatment_started, treatment_occurred
 
 
@@ -63,6 +57,7 @@ def get_treatment(
     delta_time: float,
     current_time: float,
     treatment_times: Optional[Array.Treatments.Float],
+    treatment_index: Optional[float],
     ages: Array.Person.Float,
     compliance: Optional[Array.Person.Float],
     numpy_bit_gen: Generator,
@@ -91,6 +86,7 @@ def get_treatment(
             current_time,
             delta_time,
             treatment_times,
+            treatment_index,
         )
         if treatment_started:
             rand_nums = numpy_bit_gen.uniform(low=0, high=1, size=len(ages))

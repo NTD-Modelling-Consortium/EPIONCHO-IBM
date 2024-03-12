@@ -31,6 +31,7 @@ class TreatmentParams(SpecificTreatmentParams):
     interval_years: float = 1  # treatment interval (years, 0.5 gives biannual)
     start_time: float  # The iteration upon which treatment commences
     stop_time: float  # the iteration upon which treatment stops
+    treatment_name: str = "IVM"
 
 
 class WormParams(BaseModel):

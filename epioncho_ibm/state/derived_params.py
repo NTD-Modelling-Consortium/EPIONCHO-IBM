@@ -1,4 +1,3 @@
-import math
 from typing import Optional
 
 import numpy as np
@@ -28,6 +27,7 @@ class DerivedParams:
     fecundity_rates_worms: Array.WormCat.Float
     microfillarie_mortality_rate: Array.MFCat.Float
     treatment_times: Optional[Array.Treatments.Float]
+    treatment_index: Optional[float]
     people_to_die_generator: Generator
     worm_age_rate_generator: Generator
     worm_sex_ratio_generator: Generator
@@ -37,7 +37,10 @@ class DerivedParams:
     sequela_classes: dict[str, type[Sequela]]
 
     def __init__(
-        self, params: Params, oldGenerators: dict[str, Generator] = None
+        self,
+        params: Params,
+        current_time: float,
+        oldGenerators: dict[str, Generator] = None,
     ) -> None:
         worm_age_categories: Array.WormCat.Float = np.arange(
             start=0,
@@ -71,21 +74,18 @@ class DerivedParams:
             microfillarie_age_categories,
         )
         if params.treatment is not None:
-            treatment_number = (
-                params.treatment.stop_time - params.treatment.start_time
-            ) / params.treatment.interval_years
-            if round(treatment_number) != round(treatment_number, 10):
-                raise ValueError(
-                    f"Treatment times could not be found for start: {params.treatment.start_time}, stop: {params.treatment.stop_time}, interval: {params.treatment.interval_years}"
-                )
-            treatment_number_int: int = math.ceil(treatment_number)
-            self.treatment_times = np.linspace(
-                start=params.treatment.start_time,
+            self.treatment_times = np.arange(
+                start=params.treatment.start_time + params.delta_time,
                 stop=params.treatment.stop_time,
-                num=treatment_number_int + 1,
+                step=params.treatment.interval_years,
+            )
+            possible_indeces = np.where(self.treatment_times >= current_time)[0]
+            self.treatment_index = (
+                possible_indeces[0] if len(possible_indeces) > 0 else 0
             )
         else:
             self.treatment_times = None
+            self.treatment_index = 0
 
         if oldGenerators is None:
             seeds = [
