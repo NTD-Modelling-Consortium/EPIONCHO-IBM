@@ -236,7 +236,7 @@ def run_sim(i, verbose=False, samp_interval=1, mox_interval=1, end_time=2041):
 
     # Read in endgame objects and set up simulation
     hdf5_file = h5py.File(
-        "/Users/adi/Downloads/hdf5_output/OutputVals_TestFeb2024_CIV0162715440.hdf5",
+        "test_outputs/OutputVals_TestFeb2024_CIV0162715440.hdf5",
         "r",
     )
     restored_file_to_use = hdf5_file[f"draw_{i}"]
