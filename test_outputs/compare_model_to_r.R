@@ -69,8 +69,8 @@ configure_r_data <- function(folderPath, timeStep=1/366, initialYear = 1894, isP
 python_model_data_1 <- configure_python_data("test_outputs/python_model_output/testing_CIV0162715440-original_model.csv", isPNC=TRUE)
 python_model_data_2 <- configure_python_data("test_outputs/python_model_output/testing_CIV0162715440-new_run_mox_annual_1year.csv", isPNC=TRUE)
 python_model_data_3 <- configure_python_data("test_outputs/python_model_output/testing_CIV0162715440-new_run_mox_biannual_1year.csv", isPNC=TRUE)
-python_model_data_4 <- configure_python_data("test_outputs/python_model_output/testing_CIV0162715440-new_run.csv_mox_quadannual_1year", isPNC=TRUE)
-python_model_data_5 <- configure_python_data("test_outputs/python_model_output/hdf5_testing_CIV0162715440-new_run_mox_annual_1year.csv", isPNC=TRUE)
+python_model_data_4 <- configure_python_data("test_outputs/python_model_output/testing_CIV0162715440-new_run_mox_quadannual_1year.csv", isPNC=TRUE)
+# python_model_data_5 <- configure_python_data("test_outputs/python_model_output/hdf5_testing_CIV0162715440-new_run_mox_annual_1year.csv", isPNC=TRUE)
 
 # timestep = 1/2 a day
 r_model_data_1 <- read.csv("test_outputs/r_model_output/summarized_model_result.csv")
@@ -86,12 +86,16 @@ mfp_plot <- ggplot() +
     geom_vline(aes(xintercept=2026), color="darkred", linetype="dashed") +
     annotate("text", color="darkred", label="65% MOX Treatment Starts", x=2026, y=0.7, hjust=1) +
     geom_line(aes(x=year_id, y=mean_mf_prev, color="R Model"), data=r_model_data_1) +
-    geom_line(aes(x=year_id, y=mean_mf_prev, color="Original Python Model"), alpha=0.5, data=python_model_data_1) +
-    geom_line(aes(x=year_id, y=mean_mf_prev, color="New Python Model"), alpha=0.5, data=python_model_data_2) +
+    geom_line(aes(x=year_id, y=mean_mf_prev, color="Original Python Model - Annual MOX"), alpha=0.5, data=python_model_data_1) +
+    geom_line(aes(x=year_id, y=mean_mf_prev, color="Python Model - Annual MOX"), alpha=0.5, data=python_model_data_2) +
+    geom_line(aes(x=year_id, y=mean_mf_prev, color="Python Model - Biannual MOX"), alpha=0.5, data=python_model_data_3) +
+    geom_line(aes(x=year_id, y=mean_mf_prev, color="Python Model - Quadannual MOX"), alpha=0.5, data=python_model_data_4) +
     scale_color_manual("Model", values=c(
-                        "R Model"="black",
-                        "Original Python Model"="blue",
-                        "New Python Model" = "red"
+                        "R Model"="#3b3b3b",
+                        "riginal Python Model - Annual MOX"="#6969f9",
+                        "Python Model - Annual MOX" = "red",
+                        "Python Model - Biannual MOX" = "#fb5858",
+                        "Python Model - Quadannual MOX" = "#f68d8d"
                         ),
                         labels = function(x) str_wrap(x, width=16)) +
     scale_y_continuous("MF Prevalence (%)", limits=c(0, 0.8), breaks=seq(0, 1, 0.1)) +
@@ -111,12 +115,16 @@ pnc_plot <- ggplot() +
     geom_vline(aes(xintercept=2026), color="darkred", linetype="dashed") +
     annotate("text", color="darkred", label="65% MOX Treatment Starts", x=2026, y=0.7, hjust=1) +
     geom_line(aes(x=year_id, y=mean_pnc_eligible, color="R Model"), data=r_model_data_1) +
-    geom_line(aes(x=year_id, y=mean_pnc, color="Original Python Model"), alpha=0.5, data=python_model_data_1) +
-    geom_line(aes(x=year_id, y=mean_pnc, color="New Python Model"), alpha=0.5, data=python_model_data_2) +
+    geom_line(aes(x=year_id, y=mean_pnc, color="Original Python Model - Annual MOX"), alpha=0.5, data=python_model_data_1) +
+    geom_line(aes(x=year_id, y=mean_pnc, color="Python Model - Annual MOX"), alpha=0.5, data=python_model_data_2) +
+    geom_line(aes(x=year_id, y=mean_pnc, color="Python Model - Biannual MOX"), alpha=0.5, data=python_model_data_3) +
+    geom_line(aes(x=year_id, y=mean_pnc, color="Python Model - Quadannual MOX"), alpha=0.5, data=python_model_data_4) +
     scale_color_manual("Model", values=c(
-                        "R Model"="black",
-                        "Original Python Model"="blue",
-                        "New Python Model" = "red"
+                        "R Model"="#3b3b3b",
+                        "riginal Python Model - Annual MOX"="#6969f9",
+                        "Python Model - Annual MOX" = "red",
+                        "Python Model - Biannual MOX" = "#fb5858",
+                        "Python Model - Quadannual MOX" = "#f68d8d"
                         ),
                         labels = function(x) str_wrap(x, width=16)) +
     scale_y_continuous("PNC (%)", limits=c(0, 0.8), breaks=seq(0, 1, 0.1)) +
