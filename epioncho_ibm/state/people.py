@@ -320,7 +320,7 @@ class People(HDF5Dataclass):
         # individual exposure to fly bites
         individual_exposure = people_generator.gamma(
             shape=params.gamma_distribution,
-            scale=params.gamma_distribution,
+            scale=1 / params.gamma_distribution,
             size=n_people,
         )
         if params.microfil.initial_mf > 0 or params.worms.initial_worms > 0:
@@ -433,7 +433,7 @@ class People(HDF5Dataclass):
             )
             self.individual_exposure[people_to_die] = numpy_bit_gen.gamma(
                 shape=gamma_distribution,
-                scale=gamma_distribution,
+                scale=1 / gamma_distribution,
                 size=total_people_to_die,
             )
             self.has_been_treated[people_to_die] = False
