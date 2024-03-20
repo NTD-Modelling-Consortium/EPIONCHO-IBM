@@ -148,6 +148,7 @@ class State(HDF5Dataclass, BaseState[Params]):
     people: People
     _params: ImmutableParams
     n_treatments: Optional[dict[float, Array.General.Int]]
+    n_treatments_population: Optional[dict[float, Array.General.Float]]
     current_time: float = 0.0
     _previous_delta_time: Optional[float] = None
     derived_params: DerivedParams = field(init=False, repr=False)
@@ -203,6 +204,7 @@ class State(HDF5Dataclass, BaseState[Params]):
         # backwards compatibility check, where n_treatments used to be an array, instead of a dict
         if not isinstance(self.n_treatments, dict):
             self.n_treatments = {}
+            self.n_treatments_population = {}
 
         oldGenerators = None
         # brute force - if one generator is initialized, we expect all of them to be initialized
@@ -236,6 +238,10 @@ class State(HDF5Dataclass, BaseState[Params]):
                 key: value[age_start:age_end]
                 for key, value in self.n_treatments.items()
             },
+            n_treatments_population={
+                key: value[age_start:age_end]
+                for key, value in self.n_treatments_population.items()
+            },
         )
 
     @classmethod
@@ -259,6 +265,7 @@ class State(HDF5Dataclass, BaseState[Params]):
             current_time=current_time,
             _previous_delta_time=None,
             n_treatments={},
+            n_treatments_population={},
         )
 
     def __eq__(self, other: object) -> bool:
@@ -272,6 +279,7 @@ class State(HDF5Dataclass, BaseState[Params]):
 
     def reset_treatment_counter(self):
         self.n_treatments = {}
+        self.n_treatments_population = {}
 
     def get_treatment_count_for_age_group(
         self, age_start: float, age_end: float
@@ -283,6 +291,20 @@ class State(HDF5Dataclass, BaseState[Params]):
             raise ValueError("Cannot get treatment count for state age sub group")
         return {
             key: np.nansum(value[age_start:age_end])
+            for key, value in self.n_treatments.items()
+        }
+
+    def get_achieved_coverage_for_age_group(
+        self, age_start: float, age_end: float
+    ) -> int:
+        if age_start > age_end:
+            raise ValueError(f"Age start {age_start} > age end {age_end}")
+
+        return {
+            key: (
+                np.nansum(value[age_start:age_end])
+                / np.nansum(self.n_treatments_population[key][age_start:age_end])
+            )
             for key, value in self.n_treatments.items()
         }
 
