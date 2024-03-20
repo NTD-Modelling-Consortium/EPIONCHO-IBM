@@ -202,4 +202,5 @@ def advance_state(state: State, debug: bool = False) -> None:
         state._params.humans.gender_ratio,
         state.numpy_bit_generator,
         state._params.treatment,
+        state._params.gamma_distribution,
     )
