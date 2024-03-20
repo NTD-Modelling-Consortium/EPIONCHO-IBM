@@ -27,6 +27,10 @@ def advance_state(state: State, debug: bool = False) -> None:
     if treatment is not None and treatment.treatment_occurred:
         state.derived_params.treatment_index += 1
         assert state.n_treatments is not None
+        n_people_by_age, _ = np.histogram(
+            state.people.ages,
+            bins=np.arange(0, state._params.humans.max_human_age + 1),
+        )
         n_treatments_by_age, _ = np.histogram(
             state.people.ages[treatment.coverage_in],
             bins=np.arange(0, state._params.humans.max_human_age + 1),
@@ -36,6 +40,10 @@ def advance_state(state: State, debug: bool = False) -> None:
         state.n_treatments[
             (state.current_time, treatment_name_val)
         ] = n_treatments_by_age
+        state.n_treatments_population[
+            (state.current_time, treatment_name_val)
+        ] = n_people_by_age
+
         state.people.has_been_treated = (
             state.people.has_been_treated | treatment.coverage_in
         )
