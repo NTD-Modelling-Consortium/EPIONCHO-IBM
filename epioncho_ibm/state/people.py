@@ -112,13 +112,18 @@ class DelayArrays(HDF5Dataclass):
             ),
         )
 
-    def process_deaths(self, people_to_die: Array.Person.Bool):
+    def process_deaths(
+        self, people_to_die: Array.Person.Bool, individual_exposure: Array.Person.Float
+    ):
         if np.any(people_to_die):
             if self._worm_delay.size:
                 self._worm_delay[:, people_to_die] = 0
             if self._mf_delay.size:
                 self._mf_delay[self._mf_delay_current, people_to_die] = 0
-            # TODO: Do we need self.exposure_delay = 0
+            if self._exposure_delay.size:
+                self._exposure_delay[:, people_to_die] = np.tile(
+                    individual_exposure[people_to_die], (4, 1)
+                )
 
     def lag_all_arrays(
         self,
@@ -315,11 +320,9 @@ class People(HDF5Dataclass):
         # individual exposure to fly bites
         individual_exposure = people_generator.gamma(
             shape=params.gamma_distribution,
-            scale=params.gamma_distribution,
+            scale=1 / params.gamma_distribution,
             size=n_people,
         )
-        new_individual_exposure = individual_exposure / np.mean(individual_exposure)
-        new_individual_exposure.setflags(write=False)
         if params.microfil.initial_mf > 0 or params.worms.initial_worms > 0:
             was_infected = np.ones(n_people, dtype=bool)
         else:
@@ -357,8 +360,8 @@ class People(HDF5Dataclass):
                 * params.worms.initial_worms,
             ),
             last_treatment=last_treatment_full,
-            delay_arrays=DelayArrays.from_params(params, new_individual_exposure),
-            individual_exposure=new_individual_exposure,
+            delay_arrays=DelayArrays.from_params(params, individual_exposure),
+            individual_exposure=individual_exposure,
             was_infected=was_infected,
             tested_for_OAE=np.ones(n_people, dtype=bool),
             has_OAE=np.ones(n_people, dtype=bool),
@@ -409,6 +412,7 @@ class People(HDF5Dataclass):
         gender_ratio: float,
         numpy_bit_gen: Generator,
         treatment: Optional[TreatmentParams],
+        gamma_distribution: float,
     ):
         if (total_people_to_die := int(np.sum(people_to_die))) > 0:
             self.sex_is_male[people_to_die] = (
@@ -427,13 +431,18 @@ class People(HDF5Dataclass):
             self.age_test_OAE[people_to_die] = numpy_bit_gen.uniform(
                 3.0, 15.0, size=total_people_to_die
             )
+            self.individual_exposure[people_to_die] = numpy_bit_gen.gamma(
+                shape=gamma_distribution,
+                scale=1 / gamma_distribution,
+                size=total_people_to_die,
+            )
             self.has_been_treated[people_to_die] = False
             for arr in self.has_sequela.values():
                 arr[people_to_die] = False
             for arr in self.countdown_sequela.values():
                 arr[people_to_die] = np.inf
 
-        self.delay_arrays.process_deaths(people_to_die)
+        self.delay_arrays.process_deaths(people_to_die, self.individual_exposure)
         if treatment:
             self.compliance[people_to_die] = People.draw_compliance_values(
                 treatment.correlation,
