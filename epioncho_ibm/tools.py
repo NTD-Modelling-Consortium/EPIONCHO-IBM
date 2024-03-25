@@ -94,8 +94,8 @@ def add_state_to_run_data(
                     )
                     number_of_rounds = {}
                     for key, value in sorted(n_treatments_val.items()):
-                        time_of_intervention = key[0]
-                        intervention_type = key[1]
+                        time_of_intervention = float(key.split(",")[0])
+                        intervention_type = key.split(",")[1]
                         number_of_rounds[intervention_type] = (
                             number_of_rounds.get(intervention_type, 0) + 1
                         )
@@ -121,8 +121,8 @@ def add_state_to_run_data(
                     )
                     number_of_rounds = {}
                     for key, value in sorted(achieved_coverage_val.items()):
-                        time_of_intervention = key[0]
-                        intervention_type = key[1]
+                        time_of_intervention = float(key.split(",")[0])
+                        intervention_type = key.split(",")[1]
                         number_of_rounds[intervention_type] = (
                             number_of_rounds.get(intervention_type, 0) + 1
                         )
@@ -149,8 +149,8 @@ def add_state_to_run_data(
                 )
                 number_of_rounds = {}
                 for key, value in sorted(n_treatments_val.items()):
-                    time_of_intervention = key[0]
-                    intervention_type = key[1]
+                    time_of_intervention = float(key.split(",")[0])
+                    intervention_type = key.split(",")[1]
 
                     number_of_rounds[intervention_type] = (
                         number_of_rounds.get(intervention_type, 0) + 1
@@ -172,8 +172,8 @@ def add_state_to_run_data(
                 )
                 number_of_rounds = {}
                 for key, value in sorted(achieved_coverage_val.items()):
-                    time_of_intervention = key[0]
-                    intervention_type = key[1]
+                    time_of_intervention = float(key.split(",")[0])
+                    intervention_type = key.split(",")[1]
                     number_of_rounds[intervention_type] = (
                         number_of_rounds.get(intervention_type, 0) + 1
                     )
