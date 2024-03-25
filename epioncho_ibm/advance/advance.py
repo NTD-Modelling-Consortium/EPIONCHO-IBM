@@ -38,10 +38,10 @@ def advance_state(state: State, debug: bool = False) -> None:
 
         treatment_name_val = str(state._params.treatment.treatment_name) + " MDA Round"
         state.n_treatments[
-            (state.current_time, treatment_name_val)
+            str(state.current_time) + "," + str(treatment_name_val)
         ] = n_treatments_by_age
         state.n_treatments_population[
-            (state.current_time, treatment_name_val)
+            str(state.current_time) + "," + str(treatment_name_val)
         ] = n_people_by_age
 
         state.people.has_been_treated = (
