@@ -59,7 +59,5 @@ def calculate_total_exposure(
         female_exposure_array,
     )
 
-    normalized_individual_exposure = individual_exposure / np.mean(individual_exposure)
-
-    total_exposure = sex_age_exposure * normalized_individual_exposure
+    total_exposure = sex_age_exposure * individual_exposure
     return total_exposure / np.mean(total_exposure)
