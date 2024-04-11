@@ -206,6 +206,10 @@ class State(HDF5Dataclass, BaseState[Params]):
             self.n_treatments = {}
             self.n_treatments_population = {}
 
+        # backwards compatibility check, where people.has_been_treated did not exist
+        if self.people.has_been_treated is None:
+            self.people.has_been_treated = np.full(params.n_people, False)
+
         oldGenerators = None
         # brute force - if one generator is initialized, we expect all of them to be initialized
         if (self._params.seed == params.seed) and (
