@@ -250,7 +250,7 @@ class People(HDF5Dataclass):
     age_test_OAE: Array.Person.Float
     has_sequela: dict[str, Array.Person.Bool]
     countdown_sequela: dict[str, Array.Person.Float]
-    has_been_treated: Array.Person.Bool
+    has_been_treated: Optional[Array.Person.Bool]
 
     def __eq__(self, other: object) -> bool:
         if isinstance(other, People):
