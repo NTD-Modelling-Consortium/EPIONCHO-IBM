@@ -6,7 +6,7 @@ from numpy.random import SFC64, Generator
 
 from epioncho_ibm.utils import array_fully_equal
 
-from .params import Params, TreatmentParams
+from .params import BaseParams, BlackflyParams, Params, TreatmentParams
 from .types import Array
 
 
@@ -113,14 +113,16 @@ class DelayArrays(HDF5Dataclass):
         )
 
     def process_deaths(
-        self, people_to_die: Array.Person.Bool, individual_exposure: Array.Person.Float
+        self,
+        people_to_die: Array.Person.Bool,
+        individual_exposure: Array.Person.Float = None,
     ):
         if np.any(people_to_die):
             if self._worm_delay.size:
                 self._worm_delay[:, people_to_die] = 0
             if self._mf_delay.size:
                 self._mf_delay[self._mf_delay_current, people_to_die] = 0
-            if self._exposure_delay.size:
+            if self._exposure_delay.size and individual_exposure is not None:
                 self._exposure_delay[:, people_to_die] = np.tile(
                     individual_exposure[people_to_die], (4, 1)
                 )
@@ -176,6 +178,11 @@ class WormGroup(HDF5Dataclass):
             infertile=np.zeros(population, dtype=int),
             fertile=np.zeros(population, dtype=int),
         )
+
+    def reset_population(self, population_to_reset: Array.WormCat.Person.Bool):
+        self.male[:, population_to_reset] = 0
+        self.fertile[:, population_to_reset] = 0
+        self.infertile[:, population_to_reset] = 0
 
     def copy(self):
         return WormGroup(
@@ -250,7 +257,7 @@ class People(HDF5Dataclass):
     age_test_OAE: Array.Person.Float
     has_sequela: dict[str, Array.Person.Bool]
     countdown_sequela: dict[str, Array.Person.Float]
-    has_been_treated: Array.Person.Bool
+    has_been_treated: Optional[Array.Person.Bool]
 
     def __eq__(self, other: object) -> bool:
         if isinstance(other, People):
@@ -405,6 +412,30 @@ class People(HDF5Dataclass):
             corr, cov, size=len(self.ages), random_generator=numpy_bit_gen
         )
         self.compliance[np.argsort(self.compliance)] = np.sort(new_probs)
+
+    def immigration_check(
+        self,
+        blackfly_params: BlackflyParams,
+        immigration_rate: float,
+        delta_time: float,
+        worm_sex_ratio_generator: Generator,
+    ) -> bool:
+        total_pop = len(self.ages)
+        # Converting yearly rate to probability by timestep and conducting a trial
+        people_to_immigrate = np.random.random(total_pop) < (
+            1 - (1 - immigration_rate) ** delta_time
+        )
+        if sum(people_to_immigrate) == 0:
+            return
+
+        # using worm count
+        new_worms = blackfly_params.immigrated_worm_count
+
+        male_worms = worm_sex_ratio_generator.binomial(n=new_worms)
+        self.worms.reset_population(people_to_immigrate)
+        self.worms.male[0, people_to_immigrate] = male_worms
+        self.worms.fertile[0, people_to_immigrate] = new_worms - male_worms
+        self.delay_arrays.process_deaths(people_to_immigrate, None)
 
     def process_deaths(
         self,

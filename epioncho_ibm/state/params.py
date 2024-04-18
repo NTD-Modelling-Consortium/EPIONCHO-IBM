@@ -94,6 +94,10 @@ class BlackflyParams(BaseModel):
     l1_delay: float = 4  # (days)
     l3_delay: float = 10  # "l3.delay" (months) delay in worms entering humans and joining the first adult worm age class
 
+    immigrated_worm_count: int = (
+        0  # The number of worms that immigrated individuals will start with
+    )
+
 
 class MicrofilParams(BaseModel):
     microfil_move_rate: float = 8.13333  # 'mf.move.rate' #for aging in parasites
@@ -137,6 +141,9 @@ class BaseParams(BaseModel):
     year_length_days: float = 365
     month_length_days: float = 28
     sequela_active: SequelaType = []
+    immigration_rate: float = (
+        0  # The yearly rate at which people immigrate into the population
+    )
 
 
 class BaseMutableParams(BaseParams):
