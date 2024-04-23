@@ -67,14 +67,12 @@ configure_r_data <- function(folderPath, timeStep=1/366, initialYear = 1894, isP
 }
 
 python_model_data_1 <- configure_python_data("test_outputs/python_model_output/testing_CIV0162715440-original_model.csv", isPNC=TRUE)
-python_model_data_2 <- configure_python_data("test_outputs/python_model_output/testing_CIV0162715440-new_run_mox_annual_1year.csv", isPNC=TRUE)
-python_model_data_3 <- configure_python_data("test_outputs/python_model_output/testing_CIV0162715440-new_run_mox_biannual_1year.csv", isPNC=TRUE)
-python_model_data_4 <- configure_python_data("test_outputs/python_model_output/testing_CIV0162715440-new_run_mox_quadannual_1year.csv", isPNC=TRUE)
-# python_model_data_5 <- configure_python_data("test_outputs/python_model_output/hdf5_testing_CIV0162715440-new_run_mox_annual_1year.csv", isPNC=TRUE)
+python_model_data_2 <- configure_python_data("test_outputs/python_model_output/testing_CIV0162715440-new_run_mox_annual.csv", isPNC=TRUE)
+python_model_data_3 <- configure_python_data("test_outputs/python_model_output/testing_CIV0162715440-new_run_mox_biannual.csv", isPNC=TRUE)
+python_model_data_4 <- configure_python_data("test_outputs/python_model_output/testing_CIV0162715440-new_run_mox_quadannual.csv", isPNC=TRUE)
 
 # timestep = 1/2 a day
 r_model_data_1 <- read.csv("test_outputs/r_model_output/summarized_model_result.csv")
-print(head(r_model_data_1))
 
 mfp_plot <- ggplot() +
     geom_vline(aes(xintercept=1988), color="gold", linetype="dashed") +
