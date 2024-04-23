@@ -22,12 +22,16 @@ def plot_outputs(file_name):
             on=["year_id", "age_start", "age_end"],
             suffixes=(measure_columns, "_number"),
         )
+        new_columns = []
         for col in df.columns:
             if col.startswith("draw"):
-                new_combined_df[col] = (
+                new_column = (
                     new_combined_df[col + measure_columns]
                     * new_combined_df[col + "_number"]
                 )
+                new_columns.append(pd.Series(new_column, name=col))
+        new_df = pd.concat(new_columns, axis=1)
+        new_combined_df = pd.concat([new_combined_df, new_df], axis=1)
         new_combined_df = new_combined_df.drop(
             columns=[
                 col + suffix
@@ -117,9 +121,7 @@ def plot_outputs(file_name):
                 newDf_2["measure"],
                 label=newDf_2["age_groups"].unique(),
             )
-            ax1[index].vlines(
-                x=1988, color="red", ymin=0, ymax=np.max(newDf_2["measure"])
-            )
+
             ax1[index].set_xlim(left=1950)
             ax1[index].set_title(newDf_2["age_groups"].unique())
             for i in range(index + 1, len(ax1)):
