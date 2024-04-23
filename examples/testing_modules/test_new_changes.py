@@ -17,6 +17,8 @@ def run_sim(
     samp_interval=1,
     mox_interval=1,
     abr=1641,
+    end_time=2041,
+    scenario_file="",
 ):
     endgame_structure = get_endgame(
         i,
@@ -34,7 +36,9 @@ def run_sim(
     # Run
     run_data: Data = {}
     run_data_age: Data = {}
-    for state in endgame_sim.iter_run(end_time=2041, sampling_interval=samp_interval):
+    for state in endgame_sim.iter_run(
+        end_time=end_time, sampling_interval=samp_interval
+    ):
 
         add_state_to_run_data(
             state,
@@ -48,7 +52,7 @@ def run_sim(
             prevalence_OAE=False,
             intensity=True,
             with_sequela=False,
-            with_pnc=False,
+            with_pnc=True,
             saving_multiple_states=True,
         )
         add_state_to_run_data(
@@ -76,7 +80,7 @@ def run_sim(
 # Wrapper
 def wrapped_parameters(iu_name):
     # Run simulations and save output
-    num_iter = 10
+    num_iter = 100
     max_workers = os.cpu_count() if num_iter > os.cpu_count() else num_iter
     run_simulations(
         run_sim,

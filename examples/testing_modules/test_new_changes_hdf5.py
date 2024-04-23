@@ -11,12 +11,20 @@ from epioncho_ibm.tools import Data, add_state_to_run_data
 
 # Function to run and save simulations
 def run_sim(
-    i, verbose=False, samp_interval=1, mox_interval=1, end_time=2041, scenario_file=""
+    i,
+    iu_name,
+    verbose=False,
+    sample=False,
+    samp_interval=1,
+    mox_interval=1,
+    abr=0,
+    end_time=2041,
+    scenario_file="",
 ):
 
     # Read in endgame objects and set up simulation
     hdf5_file = h5py.File(
-        "test_outputs/OutputVals_GHA0216121382_BC.hdf5",
+        "test_outputs/OutputVals_TestFeb2024_CIV0162715440.hdf5",
         "r",
     )
     restored_file_to_use = hdf5_file[f"draw_{i}"]
@@ -39,8 +47,8 @@ def run_sim(
     )
     new_endgame.parameters.initial.seed = current_params.seed
 
-    restored_endgame_sim.simulation.state.current_time = 2026
     restored_endgame_sim.reset_endgame(new_endgame)
+
     # Run
     run_data: Data = {}
     run_data_age: Data = {}
@@ -62,7 +70,7 @@ def run_sim(
             prevalence_OAE=False,
             intensity=False,
             with_sequela=False,
-            with_pnc=False,
+            with_pnc=True,
             saving_multiple_states=True,
         )
         add_state_to_run_data(
@@ -86,7 +94,7 @@ def run_sim(
 # Wrapper
 def wrapped_parameters(iu_name):
     # Run simulations and save output
-    num_iter = 10
+    num_iter = 200
     end_time = 2040
     max_workers = os.cpu_count() if num_iter > os.cpu_count() else num_iter
     run_simulations(
@@ -99,7 +107,7 @@ def wrapped_parameters(iu_name):
         end_time,
         range(num_iter),
         max_workers,
-        "mox_annual_1year",
+        "hdf5_mox_annual",
         scenario_file="",
     )
 
@@ -113,7 +121,7 @@ def wrapped_parameters(iu_name):
         end_time,
         range(num_iter),
         max_workers,
-        "mox_biannual_1year",
+        "hdf5_mox_biannual",
         scenario_file="",
     )
 
@@ -123,31 +131,17 @@ def wrapped_parameters(iu_name):
         iu_name,
         True,
         1,
-        1,
+        0.25,
         end_time,
         range(num_iter),
         max_workers,
-        "mox_quadannual_1year",
+        "hdf5_mox_quadannual",
         scenario_file="",
-    )
-
-    run_simulations(
-        run_sim,
-        False,
-        iu_name,
-        True,
-        1,
-        1,
-        end_time,
-        range(num_iter),
-        max_workers,
-        "mox_annual_1year",
-        scenario_file="test_outputs/scenario1di.json",
     )
 
 
 if __name__ == "__main__":
     # Run example
-    iu = "GHA0216121382"
-    # iu = "CIV0162715440"
+    # iu = "GHA0216121382"
+    iu = "CIV0162715440"
     wrapped_parameters(iu)

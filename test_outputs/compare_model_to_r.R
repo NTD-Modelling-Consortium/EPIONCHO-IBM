@@ -84,13 +84,13 @@ mfp_plot <- ggplot() +
     geom_vline(aes(xintercept=2026), color="darkred", linetype="dashed") +
     annotate("text", color="darkred", label="65% MOX Treatment Starts", x=2026, y=0.7, hjust=1) +
     geom_line(aes(x=year_id, y=mean_mf_prev, color="R Model"), data=r_model_data_1) +
-    geom_line(aes(x=year_id, y=mean_mf_prev, color="Original Python Model - Annual MOX"), alpha=0.5, data=python_model_data_1) +
+    geom_line(aes(x=year_id, y=mean_mf_prev, color="Original Python Model - Annual MOX (daily output)"), alpha=0.5, data=python_model_data_1) +
     geom_line(aes(x=year_id, y=mean_mf_prev, color="Python Model - Annual MOX"), alpha=0.5, data=python_model_data_2) +
     geom_line(aes(x=year_id, y=mean_mf_prev, color="Python Model - Biannual MOX"), alpha=0.5, data=python_model_data_3) +
     geom_line(aes(x=year_id, y=mean_mf_prev, color="Python Model - Quadannual MOX"), alpha=0.5, data=python_model_data_4) +
     scale_color_manual("Model", values=c(
                         "R Model"="#3b3b3b",
-                        "riginal Python Model - Annual MOX"="#6969f9",
+                        "Original Python Model - Annual MOX (daily output)"="#6969f9",
                         "Python Model - Annual MOX" = "red",
                         "Python Model - Biannual MOX" = "#fb5858",
                         "Python Model - Quadannual MOX" = "#f68d8d"
@@ -113,13 +113,13 @@ pnc_plot <- ggplot() +
     geom_vline(aes(xintercept=2026), color="darkred", linetype="dashed") +
     annotate("text", color="darkred", label="65% MOX Treatment Starts", x=2026, y=0.7, hjust=1) +
     geom_line(aes(x=year_id, y=mean_pnc_eligible, color="R Model"), data=r_model_data_1) +
-    geom_line(aes(x=year_id, y=mean_pnc, color="Original Python Model - Annual MOX"), alpha=0.5, data=python_model_data_1) +
+    geom_line(aes(x=year_id, y=mean_pnc, color="Original Python Model - Annual MOX (daily output)"), alpha=0.5, data=python_model_data_1) +
     geom_line(aes(x=year_id, y=mean_pnc, color="Python Model - Annual MOX"), alpha=0.5, data=python_model_data_2) +
     geom_line(aes(x=year_id, y=mean_pnc, color="Python Model - Biannual MOX"), alpha=0.5, data=python_model_data_3) +
     geom_line(aes(x=year_id, y=mean_pnc, color="Python Model - Quadannual MOX"), alpha=0.5, data=python_model_data_4) +
     scale_color_manual("Model", values=c(
                         "R Model"="#3b3b3b",
-                        "riginal Python Model - Annual MOX"="#6969f9",
+                        "Original Python Model - Annual MOX (daily output)"="#6969f9",
                         "Python Model - Annual MOX" = "red",
                         "Python Model - Biannual MOX" = "#fb5858",
                         "Python Model - Quadannual MOX" = "#f68d8d"

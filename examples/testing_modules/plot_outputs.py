@@ -1,4 +1,6 @@
 import math
+import os
+import zipfile
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -9,11 +11,8 @@ def plot_outputs(file_name):
     df = pd.read_csv("test_outputs/python_model_output/" + file_name + ".csv")
     for measure in df["measure"].unique():
         measure_columns = "_" + measure
-        filtered_df = df[((df["measure"] == measure))]
-        numbers = df[((df["measure"] == "number"))]
-
-        filtered_df.fillna(0, inplace=True)
-        numbers.fillna(0, inplace=True)
+        filtered_df = df.fillna(0)[((df["measure"] == measure))]
+        numbers = df.fillna(0)[((df["measure"] == "number"))]
 
         if measure == "number":
             measure_columns = "_numbers_2"
@@ -156,3 +155,10 @@ def plot_outputs(file_name):
         if measure == "number":
             ylab = "Population Count"
         create_graphs(newDf, newDf_2, print_num=False)
+    with zipfile.ZipFile(
+        "test_outputs/" + file_name + "_sequelae_output.zip", "w"
+    ) as zf:
+        for dirname, subdirs, files in os.walk("test_outputs/all_measure_graphs/"):
+            zf.write(dirname)
+            for filename in files:
+                zf.write(os.path.join(dirname, filename))

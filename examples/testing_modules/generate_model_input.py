@@ -178,10 +178,12 @@ def run_simulations(
     sample,
     sample_interval,
     mox_interval,
+    end_time,
     ranges,
     max_workers,
     desc,
     abr=1641,
+    scenario_file="",
 ):
     rumSim = partial(
         simulation_func,
@@ -191,6 +193,7 @@ def run_simulations(
         samp_interval=sample_interval,
         mox_interval=mox_interval,
         abr=abr,
+        end_time=end_time,
     )
     datas: list[tuple[Data, Data]] = process_map(
         rumSim, ranges, max_workers=max_workers
