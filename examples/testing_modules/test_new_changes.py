@@ -81,7 +81,7 @@ def run_sim(
 def wrapped_parameters(iu_name):
     # Run simulations and save output
     end_year = 2041
-    num_iter = 100
+    num_iter = 50
     max_workers = os.cpu_count() if num_iter > os.cpu_count() else num_iter
     run_simulations(
         run_sim,
@@ -97,19 +97,19 @@ def wrapped_parameters(iu_name):
         abr=1641,
     )
 
-    run_simulations(
-        run_sim,
-        False,
-        iu_name,
-        True,
-        0.5,
-        0.5,
-        end_year,
-        range(num_iter),
-        max_workers,
-        "mox_biannual",
-        abr=1641,
-    )
+    # run_simulations(
+    #     run_sim,
+    #     False,
+    #     iu_name,
+    #     True,
+    #     0.5,
+    #     0.5,
+    #     end_year,
+    #     range(num_iter),
+    #     max_workers,
+    #     "mox_biannual",
+    #     abr=1641,
+    # )
 
     run_simulations(
         run_sim,
