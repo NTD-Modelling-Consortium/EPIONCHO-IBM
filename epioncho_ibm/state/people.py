@@ -429,7 +429,9 @@ class People(HDF5Dataclass):
             return
 
         # using worm count
-        new_worms = blackfly_params.immigrated_worm_count
+        new_worms = np.random.poisson(
+            lam=blackfly_params.immigrated_worm_count, size=sum(people_to_immigrate)
+        )
 
         male_worms = worm_sex_ratio_generator.binomial(n=new_worms)
         self.worms.reset_population(people_to_immigrate)
