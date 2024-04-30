@@ -124,10 +124,10 @@ jobs:
               '| Type | Link |\n' +
               '| --- | --- |\n' +
               `| Workflow | ${workflow_url} |\n`+
-              `| Comparison Plot | ${artifact_url} |` +
-              `| Annual MOX Sequelae Plots | ${artifact_url2} |` +
-              `| Biannual MOX Sequelae Plots | ${artifact_url3} |` +
-              `| Quadnnual MOX Sequelae Plots | ${artifact_url4} |` +
+              `| Comparison Plot | ${artifact_url} |\n` +
+              `| Annual MOX Sequelae Plots | ${artifact_url2} |\n` +
+              `| Biannual MOX Sequelae Plots | ${artifact_url3} |\n` +
+              `| Quadnnual MOX Sequelae Plots | ${artifact_url4} |\n` +
               `To run this test locally, run the code in the [examples/testing_modules/test_new_changes.py](${test_file}) file.`
 
               // Creating comment
