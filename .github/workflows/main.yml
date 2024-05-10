@@ -115,7 +115,7 @@ jobs:
               const artifact_url4 = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}/artifacts/${artifactId4}`
 
               const workflow_url = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`
-              const test_file = `https://github.com/${context.repo.owner}/${context.repo.repo}/blob/master/examples/test_new_changes.py`
+              const test_file = `https://github.com/${context.repo.owner}/${context.repo.repo}/blob/master/examples/testing_modules/test_new_changes.py`
               
               // Creating the comment, including a markdown table with the links
               const comment_body = ':white_check_mark: Automated Test has been run successfully.\n' +
