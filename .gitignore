@@ -4,3 +4,4 @@ __pycache__
 *.prof
 *.hdf5
 *.png
+test_outputs/*
