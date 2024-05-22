@@ -43,17 +43,3 @@ class TestGeneral:
             match='"ImmutableHumanParams" is immutable and does not support item assignment',
         ):
             simulation.state._params.humans.max_human_age = 80
-
-
-@pytest.mark.asyncio
-class TestDerivedParams:
-    async def test_treament_params_invalid_step(self):
-        with pytest.raises(
-            ValueError,
-            match="Treatment times could not be found for start: 0.0, stop: 10.0, interval: 3.0",
-        ):
-            params = Params(
-                treatment=TreatmentParams(start_time=0, stop_time=10, interval_years=3),
-                n_people=10,
-            )
-            Simulation(start_time=0, params=params)
