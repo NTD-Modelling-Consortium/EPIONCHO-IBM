@@ -93,7 +93,7 @@ def get_parameters(iter, abr=1641, kE=0.3):
 
     # The MDA applied from 1994 - 2005 also requires us to change the delta time parameter.
     # Here we make that change.
-    changes.append({"year": 2026, "params": {"delta_time_days": 0.5}})
+    changes.append({"year": 1994, "params": {"delta_time_days": 0.5}})
 
     # Finally, we return back a dictionary full of all the parameters that we need to start the model.
     # A full list of the parameters can be found in `epioncho_ibm/state/params.py`
@@ -195,7 +195,7 @@ def run_simulations(
             state,
             run_data=run_data_age,
             # now we want to age group the data
-            with_age_groups=TRUE,
+            with_age_groups=True,
             number=True,
             n_treatments=True,
             achieved_coverage=True,
@@ -221,6 +221,7 @@ def run_simulations(
 if __name__ == "__main__":
 
     # How many times we want to run the model for a given set of parameters
+    # Typically this value is 200
     num_iters = 50
     # To use parallel processing we want to see how many cores our computer has.
     # If we have more cores than iterations, then we can just use as many cores as
