@@ -36,14 +36,14 @@ class NumericArrayStat(BaseModel):
 class StateStats(BaseModel):
     percent_compliant: float
     percent_male: float
-    L1: NumericArrayStat
-    L2: NumericArrayStat
-    L3: NumericArrayStat
-    ages: NumericArrayStat
-    mf: NumericArrayStat
-    male_worms: NumericArrayStat
-    infertile_female_worms: NumericArrayStat
-    fertile_female_worms: NumericArrayStat
+    L1: float
+    L2: float
+    L3: float
+    ages: float
+    mf: float
+    male_worms: float
+    infertile_female_worms: float
+    fertile_female_worms: float
     mf_per_skin_snip: float
     population_prevalence: float
 
@@ -323,16 +323,14 @@ class State(HDF5Dataclass, BaseState[Params]):
             percent_compliant=mean_comp,
             percent_male=float(np.sum(self.people.sex_is_male))
             / len(self.people.sex_is_male),
-            L1=NumericArrayStat.from_array(self.people.blackfly.L1),
-            L2=NumericArrayStat.from_array(self.people.blackfly.L2),
-            L3=NumericArrayStat.from_array(self.people.blackfly.L3),
-            ages=NumericArrayStat.from_array(self.people.ages),
-            mf=NumericArrayStat.from_array(self.people.mf),
-            male_worms=NumericArrayStat.from_array(self.people.worms.male),
-            infertile_female_worms=NumericArrayStat.from_array(
-                self.people.worms.infertile
-            ),
-            fertile_female_worms=NumericArrayStat.from_array(self.people.worms.fertile),
+            L1=np.mean(self.people.blackfly.L1),
+            L2=np.mean(self.people.blackfly.L2),
+            L3=np.mean(self.people.blackfly.L3),
+            ages=np.mean(self.people.ages),
+            mf=np.mean(self.people.mf),
+            male_worms=np.mean(self.people.worms.male),
+            infertile_female_worms=np.mean(self.people.worms.infertile),
+            fertile_female_worms=np.mean(self.people.worms.fertile),
             mf_per_skin_snip=self.microfilariae_per_skin_snip()[0],
             population_prevalence=self.mf_prevalence_in_population(),
         )
