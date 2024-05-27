@@ -8,13 +8,12 @@ on:
     branches-ignore:
       - 'master'
   pull_request:
-    types: ready_for_review
     branches: [ "master" ]
 
 permissions:
   actions: read
   contents: read
-  pull-requests: write
+  pull-requests: read
   packages: read
 
 jobs:
@@ -45,6 +44,11 @@ jobs:
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+    #- name: Run Unit Tests
+    #  run: |
+    #    cd tests/
+    #    poetry run pytest
+    #    cd ../
     - name: Run Base Model
       run: |
         poetry run python examples/testing_modules/test_new_changes.py
@@ -63,6 +67,17 @@ jobs:
           any::stringr
     - name: Run Visualization Code in R
       run: Rscript test_outputs/compare_model_to_r.R
+    - name: Save PR number
+      env:
+        PR_NUMBER: ${{ github.event.number }}
+      run: |
+        mkdir -p ./pr
+        echo $PR_NUMBER > ./pr/pr_number
+    - name: Upload PR number as an artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: pr_number
+        path: pr/
     - name: Upload image as artifact
       uses: actions/upload-artifact@v4
       id: artifact-upload-step
@@ -127,20 +142,21 @@ jobs:
               `| Comparison Plot | ${artifact_url} |\n` +
               `| Annual MOX Sequelae Plots | ${artifact_url2} |\n` +
               `| Biannual MOX Sequelae Plots | ${artifact_url3} |\n` +
-              `| Quadnnual MOX Sequelae Plots | ${artifact_url4} |\n` +
+              `| Quadnnual MOX Sequelae Plots | ${artifact_url4} |\n\n` +
               `To run this test locally, run the code in the [examples/testing_modules/test_new_changes.py](${test_file}) file.`
 
-              // Creating comment
-              await github.rest.issues.createComment({
-                issue_number: context.issue.number,
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                body: comment_body
-              })
+              let fs = require('fs');
+              fs.mkdirSync(`${process.env.GITHUB_WORKSPACE}/pr/`)
+              fs.writeFileSync(`${process.env.GITHUB_WORKSPACE}/pr/pr_comment`, Buffer.from(comment_body));
             }
 
             // Using a separate function to run asyncronous code within a github action.
             await runAsync()
+      - name: Upload comment as an artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr_comment
+          path: pr/pr_comment
   comment-failure:
     runs-on: ubuntu-latest
     if: failure() && github.event_name == 'pull_request'
@@ -162,14 +178,15 @@ jobs:
               `Please see the [workflow](${github_url}) for more details.` +
               `To run this test locally, run the code in the [examples/testing_modules/test_new_changes.py](${test_file}) file.`
               
-              // Adding comment to PR
-              await github.rest.issues.createComment({
-                issue_number: context.issue.number,
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                body: comment_body
-              })
+              let fs = require('fs');
+              fs.mkdirSync(`${process.env.GITHUB_WORKSPACE}/pr/`)
+              fs.writeFileSync(`${process.env.GITHUB_WORKSPACE}/pr/pr_comment`, Buffer.from(comment_body));
             }
 
             // Using a separate function to run asyncronous code within a github action.
             await runAsync()
+      - name: Upload comment as an artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr_comment
+          path: pr/pr_comment
