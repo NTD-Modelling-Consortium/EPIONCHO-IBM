@@ -1,0 +1,76 @@
+name: Adding Failure/Success Comment to PR
+
+on:
+    workflow_run: 
+        workflows: ["Testing Simulations"]
+        types: 
+            - completed
+
+permissions:
+    actions: read
+    contents: read
+    pull-requests: write
+    packages: read
+
+jobs:
+    comment_on_pr:
+        runs-on: ubuntu-latest
+        if: ${{ github.event.workflow_run.event == 'pull_request' }}
+        steps:
+            - uses: actions/checkout@v3
+              name: Get Comment File
+            - uses: actions/github-script@v7
+              with:
+                script: |
+                    // Function to get artifact ID and add it to a PR if the build script succeeds
+                    async function runAsync() {
+                        // Get all artifacts for the workflow, and filter the one we need by name
+                        const allArtifacts = await github.rest.actions.listWorkflowRunArtifacts({
+                            owner: context.repo.owner,
+                            repo: context.repo.repo,
+                            run_id: context.payload.workflow_run.id,
+                        });
+                        const commentArtifactObject = allArtifacts.data.artifacts.filter((artifact) => {
+                            return artifact.name == "pr_comment"
+                        })[0];
+                        const issueNumberArtifactObject = allArtifacts.data.artifacts.filter((artifact) => {
+                            return artifact.name == "pr_number"
+                        })[0];
+
+                        const commentArtifact = await github.rest.actions.downloadArtifact({
+                            owner: context.repo.owner,
+                            repo: context.repo.repo,
+                            artifact_id: commentArtifactObject.id,
+                            archive_format: 'zip',
+                        });
+
+                        const issueNumberArtifact = await github.rest.actions.downloadArtifact({
+                            owner: context.repo.owner,
+                            repo: context.repo.repo,
+                            artifact_id: issueNumberArtifactObject.id,
+                            archive_format: 'zip',
+                        });
+
+                        let fs = require('fs');
+                        fs.writeFileSync(`${process.env.GITHUB_WORKSPACE}/pr_comment.zip`, Buffer.from(commentArtifact.data));
+                        fs.writeFileSync(`${process.env.GITHUB_WORKSPACE}/pr_number.zip`, Buffer.from(issueNumberArtifact.data));
+                    }
+
+                    // Using a separate function to run asyncronous code within a github action.
+                    await runAsync()
+            - name: 'Unzip artifact'
+              run: unzip pr_comment.zip; unzip pr_number.zip
+            - name: 'Add Comment to PR'
+              uses: actions/github-script@v7
+              with:
+                script: |
+                    // Creating comment
+                    let fs = require('fs');
+                    let pr_comment = fs.readFileSync('./pr_comment', { encoding: 'utf8'});
+                    let pr_num = Number(fs.readFileSync('./pr_number'));
+                    await github.rest.issues.createComment({
+                        issue_number: pr_num,
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        body: pr_comment
+                    })
