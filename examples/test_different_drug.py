@@ -16,7 +16,7 @@ assert params.treatment is not None
 params.treatment.microfilaricidal_nu = 0.01
 params.treatment.microfilaricidal_omega = 1.5
 params.treatment.embryostatic_lambda_max = 30
-params.treatment.phi = 10
+params.treatment.embryostatic_phi = 10
 params.treatment.permanent_infertility = 0.4
 
 simulation.reset_current_params(params)

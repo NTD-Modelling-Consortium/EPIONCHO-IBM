@@ -122,7 +122,8 @@ class DelayArrays(HDF5Dataclass):
                 self._mf_delay[self._mf_delay_current, people_to_die] = 0
             if self._exposure_delay.size:
                 self._exposure_delay[:, people_to_die] = np.tile(
-                    individual_exposure[people_to_die], (4, 1)
+                    individual_exposure[people_to_die],
+                    (self._exposure_delay.shape[0], 1),
                 )
 
     def lag_all_arrays(
