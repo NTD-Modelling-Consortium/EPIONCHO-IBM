@@ -9,6 +9,7 @@ def calculate_total_exposure(
     ages: Array.Person.Float,
     sex_is_male: Array.Person.Bool,
     individual_exposure: Array.Person.Float,
+    use_onchosim_mechanisms: str,
 ) -> Array.Person.Float:
     """
     Calculates how much each person is exposed to infection, taking
@@ -53,6 +54,30 @@ def calculate_total_exposure(
         np.logical_not(sex_is_male),
     )
 
+    onchosim_exposure = (
+        use_onchosim_mechanisms == "both" or use_onchosim_mechanisms == "age-sex"
+    )
+    if onchosim_exposure:
+        male_exposure_array = np.where(
+            ages < exposure_params.male_exposure_const_age,
+            ages
+            * (
+                exposure_params.male_exposure_max
+                / exposure_params.male_exposure_const_age
+            ),
+            exposure_params.male_exposure_max,
+        )
+
+        female_exposure_array = np.where(
+            ages < exposure_params.female_exposure_const_age,
+            ages
+            * (
+                exposure_params.female_exposure_max
+                / exposure_params.female_exposure_const_age
+            ),
+            exposure_params.female_exposure_max,
+        )
+
     sex_age_exposure = np.where(
         sex_is_male,
         male_exposure_array,
@@ -60,4 +85,6 @@ def calculate_total_exposure(
     )
 
     total_exposure = sex_age_exposure * individual_exposure
+    if onchosim_exposure:
+        return total_exposure
     return total_exposure / np.mean(total_exposure)
