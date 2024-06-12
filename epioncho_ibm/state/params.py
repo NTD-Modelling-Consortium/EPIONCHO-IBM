@@ -94,9 +94,7 @@ class BlackflyParams(BaseModel):
     l1_delay: float = 4  # (days)
     l3_delay: float = 10  # "l3.delay" (months) delay in worms entering humans and joining the first adult worm age class
 
-    immigrated_l3: float = (
-        0  # The number of worms that immigrated individuals will start with
-    )
+    immigrated_l3: float = 0  # A constant amount of L3 that will be added to the mean L3 in a single blackfly when calculating the larval release to humans
 
 
 class MicrofilParams(BaseModel):
