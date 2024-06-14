@@ -94,9 +94,7 @@ class BlackflyParams(BaseModel):
     l1_delay: float = 4  # (days)
     l3_delay: float = 10  # "l3.delay" (months) delay in worms entering humans and joining the first adult worm age class
 
-    immigrated_worm_count: int = (
-        0  # The number of worms that immigrated individuals will start with
-    )
+    immigrated_l3: float = 0  # A constant amount of L3 that will be added to the mean L3 in a single blackfly when calculating the larval release to humans
 
 
 class MicrofilParams(BaseModel):
@@ -120,6 +118,17 @@ class ExposureParams(BaseModel):
     male_exposure_exponent: float = 0.007  # "age.exp.m"
     female_exposure_exponent: float = -0.023  # "age.exp.f"
 
+    # ONCHOSIM Age-Sex Parameters:
+    male_exposure_max: float = 0  # onchosim age-sex maximum exposure for males
+    female_exposure_max: float = 0  # onchosim age-sex maximum exposure for females
+
+    male_exposure_const_age: float = (
+        20  # onchosim age where exposure for males becomes constant
+    )
+    female_exposure_const_age: float = (
+        20  # onchosim age where exposure for females becomes constant
+    )
+
 
 class HumanParams(BaseModel):
     min_skinsnip_age: int = 5
@@ -141,9 +150,7 @@ class BaseParams(BaseModel):
     year_length_days: float = 365
     month_length_days: float = 28
     sequela_active: SequelaType = []
-    immigration_rate: float = (
-        0  # The yearly rate at which people immigrate into the population
-    )
+    use_onchosim_mechanisms: str = ""  # Can be "" to not use any onchosim mechanisms "age-sex", "immigration" or "both"
 
 
 class BaseMutableParams(BaseParams):

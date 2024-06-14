@@ -6,7 +6,7 @@ from numpy.random import SFC64, Generator
 
 from epioncho_ibm.utils import array_fully_equal
 
-from .params import BaseParams, BlackflyParams, Params, TreatmentParams
+from .params import Params, TreatmentParams
 from .types import Array
 
 
@@ -412,32 +412,6 @@ class People(HDF5Dataclass):
             corr, cov, size=len(self.ages), random_generator=numpy_bit_gen
         )
         self.compliance[np.argsort(self.compliance)] = np.sort(new_probs)
-
-    def immigration_check(
-        self,
-        blackfly_params: BlackflyParams,
-        immigration_rate: float,
-        delta_time: float,
-        worm_sex_ratio_generator: Generator,
-    ) -> bool:
-        total_pop = len(self.ages)
-        # Converting yearly rate to probability by timestep and conducting a trial
-        people_to_immigrate = np.random.random(total_pop) < (
-            1 - (1 - immigration_rate) ** delta_time
-        )
-        if sum(people_to_immigrate) == 0:
-            return
-
-        # using worm count
-        new_worms = np.random.poisson(
-            lam=blackfly_params.immigrated_worm_count, size=sum(people_to_immigrate)
-        )
-
-        male_worms = worm_sex_ratio_generator.binomial(n=new_worms)
-        self.worms.reset_population(people_to_immigrate)
-        self.worms.male[0, people_to_immigrate] = male_worms
-        self.worms.fertile[0, people_to_immigrate] = new_worms - male_worms
-        self.delay_arrays.process_deaths(people_to_immigrate, None)
 
     def process_deaths(
         self,

@@ -54,14 +54,9 @@ def advance_state(state: State, debug: bool = False) -> None:
         state.people.ages,
         state.people.sex_is_male,
         state.people.individual_exposure,
+        state._params.use_onchosim_mechanisms,
     )
 
-    state.people.immigration_check(
-        state._params.blackfly,
-        state._params.immigration_rate,
-        state._params.delta_time,
-        state.derived_params.worm_sex_ratio_generator,
-    )
     old_ages = state.people.ages.copy()
     state.people.ages += state._params.delta_time
 
@@ -73,6 +68,7 @@ def advance_state(state: State, debug: bool = False) -> None:
         state.people.blackfly.L3,
         state._params.blackfly,
         state._params.delta_time,
+        state._params.use_onchosim_mechanisms,
         total_exposure,
         state.n_people,
         debug,

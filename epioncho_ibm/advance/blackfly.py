@@ -199,6 +199,7 @@ def calc_new_worms_from_blackfly(
     L3: Array.Person.Float,
     blackfly_params: BlackflyParams,
     delta_time: float,
+    use_onchosim_mechanisms: str,
     total_exposure: Array.Person.Float,
     n_people: int,
     debug: bool,
@@ -219,8 +220,13 @@ def calc_new_worms_from_blackfly(
     Returns:
         Array.Person.Int: The number of new worms produced by L3 larvae
     """
+
+    mean_l3 = float(np.mean(L3))
+    if use_onchosim_mechanisms == "both" or use_onchosim_mechanisms == "immigration":
+        mean_l3 += blackfly_params.immigrated_l3
+
     new_rate = _calc_rate_of_l3_to_worms(
-        blackfly_params, delta_time, float(np.mean(L3)), total_exposure
+        blackfly_params, delta_time, mean_l3, total_exposure
     )
     if debug:
         assert not np.any(new_rate > 10**10)
