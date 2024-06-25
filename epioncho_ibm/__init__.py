@@ -1,5 +1,3 @@
-version = 1.0
-
 from .endgame_simulation import EndgameSimulation
 from .simulation import Simulation
 from .state import (
