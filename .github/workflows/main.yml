@@ -18,7 +18,7 @@ permissions:
 
 jobs:
   build:
-    if: ${{ github.event_name == 'push' || (github.event_name == 'pull_request' && length(github.event.pull_request.labels) > 0 && contains(toJson(github.event.pull_request.labels.*.name), 'run end-to-end test')) }}
+    if: ${{ github.event_name == 'push' || (github.event_name == 'pull_request' && contains(toJson(github.event.pull_request.labels.*.name), 'run end-to-end test')) }}
     runs-on: ubuntu-latest
     outputs:
       artifactId: ${{ steps.artifact-upload-step.outputs.artifact-id }}
