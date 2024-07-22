@@ -230,23 +230,28 @@ def post_processing_calculation(
     data: list[Data],
     iuName: str,
     scenario: str,
+    prevalence_marker_name: str,
     csv_file: str,
+    post_processing_start_time: int = 1970,
     mda_start_year: int = 2026,
     mda_stop_year: int = 2041,
     mda_interval: float = 1,
 ) -> None:
     """
     Takes in non-age-grouped model outputs and generates a summarized output file that summarizes
-    the model outputs into mean, median, 2.5 percentile, and 97.5 percentile outputs.
+    the model outputs into mean, median, standard deviation, 2.5, 5, 10, 25, 50, 75, 90, 95, and 97.5 percentiles.
     It also calculates:
         (for each year) the probability that < 1% mf prevalence was reached across all iterations/draws
         (for each year) the probability that < 0% mf prevalence was reached across all iterations/draws
         the year at which < 1% mf prevalence is reached, calculated using the average prevalence across all runs
+        the year at which 90% of runs reach < 1% mf prevalence is reached
 
     Args:
         data list[Data]: The raw data output from multiple runs of the model (a list of dictionaries, where each dictionary is the outputs for a single run of the model)
         iuName str: A name to define the parameters used for the model, typically the name of the IU being simulated
         scenario str: A name to define the scenario being tested
+        prevalence_marker_name str: The name for the prevalence marker to be used to calculate the additional outputs
+        post_processing_start_time int: The time at which we start the calculations of reaching the threshold/elimination
         csv_file str: The name you want the post processed data to be saved to.
         mda_start_year int: An optional variable to denote when MDA starts for a scenario
         mda_stop_year int: An optional variable to denote when MDA ends for a given scenario
@@ -267,9 +272,13 @@ def post_processing_calculation(
 
     tmp = np.array(rows)
     # Data manipulation
+    # Making sure we only start the calculations from where MDA starts
+    post_processing_start_mask = tmp[:, 0].astype(float) >= post_processing_start_time
+    tmp_for_calc = tmp[post_processing_start_mask, :]
+
     # Calculating probability of elimination using mf_prev
-    mf_prev_mask = tmp[:, 3] == "prevalence"
-    mf_prev_vals = tmp[mf_prev_mask, 4:].astype(float)
+    mf_prev_mask = tmp_for_calc[:, 3] == prevalence_marker_name
+    mf_prev_vals = tmp_for_calc[mf_prev_mask, 4:].astype(float)
 
     # Probability of elimination for a given year = the average number of runs that reach 0 mf prev
     prob_elim = np.mean(mf_prev_vals == 0, axis=1)
@@ -278,9 +287,17 @@ def post_processing_calculation(
     # combining results into a matrix format for output
     prob_elim_output = np.column_stack(
         (
-            tmp[mf_prev_mask, :3],
+            tmp_for_calc[mf_prev_mask, :3],
             np.full(num_prob_elim, "prob_elim"),
             prob_elim,
+            none_array,
+            none_array,
+            none_array,
+            none_array,
+            none_array,
+            none_array,
+            none_array,
+            none_array,
             none_array,
             none_array,
             none_array,
@@ -296,12 +313,47 @@ def post_processing_calculation(
     none_array = np.full(num_prob_under_1_mfp, None)
     prob_under_1_mfp_output = np.column_stack(
         (
-            tmp[mf_prev_mask, :3],
+            tmp_for_calc[mf_prev_mask, :3],
             np.full(num_prob_under_1_mfp, "prob_under_1_mfp"),
             prob_under_1_mfp,
             none_array,
             none_array,
             none_array,
+            none_array,
+            none_array,
+            none_array,
+            none_array,
+            none_array,
+            none_array,
+            none_array,
+            none_array,
+        )
+    )
+
+    indeces_of_90_under_1_mfp = np.where(prob_under_1_mfp >= 0.90)[0]
+    year_of_90_under_1_mfp = None
+    if indeces_of_90_under_1_mfp.size > 0:
+        year_of_90_under_1_mfp = tmp_for_calc[mf_prev_mask, :][
+            indeces_of_90_under_1_mfp[0], 0
+        ]
+    year_90_under_1_mfp_output = np.column_stack(
+        (
+            "",
+            np.nan,
+            np.nan,
+            "year_of_90_under_1_mfp_avg",
+            year_of_90_under_1_mfp,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
         )
     )
 
@@ -310,7 +362,7 @@ def post_processing_calculation(
     indeces_of_1_mfp_avg = np.where(yearly_avg_mfp < 0.01)[0]
     year_of_1_mfp_avg = None
     if indeces_of_1_mfp_avg.size > 0:
-        year_of_1_mfp_avg = tmp[mf_prev_mask, :][indeces_of_1_mfp_avg[0], 0]
+        year_of_1_mfp_avg = tmp_for_calc[mf_prev_mask, :][indeces_of_1_mfp_avg[0], 0]
     year_under_1_avg_mfp_output = np.column_stack(
         (
             "",
@@ -321,17 +373,33 @@ def post_processing_calculation(
             None,
             None,
             None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
         )
     )
 
-    # Summarizing all other prevalence outputs
+    # Summarizing all other outputs
     other_prevs = tmp[:, 4:].astype(float)
     other_prevs_output = np.column_stack(
         (
             tmp[:, :4],
             np.mean(other_prevs, axis=1),
             np.percentile(other_prevs, 2.5, axis=1),
+            np.percentile(other_prevs, 5, axis=1),
+            np.percentile(other_prevs, 10, axis=1),
+            np.percentile(other_prevs, 25, axis=1),
+            np.percentile(other_prevs, 50, axis=1),
+            np.percentile(other_prevs, 75, axis=1),
+            np.percentile(other_prevs, 90, axis=1),
+            np.percentile(other_prevs, 95, axis=1),
             np.percentile(other_prevs, 97.5, axis=1),
+            np.std(other_prevs, axis=1),
             np.median(other_prevs, axis=1),
         )
     )
@@ -342,8 +410,10 @@ def post_processing_calculation(
             prob_elim_output,
             # probability of 1% mf_prev for each year
             prob_under_1_mfp_output,
-            # year_under_1_avg_mfp_output
+            # year that the avg mfp is < 1%
             year_under_1_avg_mfp_output,
+            # year that the 90% of runs have < 1% mfp
+            year_90_under_1_mfp_output,
         )
     )
 
@@ -371,8 +441,16 @@ def post_processing_calculation(
             "age_end",
             "measure",
             "mean",
-            "lower_bound",
-            "upper_bound",
+            "2.5_percentile",
+            "5_percentile",
+            "10_percentile",
+            "25_percentile",
+            "50_percentile",
+            "75_percentile",
+            "90_percentile",
+            "95_percentile",
+            "97.5_percentile",
+            "standard_deviation",
             "median",
         ],
     ).to_csv(csv_file)

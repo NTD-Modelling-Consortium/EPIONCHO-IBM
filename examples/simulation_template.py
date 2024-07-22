@@ -47,8 +47,8 @@ def get_parameters(iter, abr=1641, kE=0.3):
         }
     )
 
-    # Now we are adding 10 years of MDA [1994-2005)
-    # applied annually, at 65% total population coverage
+    # Now we are adding 20 years of MDA [1994-2015)
+    # applied bi-annually, at 80% total population coverage
     # We are also changing some of the parameters of
     # the effectiveness of the treatment
     # for a list of more parameters you can edit
@@ -61,11 +61,11 @@ def get_parameters(iter, abr=1641, kE=0.3):
     treatment_program.append(
         {
             "first_year": 1994,
-            "last_year": 2005,
+            "last_year": 2015,
             "interventions": {
                 "treatment_name": "MOX",
-                "treatment_interval": 1,
-                "total_population_coverage": 0.65,
+                "treatment_interval": 0.5,
+                "total_population_coverage": 0.80,
                 "correlation": 0.5,
                 "min_age_of_treatment": 4,
                 "microfilaricidal_nu": 0.04,
@@ -96,7 +96,7 @@ def get_parameters(iter, abr=1641, kE=0.3):
         }
     )
 
-    # The MDA applied from 1994 - 2005 also requires us to change the delta time parameter.
+    # The MDA applied from 1994 - 2015 also requires us to change the delta time parameter.
     # Here we make that change.
     changes.append({"year": 1994, "params": {"delta_time_days": 0.5}})
 
@@ -143,7 +143,7 @@ def run_simulations(
     abr=1641,
     kE=0.3,
     start_time=1900,
-    end_time=2005,
+    end_time=2015,
 ):
     endgame_structure = get_parameters(i, abr=abr, kE=kE)
 
@@ -271,7 +271,17 @@ if __name__ == "__main__":
     data: list[Data] = [row[0] for row in datas]
     age_data: list[Data] = [row[1] for row in datas]
 
-    post_processing_calculation(data, "tmpIU", "test", "post_processing_test.csv")
+    post_processing_calculation(
+        data=data,
+        iuName="tmpIU",
+        scenario="test",
+        prevalence_marker_name="prevalence",
+        csv_file="post_processing_test.csv",
+        post_processing_start_time=1970,
+        mda_start_year=1994,
+        mda_stop_year=2015,
+        mda_interval=0.5,
+    )
 
     # We are then going to save this data to a csv file
     write_data_to_csv(
