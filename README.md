@@ -1,4 +1,10 @@
-Welcome to EPIONCHO-IBM
+# Welcome to EPIONCHO-IBM
+
+This is the Python version of the model, initiall developed in R: 
+
+The R model is described in full here, and should reflect the python model as well:
+Hamley JID, Milton P, Walker M, Basáñez MG Modelling exposure heterogeneity and density dependence in onchocerciasis using a novel individual-based transmission model, EPIONCHO-IBM: Implications for elimination and data needs. PLOS Neglected Tropical Diseases 2019; 13(12): e0007557. https://doi.org/10.1371/journal.pntd.0007557
+
 
 # Requirements
 
