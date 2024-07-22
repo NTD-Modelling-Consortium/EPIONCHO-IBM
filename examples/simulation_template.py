@@ -6,7 +6,12 @@ from tqdm.contrib.concurrent import process_map
 
 from epioncho_ibm.endgame_simulation import EndgameSimulation
 from epioncho_ibm.state.params import EpionchoEndgameModel
-from epioncho_ibm.tools import Data, add_state_to_run_data, write_data_to_csv
+from epioncho_ibm.tools import (
+    Data,
+    add_state_to_run_data,
+    post_processing_calculation,
+    write_data_to_csv,
+)
 
 
 # You can edit the inputs to this function to set more parameters dynamically
@@ -102,14 +107,14 @@ def get_parameters(iter, abr=1641, kE=0.3):
             "initial": {
                 "n_people": 400,
                 "year_length_days": 365,
-                "delta_h_zero": 0.186,
-                "c_v": 0.005,
-                "delta_h_inf": 0.003,
                 "seed": seed,
                 "gamma_distribution": kE,
                 "delta_time_days": 1,
                 "blackfly": {
                     "bite_rate_per_person_per_year": abr,
+                    "delta_h_zero": 0.186,
+                    "c_v": 0.005,
+                    "delta_h_inf": 0.003,
                 },
                 "exposure": {"Q": 1.2},
                 # Having this in the parameters makes sure that sequela prevalence is calculated
@@ -265,6 +270,8 @@ if __name__ == "__main__":
     # from the all age outputs
     data: list[Data] = [row[0] for row in datas]
     age_data: list[Data] = [row[1] for row in datas]
+
+    post_processing_calculation(data, "tmpIU", "test", "post_processing_test.csv")
 
     # We are then going to save this data to a csv file
     write_data_to_csv(
