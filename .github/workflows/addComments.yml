@@ -2,7 +2,7 @@ name: Adding Failure/Success Comment to PR
 
 on:
     workflow_run: 
-        workflows: ["Testing Simulations"]
+        workflows: ["End-to-End Test"]
         types: 
             - completed
 
