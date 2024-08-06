@@ -26,15 +26,18 @@ def add_state_to_run_data(
     with_sequela: bool = True,
     with_pnc: bool = True,
     saving_multiple_states=False,
+    custom_age_groups: list[tuple[int, int]] = None,
     age_range: tuple[int, int] = (0, 80),
 ) -> None:
     age_min = age_range[0]
     age_max = age_range[1]
+    if custom_age_groups is None:
+        custom_age_groups = [(i, i + 1) for i in range(age_max)]
     if prevalence or number or mean_worm_burden or intensity or with_pnc:
         if with_age_groups:
-            for age_start in range(age_min, age_max):
-                age_state = state.get_state_for_age_group(age_start, age_start + 1)
-                partial_key = (round(state.current_time, 2), age_start, age_start + 1)
+            for age_start, age_end in custom_age_groups:
+                age_state = state.get_state_for_age_group(age_start, age_end)
+                partial_key = (round(state.current_time, 2), age_start, age_end)
                 if prevalence:
                     run_data[
                         (*partial_key, "prevalence")
@@ -85,12 +88,12 @@ def add_state_to_run_data(
                 run_data[(*partial_key, "pnc")] = state.percent_non_compliant()
     if n_treatments or achieved_coverage:
         if with_age_groups:
-            for age_start in range(age_min, age_max, 1):
-                age_state = state.get_state_for_age_group(age_start, age_start + 1)
+            for age_start, age_end in custom_age_groups:
+                age_state = state.get_state_for_age_group(age_start, age_end)
 
                 if n_treatments:
                     n_treatments_val = state.get_treatment_count_for_age_group(
-                        age_start, (age_start + 1)
+                        age_start, age_end
                     )
                     number_of_rounds = {}
                     for key, value in sorted(n_treatments_val.items()):
@@ -103,7 +106,7 @@ def add_state_to_run_data(
                         partial_key = (
                             math.floor(time_of_intervention),
                             age_start,
-                            age_start + 1,
+                            age_end,
                         )
 
                         run_data[
@@ -117,7 +120,7 @@ def add_state_to_run_data(
 
                 if achieved_coverage:
                     achieved_coverage_val = state.get_achieved_coverage_for_age_group(
-                        age_start, (age_start + 1)
+                        age_start, age_end
                     )
                     number_of_rounds = {}
                     for key, value in sorted(achieved_coverage_val.items()):
@@ -130,7 +133,7 @@ def add_state_to_run_data(
                         partial_key = (
                             math.floor(time_of_intervention),
                             age_start,
-                            age_start + 1,
+                            age_end,
                         )
 
                         run_data[
