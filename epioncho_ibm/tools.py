@@ -2,6 +2,8 @@ import csv
 import math
 from collections import defaultdict
 
+import pandas as pd
+
 from epioncho_ibm import State
 
 Year = float
@@ -197,10 +199,9 @@ def add_state_to_run_data(
         state.reset_treatment_counter()
 
 
-def write_data_to_csv(
+def loop_through_rows(
     data: list[Data],
-    csv_file: str,
-) -> None:
+):
     data_combined_runs: dict[
         tuple[Year, AgeStart, AgeEnd, Measurement], list[float | int]
     ] = defaultdict(list)
@@ -212,6 +213,25 @@ def write_data_to_csv(
         (k + tuple(v) for k, v in data_combined_runs.items()),
         key=lambda r: (r[0], r[3], r[1]),
     )
+    return rows
+
+
+def convert_data_to_pandas(
+    data: list[Data],
+) -> None:
+    rows = loop_through_rows(data)
+    return pd.DataFrame(
+        rows,
+        columns=["year_id", "age_start", "age_end", "measure"]
+        + [f"draw_{i}" for i in range(len(data))],
+    )
+
+
+def write_data_to_csv(
+    data: list[Data],
+    csv_file: str,
+) -> None:
+    rows = loop_through_rows(data)
     with open(csv_file, "w") as f:
         # create the csv writer
         writer = csv.writer(f)
