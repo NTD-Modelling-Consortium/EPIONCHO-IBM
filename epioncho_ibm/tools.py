@@ -201,7 +201,7 @@ def add_state_to_run_data(
 
 def flatten_and_sort(
     data: list[Data],
-) -> list[tuple]:
+) -> list[tuple[Year, AgeStart, AgeEnd, Measurement, list[float | int]]]:
     """
     Converts the model outputs from multiple runs (using `add_state_to_run_data`) into a sorted 2d list, where each row represents a year, age group, measure, and value for all runs.
 
