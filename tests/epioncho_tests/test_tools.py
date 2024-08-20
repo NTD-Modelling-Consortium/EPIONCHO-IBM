@@ -29,13 +29,13 @@ def test_flatten_and_sort_single_data_multiple_keys():
 
 def test_flatten_and_sort_multiple_data_single_key():
     inputData: list[Data] = [
-        {(2000, 0, 80, "test_measure"): 1, (2001, 0, 80, "test_measure"): 1},
-        {(2000, 0, 80, "test_measure"): 2, (2001, 0, 80, "test_measure"): 2},
+        {(2000, 0, 80, "test_measure"): 1, (2001, 0, 80, "test_measure"): 2},
+        {(2000, 0, 80, "test_measure"): 3, (2001, 0, 80, "test_measure"): 4},
     ]
     outputData = flatten_and_sort(inputData)
     assert len(outputData) == 2
-    assert outputData[0] == (2000, 0, 80, "test_measure", 1, 2)
-    assert outputData[1] == (2001, 0, 80, "test_measure", 1, 2)
+    assert outputData[0] == (2000, 0, 80, "test_measure", 1, 3)
+    assert outputData[1] == (2001, 0, 80, "test_measure", 2, 4)
 
 
 def test_flatten_and_sort_multiple_data_multiple_keys():
