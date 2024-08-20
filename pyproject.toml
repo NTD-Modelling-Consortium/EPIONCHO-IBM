@@ -2,7 +2,7 @@
 name = "epioncho-ibm"
 version = "1.0.1"
 description = ""
-authors = ["mark-todd <markpeter.todd@hotmail.co.uk>"]
+authors = ["NTD-Modelling-Consortium <todo>"]
 
 [tool.poetry.dependencies]
 python = ">=3.10, <3.11"
