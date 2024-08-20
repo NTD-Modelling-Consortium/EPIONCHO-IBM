@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "epioncho-ibm"
-version = "1.0.1dev"
+version = "1.0.1"
 description = ""
 authors = ["mark-todd <markpeter.todd@hotmail.co.uk>"]
 
