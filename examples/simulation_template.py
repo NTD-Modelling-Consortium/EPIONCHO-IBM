@@ -2,11 +2,18 @@ import os
 from functools import partial
 
 import h5py
+from endgame_postprocessing.model_wrappers import constants
+from endgame_postprocessing.post_processing import measures, single_file_post_processing
 from tqdm.contrib.concurrent import process_map
 
 from epioncho_ibm.endgame_simulation import EndgameSimulation
 from epioncho_ibm.state.params import EpionchoEndgameModel
-from epioncho_ibm.tools import Data, add_state_to_run_data, write_data_to_csv
+from epioncho_ibm.tools import (
+    Data,
+    add_state_to_run_data,
+    convert_data_to_pandas,
+    write_data_to_csv,
+)
 
 
 # You can edit the inputs to this function to set more parameters dynamically
@@ -266,7 +273,7 @@ if __name__ == "__main__":
     data: list[Data] = [row[0] for row in datas]
     age_data: list[Data] = [row[1] for row in datas]
 
-    # We are then going to save this data to a csv file
+    # We are then going to save this raw data to a csv file
     write_data_to_csv(
         data,
         "test_outputs/python_model_output/template_simulation_output.csv",
@@ -274,4 +281,21 @@ if __name__ == "__main__":
     write_data_to_csv(
         age_data,
         "test_outputs/python_model_output/template_simulation_output_age-grouped.csv",
+    )
+
+    # then we are going to use the endgame-postprocessing library to summarize the data
+    pandas_df = convert_data_to_pandas(data=data)
+    single_file_post_processing.process_single_file(
+        raw_model_outputs=pandas_df,
+        scenario="test_scenario",
+        iuName="iuName",
+        prevalence_marker_name="prevalence",
+        num_draws=num_iters,
+        post_processing_start_time=1970,
+        measure_summary_map={
+            measure: measures.measure_summary_float
+            for measure in constants.ONCHO_MEASURES
+        },
+    ).to_csv(
+        "test_outputs/python_model_output/template_simulation_output_post_processed.csv"
     )

@@ -10,6 +10,7 @@ numpy = "^1.22.3"
 pydantic = "^1.9.0"
 tqdm = "^4.64.1"
 fast-binomial = {git = "https://github.com/NTD-Modelling-Consortium/fast-binomial.git"}
+endgame-postprocessing = {git = "https://github.com/NTD-Modelling-Consortium/endgame-postprocessing.git"}
 pytest-trust-random = {git = "https://github.com/NTD-Modelling-Consortium/pytest-trust-random.git"}
 hdf5-dataclass = {git = "https://github.com/NTD-Modelling-Consortium/hdf5-dataclass.git"}
 endgame-simulations = {git = "https://github.com/NTD-Modelling-Consortium/endgame-simulations.git"}
@@ -29,7 +30,7 @@ joblib = "^1.1.0"
 ipykernel = "^6.17.1"
 snakeviz = "^2.1.1"
 matplotlib = "^3.6.3"
-pandas = "^1.5.3"
+pandas = "^2.0.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
